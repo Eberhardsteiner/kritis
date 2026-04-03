@@ -1,1 +1,79 @@
-{}
+{
+  "uploadedModules": [],
+  "answers": {},
+  "requirementStates": {},
+  "companyProfile": {
+    "companyName": "",
+    "industryLabel": "",
+    "locations": "",
+    "employees": "",
+    "criticalService": "",
+    "personsServed": ""
+  },
+  "actionItems": [],
+  "evidenceItems": [],
+  "stakeholders": [],
+  "sites": [],
+  "assets": [],
+  "reviewPlan": {
+    "executiveSponsor": "",
+    "approver": "",
+    "nextInternalAuditDate": "",
+    "nextManagementReviewDate": "",
+    "nextExerciseDate": "",
+    "nextEvidenceReviewDate": ""
+  },
+  "users": [
+    {
+      "id": "usr-625b9473-5ef7-4a95-a8af-dd28cdd18a3f",
+      "name": "Programmadmin",
+      "email": "",
+      "department": "",
+      "roleProfile": "admin",
+      "status": "active",
+      "scope": "Gesamtprogramm",
+      "notes": ""
+    }
+  ],
+  "complianceCalendar": {
+    "registrationDate": "",
+    "lastRiskAssessmentDate": "",
+    "lastResiliencePlanUpdate": "",
+    "lastBsiEvidenceAuditDate": "",
+    "incidentContact": "",
+    "incidentBackupContact": ""
+  },
+  "auditChecklistStates": {},
+  "auditFindings": [],
+  "certificationState": {
+    "auditLead": "",
+    "targetDate": "",
+    "decisionNote": "",
+    "stageStates": {
+      "scope": {
+        "status": "not_started",
+        "notes": ""
+      },
+      "gap_assessment": {
+        "status": "not_started",
+        "notes": ""
+      },
+      "action_program": {
+        "status": "not_started",
+        "notes": ""
+      },
+      "evidence_pack": {
+        "status": "not_started",
+        "notes": ""
+      },
+      "internal_audit": {
+        "status": "not_started",
+        "notes": ""
+      },
+      "management_decision": {
+        "status": "not_started",
+        "notes": ""
+      }
+    }
+  }
+}
