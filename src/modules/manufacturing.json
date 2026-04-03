@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "manufacturing",
+  "name": "Produktion & Industrie",
+  "version": "1.0.0",
+  "description": "Zusatzparameter für Produktionsunternehmen mit Fokus auf Anlagenverfügbarkeit, Materialfluss und Sicherheitsbestände.",
+  "sectorCategory": "Industrie",
+  "domainWeightAdjustments": {
+    "operations": 1.25,
+    "supply": 1.2,
+    "physical": 1.1
+  },
+  "additionalQuestions": [
+    {
+      "id": "manu_line_redundancy",
+      "domainId": "operations",
+      "title": "Produktionslinien haben Ausweichfähigkeit",
+      "prompt": "Können kritische Produktionsschritte auf alternative Linien, Schichten oder Standorte verlagert werden?",
+      "guidance": "Zu berücksichtigen sind Rüstzeiten, Werkzeugverfügbarkeit und Freigabeprozesse.",
+      "recommendation": "Definieren und testen Sie Verlagerungsoptionen für kritische Produktionsschritte inklusive Rüst- und Freigabekonzept.",
+      "weight": 1.3,
+      "critical": true,
+      "evidenceHint": "Verlagerungsszenarien, Rüstzeitdaten, Freigabekonzept",
+      "tags": ["Produktion", "Ausweichfähigkeit"]
+    },
+    {
+      "id": "manu_maintenance_spares",
+      "domainId": "operations",
+      "title": "Kritische Ersatzteile und Instandhaltung sind abgesichert",
+      "prompt": "Sind kritische Ersatzteile, Wartungsintervalle und Instandhaltungsdienstleister für Ausfälle vorbereitet?",
+      "guidance": "Wichtig sind Single-Source-Ersatzteile, Lieferzeiten und externe Spezialisten.",
+      "recommendation": "Bauen Sie ein Ersatzteil- und Instandhaltungskonzept für kritische Anlagen mit Mindestbeständen und Eskalationswegen auf.",
+      "weight": 1.2,
+      "evidenceHint": "Ersatzteilliste, Wartungsstrategie, SLA mit Dienstleistern",
+      "tags": ["Ersatzteile", "Instandhaltung"]
+    },
+    {
+      "id": "manu_material_buffer",
+      "domainId": "supply",
+      "title": "Materialpuffer für kritische Komponenten sind definiert",
+      "prompt": "Sind für kritische Rohstoffe und Komponenten Sicherheitsbestände oder Alternativen festgelegt?",
+      "guidance": "Besonders relevant bei langen Wiederbeschaffungszeiten oder geopolitischen Risiken.",
+      "recommendation": "Legen Sie für kritische Rohstoffe und Komponenten Materialpuffer, Freigabegrenzen und Second-Source-Strategien fest.",
+      "weight": 1.2,
+      "critical": true,
+      "evidenceHint": "Materialklassifikation, Bestandsgrenzen, Alternativteile",
+      "tags": ["Rohstoffe", "Bestände"]
+    },
+    {
+      "id": "manu_ot_segmentation",
+      "domainId": "cyber",
+      "title": "OT-Umgebung ist abgesichert",
+      "prompt": "Sind Produktions- und OT-Netze segmentiert, überwacht und mit Notfallverfahren versehen?",
+      "guidance": "Zu prüfen sind Segmentierung, Fernzugriff, Lieferantenzugänge und Wiederanlauf von Steuerungen.",
+      "recommendation": "Stärken Sie Segmentierung und Notfallverfahren für OT-Systeme und begrenzen Sie externe Fernzugriffe.",
+      "weight": 1.2,
+      "critical": true,
+      "evidenceHint": "OT-Netzplan, Fernzugriffskonzept, Notfallrunbooks",
+      "tags": ["OT", "Segmentierung"]
+    }
+  ],
+  "kritisExtension": {
+    "hints": [
+      "Bei Versorgungsrelevanz für breite Bevölkerung oder kritische Lieferketten sollte die Anlage gesondert auf KRITIS-Relevanz geprüft werden.",
+      "Für Produktionsunternehmen ist besonders die Kopplung von physischer Resilienz und OT-Sicherheit wichtig."
+    ],
+    "additionalRequirements": []
+  }
+}
