@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/krisenfest/module-schema-v1.json",
+  "title": "Krisenfestigkeit Branchenmodul v1",
+  "type": "object",
+  "required": ["schemaVersion", "id", "name", "version", "description"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sectorCategory": {
+      "type": "string"
+    },
+    "domainWeightAdjustments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "additionalQuestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "domainId",
+          "title",
+          "prompt",
+          "guidance",
+          "recommendation",
+          "weight"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "domainId": { "type": "string" },
+          "title": { "type": "string" },
+          "prompt": { "type": "string" },
+          "guidance": { "type": "string" },
+          "recommendation": { "type": "string" },
+          "weight": { "type": "number", "exclusiveMinimum": 0 },
+          "critical": { "type": "boolean" },
+          "evidenceHint": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "lawRefs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "kritisExtension": {
+      "type": "object",
+      "properties": {
+        "eligibleSectors": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "additionalRequirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "description", "guidance"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "guidance": { "type": "string" },
+              "lawRef": { "type": "string" },
+              "dueHint": { "type": "string" },
+              "severity": {
+                "type": "string",
+                "enum": ["high", "medium", "low"]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
