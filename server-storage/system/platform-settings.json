@@ -1,0 +1,18 @@
+{
+  "environmentLabel": "Bolt / Local",
+  "deploymentStage": "pilot",
+  "appBaseUrl": "http://localhost:5173",
+  "allowedOrigins": [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:4173"
+  ],
+  "persistenceDriver": "tenant-filesystem",
+  "persistenceTarget": "server-storage/tenants",
+  "backupCadenceHours": 24,
+  "maintenanceMode": false,
+  "publicApiEnabled": true,
+  "requireSignedWebhooks": true,
+  "notes": ""
+}
