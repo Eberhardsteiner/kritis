@@ -42,5 +42,9 @@
   "tenant:demo-unternehmen:backup-log": {
     "version": 1,
     "updatedAt": "2026-04-08T16:04:27.549Z"
+  },
+  "system:platform-settings": {
+    "version": 2,
+    "updatedAt": "2026-04-08T16:04:31.730Z"
   }
 }
