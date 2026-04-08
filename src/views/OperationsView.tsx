@@ -244,9 +244,9 @@ export function OperationsView({
           <p className="eyebrow">Betrieb & APIs</p>
           <h2>Hardening, Observability, Restore-Drills und produktionsnahe Betriebsreife</h2>
           <p className="hero-text">
-            Sprint O erweitert die bisherige Betriebsansicht um Sicherheitsgates, Request-Telemetrie,
-            Restore-Drills, Live-/Ready-Probes und eine klarere Betriebssteuerung. Der offene
-            Arbeitsbereich bleibt erhalten, kritische Betriebsänderungen bleiben jedoch geschützt.
+            Die in Sprint O eingeführte Betriebsbasis wird in P4 weiter stabilisiert: Sicherheitsgates,
+            Request-Telemetrie, Restore-Drills, Live-/Ready-Probes und klarere Betriebssteuerung
+            bleiben erhalten, während die Test- und Refactoring-Strecke ausgebaut wird.
           </p>
           <div className="chip-row top-gap">
             <span className="chip outline">Servermodus: {serverMode}</span>

@@ -137,6 +137,20 @@ export const sprintDefinitions: SprintDefinition[] = [
     status: 'current',
     phases: [21],
   },
+  {
+    id: 'P5',
+    label: 'Produktpaket P5',
+    goal: 'Produktionsplattform mit Zielhosting, produktiver Persistenz und echter Betriebsintegration',
+    status: 'planned',
+    phases: [22],
+  },
+  {
+    id: 'P6',
+    label: 'Produktpaket P6',
+    goal: 'Pilotbetrieb, UAT, Rollout und geregelte Übergabe in den operativen Betrieb',
+    status: 'planned',
+    phases: [23],
+  },
 ];
 
 export const programPhases: ProgramPhaseDefinition[] = [
@@ -372,7 +386,7 @@ export const programPhases: ProgramPhaseDefinition[] = [
     id: 20,
     title: 'Produktive Daten- und Evidenzplattform',
     sprint: 'P3',
-    status: 'planned',
+    status: 'completed',
     focus: 'Postgres, Objektablage, Retention und belastbare Tenant-Trennung für Evidenzen und Registers.',
     deliverables: [
       'Produktive Persistenz',
@@ -384,12 +398,36 @@ export const programPhases: ProgramPhaseDefinition[] = [
     id: 21,
     title: 'Pilotfreigabe und Refactoring',
     sprint: 'P4',
-    status: 'planned',
+    status: 'current',
     focus: 'Code-Entzerrung, Observability-Ausbau, E2E-Strecke und Pilotpaket für echte Kundentests.',
     deliverables: [
       'Modularisierte Frontend- und Serverstruktur',
       'Pilotfähige Test- und Monitoringstrecke',
       'Go-Live-Vorbereitung für ersten Kundeneinsatz',
+    ],
+  },
+  {
+    id: 22,
+    title: 'Produktionsplattform',
+    sprint: 'P5',
+    status: 'planned',
+    focus: 'Zielhosting, produktive Datenbank, Objektablage, Secret-Management und SSO im echten Betriebsprofil.',
+    deliverables: [
+      'Produktive Umgebungsprofile und Zielhosting',
+      'Tenant-sichere DB- und Storage-Anbindung',
+      'Restore-, Secret- und Observability-Betriebsmodell',
+    ],
+  },
+  {
+    id: 23,
+    title: 'Pilotbetrieb und Rollout',
+    sprint: 'P6',
+    status: 'planned',
+    focus: 'Pilotmandant, UAT-Protokolle, Supportpfade, Betriebsübergabe und Rollout-Modell.',
+    deliverables: [
+      'Pilotfähiger End-to-End-Arbeitszyklus',
+      'Dokumentierte Support- und Betriebsverantwortung',
+      'Rollout- und Übergabepaket',
     ],
   },
 ];

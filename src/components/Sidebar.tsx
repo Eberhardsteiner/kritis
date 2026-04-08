@@ -14,6 +14,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import type { ViewKey } from '../types';
+import { releaseStatus } from '../data/releaseStatus';
 
 interface SidebarProps {
   activeView: ViewKey;
@@ -46,7 +47,7 @@ export function Sidebar({ activeView, onChange }: SidebarProps) {
       <div className="sidebar-brand">
         <div className="brand-mark">KF</div>
         <div>
-          <p className="eyebrow">Sprint O</p>
+          <p className="eyebrow">{releaseStatus.currentSprintLabel}</p>
           <h1>Krisenfestigkeit Monitor</h1>
         </div>
       </div>
@@ -69,11 +70,10 @@ export function Sidebar({ activeView, onChange }: SidebarProps) {
       </nav>
 
       <div className="sidebar-footer card">
-        <p className="eyebrow">Zielbild</p>
-        <strong>Sprint O abgeschlossen, Betriebsunterbau erweitert</strong>
+        <p className="eyebrow">Status {releaseStatus.appVersion}</p>
+        <strong>{releaseStatus.currentHeadline}</strong>
         <p>
-          Die App unterstützt jetzt DACH-Regime, Security Gates, Restore-Drills
-          und Request-Telemetrie für den produktionsnahen Betrieb.
+          {releaseStatus.currentSummary}
         </p>
       </div>
     </aside>

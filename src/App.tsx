@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Cloud, CloudOff, Download, RefreshCw, Save } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
+import { ProjectTopbar } from './components/ProjectTopbar';
 import { AssessmentView } from './views/AssessmentView';
 import { DashboardView } from './views/DashboardView';
 import { ProgramView } from './views/ProgramView';
@@ -4628,139 +4628,62 @@ export default function App() {
     });
   }
 
+  const userOptions = state.users.map((user) => ({
+    id: user.id,
+    label: `${user.name || 'Ohne Namen'} · ${getAccessProfile(user.roleProfile).label}`,
+  }));
+  const moduleOptions = effectiveModuleCatalog.map((module) => ({
+    id: module.id,
+    name: module.name,
+  }));
+  const serverStatusConnected = serverMode === 'connected' || serverMode === 'syncing';
+  const serverStatusLabel = serverMode === 'connected'
+    ? authSession
+      ? 'Server verbunden'
+      : 'Offener Arbeitsbereich aktiv'
+    : serverMode === 'syncing'
+      ? 'Server synchronisiert'
+      : serverMode === 'checking'
+        ? 'Server wird geprüft'
+        : serverMode === 'auth_required'
+          ? 'Anmeldung erforderlich'
+          : serverMode === 'error'
+            ? 'Serverfehler'
+            : 'Nur lokaler Modus';
+  const tenantChipLabel = !authSession && !serverAuthRequired && publicTenant
+    ? `Arbeitsbereich: ${publicTenant.name}`
+    : authSession
+      ? `Mandant: ${authSession.tenantName}`
+      : '';
+  const accountChipLabel = authSession ? `Konto: ${authSession.email}` : '';
+  const canSyncNow = !(serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required');
+  const canExportJson = hasPermission('reports_export');
+
   return (
     <div className="app-shell">
       <Sidebar activeView={state.activeView} onChange={setActiveView} />
 
       <div className="main-shell">
-        <header className="topbar card">
-          <div className="topbar-head">
-            <div>
-              <p className="eyebrow">Projektsteuerung</p>
-              <h2>Unternehmensprofil und aktives Branchenmodul</h2>
-            </div>
-            <div className="topbar-actions">
-              <label className="field-label topbar-selector">
-                Arbeitsprofil
-                <select
-                  value={activeUser?.id ?? ''}
-                  onChange={(event) => selectActiveUser(event.target.value)}
-                  disabled={Boolean(authSession)}
-                >
-                  {state.users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name || 'Ohne Namen'} · {getAccessProfile(user.roleProfile).label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="inline-note">
-                <Save size={16} />
-                <span>Automatisch lokal gespeichert</span>
-              </div>
-              <div className="inline-note">
-                {serverMode === 'connected' || serverMode === 'syncing' ? <Cloud size={16} /> : <CloudOff size={16} />}
-                <span>
-                  {serverMode === 'connected'
-                    ? authSession
-                      ? 'Server verbunden'
-                      : 'Offener Arbeitsbereich aktiv'
-                    : serverMode === 'syncing'
-                      ? 'Server synchronisiert'
-                      : serverMode === 'checking'
-                        ? 'Server wird geprüft'
-                        : serverMode === 'auth_required'
-                          ? 'Anmeldung erforderlich'
-                          : serverMode === 'error'
-                            ? 'Serverfehler'
-                            : 'Nur lokaler Modus'}
-                </span>
-              </div>
-              <span className="chip outline">{activeAccessProfile.label}</span>
-              {!authSession && !serverAuthRequired && publicTenant ? <span className="chip outline">Arbeitsbereich: {publicTenant.name}</span> : null}
-              {authSession ? <span className="chip outline">Mandant: {authSession.tenantName}</span> : null}
-              {authSession ? <span className="chip outline">Konto: {authSession.email}</span> : null}
-              <button type="button" className="button secondary" onClick={handleSyncNow} disabled={serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required'}>
-                <RefreshCw size={16} />
-                Jetzt synchronisieren
-              </button>
-              <button type="button" className="button secondary" onClick={handleExportJson} disabled={!hasPermission('reports_export')}>
-                <Download size={16} />
-                JSON exportieren
-              </button>
-            </div>
-          </div>
-
-          <div className="profile-grid">
-            <label className="field-label">
-              Unternehmen
-              <input
-                type="text"
-                placeholder="z. B. Musterwerke GmbH"
-                value={state.companyProfile.companyName}
-                onChange={(event) => updateProfileField('companyName', event.target.value)}
-              />
-            </label>
-            <label className="field-label">
-              Branche / Segment
-              <input
-                type="text"
-                placeholder="z. B. Krankenhaus, Produktion, Energie"
-                value={state.companyProfile.industryLabel}
-                onChange={(event) => updateProfileField('industryLabel', event.target.value)}
-              />
-            </label>
-            <label className="field-label">
-              Aktives Modul
-              <select
-                value={state.selectedModuleId}
-                onChange={(event) => selectModule(event.target.value)}
-              >
-                {effectiveModuleCatalog.map((module) => (
-                  <option key={module.id} value={module.id}>
-                    {module.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field-label">
-              Mitarbeitende
-              <input
-                type="text"
-                placeholder="z. B. 850"
-                value={state.companyProfile.employees}
-                onChange={(event) => updateProfileField('employees', event.target.value)}
-              />
-            </label>
-            <label className="field-label">
-              Standorte / Werke
-              <input
-                type="text"
-                placeholder="z. B. 3 Standorte, 1 Rechenzentrum"
-                value={state.companyProfile.locations}
-                onChange={(event) => updateProfileField('locations', event.target.value)}
-              />
-            </label>
-            <label className="field-label wide">
-              Kritische Dienstleistung / Versorgung
-              <input
-                type="text"
-                placeholder="z. B. Notfallversorgung, Stromverteilung, Trinkwasserversorgung"
-                value={state.companyProfile.criticalService}
-                onChange={(event) => updateProfileField('criticalService', event.target.value)}
-              />
-            </label>
-            <label className="field-label">
-              Versorgte Personen
-              <input
-                type="text"
-                placeholder="z. B. 500000"
-                value={state.companyProfile.personsServed}
-                onChange={(event) => updateProfileField('personsServed', event.target.value)}
-              />
-            </label>
-          </div>
-        </header>
+        <ProjectTopbar
+          activeUserId={activeUser?.id ?? ''}
+          userOptions={userOptions}
+          authSession={authSession}
+          serverStatusConnected={serverStatusConnected}
+          serverStatusLabel={serverStatusLabel}
+          activeAccessProfileLabel={activeAccessProfile.label}
+          tenantChipLabel={tenantChipLabel}
+          accountChipLabel={accountChipLabel}
+          canSync={canSyncNow}
+          canExportJson={canExportJson}
+          companyProfile={state.companyProfile}
+          selectedModuleId={state.selectedModuleId}
+          moduleOptions={moduleOptions}
+          onSelectActiveUser={selectActiveUser}
+          onSyncNow={handleSyncNow}
+          onExportJson={handleExportJson}
+          onProfileFieldChange={updateProfileField}
+          onSelectModule={selectModule}
+        />
 
         {notice ? (
           <div className={`feedback-box ${notice.type}`}>

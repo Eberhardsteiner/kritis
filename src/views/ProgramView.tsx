@@ -1,5 +1,6 @@
 import { CheckCircle2, Clock3, FolderKanban, ShieldCheck } from 'lucide-react';
 import { programPhases, sprintDefinitions, type RoadmapStatus } from '../data/programRoadmap';
+import { releaseStatus } from '../data/releaseStatus';
 
 interface ProgramViewProps {
   companyName: string;
@@ -41,6 +42,7 @@ export function ProgramView({
   const completedSprints = sprintDefinitions.filter((entry) => entry.status === 'completed').length;
   const plannedSprints = sprintDefinitions.filter((entry) => entry.status === 'planned').length;
   const completedPhases = programPhases.filter((entry) => entry.status === 'completed').length;
+  const currentPhases = programPhases.filter((entry) => entry.status === 'current').length;
 
   return (
     <div className="view-stack">
@@ -92,8 +94,9 @@ export function ProgramView({
           <div className="chip-row">
             <span className="chip success">{completedSprints} Sprints abgeschlossen</span>
             <span className="chip success">{completedPhases} Phasen umgesetzt</span>
+            <span className="chip warn">{currentPhases} Phase aktuell in Arbeit</span>
             <span className="chip outline">{plannedSprints} Sprints geplant</span>
-            <span className="chip outline">Produktstand 1.7</span>
+            <span className="chip outline">Produktstand {releaseStatus.appVersion}</span>
           </div>
         </div>
 
@@ -113,6 +116,25 @@ export function ProgramView({
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Wo Wir Stehen</p>
+            <h3>{releaseStatus.currentPackageLabel} ist aktuell aktiv</h3>
+          </div>
+        </div>
+        <p>{releaseStatus.currentSummary}</p>
+        <div className="chip-row top-gap">
+          <span className="chip warn">{releaseStatus.currentPackageLabel}</span>
+          <span className="chip outline">Version {releaseStatus.appVersion}</span>
+        </div>
+        <ul className="plain-list top-gap">
+          {releaseStatus.nextMilestones.map((milestone) => (
+            <li key={milestone}>{milestone}</li>
+          ))}
+        </ul>
       </section>
 
       <section className="card">

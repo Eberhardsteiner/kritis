@@ -257,9 +257,9 @@ export function PlatformView({
           <h2>Lesemodus ohne Login, geschützte Bearbeitung, Objektablage und versionierte Dokumente</h2>
           <p className="hero-text">
             Die Plattformsicht bündelt offenen Lesemodus, produktive Identität, SSO-Startpfade,
-            Mandantenrichtlinien, Exportregister und Dokumentversionierung. Produktpaket P3 ergänzt
-            eine austauschbare Objektablage und den Evidenz-Lebenszyklus mit Retention- und
-            Review-Sicht, ohne die Branchen-Engine fest zu verdrahten.
+            Mandantenrichtlinien, Exportregister und Dokumentversionierung. Die in Produktpaket P3
+            eingeführte Objektablage und der Evidenz-Lebenszyklus werden in P4 nun auf eine
+            wartbarere und pilotfähige Struktur überführt.
           </p>
           <div className="chip-row top-gap">
             <span className="chip outline">{authSession ? describeMode(serverMode) : serverMode === 'connected' ? 'Offener Lesemodus' : describeMode(serverMode)}</span>
