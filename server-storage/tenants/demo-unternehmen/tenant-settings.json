@@ -1,0 +1,9 @@
+{
+  "retentionDays": 365,
+  "evidenceReviewCadenceDays": 180,
+  "exportApprovalRequired": true,
+  "requireReleaseForCertification": true,
+  "defaultClassification": "intern",
+  "certificationAuthorityLabel": "Interne KRITIS-Readiness-Prüfstelle",
+  "incidentMailbox": ""
+}

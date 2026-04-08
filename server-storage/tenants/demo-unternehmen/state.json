@@ -1,0 +1,89 @@
+{
+  "uploadedModules": [],
+  "answers": {},
+  "requirementStates": {},
+  "companyProfile": {
+    "companyName": "Demo-Unternehmen",
+    "industryLabel": "Produktion",
+    "locations": "",
+    "employees": "",
+    "criticalService": "",
+    "personsServed": ""
+  },
+  "regulatoryProfile": {
+    "jurisdiction": "DE",
+    "scopeByRegime": {
+      "de_kritisdachg": "unknown",
+      "de_bsig_nis2": "unknown",
+      "at_nisg_2026": "unknown",
+      "ch_bacs_ci": "unknown"
+    },
+    "bsigEntityClass": "unknown",
+    "lastReviewDate": "",
+    "owner": "",
+    "notes": ""
+  },
+  "actionItems": [],
+  "evidenceItems": [],
+  "stakeholders": [],
+  "sites": [],
+  "assets": [],
+  "businessProcesses": [],
+  "dependencies": [],
+  "scenarios": [],
+  "exercises": [],
+  "rolloutPlan": {
+    "releaseVersion": "",
+    "targetGoLiveDate": "",
+    "freezeDate": "",
+    "deploymentWindow": "",
+    "hypercareDays": "14",
+    "rollbackOwner": "",
+    "supportLead": "",
+    "communicationPlan": "",
+    "decisionStatus": "draft",
+    "decisionNote": ""
+  },
+  "hardeningChecks": [],
+  "runbooks": [],
+  "releaseGates": [],
+  "reviewPlan": {
+    "executiveSponsor": "",
+    "approver": "",
+    "nextInternalAuditDate": "",
+    "nextManagementReviewDate": "",
+    "nextExerciseDate": "",
+    "nextEvidenceReviewDate": ""
+  },
+  "users": [
+    {
+      "id": "usr-1775664267484-967qmuq",
+      "name": "Programmadmin",
+      "email": "admin@krisenfest.local",
+      "department": "",
+      "roleProfile": "admin",
+      "status": "active",
+      "scope": "Demo-Unternehmen",
+      "notes": "Automatisch angelegter Zugriff"
+    }
+  ],
+  "complianceCalendar": {
+    "registrationDate": "",
+    "lastRiskAssessmentDate": "",
+    "lastResiliencePlanUpdate": "",
+    "lastBsiEvidenceAuditDate": "",
+    "incidentContact": "",
+    "incidentBackupContact": "",
+    "bsigRegistrationDate": "",
+    "lastCyberRiskAssessmentDate": "",
+    "lastIncidentExerciseDate": ""
+  },
+  "auditChecklistStates": {},
+  "auditFindings": [],
+  "certificationState": {
+    "auditLead": "",
+    "targetDate": "",
+    "decisionNote": "",
+    "stageStates": {}
+  }
+}
