@@ -142,17 +142,26 @@ export function getFileExtension(name = '') {
 async function readTextFileWithRetry(filePath, attempts = 4, delayMs = 25) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
-      return await fs.readFile(filePath, 'utf8');
+      return {
+        content: await fs.readFile(filePath, 'utf8'),
+        errorCode: '',
+      };
     } catch (error) {
       if (!RETRYABLE_FILE_ERROR_CODES.has(error?.code) || attempt === attempts - 1) {
-        return '';
+        return {
+          content: '',
+          errorCode: String(error?.code || ''),
+        };
       }
 
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
-  return '';
+  return {
+    content: '',
+    errorCode: '',
+  };
 }
 
 export function validateUploadCandidate(file, policy) {
@@ -209,11 +218,18 @@ export async function runAntivirusScan(filePath, runtimeConfig) {
   }
 
   if (antivirusConfig.mode === 'mock-eicar') {
-    const content = await readTextFileWithRetry(filePath);
-    if (content.includes(EICAR_TEST_STRING)) {
+    const fileRead = await readTextFileWithRetry(filePath);
+    if (fileRead.content.includes(EICAR_TEST_STRING)) {
       return {
         status: 'blocked',
         detail: 'Mock-Antivirus hat eine EICAR-Testsignatur erkannt.',
+      };
+    }
+
+    if (RETRYABLE_FILE_ERROR_CODES.has(fileRead.errorCode)) {
+      return {
+        status: 'blocked',
+        detail: 'Mock-Antivirus konnte die Datei nicht stabil lesen und blockiert sie vorsorglich.',
       };
     }
 

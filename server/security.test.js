@@ -14,6 +14,23 @@ import {
   validateUploadCandidate,
 } from './security.js';
 
+const RETRYABLE_FS_CODES = new Set(['EPERM', 'EBUSY']);
+
+async function removeWithRetry(targetPath, attempts = 6, delayMs = 50) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      await fs.rm(targetPath, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      if (!RETRYABLE_FS_CODES.has(error?.code) || attempt === attempts - 1) {
+        throw error;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 test('normalizeAppMode distinguishes demo and production', () => {
   assert.equal(normalizeAppMode('demo'), 'demo');
   assert.equal(normalizeAppMode('production'), 'production');
@@ -71,8 +88,9 @@ test('validateUploadCandidate rejects disallowed MIME types', () => {
 });
 
 
-test('runAntivirusScan blocks EICAR test file in mock mode', async () => {
+test('runAntivirusScan blocks EICAR test file in mock mode', async (t) => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'krisenfest-av-'));
+  t.after(() => removeWithRetry(tempDir));
   const filePath = path.join(tempDir, 'eicar.txt');
   await fs.writeFile(filePath, EICAR_TEST_STRING, 'utf8');
 
@@ -84,5 +102,4 @@ test('runAntivirusScan blocks EICAR test file in mock mode', async () => {
   });
 
   assert.equal(result.status, 'blocked');
-  await fs.rm(tempDir, { recursive: true, force: true });
 });
