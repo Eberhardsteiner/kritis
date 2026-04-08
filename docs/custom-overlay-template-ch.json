@@ -1,0 +1,76 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "overlay-ch-health-bacs",
+    "packType": "overlay",
+    "moduleId": "ch-health-bacs-overlay",
+    "name": "CH Overlay Gesundheit / BACS-Meldepflicht",
+    "version": "1.0.0",
+    "description": "Beispielhaftes Overlay für schweizerische Melde- und Evidenzpflichten.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Gesundheit",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "overlay",
+      "dach"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "kritis",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "overlay"
+  },
+  "targetModuleId": "healthcare",
+  "module": {
+    "id": "ch-health-bacs-overlay",
+    "name": "CH Overlay Gesundheit / BACS-Meldepflicht",
+    "version": "1.0.0",
+    "description": "Beispielhaftes Overlay für schweizerische Melde- und Evidenzpflichten.",
+    "sectorCategory": "Gesundheit",
+    "uiHints": {
+      "accentLabel": "CH Meldepflicht",
+      "focusAreas": [
+        "24h-Meldung",
+        "14-Tage-Nachreichung",
+        "Kontaktkanal"
+      ]
+    },
+    "additionalQuestions": [
+      {
+        "id": "ch_health_overlay_reporting_channel",
+        "domainId": "bcm",
+        "title": "Meldekanal und Nachreichung sind vorbereitet",
+        "prompt": "Sind Meldeweg, Kontaktpersonen und Nachreichungslogik für erhebliche Cybervorfälle dokumentiert?",
+        "guidance": "Berücksichtigen Sie technische Bewertung, Managementfreigabe und Evidenzsammlung.",
+        "recommendation": "Verankern Sie eine belastbare Vorfallsakte mit 24h-Meldepfad und Nachreichung.",
+        "weight": 1.2,
+        "critical": true,
+        "evidenceHint": "Meldeplan, Kontaktliste, Vorfallsakte",
+        "tags": [
+          "Schweiz",
+          "Meldepflicht"
+        ]
+      }
+    ],
+    "recommendedActions": [
+      {
+        "id": "ch_health_overlay_action_reporting_channel",
+        "title": "Schweizer Meldepfad formalisieren",
+        "description": "Kontaktwege, Evidenzakte und Verantwortlichkeiten für Erstmeldung und Nachreichung verbindlich regeln.",
+        "priority": "hoch",
+        "ownerRole": "Krisenstab / IT-Sicherheit",
+        "relatedQuestionIds": [
+          "ch_health_overlay_reporting_channel"
+        ]
+      }
+    ]
+  }
+}

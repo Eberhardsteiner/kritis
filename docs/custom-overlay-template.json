@@ -1,0 +1,62 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "overlay-template-generic",
+    "packType": "overlay",
+    "moduleId": "new-sector-overlay",
+    "name": "Generisches Branchen-Overlay",
+    "version": "1.0.0",
+    "description": "Vorlage für ein Overlay, das auf ein bestehendes Branchenmodul gelegt wird.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Neue Branche",
+    "maintainer": "Ihr Team / Mandant",
+    "tags": [
+      "overlay",
+      "template"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "kritis",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "overlay"
+  },
+  "targetModuleId": "new-sector",
+  "module": {
+    "id": "new-sector-overlay",
+    "version": "1.0.0",
+    "name": "Generisches Branchen-Overlay",
+    "description": "Erweitert ein bestehendes Branchenmodul um zusätzliche Parameter.",
+    "sectorCategory": "Neue Branche",
+    "uiHints": {
+      "accentLabel": "Overlay-Fokus",
+      "focusAreas": [
+        "Regulatorik",
+        "Nachweise"
+      ]
+    },
+    "additionalQuestions": [
+      {
+        "id": "new_sector_overlay_question_1",
+        "domainId": "governance",
+        "title": "Zusätzliche Overlay-Frage",
+        "prompt": "Ist die zusätzliche Overlay-Anforderung dokumentiert?",
+        "guidance": "Beschreiben Sie Verantwortlichkeit, Nachweis und Review.",
+        "recommendation": "Ergänzen Sie einen verbindlichen Prozess und einen Review-Zyklus.",
+        "weight": 1.1,
+        "critical": true,
+        "evidenceHint": "Prozessdokument, Evidenz, Freigabe",
+        "tags": [
+          "Overlay"
+        ]
+      }
+    ]
+  }
+}
