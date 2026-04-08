@@ -1,0 +1,18 @@
+[
+  {
+    "id": "demo-unternehmen",
+    "name": "Demo-Unternehmen",
+    "slug": "demo-unternehmen",
+    "industryLabel": "Produktion",
+    "createdAt": "2026-04-08T16:04:27.556Z",
+    "active": true,
+    "deploymentStage": "pilot",
+    "serviceTier": "standard",
+    "dataRegion": "DE",
+    "primaryContactName": "",
+    "primaryContactEmail": "",
+    "technicalContactName": "",
+    "technicalContactEmail": "",
+    "notes": ""
+  }
+]
