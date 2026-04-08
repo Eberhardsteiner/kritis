@@ -1,0 +1,76 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "overlay-at-energy-nisg",
+    "packType": "overlay",
+    "moduleId": "at-energy-nisg-overlay",
+    "name": "AT Overlay Energie / NISG 2026",
+    "version": "1.0.0",
+    "description": "Beispielhaftes Overlay für österreichische NISG-2026-Anforderungen.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Energie",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "overlay",
+      "dach"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "kritis",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "overlay"
+  },
+  "targetModuleId": "energy",
+  "module": {
+    "id": "at-energy-nisg-overlay",
+    "name": "AT Overlay Energie / NISG 2026",
+    "version": "1.0.0",
+    "description": "Beispielhaftes Overlay für österreichische NISG-2026-Anforderungen.",
+    "sectorCategory": "Energie",
+    "uiHints": {
+      "accentLabel": "AT NISG 2026",
+      "focusAreas": [
+        "Selbsterklärung",
+        "Meldewesen",
+        "Governance"
+      ]
+    },
+    "additionalQuestions": [
+      {
+        "id": "at_energy_overlay_self_assessment",
+        "domainId": "governance",
+        "title": "Selbsterklärung und Zuständigkeiten sind vorbereitet",
+        "prompt": "Sind Zuständigkeiten, Meldeweg und Nachweise für die Selbsterklärung dokumentiert?",
+        "guidance": "Berücksichtigen Sie Management, Compliance und operative Erreichbarkeit.",
+        "recommendation": "Verankern Sie einen festen Selbsterklärungs- und Nachweisprozess.",
+        "weight": 1.2,
+        "critical": true,
+        "evidenceHint": "Selbsterklärung, Organisationsverantwortung, Kontaktdaten",
+        "tags": [
+          "NISG 2026",
+          "Selbsterklärung"
+        ]
+      }
+    ],
+    "recommendedActions": [
+      {
+        "id": "at_energy_overlay_action_self_assessment",
+        "title": "Selbsterklärungsprozess etablieren",
+        "description": "Rollen, Zeitpunkte, Prüfnachweise und Freigaben für die Selbsterklärung festlegen.",
+        "priority": "hoch",
+        "ownerRole": "Compliance / CISO",
+        "relatedQuestionIds": [
+          "at_energy_overlay_self_assessment"
+        ]
+      }
+    ]
+  }
+}

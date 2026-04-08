@@ -1,0 +1,206 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-template-generic",
+    "packType": "module",
+    "moduleId": "new-sector",
+    "name": "Neues Branchenmodul",
+    "version": "1.0.0",
+    "description": "Vorlage für ein neues Branchenmodul im standardisierten Containerformat.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Neue Branche",
+    "industryClass": "Teilsegment oder Unterbranche",
+    "maintainer": "Ihr Team / Mandant",
+    "tags": [
+      "branche",
+      "template"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "custom"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "new-sector",
+    "name": "Neues Branchenmodul",
+    "version": "1.0.0",
+    "description": "Beschreibt die branchenspezifischen Erweiterungen für die KRITIS-Readiness.",
+    "sectorCategory": "Neue Branche",
+    "domainWeightAdjustments": {
+      "operations": 1.2,
+      "cyber": 1.1,
+      "bcm": 1.1
+    },
+    "uiHints": {
+      "accentLabel": "Wichtigste Schwerpunktlinie",
+      "focusAreas": [
+        "Bereich A",
+        "Bereich B",
+        "Bereich C"
+      ]
+    },
+    "additionalQuestions": [
+      {
+        "id": "new_sector_question_1",
+        "domainId": "operations",
+        "title": "Branchenspezifische Kernfrage",
+        "prompt": "Ist der kritische Branchenprozess belastbar beschrieben und getestet?",
+        "guidance": "Beschreiben Sie, was bewertet werden soll, welche Nachweise geeignet sind und welche Ausnahmen gelten.",
+        "recommendation": "Hinterlegen Sie ein klares Verfahren, einen Owner und einen Testzyklus.",
+        "weight": 1.2,
+        "critical": true,
+        "evidenceHint": "Verfahrensanweisung, Testprotokoll, KPI-Übersicht",
+        "tags": [
+          "Prozess",
+          "Branchenspezifik"
+        ]
+      }
+    ],
+    "recommendedActions": [
+      {
+        "id": "new_sector_action_1",
+        "title": "Branchenspezifische Maßnahme anlegen",
+        "description": "Owner, Termin, Erfolgskriterium und Übergabe definieren.",
+        "priority": "hoch",
+        "ownerRole": "Fachbereich / Krisenmanagement",
+        "relatedQuestionIds": [
+          "new_sector_question_1"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "new_sector_evidence_1",
+        "title": "Nachweis für die Branchenfrage",
+        "type": "plan",
+        "ownerRole": "Fachbereich",
+        "reviewCycleHint": "Jährlich prüfen",
+        "folder": "Branchennachweise",
+        "tags": [
+          "Nachweis",
+          "Review"
+        ],
+        "relatedQuestionIds": [
+          "new_sector_question_1"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "Branchennachweise"
+    ],
+    "roleTemplates": [
+      {
+        "id": "new_sector_owner",
+        "label": "Branchenverantwortung",
+        "responsibility": "Koordiniert fachliche Bewertung, Nachweise und Reviews.",
+        "focusAreas": [
+          "Review",
+          "Nachweise",
+          "Steuerung"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 75,
+      "targetByDomain": {
+        "operations": 80,
+        "cyber": 72,
+        "bcm": 74
+      },
+      "notes": [
+        "Passen Sie Zielwerte und Schwerpunktdomänen an die neue Branche an."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "new_sector_audit_1",
+        "area": "Branchensteuerung",
+        "title": "Branchenspezifische Kernanforderung ist evidenzgestützt erfüllt",
+        "guidance": "Prüfen Sie Status, Nachweise, Review und Eskalation.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "new_sector_question_1"
+        ]
+      }
+    ],
+    "processTemplates": [
+      {
+        "id": "new_sector_process_1",
+        "title": "Kritischer Branchenprozess",
+        "ownerRole": "Fachbereich",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Lieferant, IT, Personal",
+        "outputs": "Lieferfähigkeit / Service",
+        "notes": "Anpassen an Ihre Branche."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "new_sector_dep_1",
+        "title": "Kritische Abhängigkeit",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": true,
+        "fallback": "Alternative Quelle oder manueller Ersatzprozess",
+        "contractReference": "SLA / Vertrag",
+        "notes": "Nur Beispiel."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "new_sector_scenario_1",
+        "title": "Branchenspezifisches Ausfallszenario",
+        "category": "Betrieb",
+        "description": "Beschreibt den typischen Krisenfall für diese Branche.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Krisenmanagement",
+        "linkedProcessTemplateIds": [
+          "new_sector_process_1"
+        ],
+        "linkedDependencyTemplateIds": [
+          "new_sector_dep_1"
+        ],
+        "playbook": "Sofortmaßnahmen, Eskalation, Notbetrieb, Kommunikation",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Beispiel."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "new_sector_exercise_1",
+        "title": "Branchenspezifische Übung",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "new_sector_scenario_1",
+        "ownerRole": "Krisenmanagement",
+        "cadenceMonths": 12,
+        "notes": "Mindestens jährlich planen."
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "Neue Branche"
+      ],
+      "hints": [
+        "Ergänzen Sie branchenspezifische KRITIS- oder NIS-2-Hinweise."
+      ],
+      "additionalRequirements": []
+    }
+  }
+}
