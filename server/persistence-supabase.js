@@ -76,6 +76,10 @@ export class SupabaseDocumentPersistence {
     return this;
   }
 
+  async close() {
+    return undefined;
+  }
+
   getScopeParts(ref) {
     if (ref.kind === 'system') {
       return { scopeKind: 'system', scopeId: 'system', namespace: ref.namespace };

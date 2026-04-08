@@ -69,6 +69,10 @@ class FileMirrorPersistence {
     return this;
   }
 
+  async close() {
+    return undefined;
+  }
+
   async hasDocument(ref, options = {}) {
     const meta = await this.loadMetaIndex();
     if (meta[this.getMetaKey(ref)]) {
@@ -219,6 +223,23 @@ class SqliteDocumentPersistence {
     await fs.mkdir(path.dirname(this.targetPath), { recursive: true });
     this.initializeDatabase();
     return this;
+  }
+
+  async close() {
+    if (!this.db) {
+      return;
+    }
+
+    try {
+      this.db.exec('PRAGMA wal_checkpoint(TRUNCATE);');
+    } catch {
+      // Best effort before closing on platforms that keep WAL files locked.
+    }
+
+    if (typeof this.db.close === 'function') {
+      this.db.close();
+    }
+    this.db = null;
   }
 
   getScopeParts(ref) {

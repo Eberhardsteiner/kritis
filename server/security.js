@@ -26,6 +26,8 @@ export const ALLOWED_UPLOAD_MIME_MAP = Object.freeze({
 
 export const EICAR_TEST_STRING = 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*';
 
+const RETRYABLE_FILE_ERROR_CODES = new Set(['EPERM', 'EBUSY']);
+
 export function normalizeAppMode(value) {
   const normalized = String(value || '').trim().toLowerCase();
   if (normalized === 'prod' || normalized === 'production') {
@@ -137,6 +139,22 @@ export function getFileExtension(name = '') {
   return path.extname(String(name || '')).toLowerCase();
 }
 
+async function readTextFileWithRetry(filePath, attempts = 4, delayMs = 25) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+      if (!RETRYABLE_FILE_ERROR_CODES.has(error?.code) || attempt === attempts - 1) {
+        return '';
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  return '';
+}
+
 export function validateUploadCandidate(file, policy) {
   const safePolicy = policy || buildUploadPolicy(Number.MAX_SAFE_INTEGER);
   const originalName = String(file?.originalname || '').trim();
@@ -191,7 +209,7 @@ export async function runAntivirusScan(filePath, runtimeConfig) {
   }
 
   if (antivirusConfig.mode === 'mock-eicar') {
-    const content = await fs.readFile(filePath, 'utf8').catch(() => '');
+    const content = await readTextFileWithRetry(filePath);
     if (content.includes(EICAR_TEST_STRING)) {
       return {
         status: 'blocked',

@@ -8,13 +8,14 @@ import { createPersistenceLayer, readJsonFromDiskForTests } from './persistence.
 
 async function createTempLayer(t) {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'krisenfest-persistence-'));
-  t.after(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
-  });
-
   const layer = await createPersistenceLayer({
     dbPath: path.join(tempDir, 'krisenfest.sqlite'),
     logger: { warn() {} },
+  });
+
+  t.after(async () => {
+    await layer.close?.();
+    await fs.rm(tempDir, { recursive: true, force: true });
   });
 
   return { layer, tempDir };
@@ -108,14 +109,15 @@ test('audit ledger keeps newest entries first and enforces the configured limit'
 
 test('file-mirror fallback keeps document meta and rejects stale versions', async (t) => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'krisenfest-persistence-fallback-'));
-  t.after(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
-  });
-
   const layer = await createPersistenceLayer({
     dbPath: path.join(tempDir, 'krisenfest.sqlite'),
     logger: { warn() {} },
     forceFallback: true,
+  });
+
+  t.after(async () => {
+    await layer.close?.();
+    await fs.rm(tempDir, { recursive: true, force: true });
   });
 
   const ref = { kind: 'tenant', tenantId: 'tenant-a', namespace: 'state' };
