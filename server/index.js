@@ -39,6 +39,11 @@ import {
   summarizeRestoreDrills,
 } from './hardening.js';
 import { buildEvidenceRetentionInfo, buildEvidenceRetentionSummary } from './evidence-platform.js';
+import { registerAdminRoutes } from './routes/admin.js';
+import { registerAuthRoutes } from './routes/auth.js';
+import { registerFileRoutes } from './routes/files.js';
+import { registerIntegrationRoutes } from './routes/integration.js';
+import { registerSystemRoutes } from './routes/system.js';
 
 const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
 const MAX_JSON_SIZE = '20mb';
@@ -3050,383 +3055,47 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/api/health', async (_req, res, next) => {
-  try {
-    res.json(await buildHealthResponse());
-  } catch (error) {
-    next(error);
-  }
+registerSystemRoutes(app, {
+  buildHealthResponse,
+  nowIso,
+  getPersistenceLayer,
+  getAuthContext,
+  ensureSystemAdmin,
+  readPlatformSettings,
+  writePlatformSettings,
+  sanitizeObject,
+  buildHostingReadinessSummary,
+  buildIntegritySummaryForTenant,
+  buildSecurityGateSummary,
+  observability,
+  listRestoreDrillSummaries,
+  readApiClients,
+  readTenants,
+  sanitizeApiClientScopes,
+  httpError,
+  createApiClientSecret,
+  hashPassword,
+  sanitizeApiClientRecord,
+  createId,
+  maskSecret,
+  writeApiClients,
+  readJobRuns,
+  runSystemJob,
+  jobsArtifactsDir,
+  fsSync,
+  path,
 });
 
-app.get('/api/health/live', (_req, res) => {
-  res.json({ ok: true, serverTime: nowIso() });
-});
-
-app.get('/api/health/ready', async (_req, res, next) => {
-  try {
-    const persistence = await getPersistenceLayer();
-    res.json({
-      ok: true,
-      ready: Boolean(persistence?.driver),
-      persistenceDriver: persistence?.driver || 'tenant-filesystem',
-      serverTime: nowIso(),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/platform', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({
-      ok: true,
-      settings: await readPlatformSettings(),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.put('/api/system/platform', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const current = await readPlatformSettings();
-    const settings = await writePlatformSettings({
-      ...current,
-      ...sanitizeObject(req.body?.settings),
-    });
-
-    res.json({
-      ok: true,
-      settings,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/readiness', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({
-      ok: true,
-      summary: await buildHostingReadinessSummary(),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-
-app.get('/api/system/integrity', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const summary = await buildIntegritySummaryForTenant(authContext.membership.tenantId);
-    res.json({
-      ok: true,
-      summary,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/security-gates', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({ ok: true, summary: await buildSecurityGateSummary() });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/observability', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({ ok: true, summary: observability.buildSummary() });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/restore-drills', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({ ok: true, drills: await listRestoreDrillSummaries() });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/api-clients', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const clients = await readApiClients();
-    res.json({
-      ok: true,
-      clients,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/system/api-clients', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-
-    const label = String(req.body?.label || '').trim();
-    const tenantId = String(req.body?.tenantId || '').trim();
-    const integrationType = ['reporting', 'backup', 'siem', 'bi', 'custom'].includes(req.body?.integrationType)
-      ? req.body.integrationType
-      : 'custom';
-    const scopes = sanitizeApiClientScopes(req.body?.scopes);
-    const expiresAt = String(req.body?.expiresAt || '').trim();
-    const note = String(req.body?.note || '').trim();
-
-    if (!label) {
-      throw httpError(400, 'Bitte eine Bezeichnung für den API-Client angeben.');
-    }
-
-    const tenants = await readTenants();
-    if (tenantId && !tenants.some((tenant) => tenant.id === tenantId)) {
-      throw httpError(404, 'Der gewählte Mandant wurde nicht gefunden.');
-    }
-
-    const secret = createApiClientSecret();
-    const secretData = hashPassword(secret);
-    const clients = await readApiClients();
-    const client = sanitizeApiClientRecord({
-      id: createId('api'),
-      label,
-      tenantId,
-      integrationType,
-      scopes,
-      status: 'active',
-      createdAt: nowIso(),
-      createdBy: authContext.account.name || authContext.account.email || 'System',
-      lastUsedAt: '',
-      expiresAt,
-      secretHint: maskSecret(secret),
-      note,
-      secretSalt: secretData.salt,
-      secretHash: secretData.hash,
-    }, new Map(tenants.map((tenant) => [tenant.id, tenant])));
-
-    clients.unshift(client);
-    await writeApiClients(clients);
-
-    res.json({
-      ok: true,
-      client,
-      secret,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/system/api-clients/:clientId/rotate', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const clientId = String(req.params.clientId || '').trim();
-    const secret = createApiClientSecret();
-    const secretData = hashPassword(secret);
-    const clients = await readApiClients();
-    const index = clients.findIndex((client) => client.id === clientId);
-
-    if (index < 0) {
-      throw httpError(404, 'Der API-Client wurde nicht gefunden.');
-    }
-
-    const updated = {
-      ...clients[index],
-      status: 'active',
-      secretHint: maskSecret(secret),
-      secretSalt: secretData.salt,
-      secretHash: secretData.hash,
-      lastUsedAt: '',
-    };
-    clients[index] = updated;
-    await writeApiClients(clients);
-
-    res.json({
-      ok: true,
-      client: clients[index],
-      secret,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/system/api-clients/:clientId/revoke', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const clientId = String(req.params.clientId || '').trim();
-    const clients = await readApiClients();
-    const index = clients.findIndex((client) => client.id === clientId);
-
-    if (index < 0) {
-      throw httpError(404, 'Der API-Client wurde nicht gefunden.');
-    }
-
-    clients[index] = {
-      ...clients[index],
-      status: 'revoked',
-    };
-    await writeApiClients(clients);
-
-    res.json({
-      ok: true,
-      client: clients[index],
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/jobs', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    res.json({
-      ok: true,
-      jobs: await readJobRuns(),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/system/jobs/run', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const job = await runSystemJob(authContext, req.body || {});
-    res.json({
-      ok: true,
-      job,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/system/jobs/:jobId/download', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-    const jobId = String(req.params.jobId || '').trim();
-    const jobs = await readJobRuns();
-    const job = jobs.find((entry) => entry.id === jobId);
-
-    if (!job?.artifactFileName) {
-      throw httpError(404, 'Für diesen Job ist kein Artefakt verfügbar.');
-    }
-
-    const filePath = path.join(jobsArtifactsDir, job.artifactFileName);
-    if (!fsSync.existsSync(filePath)) {
-      throw httpError(404, 'Das Job-Artefakt wurde nicht gefunden.');
-    }
-
-    const requestedName = String(req.query.download || job.artifactFileName || `${jobId}.json`).trim();
-    res.download(filePath, requestedName);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/integration/manifest', async (req, res, next) => {
-  try {
-    const apiContext = await getApiClientContext(req);
-    assertApiClientScopes(['readiness:read'], apiContext);
-    res.json(await buildIntegrationManifest(apiContext));
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/integration/tenant-summary', async (req, res, next) => {
-  try {
-    const apiContext = await getApiClientContext(req);
-    assertApiClientScopes(['tenant:read'], apiContext);
-    const tenants = await listTenantSummaries();
-    const scoped = apiContext.client.tenantId
-      ? tenants.filter((tenant) => tenant.id === apiContext.client.tenantId)
-      : tenants;
-
-    res.json({
-      ok: true,
-      tenants: scoped,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/integration/exports', async (req, res, next) => {
-  try {
-    const apiContext = await getApiClientContext(req);
-    assertApiClientScopes(['exports:read'], apiContext);
-    const tenants = await readTenants();
-    const scopedTenants = apiContext.client.tenantId
-      ? tenants.filter((tenant) => tenant.id === apiContext.client.tenantId)
-      : tenants;
-    const releaseOnly = String(req.query.releaseOnly || '').trim() === '1';
-    const packages = [];
-
-    for (const tenant of scopedTenants) {
-      const entries = await listExportEntries(tenant.id);
-      packages.push(...entries.filter((entry) => (releaseOnly ? entry.releaseStatus === 'released' : true)));
-    }
-
-    res.json({
-      ok: true,
-      packages,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/integration/state', async (req, res, next) => {
-  try {
-    const apiContext = await getApiClientContext(req);
-    assertApiClientScopes(['state:read'], apiContext);
-    const requestedTenantId = String(req.query.tenantId || '').trim();
-    const targetTenantId = apiContext.client.tenantId || requestedTenantId;
-
-    if (!targetTenantId) {
-      throw httpError(400, 'Für systemweite API-Clients muss ein tenantId-Parameter angegeben werden.');
-    }
-
-    const tenants = await readTenants();
-    if (!tenants.some((tenant) => tenant.id === targetTenantId)) {
-      throw httpError(404, 'Der angeforderte Mandant wurde nicht gefunden.');
-    }
-
-    const stateEnvelope = await buildStateEnvelope(targetTenantId, await readState(targetTenantId));
-    res.json({
-      ok: true,
-      tenantId: targetTenantId,
-      ...stateEnvelope,
-    });
-  } catch (error) {
-    next(error);
-  }
+registerIntegrationRoutes(app, {
+  getApiClientContext,
+  assertApiClientScopes,
+  buildIntegrationManifest,
+  listTenantSummaries,
+  readTenants,
+  listExportEntries,
+  httpError,
+  buildStateEnvelope,
+  readState,
 });
 
 async function buildSuccessfulAuthResponse({ account, membership, tenant, providerId = 'local' }) {
@@ -3523,221 +3192,43 @@ async function consumeAuthCallbackTicket(ticketId) {
   };
 }
 
-app.get('/api/auth/bootstrap', async (_req, res, next) => {
-  try {
-    const tenants = await listTenantSummaries();
-    const publicTenant = tenants.find((entry) => entry.active !== false) ?? tenants[0] ?? null;
-    res.json({
-      ok: true,
-      appMode: runtimeConfig.appMode,
-      authMode: authStrategy.mode,
-      authenticationRequired: AUTHENTICATION_REQUIRED,
-      authenticationOptional: !AUTHENTICATION_REQUIRED,
-      anonymousAccessEnabled: ANONYMOUS_ACCESS_ENABLED,
-      anonymousAccessMode: ANONYMOUS_ACCESS_ENABLED ? 'read_only' : 'disabled',
-      localLoginEnabled: authStrategy.local.enabled,
-      authProviders: buildPublicAuthProviders(authStrategy),
-      publicTenant,
-      tenants,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/auth/login', async (req, res, next) => {
-  try {
-    if (!authStrategy.local.enabled) {
-      throw httpError(403, 'Lokale Passwortanmeldung ist für diese Instanz deaktiviert.');
-    }
-
-    const email = String(req.body?.email || '').trim().toLowerCase();
-    const password = String(req.body?.password || '');
-    const requestedTenantId = String(req.body?.tenantId || '').trim();
-
-    if (!email || !password) {
-      throw httpError(400, 'Bitte E-Mail und Passwort angeben.');
-    }
-
-    const [accounts, tenants] = await Promise.all([readAccounts(), readTenants()]);
-    const account = accounts.find((entry) => String(entry?.email || '').toLowerCase() === email && entry?.status !== 'inactive');
-    if (!account) {
-      throw httpError(401, 'Anmeldung fehlgeschlagen. Konto nicht gefunden oder deaktiviert.');
-    }
-
-    if (!isLocalLoginAllowed(account) || !account.passwordSalt || !account.passwordHash) {
-      throw httpError(403, 'Dieses Zugriffskonto ist nur für SSO freigegeben.');
-    }
-
-    if (!verifyPassword(password, account.passwordSalt, account.passwordHash)) {
-      throw httpError(401, 'Anmeldung fehlgeschlagen. Passwort ist nicht korrekt.');
-    }
-
-    const activeTenants = new Map(sanitizeArray(tenants).filter((entry) => entry?.active !== false).map((entry) => [entry.id, entry]));
-    const membership = resolveMembershipForAccount(account, requestedTenantId, activeTenants);
-
-    if (!membership) {
-      throw httpError(403, 'Für den ausgewählten Mandanten besteht keine Berechtigung.');
-    }
-
-    const tenant = activeTenants.get(membership.tenantId);
-    if (!tenant) {
-      throw httpError(403, 'Der ausgewählte Mandant ist nicht mehr aktiv.');
-    }
-
-    const responsePayload = await buildSuccessfulAuthResponse({
-      account,
-      membership,
-      tenant,
-      providerId: 'local',
-    });
-
-    res.json(responsePayload);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/auth/oidc/start', async (req, res, next) => {
-  try {
-    if (!authStrategy.oidc.enabled || !authStrategy.oidc.configured) {
-      throw httpError(503, 'OIDC / SSO ist für diese Instanz nicht konfiguriert.');
-    }
-
-    await cleanupExpiredAuthFlows();
-    const tenantId = String(req.query.tenantId || '').trim();
-    const discovery = await fetchOidcDiscovery(authStrategy.oidc);
-    const transaction = {
-      ...createOidcTransaction(authStrategy.oidc, tenantId),
-      providerId: OIDC_PROVIDER_ID,
-    };
-    const flows = await readPendingAuthFlows();
-    await writePendingAuthFlows([transaction, ...flows.filter((entry) => entry.state !== transaction.state)]);
-    const redirectUrl = buildOidcAuthorizationUrl(authStrategy.oidc, discovery, transaction);
-
-    res.json({
-      ok: true,
-      providerId: OIDC_PROVIDER_ID,
-      redirectUrl,
-      state: transaction.state,
-      expiresAt: transaction.expiresAt,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/auth/oidc/callback', async (req, res, next) => {
-  try {
-    if (!authStrategy.oidc.enabled || !authStrategy.oidc.configured) {
-      throw httpError(503, 'OIDC / SSO ist für diese Instanz nicht konfiguriert.');
-    }
-
-    const code = String(req.query.code || '').trim();
-    const state = String(req.query.state || '').trim();
-    const errorCode = String(req.query.error || '').trim();
-    const errorDescription = String(req.query.error_description || '').trim();
-    const platformSettings = await readPlatformSettings();
-    const callbackBase = platformSettings.appBaseUrl || 'http://localhost:5173';
-
-    const redirectWithQuery = (params) => {
-      const url = new URL(callbackBase);
-      Object.entries(params).forEach(([key, value]) => {
-        if (value) {
-          url.searchParams.set(key, String(value));
-        }
-      });
-      res.redirect(302, url.toString());
-    };
-
-    if (errorCode) {
-      redirectWithQuery({ auth_error: `${errorCode}${errorDescription ? `: ${errorDescription}` : ''}` });
-      return;
-    }
-
-    await cleanupExpiredAuthFlows();
-    const flows = await readPendingAuthFlows();
-    const flow = flows.find((entry) => entry.state === state && entry.providerId === OIDC_PROVIDER_ID);
-    if (!flow) {
-      throw httpError(401, 'Die OIDC-Anmeldung konnte nicht zugeordnet werden oder ist abgelaufen.');
-    }
-
-    const discovery = await fetchOidcDiscovery(authStrategy.oidc);
-    const tokenSet = await exchangeOidcCode(authStrategy.oidc, discovery, {
-      code,
-      codeVerifier: flow.codeVerifier,
-    });
-    const rawProfile = await fetchOidcUserProfile(authStrategy.oidc, discovery, tokenSet);
-    const profile = extractOidcProfile(authStrategy.oidc, rawProfile);
-    const loginContext = await resolveOidcLoginContext({
-      profile,
-      requestedTenantId: flow.tenantId,
-    });
-
-    const authResponse = await buildSuccessfulAuthResponse({
-      account: loginContext.account,
-      membership: loginContext.membership,
-      tenant: loginContext.tenant,
-      providerId: OIDC_PROVIDER_ID,
-    });
-
-    const ticket = createAuthCallbackTicket(authStrategy.oidc, authResponse.session.token);
-    const tickets = await readAuthCallbackTickets();
-    await writeAuthCallbackTickets([ticket, ...tickets]);
-    await writePendingAuthFlows(flows.filter((entry) => entry.state !== flow.state));
-
-    redirectWithQuery({ auth_ticket: ticket.id, auth_provider: OIDC_PROVIDER_ID });
-  } catch (error) {
-    try {
-      const platformSettings = await readPlatformSettings();
-      const url = new URL(platformSettings.appBaseUrl || 'http://localhost:5173');
-      url.searchParams.set('auth_error', error instanceof Error ? error.message : 'SSO-Anmeldung fehlgeschlagen.');
-      res.redirect(302, url.toString());
-    } catch {
-      next(error);
-    }
-  }
-});
-
-app.post('/api/auth/oidc/complete', async (req, res, next) => {
-  try {
-    const ticketId = String(req.body?.ticket || '').trim();
-    if (!ticketId) {
-      throw httpError(400, 'Authentifizierungsticket fehlt.');
-    }
-
-    const responsePayload = await consumeAuthCallbackTicket(ticketId);
-    res.json(responsePayload);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/auth/session', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    await ensureWorkspaceUser(authContext.membership.tenantId, authContext.membership, authContext.account);
-    res.json({
-      ok: true,
-      session: authContext.sessionPublic,
-      workspaceUserSeed: buildWorkspaceUserSeedFromContext(authContext),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/auth/logout', async (req, res, next) => {
-  try {
-    const token = extractAuthToken(req);
-    if (token) {
-      const sessions = await readSessions();
-      await writeSessions(sessions.filter((entry) => entry?.token !== token));
-    }
-    res.json({ ok: true });
-  } catch (error) {
-    next(error);
-  }
+registerAuthRoutes(app, {
+  runtimeConfig,
+  authStrategy,
+  AUTHENTICATION_REQUIRED,
+  ANONYMOUS_ACCESS_ENABLED,
+  OIDC_PROVIDER_ID,
+  listTenantSummaries,
+  buildPublicAuthProviders,
+  httpError,
+  readAccounts,
+  readTenants,
+  isLocalLoginAllowed,
+  verifyPassword,
+  sanitizeArray,
+  resolveMembershipForAccount,
+  buildSuccessfulAuthResponse,
+  cleanupExpiredAuthFlows,
+  fetchOidcDiscovery,
+  createOidcTransaction,
+  readPendingAuthFlows,
+  writePendingAuthFlows,
+  buildOidcAuthorizationUrl,
+  readPlatformSettings,
+  exchangeOidcCode,
+  fetchOidcUserProfile,
+  extractOidcProfile,
+  resolveOidcLoginContext,
+  createAuthCallbackTicket,
+  readAuthCallbackTickets,
+  writeAuthCallbackTickets,
+  consumeAuthCallbackTicket,
+  getAuthContext,
+  ensureWorkspaceUser,
+  buildWorkspaceUserSeedFromContext,
+  extractAuthToken,
+  readSessions,
+  writeSessions,
 });
 
 app.get('/api/state', async (req, res, next) => {
@@ -4346,352 +3837,41 @@ app.get('/api/exports/:exportId/download', async (req, res, next) => {
   }
 });
 
-app.get('/api/admin/tenants', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    const summaries = await listTenantSummaries(
-      authContext.account.isSystemAdmin
-        ? null
-        : [authContext.tenant],
-    );
-    res.json({ ok: true, tenants: summaries });
-  } catch (error) {
-    next(error);
-  }
+registerAdminRoutes(app, {
+  getAuthContext,
+  ensureSystemAdmin,
+  assertPermissions,
+  listTenantSummaries,
+  DEFAULT_DEMO_PASSWORD,
+  httpError,
+  readTenants,
+  slugify,
+  createId,
+  buildSeedState,
+  ensureTenantStorage,
+  writeState,
+  nowIso,
+  writeTenants,
+  readAccounts,
+  sanitizeArray,
+  hashPassword,
+  writeAccounts,
+  sanitizeObject,
+  sanitizeTenantRecord,
+  sanitizeAccountForResponse,
+  normalizeAuthSource,
+  sanitizeRoleProfile,
+  sanitizeMembershipRecord,
+  sanitizeAccountRecord,
+  ensureWorkspaceUser,
 });
 
-app.post('/api/admin/tenants', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-
-    const name = String(req.body?.name || '').trim();
-    const industryLabel = String(req.body?.industryLabel || '').trim();
-    const adminName = String(req.body?.adminName || '').trim() || 'Mandantenadmin';
-    const adminEmail = String(req.body?.adminEmail || '').trim().toLowerCase();
-    const adminPassword = String(req.body?.adminPassword || '').trim() || DEFAULT_DEMO_PASSWORD;
-    const requestedSlug = String(req.body?.slug || '').trim();
-
-    if (!name || !adminEmail) {
-      throw httpError(400, 'Bitte Mandantenname und Admin-E-Mail angeben.');
-    }
-
-    const tenants = await readTenants();
-    const baseSlug = slugify(requestedSlug || name) || 'mandant';
-    let tenantId = baseSlug;
-    let suffix = 1;
-    while (tenants.some((entry) => entry?.id === tenantId)) {
-      tenantId = `${baseSlug}-${suffix}`;
-      suffix += 1;
-    }
-
-    const workspaceUserId = createId('usr');
-    const initialState = buildSeedState({
-      companyName: name,
-      industryLabel,
-      adminName,
-      adminEmail,
-      workspaceUserId,
-      roleProfile: 'admin',
-    });
-
-    await ensureTenantStorage(tenantId, initialState);
-    await writeState(tenantId, initialState);
-
-    const tenantRecord = {
-      id: tenantId,
-      name,
-      slug: tenantId,
-      industryLabel,
-      createdAt: nowIso(),
-      active: true,
-    };
-    await writeTenants([...tenants, tenantRecord]);
-
-    const accounts = await readAccounts();
-    const normalizedEmail = adminEmail.toLowerCase();
-    const existingAccount = accounts.find((entry) => String(entry?.email || '').toLowerCase() === normalizedEmail);
-
-    let nextAccounts = [...accounts];
-    if (existingAccount) {
-      nextAccounts = nextAccounts.map((entry) => {
-        if (entry.id !== existingAccount.id) {
-          return entry;
-        }
-        const memberships = sanitizeArray(entry.memberships).some((membership) => membership?.tenantId === tenantId)
-          ? sanitizeArray(entry.memberships)
-          : [...sanitizeArray(entry.memberships), {
-              tenantId,
-              roleProfile: 'admin',
-              workspaceUserId,
-              scope: name,
-            }];
-        return {
-          ...entry,
-          name: entry.name || adminName,
-          memberships,
-        };
-      });
-    } else {
-      const passwordData = hashPassword(adminPassword);
-      nextAccounts.push({
-        id: createId('acct'),
-        name: adminName,
-        email: normalizedEmail,
-        status: 'active',
-        isSystemAdmin: false,
-        authSource: 'local',
-        passwordSalt: passwordData.salt,
-        passwordHash: passwordData.hash,
-        lastLoginAt: '',
-        lastAuthProvider: '',
-        identities: [],
-        memberships: [{ tenantId, roleProfile: 'admin', workspaceUserId, scope: name }],
-      });
-    }
-
-    nextAccounts = nextAccounts.map((entry) => {
-      if (entry.id !== authContext.account.id) {
-        return entry;
-      }
-      const memberships = sanitizeArray(entry.memberships).some((membership) => membership?.tenantId === tenantId)
-        ? sanitizeArray(entry.memberships)
-        : [...sanitizeArray(entry.memberships), {
-            tenantId,
-            roleProfile: 'admin',
-            workspaceUserId: createId('usr'),
-            scope: `${name} (Systemzugriff)`,
-          }];
-      return { ...entry, memberships };
-    });
-
-    await writeAccounts(nextAccounts);
-    res.json({ ok: true, tenant: (await listTenantSummaries([tenantRecord]))[0] });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.put('/api/admin/tenants/:tenantId', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    ensureSystemAdmin(authContext);
-
-    const tenantId = String(req.params.tenantId || '').trim();
-    const patch = sanitizeObject(req.body?.patch);
-    const tenants = await readTenants();
-    const index = tenants.findIndex((entry) => entry.id === tenantId);
-
-    if (index < 0) {
-      throw httpError(404, 'Der Mandant wurde nicht gefunden.');
-    }
-
-    const current = tenants[index];
-    tenants[index] = sanitizeTenantRecord({
-      ...current,
-      ...patch,
-      id: current.id,
-      slug: current.slug,
-      createdAt: current.createdAt,
-    });
-
-    await writeTenants(tenants);
-    res.json({
-      ok: true,
-      tenant: (await listTenantSummaries([tenants[index]]))[0],
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/admin/accounts', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    assertPermissions(['workspace_edit'], authContext);
-    const [accounts, tenants] = await Promise.all([readAccounts(), readTenants()]);
-    const tenantLookup = new Map(tenants.map((tenant) => [tenant.id, tenant]));
-    const visibleAccounts = sanitizeArray(accounts).filter((account) => (
-      authContext.account.isSystemAdmin
-        ? true
-        : sanitizeArray(account.memberships).some((membership) => membership?.tenantId === authContext.membership.tenantId)
-    ));
-
-    res.json({
-      ok: true,
-      accounts: visibleAccounts.map((account) => sanitizeAccountForResponse(account, tenantLookup)),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/admin/accounts', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    assertPermissions(['workspace_edit'], authContext);
-
-    const targetTenantId = authContext.account.isSystemAdmin
-      ? String(req.body?.tenantId || authContext.membership.tenantId).trim()
-      : authContext.membership.tenantId;
-    const name = String(req.body?.name || '').trim();
-    const email = String(req.body?.email || '').trim().toLowerCase();
-    const password = String(req.body?.password || '').trim();
-    const roleProfile = sanitizeRoleProfile(String(req.body?.roleProfile || 'editor'));
-    const authSource = normalizeAuthSource(String(req.body?.authSource || 'local').trim() || 'local');
-    const status = String(req.body?.status || 'active').trim() || 'active';
-    const scope = String(req.body?.scope || '').trim();
-    const requestedWorkspaceUserId = String(req.body?.workspaceUserId || '').trim();
-
-    if (!name || !email) {
-      throw httpError(400, 'Bitte Name und E-Mail für das Zugriffskonto angeben.');
-    }
-
-    const tenants = await readTenants();
-    const tenant = tenants.find((entry) => entry?.id === targetTenantId && entry?.active !== false);
-    if (!tenant) {
-      throw httpError(404, 'Der Zielmandant wurde nicht gefunden.');
-    }
-
-    const accounts = await readAccounts();
-    const accountIndex = accounts.findIndex((entry) => String(entry?.email || '').toLowerCase() === email);
-    const workspaceUserId = requestedWorkspaceUserId || createId('usr');
-    const membershipPatch = sanitizeMembershipRecord({
-      tenantId: targetTenantId,
-      roleProfile,
-      workspaceUserId,
-      scope: scope || tenant.name || targetTenantId,
-    });
-
-    let account;
-    if (accountIndex >= 0) {
-      account = sanitizeAccountRecord(accounts[accountIndex]);
-      const memberships = sanitizeArray(account.memberships).map((entry) => sanitizeMembershipRecord(entry));
-      const membershipIndex = memberships.findIndex((entry) => entry?.tenantId === targetTenantId);
-      if (membershipIndex >= 0) {
-        memberships[membershipIndex] = { ...memberships[membershipIndex], ...membershipPatch };
-      } else {
-        memberships.push(membershipPatch);
-      }
-
-      account = sanitizeAccountRecord({
-        ...account,
-        name,
-        status,
-        authSource,
-        memberships,
-        passwordSalt: authSource === 'oidc' ? '' : account.passwordSalt,
-        passwordHash: authSource === 'oidc' ? '' : account.passwordHash,
-      });
-
-      if ((authSource === 'local' || authSource === 'hybrid') && password) {
-        const passwordData = hashPassword(password);
-        account = sanitizeAccountRecord({
-          ...account,
-          passwordSalt: passwordData.salt,
-          passwordHash: passwordData.hash,
-        });
-      }
-
-      if ((authSource === 'local' || authSource === 'hybrid') && !password && !account.passwordHash) {
-        throw httpError(400, 'Für lokale oder hybride Konten ist ein Passwort erforderlich.');
-      }
-
-      accounts[accountIndex] = account;
-    } else {
-      if ((authSource === 'local' || authSource === 'hybrid') && !password) {
-        throw httpError(400, 'Für neue lokale oder hybride Zugriffskonten ist ein Initialpasswort erforderlich.');
-      }
-
-      const passwordData = password ? hashPassword(password) : { salt: '', hash: '' };
-      account = sanitizeAccountRecord({
-        id: createId('acct'),
-        name,
-        email,
-        status,
-        isSystemAdmin: false,
-        authSource,
-        passwordSalt: authSource === 'oidc' ? '' : passwordData.salt,
-        passwordHash: authSource === 'oidc' ? '' : passwordData.hash,
-        lastLoginAt: '',
-        lastAuthProvider: '',
-        identities: [],
-        memberships: [membershipPatch],
-      });
-      accounts.push(account);
-    }
-
-    await writeAccounts(accounts);
-    await ensureWorkspaceUser(targetTenantId, membershipPatch, account);
-    const tenantLookup = new Map(tenants.map((entry) => [entry.id, entry]));
-    res.json({ ok: true, account: sanitizeAccountForResponse(account, tenantLookup) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/admin/accounts/:accountId/reset-password', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req);
-    assertPermissions(['workspace_edit'], authContext);
-    const password = String(req.body?.password || '').trim();
-    if (!password) {
-      throw httpError(400, 'Bitte ein neues Passwort angeben.');
-    }
-
-    const accounts = await readAccounts();
-    const accountIndex = accounts.findIndex((entry) => entry?.id === req.params.accountId);
-    if (accountIndex < 0) {
-      throw httpError(404, 'Zugriffskonto wurde nicht gefunden.');
-    }
-
-    const account = sanitizeAccountRecord(accounts[accountIndex]);
-    const hasTenantAccess = sanitizeArray(account.memberships).some((membership) => membership?.tenantId === authContext.membership.tenantId);
-    if (!authContext.account.isSystemAdmin && !hasTenantAccess) {
-      throw httpError(403, 'Das Passwort kann nur für Konten des eigenen Mandanten zurückgesetzt werden.');
-    }
-
-    const passwordData = hashPassword(password);
-    accounts[accountIndex] = sanitizeAccountRecord({
-      ...account,
-      authSource: account.authSource === 'oidc' ? 'hybrid' : account.authSource,
-      passwordSalt: passwordData.salt,
-      passwordHash: passwordData.hash,
-    });
-    await writeAccounts(accounts);
-    res.json({ ok: true });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/files/:storedFileName', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const storedFileName = path.basename(req.params.storedFileName);
-    const versions = await readVersions(authContext.membership.tenantId);
-    const versionEntry = sanitizeArray(versions).find((entry) => entry?.storedFileName === storedFileName);
-    const requestedName = String(req.query.download || versionEntry?.fileName || storedFileName);
-    const storage = await getObjectStorage();
-    const payload = await storage.getDownloadPayload({
-      tenantId: authContext.membership.tenantId,
-      storedFileName,
-      objectKey: versionEntry?.objectKey,
-    });
-
-    res.setHeader('content-disposition', `attachment; filename*=UTF-8''${encodeURIComponent(requestedName)}`);
-    if (payload.type === 'file') {
-      res.sendFile(payload.filePath);
-      return;
-    }
-
-    if (payload.contentType) {
-      res.setHeader('content-type', payload.contentType);
-    }
-    res.send(payload.buffer);
-  } catch (error) {
-    next(error);
-  }
+registerFileRoutes(app, {
+  getAuthContext,
+  path,
+  readVersions,
+  sanitizeArray,
+  getObjectStorage,
 });
 
 app.use((error, req, res, _next) => {
