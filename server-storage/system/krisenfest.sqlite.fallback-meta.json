@@ -1,15 +1,15 @@
 {
   "system:tenants": {
-    "version": 381,
-    "updatedAt": "2026-04-09T06:21:53.650Z"
+    "version": 385,
+    "updatedAt": "2026-04-09T06:23:24.481Z"
   },
   "system:accounts": {
     "version": 2,
     "updatedAt": "2026-04-08T16:04:27.754Z"
   },
   "system:sessions": {
-    "version": 123,
-    "updatedAt": "2026-04-09T06:21:52.688Z"
+    "version": 125,
+    "updatedAt": "2026-04-09T06:23:24.432Z"
   },
   "system:pending-auth-flows": {
     "version": 4,
@@ -20,12 +20,12 @@
     "updatedAt": "2026-04-08T20:10:15.625Z"
   },
   "tenant:demo-unternehmen:state": {
-    "version": 163,
-    "updatedAt": "2026-04-09T06:21:52.735Z"
+    "version": 165,
+    "updatedAt": "2026-04-09T06:23:24.621Z"
   },
   "tenant:demo-unternehmen:document-versions": {
-    "version": 162,
-    "updatedAt": "2026-04-09T06:21:52.791Z"
+    "version": 164,
+    "updatedAt": "2026-04-09T06:23:24.696Z"
   },
   "tenant:demo-unternehmen:export-log": {
     "version": 14,
@@ -44,7 +44,7 @@
     "updatedAt": "2026-04-08T16:04:27.549Z"
   },
   "system:platform-settings": {
-    "version": 666,
-    "updatedAt": "2026-04-09T06:21:53.447Z"
+    "version": 673,
+    "updatedAt": "2026-04-09T06:23:25.614Z"
   }
 }
