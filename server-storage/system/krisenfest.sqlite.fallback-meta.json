@@ -1,23 +1,23 @@
 {
   "system:tenants": {
-    "version": 697,
-    "updatedAt": "2026-04-09T07:58:20.203Z"
+    "version": 699,
+    "updatedAt": "2026-04-09T08:06:16.903Z"
   },
   "system:accounts": {
     "version": 2,
     "updatedAt": "2026-04-08T16:04:27.754Z"
   },
   "system:sessions": {
-    "version": 225,
-    "updatedAt": "2026-04-09T07:58:20.203Z"
+    "version": 226,
+    "updatedAt": "2026-04-09T08:06:16.780Z"
   },
   "system:pending-auth-flows": {
-    "version": 4,
-    "updatedAt": "2026-04-08T20:10:15.612Z"
+    "version": 5,
+    "updatedAt": "2026-04-09T08:06:16.816Z"
   },
   "system:auth-callback-tickets": {
-    "version": 4,
-    "updatedAt": "2026-04-08T20:10:15.625Z"
+    "version": 5,
+    "updatedAt": "2026-04-09T08:06:16.865Z"
   },
   "tenant:demo-unternehmen:state": {
     "version": 296,
