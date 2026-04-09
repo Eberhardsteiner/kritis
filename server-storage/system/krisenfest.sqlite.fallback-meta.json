@@ -1,15 +1,15 @@
 {
   "system:tenants": {
-    "version": 620,
-    "updatedAt": "2026-04-09T06:59:29.034Z"
+    "version": 633,
+    "updatedAt": "2026-04-09T07:00:43.423Z"
   },
   "system:accounts": {
     "version": 2,
     "updatedAt": "2026-04-08T16:04:27.754Z"
   },
   "system:sessions": {
-    "version": 200,
-    "updatedAt": "2026-04-09T06:59:28.751Z"
+    "version": 204,
+    "updatedAt": "2026-04-09T07:00:42.279Z"
   },
   "system:pending-auth-flows": {
     "version": 4,
@@ -20,31 +20,31 @@
     "updatedAt": "2026-04-08T20:10:15.625Z"
   },
   "tenant:demo-unternehmen:state": {
-    "version": 264,
-    "updatedAt": "2026-04-09T06:59:29.049Z"
+    "version": 269,
+    "updatedAt": "2026-04-09T07:00:42.842Z"
   },
   "tenant:demo-unternehmen:document-versions": {
-    "version": 264,
-    "updatedAt": "2026-04-09T06:59:28.789Z"
+    "version": 268,
+    "updatedAt": "2026-04-09T07:00:42.820Z"
   },
   "tenant:demo-unternehmen:export-log": {
     "version": 29,
     "updatedAt": "2026-04-09T06:58:19.654Z"
   },
   "tenant:demo-unternehmen:module-pack-registry": {
-    "version": 28,
-    "updatedAt": "2026-04-09T06:59:29.002Z"
+    "version": 29,
+    "updatedAt": "2026-04-09T07:00:44.105Z"
   },
   "tenant:demo-unternehmen:tenant-settings": {
-    "version": 173,
-    "updatedAt": "2026-04-09T06:59:29.068Z"
+    "version": 177,
+    "updatedAt": "2026-04-09T07:00:44.103Z"
   },
   "tenant:demo-unternehmen:backup-log": {
     "version": 1,
     "updatedAt": "2026-04-08T16:04:27.549Z"
   },
   "system:platform-settings": {
-    "version": 1093,
-    "updatedAt": "2026-04-09T06:59:28.969Z"
+    "version": 1116,
+    "updatedAt": "2026-04-09T07:00:43.305Z"
   }
 }
