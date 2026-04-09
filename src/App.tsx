@@ -1,19 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActiveViewPanel } from './components/ActiveViewPanel';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
-import { AssessmentView } from './views/AssessmentView';
-import { DashboardView } from './views/DashboardView';
-import { ProgramView } from './views/ProgramView';
-import { GovernanceView } from './views/GovernanceView';
-import { ControlView } from './views/ControlView';
-import { KritisView } from './views/KritisView';
-import { MeasuresView } from './views/MeasuresView';
-import { ResilienceView } from './views/ResilienceView';
-import { ModulesView } from './views/ModulesView';
-import { ReportView } from './views/ReportView';
-import { PlatformView } from './views/PlatformView';
-import { OperationsView } from './views/OperationsView';
-import { RolloutView } from './views/RolloutView';
 import {
   exportActionPlanAsCsv,
   exportAssessmentAsJson,
@@ -4658,6 +4646,328 @@ export default function App() {
   const accountChipLabel = authSession ? `Konto: ${authSession.email}` : '';
   const canSyncNow = !(serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required');
   const canExportJson = hasPermission('reports_export');
+  const programViewProps = {
+    companyName: state.companyProfile.companyName,
+    moduleName: currentModule.name,
+    overallScore: scoreSnapshot.overallScore,
+    requirementScore: requirementProgress.score,
+    evidenceCoverage: evidenceSummary.coverage,
+    exportCount: exportPackages.length,
+  };
+  const dashboardViewProps = {
+    companyName: state.companyProfile.companyName,
+    module: currentModule,
+    scoreSnapshot,
+    benchmark: benchmarkSnapshot,
+    requirementScore: requirementProgress.score,
+    actionSummary,
+    evidenceSummary,
+    certificationProgress,
+    applicability: kritisApplicability,
+    governanceSummary,
+    resilienceSummary,
+    checklistProgress,
+    findingSummary,
+    onGoToAssessment: () => setActiveView('assessment'),
+    onGoToMeasures: () => setActiveView('measures'),
+    onGoToGovernance: () => setActiveView('governance'),
+    onGoToResilience: () => setActiveView('resilience'),
+    onGoToKritis: () => setActiveView('kritis'),
+  };
+  const assessmentViewProps = {
+    questions,
+    answers: state.answers,
+    domainScores: scoreSnapshot.domainScores,
+    filters: state.assessmentFilters,
+    questionActionCounts,
+    questionEvidenceCounts,
+    onScoreChange: handleScoreChange,
+    onNoteChange: handleNoteChange,
+    onChangeFilter: updateAssessmentFilter,
+    onCreateAction: handleCreateActionFromQuestion,
+    onCreateEvidence: handleCreateEvidenceFromQuestion,
+  };
+  const measuresViewProps = {
+    module: currentModule,
+    recommendations: scoreSnapshot.recommendations,
+    requirements: activeRequirements,
+    requirementStates: state.requirementStates,
+    actionItems: currentActionItems,
+    evidenceItems: currentEvidenceItems,
+    actionSummary,
+    evidenceSummary,
+    documentFolders,
+    documentLibrarySummary,
+    onCreateEmptyAction: handleCreateEmptyAction,
+    onCreateEmptyEvidence: handleCreateEmptyEvidence,
+    onGenerateRecommendationActions: handleGenerateRecommendationActions,
+    onGenerateRequirementActions: handleGenerateRequirementActions,
+    onGenerateModuleActionTemplates: handleGenerateModuleActionTemplates,
+    onGenerateCriticalQuestionEvidence: handleGenerateCriticalQuestionEvidence,
+    onGenerateRequirementEvidence: handleGenerateRequirementEvidence,
+    onGenerateModuleEvidenceTemplates: handleGenerateModuleEvidenceTemplates,
+    onUpdateAction: handleUpdateAction,
+    onDeleteAction: handleDeleteAction,
+    onUpdateEvidence: handleUpdateEvidence,
+    onDeleteEvidence: handleDeleteEvidence,
+    onAttachEvidenceFile: handleAttachEvidenceFile,
+    onRemoveEvidenceFile: handleRemoveEvidenceFile,
+    evidenceVersions: evidenceVersionMap,
+    serverVersioningEnabled: serverMode === 'connected' || serverMode === 'syncing',
+    onDownloadServerFile: (url: string, fileName: string) => {
+      void downloadProtectedResource(url, authToken || '', fileName).catch((error) => {
+        const details = extractErrorDetails(error);
+        showNotice('error', 'Datei konnte nicht heruntergeladen werden.', details);
+      });
+    },
+    onLoadEvidenceVersions: handleLoadEvidenceVersions,
+    onRestoreEvidenceVersion: handleRestoreEvidenceVersion,
+  };
+  const governanceViewProps = {
+    module: currentModule,
+    stakeholders: currentStakeholders,
+    sites: currentSites,
+    assets: currentAssets,
+    reviewPlan: state.reviewPlan,
+    benchmark: benchmarkSnapshot,
+    scoreSnapshot,
+    governanceSummary,
+    roleTemplates,
+    onCreateStakeholder: handleCreateEmptyStakeholder,
+    onCreateSite: handleCreateEmptySite,
+    onCreateAsset: handleCreateEmptyAsset,
+    onGenerateRoleTemplates: handleGenerateRoleTemplates,
+    onUpdateStakeholder: handleUpdateStakeholder,
+    onDeleteStakeholder: handleDeleteStakeholder,
+    onUpdateSite: handleUpdateSite,
+    onDeleteSite: handleDeleteSite,
+    onUpdateAsset: handleUpdateAsset,
+    onDeleteAsset: handleDeleteAsset,
+    onUpdateReviewPlan: updateReviewPlan,
+  };
+  const resilienceViewProps = {
+    moduleName: currentModule.name,
+    summary: resilienceSummary,
+    businessProcesses: currentBusinessProcesses,
+    dependencies: currentDependencies,
+    scenarios: currentScenarios,
+    exercises: currentExercises,
+    assets: currentAssets,
+    processTemplates,
+    dependencyTemplates,
+    scenarioTemplates,
+    exerciseTemplates,
+    onCreateProcess: handleCreateEmptyBusinessProcess,
+    onUpdateProcess: handleUpdateBusinessProcess,
+    onDeleteProcess: handleDeleteBusinessProcess,
+    onCreateDependency: handleCreateEmptyDependency,
+    onUpdateDependency: handleUpdateDependency,
+    onDeleteDependency: handleDeleteDependency,
+    onCreateScenario: handleCreateEmptyScenario,
+    onUpdateScenario: handleUpdateScenario,
+    onDeleteScenario: handleDeleteScenario,
+    onCreateExercise: handleCreateEmptyExercise,
+    onUpdateExercise: handleUpdateExercise,
+    onDeleteExercise: handleDeleteExercise,
+    onGenerateProcessTemplates: handleGenerateProcessTemplates,
+    onGenerateDependencyTemplates: handleGenerateDependencyTemplates,
+    onGenerateScenarioTemplates: handleGenerateScenarioTemplates,
+    onGenerateExerciseTemplates: handleGenerateExerciseTemplates,
+  };
+  const controlViewProps = {
+    users: state.users,
+    activeUserId: state.activeUserId,
+    activeAccessProfile,
+    documentLibrarySummary,
+    deadlineSummary,
+    complianceCalendar: state.complianceCalendar,
+    onSelectActiveUser: selectActiveUser,
+    userSelectionLocked: Boolean(authSession),
+    onCreateUser: handleCreateUser,
+    onGenerateUsersFromStakeholders: handleGenerateUsersFromStakeholders,
+    onUpdateUser: handleUpdateUser,
+    onDeleteUser: handleDeleteUser,
+    onUpdateComplianceCalendar: updateComplianceCalendar,
+  };
+  const platformViewProps = {
+    serverMode,
+    serverHealth,
+    activeUser,
+    activeAccessProfile,
+    authSession,
+    authMode,
+    authProviders,
+    serverAuthRequired,
+    publicTenant,
+    availableTenants,
+    accessAccounts,
+    documentLedger,
+    evidenceRetentionSummary,
+    users: state.users,
+    autoSyncEnabled,
+    lastServerLoadAt,
+    lastServerSyncAt,
+    syncError,
+    attachmentCount,
+    evidenceCount: state.evidenceItems.length,
+    auditLog: auditLogEntries,
+    snapshots,
+    exportPackages,
+    tenantPolicy,
+    hasWorkspaceAccess: hasPermission('workspace_edit'),
+    onToggleAutoSync: setAutoSyncEnabled,
+    onRefreshServer: handleRefreshServer,
+    onSyncNow: handleSyncNow,
+    onCreateSnapshot: handleCreateSnapshotOnServer,
+    onRestoreSnapshot: handleRestoreSnapshot,
+    onLogin: handleServerLogin,
+    onStartOidcLogin: handleStartOidcLogin,
+    onLogout: handleServerLogout,
+    onCreateTenant: handleCreateTenantOnServer,
+    onCreateAccessAccount: handleUpsertAccessAccount,
+    onResetAccessAccountPassword: handleResetAccessAccountPassword,
+    onUpdateTenantPolicy: handleUpdateTenantPolicy,
+    onReleaseExportPackage: handleReleaseRegisteredExport,
+    onDownloadExportPackage: handleDownloadRegisteredExport,
+  };
+  const operationsViewProps = {
+    serverMode,
+    serverHealth,
+    authSession,
+    availableTenants,
+    systemSettings,
+    readinessSummary: hostingReadiness,
+    integritySummary,
+    securityGateSummary,
+    observabilitySummary,
+    restoreDrills,
+    apiClients,
+    jobRuns: systemJobs,
+    issuedClientSecret,
+    hasSystemAdminAccess,
+    onRefreshServer: handleRefreshServer,
+    onUpdateSystemSettings: handleUpdateSystemSettings,
+    onCreateApiClient: handleCreateApiClientOnServer,
+    onRotateApiClient: handleRotateApiClient,
+    onRevokeApiClient: handleRevokeApiClient,
+    onRunSystemJob: handleRunSystemJobOnServer,
+    onUpdateTenant: handleUpdateTenantAdminMeta,
+    onDownloadJobArtifact: handleDownloadJobArtifact,
+    onClearIssuedSecret: () => setIssuedClientSecret(null),
+  };
+  const rolloutViewProps = {
+    companyName: state.companyProfile.companyName,
+    moduleName: currentModule.name,
+    rolloutPlan: state.rolloutPlan,
+    hardeningChecks: currentHardeningChecks,
+    runbooks: currentRunbooks,
+    releaseGates: currentReleaseGates,
+    integritySummary,
+    handoverBundles: exportPackages.filter((item) => item.type === 'handover_bundle'),
+    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
+    serverMode,
+    onUpdateRolloutPlan: updateRolloutPlan,
+    onCreateEmptyHardeningCheck: handleCreateEmptyHardeningCheck,
+    onGenerateHardeningBaseline: handleGenerateHardeningBaseline,
+    onUpdateHardeningCheck: handleUpdateHardeningCheck,
+    onDeleteHardeningCheck: handleDeleteHardeningCheck,
+    onCreateEmptyRunbook: handleCreateEmptyRunbook,
+    onGenerateRunbookTemplates: handleGenerateRunbookTemplates,
+    onUpdateRunbook: handleUpdateRunbook,
+    onDeleteRunbook: handleDeleteRunbook,
+    onCreateEmptyReleaseGate: handleCreateEmptyReleaseGate,
+    onGenerateReleaseGateBaseline: handleGenerateReleaseGateBaseline,
+    onUpdateReleaseGate: handleUpdateReleaseGate,
+    onDeleteReleaseGate: handleDeleteReleaseGate,
+    onRefreshIntegritySummary: handleRefreshIntegritySummary,
+    onCreateHandoverBundle: handleCreateHandoverBundle,
+    onReleaseExportPackage: handleReleaseRegisteredExport,
+    onDownloadExportPackage: handleDownloadRegisteredExport,
+  };
+  const modulesViewProps = {
+    builtInContainers: builtInModuleContainers,
+    availableModules: effectiveModuleCatalog,
+    registryEntries: moduleRegistryEntries,
+    selectedModuleId: state.selectedModuleId,
+    onSelectModule: selectModule,
+    onImportFiles: handleImportFiles,
+    onActivatePack: handleActivateModulePack,
+    onRetirePack: handleRetireModulePack,
+    canManageRegistry: hasPermission('modules_manage') && serverMode === 'connected',
+    feedback,
+  };
+  const kritisViewProps = {
+    applicability: kritisApplicability,
+    regulatoryProfile,
+    regimeDefinitions,
+    regimeSummaries,
+    requirements: activeRequirements,
+    requirementStates: state.requirementStates,
+    requirementActionCounts,
+    requirementEvidenceCounts,
+    certificationState: state.certificationState,
+    certificationProgress,
+    module: currentModule,
+    auditChecklist: activeAuditChecklist,
+    auditChecklistStates: state.auditChecklistStates,
+    checklistProgress,
+    findingSummary,
+    findings: currentFindings,
+    exportPackages,
+    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
+    certificationAuthorityLabel: tenantPolicy.certificationAuthorityLabel,
+    onUpdateJurisdiction: updateJurisdiction,
+    onUpdateRegulatoryProfileField: updateRegulatoryProfileField,
+    onUpdateRegimeScope: updateRegimeScope,
+    onChangeStatus: handleRequirementChange,
+    onCreateAction: handleCreateActionFromRequirement,
+    onCreateEvidence: handleCreateEvidenceFromRequirement,
+    onUpdateCertificationField: updateCertificationField,
+    onUpdateCertificationStage: updateCertificationStage,
+    onUpdateChecklistState: updateChecklistState,
+    onCreateFinding: handleCreateFinding,
+    onGenerateFindingsFromChecklist: handleGenerateFindingsFromChecklist,
+    onUpdateFinding: handleUpdateFinding,
+    onDeleteFinding: handleDeleteFinding,
+    onCreateCertificationDossier: handleCreateServerExportPackage,
+    onReleaseExportPackage: handleReleaseRegisteredExport,
+    onDownloadExportPackage: handleDownloadRegisteredExport,
+  };
+  const reportViewProps = {
+    companyProfile: state.companyProfile,
+    regulatoryProfile,
+    regimeSummaries,
+    module: currentModule,
+    scoreSnapshot,
+    benchmark: benchmarkSnapshot,
+    governanceSummary,
+    applicability: kritisApplicability,
+    requirementProgress,
+    requirements: activeRequirements,
+    requirementStates: state.requirementStates,
+    actionItems: currentActionItems,
+    evidenceSummary,
+    documentLibrarySummary,
+    deadlineSummary,
+    certificationProgress,
+    checklistProgress,
+    findingSummary,
+    stakeholders: currentStakeholders,
+    sites: currentSites,
+    exportPackages,
+    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
+    onExportMarkdown: handleExportMarkdown,
+    onExportManagementPdf: handleExportManagementPdf,
+    onExportAuditPdf: handleExportAuditPdf,
+    onExportActionCsv: () => exportActionPlanAsCsv(currentActionItems),
+    onExportEvidenceCsv: () => exportEvidenceRegisterAsCsv(currentEvidenceItems),
+    onExportStakeholderCsv: () => exportStakeholderRegisterAsCsv(currentStakeholders),
+    onExportFindingCsv: () => exportFindingRegisterAsCsv(currentFindings),
+    onExportFormalHtml: handleExportFormalHtml,
+    onCreateServerPackage: handleCreateServerExportPackage,
+    onReleaseExportPackage: handleReleaseRegisteredExport,
+    onDownloadExportPackage: handleDownloadRegisteredExport,
+  };
 
   return (
     <div className="app-shell">
@@ -4698,374 +5008,23 @@ export default function App() {
           </div>
         ) : null}
 
-        {readOnlyHint ? (
-          <div className="feedback-box error">
-            <strong>{readOnlyHint}</strong>
-          </div>
-        ) : null}
-
-        <main className="content-shell">
-          {state.activeView === 'program' ? (
-            <ProgramView
-              companyName={state.companyProfile.companyName}
-              moduleName={currentModule.name}
-              overallScore={scoreSnapshot.overallScore}
-              requirementScore={requirementProgress.score}
-              evidenceCoverage={evidenceSummary.coverage}
-              exportCount={exportPackages.length}
-            />
-          ) : null}
-
-          {state.activeView === 'dashboard' ? (
-            <DashboardView
-              companyName={state.companyProfile.companyName}
-              module={currentModule}
-              scoreSnapshot={scoreSnapshot}
-              benchmark={benchmarkSnapshot}
-              requirementScore={requirementProgress.score}
-              actionSummary={actionSummary}
-              evidenceSummary={evidenceSummary}
-              certificationProgress={certificationProgress}
-              applicability={kritisApplicability}
-              governanceSummary={governanceSummary}
-              resilienceSummary={resilienceSummary}
-              checklistProgress={checklistProgress}
-              findingSummary={findingSummary}
-              onGoToAssessment={() => setActiveView('assessment')}
-              onGoToMeasures={() => setActiveView('measures')}
-              onGoToGovernance={() => setActiveView('governance')}
-              onGoToResilience={() => setActiveView('resilience')}
-              onGoToKritis={() => setActiveView('kritis')}
-            />
-          ) : null}
-
-          {state.activeView === 'assessment' ? (
-            <AssessmentView
-              questions={questions}
-              answers={state.answers}
-              domainScores={scoreSnapshot.domainScores}
-              filters={state.assessmentFilters}
-              questionActionCounts={questionActionCounts}
-              questionEvidenceCounts={questionEvidenceCounts}
-              onScoreChange={handleScoreChange}
-              onNoteChange={handleNoteChange}
-              onChangeFilter={updateAssessmentFilter}
-              onCreateAction={handleCreateActionFromQuestion}
-              onCreateEvidence={handleCreateEvidenceFromQuestion}
-            />
-          ) : null}
-
-          {state.activeView === 'measures' ? (
-            <MeasuresView
-              module={currentModule}
-              recommendations={scoreSnapshot.recommendations}
-              requirements={activeRequirements}
-              requirementStates={state.requirementStates}
-              actionItems={currentActionItems}
-              evidenceItems={currentEvidenceItems}
-              actionSummary={actionSummary}
-              evidenceSummary={evidenceSummary}
-              documentFolders={documentFolders}
-              documentLibrarySummary={documentLibrarySummary}
-              onCreateEmptyAction={handleCreateEmptyAction}
-              onCreateEmptyEvidence={handleCreateEmptyEvidence}
-              onGenerateRecommendationActions={handleGenerateRecommendationActions}
-              onGenerateRequirementActions={handleGenerateRequirementActions}
-              onGenerateModuleActionTemplates={handleGenerateModuleActionTemplates}
-              onGenerateCriticalQuestionEvidence={handleGenerateCriticalQuestionEvidence}
-              onGenerateRequirementEvidence={handleGenerateRequirementEvidence}
-              onGenerateModuleEvidenceTemplates={handleGenerateModuleEvidenceTemplates}
-              onUpdateAction={handleUpdateAction}
-              onDeleteAction={handleDeleteAction}
-              onUpdateEvidence={handleUpdateEvidence}
-              onDeleteEvidence={handleDeleteEvidence}
-              onAttachEvidenceFile={handleAttachEvidenceFile}
-              onRemoveEvidenceFile={handleRemoveEvidenceFile}
-              evidenceVersions={evidenceVersionMap}
-              serverVersioningEnabled={serverMode === 'connected' || serverMode === 'syncing'}
-              onDownloadServerFile={(url, fileName) => {
-                void downloadProtectedResource(url, authToken || '', fileName).catch((error) => {
-                  const details = extractErrorDetails(error);
-                  showNotice('error', 'Datei konnte nicht heruntergeladen werden.', details);
-                });
-              }}
-              onLoadEvidenceVersions={handleLoadEvidenceVersions}
-              onRestoreEvidenceVersion={handleRestoreEvidenceVersion}
-            />
-          ) : null}
-
-          {state.activeView === 'governance' ? (
-            <GovernanceView
-              module={currentModule}
-              stakeholders={currentStakeholders}
-              sites={currentSites}
-              assets={currentAssets}
-              reviewPlan={state.reviewPlan}
-              benchmark={benchmarkSnapshot}
-              scoreSnapshot={scoreSnapshot}
-              governanceSummary={governanceSummary}
-              roleTemplates={roleTemplates}
-              onCreateStakeholder={handleCreateEmptyStakeholder}
-              onCreateSite={handleCreateEmptySite}
-              onCreateAsset={handleCreateEmptyAsset}
-              onGenerateRoleTemplates={handleGenerateRoleTemplates}
-              onUpdateStakeholder={handleUpdateStakeholder}
-              onDeleteStakeholder={handleDeleteStakeholder}
-              onUpdateSite={handleUpdateSite}
-              onDeleteSite={handleDeleteSite}
-              onUpdateAsset={handleUpdateAsset}
-              onDeleteAsset={handleDeleteAsset}
-              onUpdateReviewPlan={updateReviewPlan}
-            />
-          ) : null}
-
-          {state.activeView === 'resilience' ? (
-            <ResilienceView
-              moduleName={currentModule.name}
-              summary={resilienceSummary}
-              businessProcesses={currentBusinessProcesses}
-              dependencies={currentDependencies}
-              scenarios={currentScenarios}
-              exercises={currentExercises}
-              assets={currentAssets}
-              processTemplates={processTemplates}
-              dependencyTemplates={dependencyTemplates}
-              scenarioTemplates={scenarioTemplates}
-              exerciseTemplates={exerciseTemplates}
-              onCreateProcess={handleCreateEmptyBusinessProcess}
-              onUpdateProcess={handleUpdateBusinessProcess}
-              onDeleteProcess={handleDeleteBusinessProcess}
-              onCreateDependency={handleCreateEmptyDependency}
-              onUpdateDependency={handleUpdateDependency}
-              onDeleteDependency={handleDeleteDependency}
-              onCreateScenario={handleCreateEmptyScenario}
-              onUpdateScenario={handleUpdateScenario}
-              onDeleteScenario={handleDeleteScenario}
-              onCreateExercise={handleCreateEmptyExercise}
-              onUpdateExercise={handleUpdateExercise}
-              onDeleteExercise={handleDeleteExercise}
-              onGenerateProcessTemplates={handleGenerateProcessTemplates}
-              onGenerateDependencyTemplates={handleGenerateDependencyTemplates}
-              onGenerateScenarioTemplates={handleGenerateScenarioTemplates}
-              onGenerateExerciseTemplates={handleGenerateExerciseTemplates}
-            />
-          ) : null}
-
-          {state.activeView === 'control' ? (
-            <ControlView
-              users={state.users}
-              activeUserId={state.activeUserId}
-              activeAccessProfile={activeAccessProfile}
-              documentLibrarySummary={documentLibrarySummary}
-              deadlineSummary={deadlineSummary}
-              complianceCalendar={state.complianceCalendar}
-              onSelectActiveUser={selectActiveUser}
-              userSelectionLocked={Boolean(authSession)}
-              onCreateUser={handleCreateUser}
-              onGenerateUsersFromStakeholders={handleGenerateUsersFromStakeholders}
-              onUpdateUser={handleUpdateUser}
-              onDeleteUser={handleDeleteUser}
-              onUpdateComplianceCalendar={updateComplianceCalendar}
-            />
-          ) : null}
-
-          {state.activeView === 'platform' ? (
-            <PlatformView
-              serverMode={serverMode}
-              serverHealth={serverHealth}
-              activeUser={activeUser}
-              activeAccessProfile={activeAccessProfile}
-              authSession={authSession}
-              authMode={authMode}
-              authProviders={authProviders}
-              serverAuthRequired={serverAuthRequired}
-              publicTenant={publicTenant}
-              availableTenants={availableTenants}
-              accessAccounts={accessAccounts}
-              documentLedger={documentLedger}
-              evidenceRetentionSummary={evidenceRetentionSummary}
-              users={state.users}
-              autoSyncEnabled={autoSyncEnabled}
-              lastServerLoadAt={lastServerLoadAt}
-              lastServerSyncAt={lastServerSyncAt}
-              syncError={syncError}
-              attachmentCount={attachmentCount}
-              evidenceCount={state.evidenceItems.length}
-              auditLog={auditLogEntries}
-              snapshots={snapshots}
-              exportPackages={exportPackages}
-              tenantPolicy={tenantPolicy}
-              hasWorkspaceAccess={hasPermission('workspace_edit')}
-              onToggleAutoSync={setAutoSyncEnabled}
-              onRefreshServer={handleRefreshServer}
-              onSyncNow={handleSyncNow}
-              onCreateSnapshot={handleCreateSnapshotOnServer}
-              onRestoreSnapshot={handleRestoreSnapshot}
-              onLogin={handleServerLogin}
-              onStartOidcLogin={handleStartOidcLogin}
-              onLogout={handleServerLogout}
-              onCreateTenant={handleCreateTenantOnServer}
-              onCreateAccessAccount={handleUpsertAccessAccount}
-              onResetAccessAccountPassword={handleResetAccessAccountPassword}
-              onUpdateTenantPolicy={handleUpdateTenantPolicy}
-              onReleaseExportPackage={handleReleaseRegisteredExport}
-              onDownloadExportPackage={handleDownloadRegisteredExport}
-            />
-          ) : null}
-
-          {state.activeView === 'operations' ? (
-            <OperationsView
-              serverMode={serverMode}
-              serverHealth={serverHealth}
-              authSession={authSession}
-              availableTenants={availableTenants}
-              systemSettings={systemSettings}
-              readinessSummary={hostingReadiness}
-              integritySummary={integritySummary}
-              securityGateSummary={securityGateSummary}
-              observabilitySummary={observabilitySummary}
-              restoreDrills={restoreDrills}
-              apiClients={apiClients}
-              jobRuns={systemJobs}
-              issuedClientSecret={issuedClientSecret}
-              hasSystemAdminAccess={hasSystemAdminAccess}
-              onRefreshServer={handleRefreshServer}
-              onUpdateSystemSettings={handleUpdateSystemSettings}
-              onCreateApiClient={handleCreateApiClientOnServer}
-              onRotateApiClient={handleRotateApiClient}
-              onRevokeApiClient={handleRevokeApiClient}
-              onRunSystemJob={handleRunSystemJobOnServer}
-              onUpdateTenant={handleUpdateTenantAdminMeta}
-              onDownloadJobArtifact={handleDownloadJobArtifact}
-              onClearIssuedSecret={() => setIssuedClientSecret(null)}
-            />
-          ) : null}
-
-          {state.activeView === 'rollout' ? (
-            <RolloutView
-              companyName={state.companyProfile.companyName}
-              moduleName={currentModule.name}
-              rolloutPlan={state.rolloutPlan}
-              hardeningChecks={currentHardeningChecks}
-              runbooks={currentRunbooks}
-              releaseGates={currentReleaseGates}
-              integritySummary={integritySummary}
-              handoverBundles={exportPackages.filter((item) => item.type === 'handover_bundle')}
-              exportApprovalRequired={tenantPolicy.exportApprovalRequired}
-              serverMode={serverMode}
-              onUpdateRolloutPlan={updateRolloutPlan}
-              onCreateEmptyHardeningCheck={handleCreateEmptyHardeningCheck}
-              onGenerateHardeningBaseline={handleGenerateHardeningBaseline}
-              onUpdateHardeningCheck={handleUpdateHardeningCheck}
-              onDeleteHardeningCheck={handleDeleteHardeningCheck}
-              onCreateEmptyRunbook={handleCreateEmptyRunbook}
-              onGenerateRunbookTemplates={handleGenerateRunbookTemplates}
-              onUpdateRunbook={handleUpdateRunbook}
-              onDeleteRunbook={handleDeleteRunbook}
-              onCreateEmptyReleaseGate={handleCreateEmptyReleaseGate}
-              onGenerateReleaseGateBaseline={handleGenerateReleaseGateBaseline}
-              onUpdateReleaseGate={handleUpdateReleaseGate}
-              onDeleteReleaseGate={handleDeleteReleaseGate}
-              onRefreshIntegritySummary={handleRefreshIntegritySummary}
-              onCreateHandoverBundle={handleCreateHandoverBundle}
-              onReleaseExportPackage={handleReleaseRegisteredExport}
-              onDownloadExportPackage={handleDownloadRegisteredExport}
-            />
-          ) : null}
-
-          {state.activeView === 'modules' ? (
-            <ModulesView
-              builtInContainers={builtInModuleContainers}
-              availableModules={effectiveModuleCatalog}
-              registryEntries={moduleRegistryEntries}
-              selectedModuleId={state.selectedModuleId}
-              onSelectModule={selectModule}
-              onImportFiles={handleImportFiles}
-              onActivatePack={handleActivateModulePack}
-              onRetirePack={handleRetireModulePack}
-              canManageRegistry={hasPermission('modules_manage') && serverMode === 'connected'}
-              feedback={feedback}
-            />
-          ) : null}
-
-          {state.activeView === 'kritis' ? (
-            <KritisView
-              applicability={kritisApplicability}
-              regulatoryProfile={regulatoryProfile}
-              regimeDefinitions={regimeDefinitions}
-              regimeSummaries={regimeSummaries}
-              requirements={activeRequirements}
-              requirementStates={state.requirementStates}
-              requirementActionCounts={requirementActionCounts}
-              requirementEvidenceCounts={requirementEvidenceCounts}
-              certificationState={state.certificationState}
-              certificationProgress={certificationProgress}
-              module={currentModule}
-              auditChecklist={activeAuditChecklist}
-              auditChecklistStates={state.auditChecklistStates}
-              checklistProgress={checklistProgress}
-              findingSummary={findingSummary}
-              findings={currentFindings}
-              exportPackages={exportPackages}
-              exportApprovalRequired={tenantPolicy.exportApprovalRequired}
-              certificationAuthorityLabel={tenantPolicy.certificationAuthorityLabel}
-              onUpdateJurisdiction={updateJurisdiction}
-              onUpdateRegulatoryProfileField={updateRegulatoryProfileField}
-              onUpdateRegimeScope={updateRegimeScope}
-              onChangeStatus={handleRequirementChange}
-              onCreateAction={handleCreateActionFromRequirement}
-              onCreateEvidence={handleCreateEvidenceFromRequirement}
-              onUpdateCertificationField={updateCertificationField}
-              onUpdateCertificationStage={updateCertificationStage}
-              onUpdateChecklistState={updateChecklistState}
-              onCreateFinding={handleCreateFinding}
-              onGenerateFindingsFromChecklist={handleGenerateFindingsFromChecklist}
-              onUpdateFinding={handleUpdateFinding}
-              onDeleteFinding={handleDeleteFinding}
-              onCreateCertificationDossier={handleCreateServerExportPackage}
-              onReleaseExportPackage={handleReleaseRegisteredExport}
-              onDownloadExportPackage={handleDownloadRegisteredExport}
-            />
-          ) : null}
-
-          {state.activeView === 'report' ? (
-            <ReportView
-              companyProfile={state.companyProfile}
-              regulatoryProfile={regulatoryProfile}
-              regimeSummaries={regimeSummaries}
-              module={currentModule}
-              scoreSnapshot={scoreSnapshot}
-              benchmark={benchmarkSnapshot}
-              governanceSummary={governanceSummary}
-              applicability={kritisApplicability}
-              requirementProgress={requirementProgress}
-              requirements={activeRequirements}
-              requirementStates={state.requirementStates}
-              actionItems={currentActionItems}
-              evidenceSummary={evidenceSummary}
-              documentLibrarySummary={documentLibrarySummary}
-              deadlineSummary={deadlineSummary}
-              certificationProgress={certificationProgress}
-              checklistProgress={checklistProgress}
-              findingSummary={findingSummary}
-              stakeholders={currentStakeholders}
-              sites={currentSites}
-              exportPackages={exportPackages}
-              exportApprovalRequired={tenantPolicy.exportApprovalRequired}
-              onExportMarkdown={handleExportMarkdown}
-              onExportManagementPdf={handleExportManagementPdf}
-              onExportAuditPdf={handleExportAuditPdf}
-              onExportActionCsv={() => exportActionPlanAsCsv(currentActionItems)}
-              onExportEvidenceCsv={() => exportEvidenceRegisterAsCsv(currentEvidenceItems)}
-              onExportStakeholderCsv={() => exportStakeholderRegisterAsCsv(currentStakeholders)}
-              onExportFindingCsv={() => exportFindingRegisterAsCsv(currentFindings)}
-              onExportFormalHtml={handleExportFormalHtml}
-              onCreateServerPackage={handleCreateServerExportPackage}
-              onReleaseExportPackage={handleReleaseRegisteredExport}
-              onDownloadExportPackage={handleDownloadRegisteredExport}
-            />
-          ) : null}
-        </main>
+        <ActiveViewPanel
+          activeView={state.activeView}
+          readOnlyHint={readOnlyHint}
+          programViewProps={programViewProps}
+          dashboardViewProps={dashboardViewProps}
+          assessmentViewProps={assessmentViewProps}
+          measuresViewProps={measuresViewProps}
+          governanceViewProps={governanceViewProps}
+          resilienceViewProps={resilienceViewProps}
+          controlViewProps={controlViewProps}
+          platformViewProps={platformViewProps}
+          operationsViewProps={operationsViewProps}
+          rolloutViewProps={rolloutViewProps}
+          modulesViewProps={modulesViewProps}
+          kritisViewProps={kritisViewProps}
+          reportViewProps={reportViewProps}
+        />
       </div>
     </div>
   );
