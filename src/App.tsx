@@ -3,16 +3,13 @@ import { ActiveViewPanel } from './components/ActiveViewPanel';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
 import { getReadOnlyHint, useAppDerivedState } from './hooks/useAppDerivedState';
+import { buildActiveViewPanelProps } from './lib/buildActiveViewPanelProps';
 import {
-  exportActionPlanAsCsv,
   exportAssessmentAsJson,
   exportAuditPackAsPdf,
-  exportEvidenceRegisterAsCsv,
-  exportFindingRegisterAsCsv,
   exportFormalAuditReportAsHtml,
   exportManagementReportAsMarkdown,
   exportManagementReportAsPdf,
-  exportStakeholderRegisterAsCsv,
 } from './lib/exporters';
 import {
   builtInModuleContainers,
@@ -4399,58 +4396,114 @@ export default function App() {
   const accountChipLabel = authSession ? `Konto: ${authSession.email}` : '';
   const canSyncNow = !(serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required');
   const canExportJson = hasPermission('reports_export');
-  const programViewProps = {
-    companyName: state.companyProfile.companyName,
-    moduleName: currentModule.name,
-    overallScore: scoreSnapshot.overallScore,
-    requirementScore: requirementProgress.score,
-    evidenceCoverage: evidenceSummary.coverage,
-    exportCount: exportPackages.length,
+  const handleDownloadServerFile = (url: string, fileName: string) => {
+    void downloadProtectedResource(url, authToken || '', fileName).catch((error) => {
+      const details = extractErrorDetails(error);
+      showNotice('error', 'Datei konnte nicht heruntergeladen werden.', details);
+    });
   };
-  const dashboardViewProps = {
-    companyName: state.companyProfile.companyName,
-    module: currentModule,
+  const activeViewPanelProps = buildActiveViewPanelProps({
+    activeView: state.activeView,
+    readOnlyHint,
+    companyProfile: state.companyProfile,
+    currentModule,
     scoreSnapshot,
-    benchmark: benchmarkSnapshot,
-    requirementScore: requirementProgress.score,
-    actionSummary,
+    benchmarkSnapshot,
+    requirementProgress,
     evidenceSummary,
+    exportPackages,
+    actionSummary,
     certificationProgress,
-    applicability: kritisApplicability,
+    kritisApplicability,
     governanceSummary,
     resilienceSummary,
     checklistProgress,
     findingSummary,
-    onGoToAssessment: () => setActiveView('assessment'),
-    onGoToMeasures: () => setActiveView('measures'),
-    onGoToGovernance: () => setActiveView('governance'),
-    onGoToResilience: () => setActiveView('resilience'),
-    onGoToKritis: () => setActiveView('kritis'),
-  };
-  const assessmentViewProps = {
     questions,
     answers: state.answers,
-    domainScores: scoreSnapshot.domainScores,
-    filters: state.assessmentFilters,
+    assessmentFilters: state.assessmentFilters,
     questionActionCounts,
     questionEvidenceCounts,
+    activeRequirements,
+    requirementStates: state.requirementStates,
+    currentActionItems,
+    currentEvidenceItems,
+    documentFolders,
+    documentLibrarySummary,
+    evidenceVersions: evidenceVersionMap,
+    currentStakeholders,
+    currentSites,
+    currentAssets,
+    reviewPlan: state.reviewPlan,
+    roleTemplates,
+    currentBusinessProcesses,
+    currentDependencies,
+    currentScenarios,
+    currentExercises,
+    processTemplates,
+    dependencyTemplates,
+    scenarioTemplates,
+    exerciseTemplates,
+    users: state.users,
+    activeUserId: state.activeUserId,
+    activeAccessProfile,
+    deadlineSummary,
+    complianceCalendar: state.complianceCalendar,
+    serverMode,
+    serverHealth,
+    activeUser,
+    authSession,
+    authMode,
+    authProviders,
+    serverAuthRequired,
+    publicTenant,
+    availableTenants,
+    accessAccounts,
+    documentLedger,
+    evidenceRetentionSummary,
+    autoSyncEnabled,
+    lastServerLoadAt,
+    lastServerSyncAt,
+    syncError,
+    attachmentCount,
+    evidenceCount: state.evidenceItems.length,
+    auditLogEntries,
+    snapshots,
+    tenantPolicy,
+    systemSettings,
+    hostingReadiness,
+    integritySummary,
+    securityGateSummary,
+    observabilitySummary,
+    restoreDrills,
+    apiClients,
+    systemJobs,
+    issuedClientSecret,
+    hasSystemAdminAccess,
+    currentHardeningChecks,
+    currentRunbooks,
+    currentReleaseGates,
+    rolloutPlan: state.rolloutPlan,
+    regulatoryProfile,
+    regimeDefinitions,
+    regimeSummaries,
+    requirementActionCounts,
+    requirementEvidenceCounts,
+    certificationState: state.certificationState,
+    activeAuditChecklist,
+    auditChecklistStates: state.auditChecklistStates,
+    currentFindings,
+    moduleRegistryEntries,
+    builtInContainers: builtInModuleContainers,
+    availableModules: effectiveModuleCatalog,
+    selectedModuleId: state.selectedModuleId,
+    feedback,
+    onGoToView: setActiveView,
     onScoreChange: handleScoreChange,
     onNoteChange: handleNoteChange,
     onChangeFilter: updateAssessmentFilter,
-    onCreateAction: handleCreateActionFromQuestion,
-    onCreateEvidence: handleCreateEvidenceFromQuestion,
-  };
-  const measuresViewProps = {
-    module: currentModule,
-    recommendations: scoreSnapshot.recommendations,
-    requirements: activeRequirements,
-    requirementStates: state.requirementStates,
-    actionItems: currentActionItems,
-    evidenceItems: currentEvidenceItems,
-    actionSummary,
-    evidenceSummary,
-    documentFolders,
-    documentLibrarySummary,
+    onCreateActionFromQuestion: handleCreateActionFromQuestion,
+    onCreateEvidenceFromQuestion: handleCreateEvidenceFromQuestion,
     onCreateEmptyAction: handleCreateEmptyAction,
     onCreateEmptyEvidence: handleCreateEmptyEvidence,
     onGenerateRecommendationActions: handleGenerateRecommendationActions,
@@ -4465,27 +4518,9 @@ export default function App() {
     onDeleteEvidence: handleDeleteEvidence,
     onAttachEvidenceFile: handleAttachEvidenceFile,
     onRemoveEvidenceFile: handleRemoveEvidenceFile,
-    evidenceVersions: evidenceVersionMap,
-    serverVersioningEnabled: serverMode === 'connected' || serverMode === 'syncing',
-    onDownloadServerFile: (url: string, fileName: string) => {
-      void downloadProtectedResource(url, authToken || '', fileName).catch((error) => {
-        const details = extractErrorDetails(error);
-        showNotice('error', 'Datei konnte nicht heruntergeladen werden.', details);
-      });
-    },
+    onDownloadServerFile: handleDownloadServerFile,
     onLoadEvidenceVersions: handleLoadEvidenceVersions,
     onRestoreEvidenceVersion: handleRestoreEvidenceVersion,
-  };
-  const governanceViewProps = {
-    module: currentModule,
-    stakeholders: currentStakeholders,
-    sites: currentSites,
-    assets: currentAssets,
-    reviewPlan: state.reviewPlan,
-    benchmark: benchmarkSnapshot,
-    scoreSnapshot,
-    governanceSummary,
-    roleTemplates,
     onCreateStakeholder: handleCreateEmptyStakeholder,
     onCreateSite: handleCreateEmptySite,
     onCreateAsset: handleCreateEmptyAsset,
@@ -4497,19 +4532,6 @@ export default function App() {
     onUpdateAsset: handleUpdateAsset,
     onDeleteAsset: handleDeleteAsset,
     onUpdateReviewPlan: updateReviewPlan,
-  };
-  const resilienceViewProps = {
-    moduleName: currentModule.name,
-    summary: resilienceSummary,
-    businessProcesses: currentBusinessProcesses,
-    dependencies: currentDependencies,
-    scenarios: currentScenarios,
-    exercises: currentExercises,
-    assets: currentAssets,
-    processTemplates,
-    dependencyTemplates,
-    scenarioTemplates,
-    exerciseTemplates,
     onCreateProcess: handleCreateEmptyBusinessProcess,
     onUpdateProcess: handleUpdateBusinessProcess,
     onDeleteProcess: handleDeleteBusinessProcess,
@@ -4526,14 +4548,6 @@ export default function App() {
     onGenerateDependencyTemplates: handleGenerateDependencyTemplates,
     onGenerateScenarioTemplates: handleGenerateScenarioTemplates,
     onGenerateExerciseTemplates: handleGenerateExerciseTemplates,
-  };
-  const controlViewProps = {
-    users: state.users,
-    activeUserId: state.activeUserId,
-    activeAccessProfile,
-    documentLibrarySummary,
-    deadlineSummary,
-    complianceCalendar: state.complianceCalendar,
     onSelectActiveUser: selectActiveUser,
     userSelectionLocked: Boolean(authSession),
     onCreateUser: handleCreateUser,
@@ -4541,33 +4555,6 @@ export default function App() {
     onUpdateUser: handleUpdateUser,
     onDeleteUser: handleDeleteUser,
     onUpdateComplianceCalendar: updateComplianceCalendar,
-  };
-  const platformViewProps = {
-    serverMode,
-    serverHealth,
-    activeUser,
-    activeAccessProfile,
-    authSession,
-    authMode,
-    authProviders,
-    serverAuthRequired,
-    publicTenant,
-    availableTenants,
-    accessAccounts,
-    documentLedger,
-    evidenceRetentionSummary,
-    users: state.users,
-    autoSyncEnabled,
-    lastServerLoadAt,
-    lastServerSyncAt,
-    syncError,
-    attachmentCount,
-    evidenceCount: state.evidenceItems.length,
-    auditLog: auditLogEntries,
-    snapshots,
-    exportPackages,
-    tenantPolicy,
-    hasWorkspaceAccess: hasPermission('workspace_edit'),
     onToggleAutoSync: setAutoSyncEnabled,
     onRefreshServer: handleRefreshServer,
     onSyncNow: handleSyncNow,
@@ -4582,23 +4569,6 @@ export default function App() {
     onUpdateTenantPolicy: handleUpdateTenantPolicy,
     onReleaseExportPackage: handleReleaseRegisteredExport,
     onDownloadExportPackage: handleDownloadRegisteredExport,
-  };
-  const operationsViewProps = {
-    serverMode,
-    serverHealth,
-    authSession,
-    availableTenants,
-    systemSettings,
-    readinessSummary: hostingReadiness,
-    integritySummary,
-    securityGateSummary,
-    observabilitySummary,
-    restoreDrills,
-    apiClients,
-    jobRuns: systemJobs,
-    issuedClientSecret,
-    hasSystemAdminAccess,
-    onRefreshServer: handleRefreshServer,
     onUpdateSystemSettings: handleUpdateSystemSettings,
     onCreateApiClient: handleCreateApiClientOnServer,
     onRotateApiClient: handleRotateApiClient,
@@ -4607,18 +4577,6 @@ export default function App() {
     onUpdateTenant: handleUpdateTenantAdminMeta,
     onDownloadJobArtifact: handleDownloadJobArtifact,
     onClearIssuedSecret: () => setIssuedClientSecret(null),
-  };
-  const rolloutViewProps = {
-    companyName: state.companyProfile.companyName,
-    moduleName: currentModule.name,
-    rolloutPlan: state.rolloutPlan,
-    hardeningChecks: currentHardeningChecks,
-    runbooks: currentRunbooks,
-    releaseGates: currentReleaseGates,
-    integritySummary,
-    handoverBundles: exportPackages.filter((item) => item.type === 'handover_bundle'),
-    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
-    serverMode,
     onUpdateRolloutPlan: updateRolloutPlan,
     onCreateEmptyHardeningCheck: handleCreateEmptyHardeningCheck,
     onGenerateHardeningBaseline: handleGenerateHardeningBaseline,
@@ -4634,47 +4592,17 @@ export default function App() {
     onDeleteReleaseGate: handleDeleteReleaseGate,
     onRefreshIntegritySummary: handleRefreshIntegritySummary,
     onCreateHandoverBundle: handleCreateHandoverBundle,
-    onReleaseExportPackage: handleReleaseRegisteredExport,
-    onDownloadExportPackage: handleDownloadRegisteredExport,
-  };
-  const modulesViewProps = {
-    builtInContainers: builtInModuleContainers,
-    availableModules: effectiveModuleCatalog,
-    registryEntries: moduleRegistryEntries,
-    selectedModuleId: state.selectedModuleId,
     onSelectModule: selectModule,
     onImportFiles: handleImportFiles,
     onActivatePack: handleActivateModulePack,
     onRetirePack: handleRetireModulePack,
     canManageRegistry: hasPermission('modules_manage') && serverMode === 'connected',
-    feedback,
-  };
-  const kritisViewProps = {
-    applicability: kritisApplicability,
-    regulatoryProfile,
-    regimeDefinitions,
-    regimeSummaries,
-    requirements: activeRequirements,
-    requirementStates: state.requirementStates,
-    requirementActionCounts,
-    requirementEvidenceCounts,
-    certificationState: state.certificationState,
-    certificationProgress,
-    module: currentModule,
-    auditChecklist: activeAuditChecklist,
-    auditChecklistStates: state.auditChecklistStates,
-    checklistProgress,
-    findingSummary,
-    findings: currentFindings,
-    exportPackages,
-    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
-    certificationAuthorityLabel: tenantPolicy.certificationAuthorityLabel,
     onUpdateJurisdiction: updateJurisdiction,
     onUpdateRegulatoryProfileField: updateRegulatoryProfileField,
     onUpdateRegimeScope: updateRegimeScope,
-    onChangeStatus: handleRequirementChange,
-    onCreateAction: handleCreateActionFromRequirement,
-    onCreateEvidence: handleCreateEvidenceFromRequirement,
+    onChangeRequirementStatus: handleRequirementChange,
+    onCreateActionFromRequirement: handleCreateActionFromRequirement,
+    onCreateEvidenceFromRequirement: handleCreateEvidenceFromRequirement,
     onUpdateCertificationField: updateCertificationField,
     onUpdateCertificationStage: updateCertificationStage,
     onUpdateChecklistState: updateChecklistState,
@@ -4683,44 +4611,12 @@ export default function App() {
     onUpdateFinding: handleUpdateFinding,
     onDeleteFinding: handleDeleteFinding,
     onCreateCertificationDossier: handleCreateServerExportPackage,
-    onReleaseExportPackage: handleReleaseRegisteredExport,
-    onDownloadExportPackage: handleDownloadRegisteredExport,
-  };
-  const reportViewProps = {
-    companyProfile: state.companyProfile,
-    regulatoryProfile,
-    regimeSummaries,
-    module: currentModule,
-    scoreSnapshot,
-    benchmark: benchmarkSnapshot,
-    governanceSummary,
-    applicability: kritisApplicability,
-    requirementProgress,
-    requirements: activeRequirements,
-    requirementStates: state.requirementStates,
-    actionItems: currentActionItems,
-    evidenceSummary,
-    documentLibrarySummary,
-    deadlineSummary,
-    certificationProgress,
-    checklistProgress,
-    findingSummary,
-    stakeholders: currentStakeholders,
-    sites: currentSites,
-    exportPackages,
-    exportApprovalRequired: tenantPolicy.exportApprovalRequired,
     onExportMarkdown: handleExportMarkdown,
     onExportManagementPdf: handleExportManagementPdf,
     onExportAuditPdf: handleExportAuditPdf,
-    onExportActionCsv: () => exportActionPlanAsCsv(currentActionItems),
-    onExportEvidenceCsv: () => exportEvidenceRegisterAsCsv(currentEvidenceItems),
-    onExportStakeholderCsv: () => exportStakeholderRegisterAsCsv(currentStakeholders),
-    onExportFindingCsv: () => exportFindingRegisterAsCsv(currentFindings),
     onExportFormalHtml: handleExportFormalHtml,
     onCreateServerPackage: handleCreateServerExportPackage,
-    onReleaseExportPackage: handleReleaseRegisteredExport,
-    onDownloadExportPackage: handleDownloadRegisteredExport,
-  };
+  });
 
   return (
     <div className="app-shell">
@@ -4761,23 +4657,7 @@ export default function App() {
           </div>
         ) : null}
 
-        <ActiveViewPanel
-          activeView={state.activeView}
-          readOnlyHint={readOnlyHint}
-          programViewProps={programViewProps}
-          dashboardViewProps={dashboardViewProps}
-          assessmentViewProps={assessmentViewProps}
-          measuresViewProps={measuresViewProps}
-          governanceViewProps={governanceViewProps}
-          resilienceViewProps={resilienceViewProps}
-          controlViewProps={controlViewProps}
-          platformViewProps={platformViewProps}
-          operationsViewProps={operationsViewProps}
-          rolloutViewProps={rolloutViewProps}
-          modulesViewProps={modulesViewProps}
-          kritisViewProps={kritisViewProps}
-          reportViewProps={reportViewProps}
-        />
+        <ActiveViewPanel {...activeViewPanelProps} />
       </div>
     </div>
   );

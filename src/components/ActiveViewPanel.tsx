@@ -28,21 +28,21 @@ const ReportView = lazy(async () => ({ default: (await import('../views/ReportVi
 const ResilienceView = lazy(async () => ({ default: (await import('../views/ResilienceView')).ResilienceView }));
 const RolloutView = lazy(async () => ({ default: (await import('../views/RolloutView')).RolloutView }));
 
-type AssessmentViewProps = ComponentProps<typeof AssessmentViewModule.AssessmentView>;
-type ControlViewProps = ComponentProps<typeof ControlViewModule.ControlView>;
-type DashboardViewProps = ComponentProps<typeof DashboardViewModule.DashboardView>;
-type GovernanceViewProps = ComponentProps<typeof GovernanceViewModule.GovernanceView>;
-type KritisViewProps = ComponentProps<typeof KritisViewModule.KritisView>;
-type MeasuresViewProps = ComponentProps<typeof MeasuresViewModule.MeasuresView>;
-type ModulesViewProps = ComponentProps<typeof ModulesViewModule.ModulesView>;
-type OperationsViewProps = ComponentProps<typeof OperationsViewModule.OperationsView>;
-type PlatformViewProps = ComponentProps<typeof PlatformViewModule.PlatformView>;
-type ProgramViewProps = ComponentProps<typeof ProgramViewModule.ProgramView>;
-type ReportViewProps = ComponentProps<typeof ReportViewModule.ReportView>;
-type ResilienceViewProps = ComponentProps<typeof ResilienceViewModule.ResilienceView>;
-type RolloutViewProps = ComponentProps<typeof RolloutViewModule.RolloutView>;
+export type AssessmentViewProps = ComponentProps<typeof AssessmentViewModule.AssessmentView>;
+export type ControlViewProps = ComponentProps<typeof ControlViewModule.ControlView>;
+export type DashboardViewProps = ComponentProps<typeof DashboardViewModule.DashboardView>;
+export type GovernanceViewProps = ComponentProps<typeof GovernanceViewModule.GovernanceView>;
+export type KritisViewProps = ComponentProps<typeof KritisViewModule.KritisView>;
+export type MeasuresViewProps = ComponentProps<typeof MeasuresViewModule.MeasuresView>;
+export type ModulesViewProps = ComponentProps<typeof ModulesViewModule.ModulesView>;
+export type OperationsViewProps = ComponentProps<typeof OperationsViewModule.OperationsView>;
+export type PlatformViewProps = ComponentProps<typeof PlatformViewModule.PlatformView>;
+export type ProgramViewProps = ComponentProps<typeof ProgramViewModule.ProgramView>;
+export type ReportViewProps = ComponentProps<typeof ReportViewModule.ReportView>;
+export type ResilienceViewProps = ComponentProps<typeof ResilienceViewModule.ResilienceView>;
+export type RolloutViewProps = ComponentProps<typeof RolloutViewModule.RolloutView>;
 
-interface ActiveViewPanelProps {
+export interface ActiveViewPanelProps {
   activeView: ViewKey;
   readOnlyHint: string;
   programViewProps: ProgramViewProps;
