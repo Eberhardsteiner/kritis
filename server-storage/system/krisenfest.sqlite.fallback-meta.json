@@ -1,7 +1,7 @@
 {
   "system:tenants": {
-    "version": 701,
-    "updatedAt": "2026-04-09T08:09:00.953Z"
+    "version": 703,
+    "updatedAt": "2026-04-09T08:09:07.672Z"
   },
   "system:accounts": {
     "version": 2,
@@ -20,12 +20,12 @@
     "updatedAt": "2026-04-09T08:06:16.865Z"
   },
   "tenant:demo-unternehmen:state": {
-    "version": 296,
-    "updatedAt": "2026-04-09T07:58:19.205Z"
+    "version": 298,
+    "updatedAt": "2026-04-09T08:09:07.863Z"
   },
   "tenant:demo-unternehmen:document-versions": {
-    "version": 295,
-    "updatedAt": "2026-04-09T07:58:19.214Z"
+    "version": 297,
+    "updatedAt": "2026-04-09T08:09:08.096Z"
   },
   "tenant:demo-unternehmen:export-log": {
     "version": 33,
@@ -36,15 +36,15 @@
     "updatedAt": "2026-04-09T07:14:17.653Z"
   },
   "tenant:demo-unternehmen:tenant-settings": {
-    "version": 195,
-    "updatedAt": "2026-04-09T07:58:19.214Z"
+    "version": 197,
+    "updatedAt": "2026-04-09T08:09:08.096Z"
   },
   "tenant:demo-unternehmen:backup-log": {
     "version": 1,
     "updatedAt": "2026-04-08T16:04:27.549Z"
   },
   "system:platform-settings": {
-    "version": 1241,
-    "updatedAt": "2026-04-09T08:09:00.426Z"
+    "version": 1245,
+    "updatedAt": "2026-04-09T08:09:07.123Z"
   }
 }
