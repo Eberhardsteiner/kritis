@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActiveViewPanel } from './components/ActiveViewPanel';
+import { AppNotice } from './components/AppNotice';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
 import { getReadOnlyHint, useAppDerivedState } from './hooks/useAppDerivedState';
 import { buildActiveViewPanelProps } from './lib/buildActiveViewPanelProps';
+import { buildProjectTopbarProps } from './lib/buildProjectTopbarProps';
 import {
   exportAssessmentAsJson,
   exportAuditPackAsPdf,
@@ -4366,36 +4368,29 @@ export default function App() {
     });
   }
 
-  const userOptions = state.users.map((user) => ({
-    id: user.id,
-    label: `${user.name || 'Ohne Namen'} · ${getAccessProfile(user.roleProfile).label}`,
-  }));
   const moduleOptions = effectiveModuleCatalog.map((module) => ({
     id: module.id,
     name: module.name,
   }));
-  const serverStatusConnected = serverMode === 'connected' || serverMode === 'syncing';
-  const serverStatusLabel = serverMode === 'connected'
-    ? authSession
-      ? 'Server verbunden'
-      : 'Offener Arbeitsbereich aktiv'
-    : serverMode === 'syncing'
-      ? 'Server synchronisiert'
-      : serverMode === 'checking'
-        ? 'Server wird geprüft'
-        : serverMode === 'auth_required'
-          ? 'Anmeldung erforderlich'
-          : serverMode === 'error'
-            ? 'Serverfehler'
-            : 'Nur lokaler Modus';
-  const tenantChipLabel = !authSession && !serverAuthRequired && publicTenant
-    ? `Arbeitsbereich: ${publicTenant.name}`
-    : authSession
-      ? `Mandant: ${authSession.tenantName}`
-      : '';
-  const accountChipLabel = authSession ? `Konto: ${authSession.email}` : '';
-  const canSyncNow = !(serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required');
   const canExportJson = hasPermission('reports_export');
+  const projectTopbarProps = buildProjectTopbarProps({
+    users: state.users,
+    authSession,
+    serverMode,
+    serverAuthRequired,
+    publicTenantName: publicTenant?.name ?? '',
+    activeUserId: activeUser?.id ?? '',
+    activeAccessProfileLabel: activeAccessProfile.label,
+    companyProfile: state.companyProfile,
+    selectedModuleId: state.selectedModuleId,
+    moduleOptions,
+    onSelectActiveUser: selectActiveUser,
+    onSyncNow: handleSyncNow,
+    onExportJson: handleExportJson,
+    onProfileFieldChange: updateProfileField,
+    onSelectModule: selectModule,
+    canExportJson,
+  });
   const handleDownloadServerFile = (url: string, fileName: string) => {
     void downloadProtectedResource(url, authToken || '', fileName).catch((error) => {
       const details = extractErrorDetails(error);
@@ -4623,39 +4618,9 @@ export default function App() {
       <Sidebar activeView={state.activeView} onChange={setActiveView} />
 
       <div className="main-shell">
-        <ProjectTopbar
-          activeUserId={activeUser?.id ?? ''}
-          userOptions={userOptions}
-          authSession={authSession}
-          serverStatusConnected={serverStatusConnected}
-          serverStatusLabel={serverStatusLabel}
-          activeAccessProfileLabel={activeAccessProfile.label}
-          tenantChipLabel={tenantChipLabel}
-          accountChipLabel={accountChipLabel}
-          canSync={canSyncNow}
-          canExportJson={canExportJson}
-          companyProfile={state.companyProfile}
-          selectedModuleId={state.selectedModuleId}
-          moduleOptions={moduleOptions}
-          onSelectActiveUser={selectActiveUser}
-          onSyncNow={handleSyncNow}
-          onExportJson={handleExportJson}
-          onProfileFieldChange={updateProfileField}
-          onSelectModule={selectModule}
-        />
+        <ProjectTopbar {...projectTopbarProps} />
 
-        {notice ? (
-          <div className={`feedback-box ${notice.type}`}>
-            <strong>{notice.text}</strong>
-            {notice.details?.length ? (
-              <ul>
-                {notice.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
+        <AppNotice notice={notice} />
 
         <ActiveViewPanel {...activeViewPanelProps} />
       </div>

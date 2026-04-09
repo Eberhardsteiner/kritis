@@ -11,7 +11,7 @@ interface ModuleOption {
   name: string;
 }
 
-interface ProjectTopbarProps {
+export interface ProjectTopbarProps {
   activeUserId: string;
   userOptions: UserOption[];
   authSession: AuthSession | null;
