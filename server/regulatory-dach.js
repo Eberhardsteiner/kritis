@@ -35,6 +35,9 @@ export const defaultRegulatoryProfile = {
   lastReviewDate: '',
   owner: '',
   notes: '',
+  kritisRegistrationDate: '',
+  kritisEntityStatus: 'not_identified',
+  kritisSectorOverrideRegime: 'none',
 };
 
 function normalizeScopeStatus(value) {
@@ -49,6 +52,27 @@ function normalizeEntityClass(value) {
   return value === 'important' || value === 'essential' || value === 'not_applicable' || value === 'unknown'
     ? value
     : 'unknown';
+}
+
+function normalizeKritisEntityStatus(value) {
+  return value === 'identified_not_registered' ||
+    value === 'registered' ||
+    value === 'obligations_active' ||
+    value === 'not_identified'
+    ? value
+    : 'not_identified';
+}
+
+function normalizeKritisSectorOverride(value) {
+  return value === 'dora' || value === 'bsig_nis2' || value === 'none' ? value : 'none';
+}
+
+function normalizeIsoDate(value) {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return '';
+  }
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? value : '';
 }
 
 export function normalizeRegulatoryProfile(input) {
@@ -69,6 +93,9 @@ export function normalizeRegulatoryProfile(input) {
     lastReviewDate: typeof raw.lastReviewDate === 'string' ? raw.lastReviewDate : '',
     owner: typeof raw.owner === 'string' ? raw.owner : '',
     notes: typeof raw.notes === 'string' ? raw.notes : '',
+    kritisRegistrationDate: normalizeIsoDate(raw.kritisRegistrationDate),
+    kritisEntityStatus: normalizeKritisEntityStatus(raw.kritisEntityStatus),
+    kritisSectorOverrideRegime: normalizeKritisSectorOverride(raw.kritisSectorOverrideRegime),
   };
 }
 

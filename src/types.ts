@@ -20,6 +20,14 @@ export type RegimeScopeStatus = 'unknown' | 'in_scope' | 'out_of_scope';
 export type CyberEntityClass = 'unknown' | 'important' | 'essential' | 'not_applicable';
 export type GermanyBsigEntityClass = CyberEntityClass;
 
+export type KritisEntityStatus =
+  | 'not_identified'
+  | 'identified_not_registered'
+  | 'registered'
+  | 'obligations_active';
+
+export type KritisSectorOverrideRegime = 'dora' | 'bsig_nis2' | 'none';
+
 export type AnswerScore = 0 | 1 | 2 | 3 | 4 | null;
 
 export type RequirementStatus = 'open' | 'in_progress' | 'ready' | 'not_applicable';
@@ -561,6 +569,9 @@ export interface RegulatoryProfile {
   lastReviewDate: string;
   owner: string;
   notes: string;
+  kritisRegistrationDate?: string;
+  kritisEntityStatus?: KritisEntityStatus;
+  kritisSectorOverrideRegime?: KritisSectorOverrideRegime;
 }
 
 export interface UserItem {

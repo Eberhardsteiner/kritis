@@ -5,6 +5,8 @@ import type {
   AuditChecklistState,
   CyberEntityClass,
   JurisdictionCode,
+  KritisEntityStatus,
+  KritisSectorOverrideRegime,
   RegulatoryProfile,
   RegulatoryRegimeDefinition,
   RegulatoryRegimeId,
@@ -16,6 +18,10 @@ import type {
 
 export const supportedJurisdictions: JurisdictionCode[] = ['DE', 'AT', 'CH'];
 export const allRegimeIds: RegulatoryRegimeId[] = ['de_kritisdachg', 'de_bsig_nis2', 'at_nisg_2026', 'ch_bacs_ci'];
+
+export const KRITIS_EARLIEST_REGISTRATION_DATE = '2026-07-17';
+export const KRITIS_RISK_ANALYSIS_DELAY_MONTHS = 9;
+export const KRITIS_RESILIENCE_MEASURES_DELAY_MONTHS = 10;
 
 export const defaultRegulatoryProfile: RegulatoryProfile = {
   jurisdiction: 'DE',
@@ -29,6 +35,9 @@ export const defaultRegulatoryProfile: RegulatoryProfile = {
   lastReviewDate: '',
   owner: '',
   notes: '',
+  kritisRegistrationDate: '',
+  kritisEntityStatus: 'not_identified',
+  kritisSectorOverrideRegime: 'none',
 };
 
 function normalizeScopeStatus(value: unknown): RegimeScopeStatus {
@@ -43,6 +52,27 @@ function normalizeEntityClass(value: unknown): CyberEntityClass {
   return value === 'important' || value === 'essential' || value === 'not_applicable' || value === 'unknown'
     ? value
     : 'unknown';
+}
+
+function normalizeKritisEntityStatus(value: unknown): KritisEntityStatus {
+  return value === 'identified_not_registered' ||
+    value === 'registered' ||
+    value === 'obligations_active' ||
+    value === 'not_identified'
+    ? value
+    : 'not_identified';
+}
+
+function normalizeKritisSectorOverride(value: unknown): KritisSectorOverrideRegime {
+  return value === 'dora' || value === 'bsig_nis2' || value === 'none' ? value : 'none';
+}
+
+function normalizeIsoDate(value: unknown): string {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return '';
+  }
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) ? value : '';
 }
 
 export function normalizeRegulatoryProfile(input?: Partial<RegulatoryProfile>): RegulatoryProfile {
@@ -60,6 +90,38 @@ export function normalizeRegulatoryProfile(input?: Partial<RegulatoryProfile>): 
     lastReviewDate: input?.lastReviewDate ?? '',
     owner: input?.owner ?? '',
     notes: input?.notes ?? '',
+    kritisRegistrationDate: normalizeIsoDate(input?.kritisRegistrationDate),
+    kritisEntityStatus: normalizeKritisEntityStatus(input?.kritisEntityStatus),
+    kritisSectorOverrideRegime: normalizeKritisSectorOverride(input?.kritisSectorOverrideRegime),
+  };
+}
+
+export interface KritisMilestones {
+  earliestRegistrationAt: string;
+  riskAnalysisDueAt?: string;
+  resilienceMeasuresDueAt?: string;
+  managementAccountabilityActiveAt?: string;
+}
+
+function addMonthsIso(base: Date, months: number): string {
+  const result = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + months, base.getUTCDate()));
+  return result.toISOString().slice(0, 10);
+}
+
+export function computeKritisMilestones(registrationDate?: string): KritisMilestones {
+  const earliestRegistrationAt = KRITIS_EARLIEST_REGISTRATION_DATE;
+  const normalized = normalizeIsoDate(registrationDate);
+  if (!normalized) {
+    return { earliestRegistrationAt };
+  }
+  const parsed = new Date(normalized);
+  const floor = new Date(earliestRegistrationAt);
+  const effective = parsed.getTime() < floor.getTime() ? floor : parsed;
+  return {
+    earliestRegistrationAt,
+    riskAnalysisDueAt: addMonthsIso(effective, KRITIS_RISK_ANALYSIS_DELAY_MONTHS),
+    resilienceMeasuresDueAt: addMonthsIso(effective, KRITIS_RESILIENCE_MEASURES_DELAY_MONTHS),
+    managementAccountabilityActiveAt: addMonthsIso(effective, KRITIS_RESILIENCE_MEASURES_DELAY_MONTHS),
   };
 }
 

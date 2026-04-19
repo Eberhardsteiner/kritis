@@ -47,3 +47,28 @@ test('incident timelines reflect DACH-specific reporting windows', () => {
   assert.equal(getIncidentTimelineLength({ jurisdiction: 'CH', scopeByRegime: { ch_bacs_ci: 'out_of_scope' } }, 'ch_bacs_ci'), 0);
   assert.equal(getIncidentTimelineLength({ jurisdiction: 'AT' }, 'de_bsig_nis2'), 0);
 });
+
+test('normalizeRegulatoryProfile defaults and validates new KRITIS fields', () => {
+  const empty = normalizeRegulatoryProfile({});
+  assert.equal(empty.kritisRegistrationDate, '');
+  assert.equal(empty.kritisEntityStatus, 'not_identified');
+  assert.equal(empty.kritisSectorOverrideRegime, 'none');
+
+  const valid = normalizeRegulatoryProfile({
+    kritisRegistrationDate: '2026-09-01',
+    kritisEntityStatus: 'registered',
+    kritisSectorOverrideRegime: 'dora',
+  });
+  assert.equal(valid.kritisRegistrationDate, '2026-09-01');
+  assert.equal(valid.kritisEntityStatus, 'registered');
+  assert.equal(valid.kritisSectorOverrideRegime, 'dora');
+
+  const invalid = normalizeRegulatoryProfile({
+    kritisRegistrationDate: 'nicht-ein-datum',
+    kritisEntityStatus: 'phantasie',
+    kritisSectorOverrideRegime: 'nis1',
+  });
+  assert.equal(invalid.kritisRegistrationDate, '');
+  assert.equal(invalid.kritisEntityStatus, 'not_identified');
+  assert.equal(invalid.kritisSectorOverrideRegime, 'none');
+});
