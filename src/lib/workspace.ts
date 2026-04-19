@@ -1,5 +1,5 @@
 import { defaultDocumentFolders, getAccessProfile } from '../data/workspaceBase';
-import { normalizeRegulatoryProfile } from './regulatory';
+import { KRITIS_EARLIEST_REGISTRATION_DATE, computeKritisMilestones, normalizeRegulatoryProfile } from './regulatory';
 import type {
   ActionItem,
   ComplianceCalendar,
@@ -376,19 +376,68 @@ function buildComplianceDeadlines(
   }
 
   if (kritisScope !== 'out_of_scope' && applicability.status !== 'eher_unwahrscheinlich') {
+    const effectiveRegistrationDate =
+      profile.kritisRegistrationDate || complianceCalendar.registrationDate || '';
+
     deadlines.push({
       id: 'compliance-kritis-registration',
       title: 'Registrierung kritischer Anlage',
       category: 'regulatorisch',
-      dueDate: complianceCalendar.registrationDate ? '' : '2026-07-17',
-      status: complianceCalendar.registrationDate ? 'planned' : 'soon',
+      dueDate: effectiveRegistrationDate ? '' : KRITIS_EARLIEST_REGISTRATION_DATE,
+      status: effectiveRegistrationDate ? 'planned' : 'soon',
       owner: complianceCalendar.incidentContact || profile.owner || 'Betreiberkontakt offen',
       sourceLabel: '§ 8 KRITISDachG',
-      description: complianceCalendar.registrationDate
-        ? `Registrierung dokumentiert am ${complianceCalendar.registrationDate}.`
-        : 'Registrierung und Stammdatenpflege für das KRITIS-DachG vorbereiten.',
+      description: effectiveRegistrationDate
+        ? `Registrierung dokumentiert am ${effectiveRegistrationDate}.`
+        : `Registrierung frühestens ${KRITIS_EARLIEST_REGISTRATION_DATE} möglich (Öffnung der gemeinsamen Plattform BBK/BSI). Stammdaten und 24/7-Kontaktstelle vorbereiten.`,
       regimeId: 'de_kritisdachg',
     });
+
+    if (effectiveRegistrationDate) {
+      const milestones = computeKritisMilestones(effectiveRegistrationDate);
+
+      if (milestones.riskAnalysisDueAt) {
+        deadlines.push({
+          id: 'compliance-kritis-initial-risk-analysis',
+          title: 'Erste Betreiber-Risikoanalyse fällig',
+          category: 'regulatorisch',
+          dueDate: milestones.riskAnalysisDueAt,
+          status: getStatusFromDate(milestones.riskAnalysisDueAt),
+          owner: profile.owner || complianceCalendar.incidentContact || 'Programmverantwortung offen',
+          sourceLabel: '§ 12 KRITISDachG',
+          description: `Erste Risikoanalyse innerhalb von 9 Monaten nach Registrierung (${effectiveRegistrationDate}) vorlegen. Danach Regelzyklus mindestens alle vier Jahre.`,
+          regimeId: 'de_kritisdachg',
+        });
+      }
+
+      if (milestones.resilienceMeasuresDueAt) {
+        deadlines.push({
+          id: 'compliance-kritis-initial-resilience-plan',
+          title: 'Erster Resilienzplan fällig',
+          category: 'regulatorisch',
+          dueDate: milestones.resilienceMeasuresDueAt,
+          status: getStatusFromDate(milestones.resilienceMeasuresDueAt),
+          owner: complianceCalendar.incidentBackupContact || complianceCalendar.incidentContact || profile.owner || 'Planverantwortung offen',
+          sourceLabel: '§ 13 KRITISDachG',
+          description: `Resilienzmaßnahmen und Resilienzplan innerhalb von 10 Monaten nach Registrierung (${effectiveRegistrationDate}) vorlegen. Fortschreibung auf Basis der Risikoanalyse.`,
+          regimeId: 'de_kritisdachg',
+        });
+      }
+
+      if (milestones.managementAccountabilityActiveAt) {
+        deadlines.push({
+          id: 'compliance-kritis-management-active',
+          title: 'Geschäftsleitungspflichten aktiv',
+          category: 'regulatorisch',
+          dueDate: milestones.managementAccountabilityActiveAt,
+          status: getStatusFromDate(milestones.managementAccountabilityActiveAt),
+          owner: profile.owner || 'Geschäftsleitung',
+          sourceLabel: '§ 20 KRITISDachG',
+          description: `Umsetzungs- und Überwachungspflicht der Geschäftsleitung greift 10 Monate nach Registrierung (${effectiveRegistrationDate}). Bei Pflichtverletzung kommt persönliche Haftung nach Gesellschaftsrecht in Betracht.`,
+          regimeId: 'de_kritisdachg',
+        });
+      }
+    }
 
     deadlines.push({
       id: 'compliance-kritis-risk',
