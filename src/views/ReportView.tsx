@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Download, FileSpreadsheet, FileText, Printer, ScrollText, ShieldCheck } from 'lucide-react';
+import { getAuthorityRoleLabel } from '../lib/authorities';
 import type {
   ActionItem,
   AuditFindingSummary,
+  AuthorityAssignmentResolved,
   BenchmarkSnapshot,
   CertificationProgress,
   ChecklistProgress,
   CompanyProfile,
   RegulatoryProfile,
+  RegulatoryRegimeId,
   RegulatoryRegimeSummary,
   DeadlineSummary,
   DocumentLibrarySummary,
@@ -49,6 +52,7 @@ interface ReportViewProps {
   sites: SiteItem[];
   kritisMilestones: KritisMilestones;
   kritisPenaltyEstimate: PenaltyEstimate;
+  authorityAssignmentsByRegime: Record<RegulatoryRegimeId, AuthorityAssignmentResolved[]>;
   exportPackages: ExportPackageEntry[];
   exportApprovalRequired: boolean;
   onExportMarkdown: () => void;
@@ -90,6 +94,7 @@ export function ReportView({
   sites,
   kritisMilestones,
   kritisPenaltyEstimate,
+  authorityAssignmentsByRegime,
   exportPackages,
   exportApprovalRequired,
   onExportMarkdown,
@@ -455,6 +460,41 @@ export function ReportView({
               <div className="mini-list-row"><span>≤ 30 Tage</span><strong>{deadlineSummary.dueSoon}</strong></div>
               <div className="mini-list-row"><span>Regulatorisch</span><strong>{deadlineSummary.regulatory}</strong></div>
             </div>
+          </article>
+
+          <article className="report-card wide">
+            <h3>Zuständige Behörden</h3>
+            {regimeSummaries
+              .filter((summary) => summary.scopeStatus !== 'out_of_scope')
+              .map((summary) => {
+                const assignments = authorityAssignmentsByRegime[summary.regimeId] ?? [];
+                return (
+                  <div key={summary.regimeId} className="top-gap">
+                    <strong>{summary.label}</strong>
+                    {assignments.length ? (
+                      <ul className="plain-list">
+                        {assignments.map((assignment, index) => (
+                          <li key={`${assignment.authorityId}-${assignment.role}-${index}`}>
+                            <strong>{assignment.authority.shortName}</strong>
+                            {' — '}
+                            {getAuthorityRoleLabel(assignment.role)}
+                            {' · '}
+                            {assignment.lawRef}
+                            {assignment.note ? (
+                              <>
+                                <br />
+                                <span className="muted small">{assignment.note}</span>
+                              </>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="muted">Keine Behördenzuordnung hinterlegt.</p>
+                    )}
+                  </div>
+                );
+              })}
           </article>
 
           <article className="report-card wide">

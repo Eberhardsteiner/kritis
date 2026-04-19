@@ -36,6 +36,7 @@ interface BuildActiveViewPanelPropsArgs {
   kritisMilestones: KritisViewProps['kritisMilestones'];
   kritisPenaltyEstimate: KritisViewProps['kritisPenaltyEstimate'];
   requirementOverrides: KritisViewProps['requirementOverrides'];
+  authorityAssignmentsByRegime: KritisViewProps['authorityAssignmentsByRegime'];
   governanceSummary: DashboardViewProps['governanceSummary'];
   resilienceSummary: DashboardViewProps['resilienceSummary'];
   checklistProgress: DashboardViewProps['checklistProgress'];
@@ -255,6 +256,7 @@ export function buildActiveViewPanelProps({
   kritisMilestones,
   kritisPenaltyEstimate,
   requirementOverrides,
+  authorityAssignmentsByRegime,
   governanceSummary,
   resilienceSummary,
   checklistProgress,
@@ -728,6 +730,7 @@ export function buildActiveViewPanelProps({
       kritisMilestones,
       kritisPenaltyEstimate,
       requirementOverrides,
+      authorityAssignmentsByRegime,
       onUpdateJurisdiction,
       onUpdateRegulatoryProfileField,
       onUpdateRegimeScope,
@@ -768,6 +771,7 @@ export function buildActiveViewPanelProps({
       sites: currentSites,
       kritisMilestones,
       kritisPenaltyEstimate,
+      authorityAssignmentsByRegime,
       exportPackages,
       exportApprovalRequired: tenantPolicy.exportApprovalRequired,
       onExportMarkdown,

@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
+import { AuthorityCard } from '../components/AuthorityCard';
 import { CertificationStageCard } from '../components/CertificationStageCard';
 import { FindingCard } from '../components/FindingCard';
 import { ManagementLiabilityCard } from '../components/ManagementLiabilityCard';
@@ -27,6 +28,7 @@ import type {
   AuditChecklistState,
   AuditFindingItem,
   AuditFindingSummary,
+  AuthorityAssignmentResolved,
   CertificationProgress,
   CertificationStageState,
   CertificationState,
@@ -39,6 +41,7 @@ import type {
   KritisSectorOverrideRegime,
   RegulatoryProfile,
   RegulatoryRegimeDefinition,
+  RegulatoryRegimeId,
   RegulatoryRegimeSummary,
   RegimeScopeStatus,
   RequirementDefinition,
@@ -76,6 +79,7 @@ interface KritisViewProps {
   kritisMilestones: KritisMilestones;
   kritisPenaltyEstimate: PenaltyEstimate;
   requirementOverrides: Record<string, RequirementOverrideStatus>;
+  authorityAssignmentsByRegime: Record<RegulatoryRegimeId, AuthorityAssignmentResolved[]>;
   onUpdateJurisdiction: (value: RegulatoryProfile['jurisdiction']) => void;
   onUpdateRegulatoryProfileField: (
     field:
@@ -222,6 +226,7 @@ export function KritisView({
   kritisMilestones,
   kritisPenaltyEstimate,
   requirementOverrides,
+  authorityAssignmentsByRegime,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -506,6 +511,49 @@ export function KritisView({
           <PenaltyExposureCard penaltyEstimate={kritisPenaltyEstimate} />
         </section>
       ) : null}
+
+      <section className="card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Zuständige Behörden</p>
+            <h3>Aufsicht, Koordination und Meldewege je Regime</h3>
+          </div>
+          <div className="chip-row">
+            <span className="chip outline">Jurisdiktion: {jurisdictionLabel}</span>
+          </div>
+        </div>
+
+        <div className="priority-list top-gap">
+          {regimeDefinitions.map((regime) => {
+            const scope = regulatoryProfile.scopeByRegime[regime.id];
+            if (scope === 'out_of_scope') {
+              return null;
+            }
+            const assignments = authorityAssignmentsByRegime[regime.id] ?? [];
+            return (
+              <article key={regime.id} className="card nested-card">
+                <div className="question-title-row">
+                  <strong>{regime.shortLabel}</strong>
+                  <span className="chip outline">{assignments.length} Behörde{assignments.length === 1 ? '' : 'n'}</span>
+                </div>
+                <p className="muted small">{regime.focus}</p>
+                {assignments.length ? (
+                  <div className="content-grid two-column top-gap">
+                    {assignments.map((assignment, index) => (
+                      <AuthorityCard
+                        key={`${assignment.authorityId}-${assignment.role}-${index}`}
+                        assignment={assignment}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted top-gap">Keine Behördenzuordnung für dieses Regime hinterlegt.</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
       <section className="card">
         <div className="section-heading">

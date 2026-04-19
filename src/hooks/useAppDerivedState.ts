@@ -40,6 +40,8 @@ import {
   normalizeRegulatoryProfile,
 } from '../lib/regulatory';
 import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
+import { resolveAuthorities } from '../lib/authorities';
+import { KRITIS_ELIGIBLE_SECTORS } from '../data/kritisBase';
 import {
   buildDeadlineSummary,
   buildDocumentLibrarySummary,
@@ -47,9 +49,11 @@ import {
 } from '../lib/workspace';
 import type {
   AppState,
+  AuthorityAssignmentResolved,
   ModulePackRegistryEntry,
   PermissionKey,
   RegulatoryRegimeDefinition,
+  RegulatoryRegimeId,
   RegulatoryRegimeSummary,
   ResilienceSummary,
 } from '../types';
@@ -278,6 +282,24 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     () => estimatePenalty(kritisOpenViolations),
     [kritisOpenViolations],
   );
+  const effectiveKritisSector = useMemo(() => {
+    const sectorHints: string[] = [
+      ...(currentModule?.kritisExtension?.eligibleSectors ?? []),
+      ...(currentModule?.sectorCategory ? [currentModule.sectorCategory] : []),
+    ];
+    return sectorHints.find((hint) => (KRITIS_ELIGIBLE_SECTORS as readonly string[]).includes(hint)) ?? '';
+  }, [currentModule]);
+  const authorityAssignmentsByRegime = useMemo(() => {
+    const result = {} as Record<RegulatoryRegimeId, AuthorityAssignmentResolved[]>;
+    for (const definition of regimeDefinitions) {
+      result[definition.id] = resolveAuthorities(
+        definition.id,
+        effectiveKritisSector,
+        regulatoryProfile.jurisdiction,
+      );
+    }
+    return result;
+  }, [regimeDefinitions, effectiveKritisSector, regulatoryProfile.jurisdiction]);
   const certificationProgress = useMemo(
     () => getCertificationProgress(
       state.certificationState,
@@ -350,6 +372,8 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     kritisMilestones,
     kritisOpenViolations,
     kritisPenaltyEstimate,
+    effectiveKritisSector,
+    authorityAssignmentsByRegime,
     actionSummary,
     evidenceSummary,
     documentLibrarySummary,
