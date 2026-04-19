@@ -52,6 +52,24 @@ export interface AuthorityAssignmentResolved extends AuthorityAssignment {
   authority: CompetentAuthority;
 }
 
+export type StandardId = 'iso_27001_2022' | 'bsi_grundschutz_2023' | 'iso_22301_2019';
+
+export type MappingRelevance = 'primary' | 'secondary' | 'related';
+
+export interface StandardControlReference {
+  standardId: StandardId;
+  controlId: string;
+  controlTitle: string;
+  relevance: MappingRelevance;
+  note?: string;
+}
+
+export interface StandardControlCatalogEntry {
+  standardId: StandardId;
+  controlId: string;
+  controlTitle: string;
+}
+
 export type RequirementOverrideStatus =
   | 'applicable'
   | 'covered_by_dora'
@@ -146,6 +164,7 @@ export interface RequirementDefinition {
   severity?: 'high' | 'medium' | 'low';
   regimeId?: RegulatoryRegimeId;
   category?: string;
+  mappedControls?: StandardControlReference[];
 }
 
 export interface ActionTemplateDefinition {
