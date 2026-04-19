@@ -97,6 +97,19 @@ export const germanyRegimeDefinitions: RegulatoryRegimeDefinition[] = [
 
 export const kritisDachRequirements: RequirementDefinition[] = [
   {
+    id: 'de_kritis_land_opening_clause',
+    title: 'Länderöffnungsklausel geprüft',
+    description:
+      'Das KRITISDachG lässt den Ländern offen, Betreiber unterhalb der bundesrechtlichen Schwellenwerte als kritisch zu bestimmen. Ob eine solche landesrechtliche Bestimmung für den Betreiber greift, ist zu prüfen und zu dokumentieren.',
+    guidance:
+      'Prüfen Sie bei DE-Jurisdiktion und zuständiger Landesbehörde, ob landesrechtliche Bestimmungen den Betreiber unterhalb der 500.000-Personen-Regelschwelle erfassen. Halten Sie die Einordnung mit Begründung und Quellenangabe fest.',
+    lawRef: '§ 5 KRITISDachG',
+    dueHint: 'Anlassbezogen bei Änderung landesrechtlicher Bestimmungen prüfen.',
+    severity: 'medium',
+    regimeId: 'de_kritisdachg',
+    category: 'scope',
+  },
+  {
     id: 'de_kritis_registration',
     title: 'Registrierung der kritischen Anlage',
     description: 'Betreiber kritischer Anlagen müssen ihre Anlage registrieren und Stammdaten aktuell halten.',
@@ -142,11 +155,26 @@ export const kritisDachRequirements: RequirementDefinition[] = [
   },
   {
     id: 'de_kritis_evidence_audit',
-    title: 'Nachweise und Auditfähigkeit',
-    description: 'Unterlagen, Nachweise und Auditdokumentationen müssen für behördliche Prüfungen belastbar sein.',
-    guidance: 'Bauen Sie ein strukturiertes Evidenzregister, Mängeltracking und ein prüfergeeignetes Dossier auf.',
+    title: 'Nachweisfähigkeit auf behördliche Anordnung',
+    description:
+      'Unterlagen und Nachweise müssen für behördliche Prüfungen belastbar sein. Das KRITISDachG sieht keinen regelmäßigen Auditzyklus vor; Nachweise werden anlassbezogen auf Anordnung angefordert, im Cyber-Bezug ergänzend über § 39 BSIG.',
+    guidance:
+      'Bauen Sie ein strukturiertes Evidenzregister, Mängeltracking und ein prüfergeeignetes Dossier auf, damit auf behördliche Anordnung kurzfristig belastbare Nachweise bereitgestellt werden können.',
     lawRef: '§ 16 KRITISDachG',
-    dueHint: 'Behördlich anforderbar; kontinuierlich prüffähig halten.',
+    dueHint: 'Behördlich anforderbar; laufend prüffähig halten.',
+    severity: 'medium',
+    regimeId: 'de_kritisdachg',
+    category: 'evidence',
+  },
+  {
+    id: 'de_kritis_equivalent_proofs',
+    title: 'Gleichwertige Nachweise inventarisiert',
+    description:
+      'Bestehende Nachweise aus verwandten Regimen sind inventarisiert und den KRITIS-Pflichten zuordenbar. Gleichwertige Nachweise (insbesondere ISO 27001, § 39 BSIG, branchenspezifische Resilienzstandards) können nach § 17 KRITISDachG angerechnet werden.',
+    guidance:
+      'Bilden Sie ein Mapping: KRITIS-Pflicht zu vorhandenem Nachweis (Zertifikat, Auditbericht, Prüfbescheinigung). Kennzeichnen Sie Lücken und Anrechnungsumfang je Pflicht.',
+    lawRef: '§ 17 KRITISDachG',
+    dueHint: 'Bei neuen Zertifizierungen und vor behördlichen Anforderungen aktualisieren.',
     severity: 'medium',
     regimeId: 'de_kritisdachg',
     category: 'evidence',
@@ -165,8 +193,10 @@ export const kritisDachRequirements: RequirementDefinition[] = [
   {
     id: 'de_kritis_management_accountability',
     title: 'Geschäftsleitung übernimmt Steuerung',
-    description: 'Die Geschäftsleitung muss die Umsetzung und Überwachung der Resilienzmaßnahmen sicherstellen.',
-    guidance: 'Verankern Sie Berichtswege, Entscheidungen, Budgetverantwortung und Kontrollmechanismen auf Leitungsebene.',
+    description:
+      'Die Geschäftsleitung muss die Umsetzung und Überwachung der Resilienzmaßnahmen sicherstellen. Bei Pflichtverletzungen kommt eine persönliche Haftung der Leitungsorgane nach allgemeinem Gesellschaftsrecht in Betracht.',
+    guidance:
+      'Verankern Sie Berichtswege, Entscheidungen, Budgetverantwortung und Kontrollmechanismen auf Leitungsebene. Dokumentieren Sie Entlastungsnachweise zur Absicherung der persönlichen Haftungslage.',
     lawRef: '§ 20 KRITISDachG',
     dueHint: 'Laufende Führungsverantwortung.',
     severity: 'high',
