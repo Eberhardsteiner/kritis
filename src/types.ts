@@ -572,6 +572,7 @@ export interface RegulatoryProfile {
   kritisRegistrationDate?: string;
   kritisEntityStatus?: KritisEntityStatus;
   kritisSectorOverrideRegime?: KritisSectorOverrideRegime;
+  managementBoardContact?: string;
 }
 
 export interface UserItem {

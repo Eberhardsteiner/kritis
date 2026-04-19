@@ -42,6 +42,15 @@ describe('normalizeRegulatoryProfile · KRITIS-Felder', () => {
     expect(defaultRegulatoryProfile.kritisRegistrationDate).toBe('');
     expect(defaultRegulatoryProfile.kritisEntityStatus).toBe('not_identified');
     expect(defaultRegulatoryProfile.kritisSectorOverrideRegime).toBe('none');
+    expect(defaultRegulatoryProfile.managementBoardContact).toBe('');
+  });
+
+  it('übernimmt managementBoardContact als freien Text und setzt Default auf leer', () => {
+    const withValue = normalizeRegulatoryProfile({ managementBoardContact: 'Dr. Muster · CEO' });
+    expect(withValue.managementBoardContact).toBe('Dr. Muster · CEO');
+
+    const empty = normalizeRegulatoryProfile({});
+    expect(empty.managementBoardContact).toBe('');
   });
 });
 

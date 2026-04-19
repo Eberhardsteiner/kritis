@@ -2,9 +2,16 @@ import { describe, expect, it } from 'vitest';
 import {
   KRITIS_VIOLATION_CATALOG,
   KRITIS_VIOLATION_TYPES,
+  deriveOpenViolations,
   estimatePenalty,
   type KritisViolationType,
 } from './penaltyCalculator';
+import { defaultRegulatoryProfile } from './regulatory';
+import type { RegulatoryProfile, RequirementStatus } from '../types';
+
+function profileWith(overrides: Partial<RegulatoryProfile> = {}): RegulatoryProfile {
+  return { ...defaultRegulatoryProfile, ...overrides };
+}
 
 describe('KRITIS_VIOLATION_CATALOG', () => {
   it('enthält die vier Tatbestände nach § 24 KRITISDachG mit den richtigen Obergrenzen', () => {
@@ -72,5 +79,79 @@ describe('estimatePenalty', () => {
     expect(result.rationale[0]).toContain('Nichtvorlage von Auditergebnissen');
     expect(result.rationale[1]).toContain('Unvollständige oder verspätete Registrierung');
     expect(result.rationale[2]).toContain('Auskunftspflichten bei Registrierung');
+  });
+});
+
+describe('deriveOpenViolations', () => {
+  const noRequirements: Record<string, RequirementStatus> = {};
+
+  it('meldet bei not_identified keine Verstöße — ohne Selbstidentifikation keine Pflicht', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: { de_kritis_evidence_audit: 'open', de_kritis_resilience_measures: 'open' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'not_identified' }),
+    });
+    expect(violations).toEqual([]);
+  });
+
+  it('meldet registration_incomplete_or_late, sobald die Entity sich als kritisch identifiziert hat, aber nicht registriert ist', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: noRequirements,
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'identified_not_registered' }),
+    });
+    expect(violations).toContain('registration_incomplete_or_late');
+    expect(violations).not.toContain('registration_information_duty');
+  });
+
+  it('schaltet bei registrierter Entity auf registration_information_duty um, wenn Registrierung offen bleibt', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: { de_kritis_registration: 'in_progress' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'registered' }),
+    });
+    expect(violations).toContain('registration_information_duty');
+    expect(violations).not.toContain('registration_incomplete_or_late');
+  });
+
+  it('meldet bei aktiven Pflichten ohne offene Registrierung nichts aus der Registrierungsspalte', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: { de_kritis_registration: 'ready' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'obligations_active' }),
+    });
+    expect(violations).not.toContain('registration_incomplete_or_late');
+    expect(violations).not.toContain('registration_information_duty');
+  });
+
+  it('meldet audit_results_nonprovision, wenn Nachweisfähigkeit offen ist', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: { de_kritis_evidence_audit: 'open' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'obligations_active' }),
+    });
+    expect(violations).toContain('audit_results_nonprovision');
+  });
+
+  it('meldet order_violation bei offenen Resilienzmaßnahmen oder offenem Resilienzplan', () => {
+    const v1 = deriveOpenViolations({
+      requirementStates: { de_kritis_resilience_measures: 'in_progress' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'obligations_active' }),
+    });
+    const v2 = deriveOpenViolations({
+      requirementStates: { de_kritis_resilience_plan: 'open' },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'obligations_active' }),
+    });
+    expect(v1).toContain('order_violation');
+    expect(v2).toContain('order_violation');
+  });
+
+  it('kombiniert mehrere offene Pflichten zu den entsprechenden Tatbeständen', () => {
+    const violations = deriveOpenViolations({
+      requirementStates: {
+        de_kritis_evidence_audit: 'open',
+        de_kritis_resilience_measures: 'open',
+      },
+      regulatoryProfile: profileWith({ kritisEntityStatus: 'identified_not_registered' }),
+    });
+    expect(violations).toEqual(
+      expect.arrayContaining(['registration_incomplete_or_late', 'audit_results_nonprovision', 'order_violation']),
+    );
+    expect(violations).toHaveLength(3);
   });
 });

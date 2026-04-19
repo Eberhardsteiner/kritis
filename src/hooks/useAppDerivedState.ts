@@ -31,11 +31,13 @@ import {
 } from '../lib/scoring';
 import {
   buildRegimeSummaries,
+  computeKritisMilestones,
   filterActiveChecklist,
   filterActiveRequirements,
   getRegimeDefinitions,
   normalizeRegulatoryProfile,
 } from '../lib/regulatory';
+import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
 import {
   buildDeadlineSummary,
   buildDocumentLibrarySummary,
@@ -254,6 +256,18 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     () => getAuditFindingSummary(currentFindings),
     [currentFindings],
   );
+  const kritisMilestones = useMemo(
+    () => computeKritisMilestones(regulatoryProfile.kritisRegistrationDate || state.complianceCalendar.registrationDate || ''),
+    [regulatoryProfile.kritisRegistrationDate, state.complianceCalendar.registrationDate],
+  );
+  const kritisOpenViolations = useMemo(
+    () => deriveOpenViolations({ requirementStates: state.requirementStates, regulatoryProfile }),
+    [state.requirementStates, regulatoryProfile],
+  );
+  const kritisPenaltyEstimate = useMemo(
+    () => estimatePenalty(kritisOpenViolations),
+    [kritisOpenViolations],
+  );
   const certificationProgress = useMemo(
     () => getCertificationProgress(
       state.certificationState,
@@ -321,6 +335,9 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     documentFolders,
     requirementProgress,
     kritisApplicability,
+    kritisMilestones,
+    kritisOpenViolations,
+    kritisPenaltyEstimate,
     actionSummary,
     evidenceSummary,
     documentLibrarySummary,

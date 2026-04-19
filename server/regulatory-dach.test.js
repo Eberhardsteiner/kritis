@@ -71,4 +71,8 @@ test('normalizeRegulatoryProfile defaults and validates new KRITIS fields', () =
   assert.equal(invalid.kritisRegistrationDate, '');
   assert.equal(invalid.kritisEntityStatus, 'not_identified');
   assert.equal(invalid.kritisSectorOverrideRegime, 'none');
+
+  const withContact = normalizeRegulatoryProfile({ managementBoardContact: 'Dr. Muster · CEO' });
+  assert.equal(withContact.managementBoardContact, 'Dr. Muster · CEO');
+  assert.equal(empty.managementBoardContact, '');
 });

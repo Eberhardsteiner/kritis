@@ -38,6 +38,7 @@ export const defaultRegulatoryProfile: RegulatoryProfile = {
   kritisRegistrationDate: '',
   kritisEntityStatus: 'not_identified',
   kritisSectorOverrideRegime: 'none',
+  managementBoardContact: '',
 };
 
 function normalizeScopeStatus(value: unknown): RegimeScopeStatus {
@@ -93,6 +94,7 @@ export function normalizeRegulatoryProfile(input?: Partial<RegulatoryProfile>): 
     kritisRegistrationDate: normalizeIsoDate(input?.kritisRegistrationDate),
     kritisEntityStatus: normalizeKritisEntityStatus(input?.kritisEntityStatus),
     kritisSectorOverrideRegime: normalizeKritisSectorOverride(input?.kritisSectorOverrideRegime),
+    managementBoardContact: typeof input?.managementBoardContact === 'string' ? input.managementBoardContact : '',
   };
 }
 

@@ -23,6 +23,8 @@ import type {
   StakeholderItem,
 } from '../types';
 import { getBsigEntityClassLabel, getEntityClassFieldLabel, getJurisdictionLabel, shouldShowEntityClass } from '../lib/regulatory';
+import type { KritisMilestones } from '../lib/regulatory';
+import type { PenaltyEstimate } from '../lib/penaltyCalculator';
 
 interface ReportViewProps {
   companyProfile: CompanyProfile;
@@ -45,6 +47,8 @@ interface ReportViewProps {
   findingSummary: AuditFindingSummary;
   stakeholders: StakeholderItem[];
   sites: SiteItem[];
+  kritisMilestones: KritisMilestones;
+  kritisPenaltyEstimate: PenaltyEstimate;
   exportPackages: ExportPackageEntry[];
   exportApprovalRequired: boolean;
   onExportMarkdown: () => void;
@@ -84,6 +88,8 @@ export function ReportView({
   findingSummary,
   stakeholders,
   sites,
+  kritisMilestones,
+  kritisPenaltyEstimate,
   exportPackages,
   exportApprovalRequired,
   onExportMarkdown,
@@ -465,6 +471,63 @@ export function ReportView({
               )) : <p className="muted">Noch keine Fristen gepflegt.</p>}
             </div>
           </article>
+
+          {regulatoryProfile.jurisdiction === 'DE' &&
+          regulatoryProfile.scopeByRegime.de_kritisdachg !== 'out_of_scope' ? (
+            <>
+              <article className="report-card">
+                <h3>Geschäftsleitungshaftung (§ 20 KRITISDachG)</h3>
+                <ul className="plain-list top-gap">
+                  <li>
+                    <strong>Entity-Status:</strong>{' '}
+                    {regulatoryProfile.kritisEntityStatus === 'obligations_active'
+                      ? 'Pflichten aktiv'
+                      : regulatoryProfile.kritisEntityStatus === 'registered'
+                        ? 'Registriert'
+                        : regulatoryProfile.kritisEntityStatus === 'identified_not_registered'
+                          ? 'Identifiziert, noch nicht registriert'
+                          : 'Kritikalität noch nicht geprüft'}
+                  </li>
+                  <li>
+                    <strong>Pflichten aktiv ab:</strong>{' '}
+                    {kritisMilestones.managementAccountabilityActiveAt ?? 'offen (Registrierung steht aus)'}
+                  </li>
+                  <li>
+                    <strong>Geschäftsleitung (benannt):</strong>{' '}
+                    {regulatoryProfile.managementBoardContact?.trim() || 'Noch nicht hinterlegt'}
+                  </li>
+                  <li>
+                    <strong>Programmverantwortung:</strong> {regulatoryProfile.owner?.trim() || 'Noch nicht hinterlegt'}
+                  </li>
+                </ul>
+                <p className="muted small top-gap">
+                  Bei Pflichtverletzung kommt eine persönliche Haftung der Leitungsorgane nach
+                  allgemeinem Gesellschaftsrecht in Betracht.
+                </p>
+              </article>
+
+              <article className="report-card">
+                <h3>Bußgeldrahmen (§ 24 KRITISDachG)</h3>
+                <p className="top-gap">
+                  <strong>Potenzielle Oberschwelle:</strong>{' '}
+                  {kritisPenaltyEstimate.upperBound.toLocaleString('de-DE')} €
+                </p>
+                {kritisPenaltyEstimate.rationale.length ? (
+                  <ul className="plain-list top-gap">
+                    {kritisPenaltyEstimate.rationale.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="muted">Keine offenen Tatbestände erkannt.</p>
+                )}
+                <p className="muted small top-gap">
+                  Die Oberschwelle ist kumulativ; Sanktionen werden ab 2027 wirksam. Behördliche
+                  Einzelfallbewertung bleibt vorbehalten.
+                </p>
+              </article>
+            </>
+          ) : null}
         </div>
       </section>
     </div>

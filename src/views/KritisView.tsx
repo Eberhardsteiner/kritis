@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { CertificationStageCard } from '../components/CertificationStageCard';
 import { FindingCard } from '../components/FindingCard';
+import { ManagementLiabilityCard } from '../components/ManagementLiabilityCard';
+import { PenaltyExposureCard } from '../components/PenaltyExposureCard';
 import { kritisCertificationStages } from '../data/kritisBase';
 import {
   getBsigEntityClassLabel,
@@ -18,6 +20,8 @@ import {
   getRegimeScopeLabel,
   shouldShowEntityClass,
 } from '../lib/regulatory';
+import type { KritisMilestones } from '../lib/regulatory';
+import type { PenaltyEstimate } from '../lib/penaltyCalculator';
 import type {
   AuditChecklistItemDefinition,
   AuditChecklistState,
@@ -31,6 +35,8 @@ import type {
   GermanyBsigEntityClass,
   GermanyRegimeId,
   KritisApplicability,
+  KritisEntityStatus,
+  KritisSectorOverrideRegime,
   RegulatoryProfile,
   RegulatoryRegimeDefinition,
   RegulatoryRegimeSummary,
@@ -60,9 +66,19 @@ interface KritisViewProps {
   exportPackages: ExportPackageEntry[];
   exportApprovalRequired: boolean;
   certificationAuthorityLabel: string;
+  kritisMilestones: KritisMilestones;
+  kritisPenaltyEstimate: PenaltyEstimate;
   onUpdateJurisdiction: (value: RegulatoryProfile['jurisdiction']) => void;
   onUpdateRegulatoryProfileField: (
-    field: 'bsigEntityClass' | 'lastReviewDate' | 'owner' | 'notes',
+    field:
+      | 'bsigEntityClass'
+      | 'lastReviewDate'
+      | 'owner'
+      | 'notes'
+      | 'kritisRegistrationDate'
+      | 'kritisEntityStatus'
+      | 'kritisSectorOverrideRegime'
+      | 'managementBoardContact',
     value: string,
   ) => void;
   onUpdateRegimeScope: (regimeId: GermanyRegimeId, value: RegimeScopeStatus) => void;
@@ -195,6 +211,8 @@ export function KritisView({
   exportPackages,
   exportApprovalRequired,
   certificationAuthorityLabel,
+  kritisMilestones,
+  kritisPenaltyEstimate,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -228,6 +246,21 @@ export function KritisView({
     { value: 'not_applicable', label: 'Nicht anwendbar' },
   ];
 
+  const kritisEntityStatusOptions: Array<{ value: KritisEntityStatus; label: string }> = [
+    { value: 'not_identified', label: 'Kritikalität noch nicht geprüft' },
+    { value: 'identified_not_registered', label: 'Identifiziert, noch nicht registriert' },
+    { value: 'registered', label: 'Registriert' },
+    { value: 'obligations_active', label: 'Pflichten aktiv' },
+  ];
+  const kritisSectorOverrideOptions: Array<{ value: KritisSectorOverrideRegime; label: string }> = [
+    { value: 'none', label: 'Kein Lex-specialis-Überwurf' },
+    { value: 'dora', label: 'DORA (Finanzunternehmen)' },
+    { value: 'bsig_nis2', label: 'BSIG / NIS2 (IT und Telekommunikation)' },
+  ];
+  const isGermanKritisInScope =
+    regulatoryProfile.jurisdiction === 'DE' &&
+    regulatoryProfile.scopeByRegime.de_kritisdachg !== 'out_of_scope';
+
   const requirementsByRegime = useMemo(
     () => regimeDefinitions.map((regime) => ({
       regime,
@@ -248,6 +281,21 @@ export function KritisView({
 
   return (
     <div className="view-stack">
+      {isGermanKritisInScope ? (
+        <section className="inline-note warning-note">
+          <AlertCircle size={16} />
+          <div>
+            <strong>Hinweis zur KRITIS-Rechtsverordnung</strong>
+            <p className="muted small">
+              Die sektorspezifische KRITIS-Rechtsverordnung nach § 4 Abs. 3 und § 5 KRITISDachG steht
+              noch aus. Die Regel-Schwelle von 500.000 versorgten Personen kann sich durch Verordnung
+              verändern; die Länder können Betreiber unterhalb dieser Schwelle als kritisch bestimmen.
+              Diese App bildet den Rechtsstand zum verkündeten KRITISDachG (BGBl. 2026 I Nr. 66 vom
+              16.03.2026) ab.
+            </p>
+          </div>
+        </section>
+      ) : null}
       <section className="content-grid two-column">
         <article className="card">
           <p className="eyebrow">KRITIS-Readiness</p>
@@ -351,6 +399,49 @@ export function KritisView({
                 onChange={(event) => onUpdateRegulatoryProfileField('notes', event.target.value)}
               />
             </label>
+            {isGermanKritisInScope ? (
+              <>
+                <label className="field-label">
+                  KRITIS-Registrierungsdatum (§ 8)
+                  <input
+                    type="date"
+                    value={regulatoryProfile.kritisRegistrationDate ?? ''}
+                    onChange={(event) => onUpdateRegulatoryProfileField('kritisRegistrationDate', event.target.value)}
+                  />
+                </label>
+                <label className="field-label">
+                  KRITIS-Entity-Status
+                  <select
+                    value={regulatoryProfile.kritisEntityStatus ?? 'not_identified'}
+                    onChange={(event) => onUpdateRegulatoryProfileField('kritisEntityStatus', event.target.value)}
+                  >
+                    {kritisEntityStatusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field-label">
+                  Sektor-Überlagerung (Lex specialis)
+                  <select
+                    value={regulatoryProfile.kritisSectorOverrideRegime ?? 'none'}
+                    onChange={(event) => onUpdateRegulatoryProfileField('kritisSectorOverrideRegime', event.target.value)}
+                  >
+                    {kritisSectorOverrideOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field-label">
+                  Geschäftsleitung (§ 20)
+                  <input
+                    type="text"
+                    value={regulatoryProfile.managementBoardContact ?? ''}
+                    placeholder="z. B. Dr. Muster · CEO"
+                    onChange={(event) => onUpdateRegulatoryProfileField('managementBoardContact', event.target.value)}
+                  />
+                </label>
+              </>
+            ) : null}
           </div>
 
           <div className="priority-list top-gap">
@@ -398,6 +489,13 @@ export function KritisView({
           </div>
         </article>
       </section>
+
+      {isGermanKritisInScope ? (
+        <section className="content-grid two-column">
+          <ManagementLiabilityCard regulatoryProfile={regulatoryProfile} milestones={kritisMilestones} />
+          <PenaltyExposureCard penaltyEstimate={kritisPenaltyEstimate} />
+        </section>
+      ) : null}
 
       <section className="card">
         <div className="section-heading">

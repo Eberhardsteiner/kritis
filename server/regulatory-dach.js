@@ -38,6 +38,7 @@ export const defaultRegulatoryProfile = {
   kritisRegistrationDate: '',
   kritisEntityStatus: 'not_identified',
   kritisSectorOverrideRegime: 'none',
+  managementBoardContact: '',
 };
 
 function normalizeScopeStatus(value) {
@@ -96,6 +97,7 @@ export function normalizeRegulatoryProfile(input) {
     kritisRegistrationDate: normalizeIsoDate(raw.kritisRegistrationDate),
     kritisEntityStatus: normalizeKritisEntityStatus(raw.kritisEntityStatus),
     kritisSectorOverrideRegime: normalizeKritisSectorOverride(raw.kritisSectorOverrideRegime),
+    managementBoardContact: typeof raw.managementBoardContact === 'string' ? raw.managementBoardContact : '',
   };
 }
 

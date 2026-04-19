@@ -1,3 +1,5 @@
+import type { RegulatoryProfile, RequirementStatus } from '../types';
+
 export type KritisViolationType =
   | 'registration_information_duty'
   | 'audit_results_nonprovision'
@@ -71,4 +73,47 @@ export function estimatePenalty(violations: KritisViolationType[]): PenaltyEstim
   });
 
   return { upperBound, rationale };
+}
+
+function isOpenRequirementStatus(status?: RequirementStatus): boolean {
+  return status === 'open' || status === 'in_progress';
+}
+
+export interface DeriveOpenViolationsInput {
+  requirementStates: Record<string, RequirementStatus>;
+  regulatoryProfile: RegulatoryProfile;
+}
+
+export function deriveOpenViolations({
+  requirementStates,
+  regulatoryProfile,
+}: DeriveOpenViolationsInput): KritisViolationType[] {
+  const violations: KritisViolationType[] = [];
+  const entityStatus = regulatoryProfile.kritisEntityStatus ?? 'not_identified';
+
+  if (entityStatus === 'not_identified') {
+    return violations;
+  }
+
+  if (entityStatus === 'identified_not_registered') {
+    violations.push('registration_incomplete_or_late');
+  } else if (
+    entityStatus === 'registered' &&
+    isOpenRequirementStatus(requirementStates['de_kritis_registration'])
+  ) {
+    violations.push('registration_information_duty');
+  }
+
+  if (isOpenRequirementStatus(requirementStates['de_kritis_evidence_audit'])) {
+    violations.push('audit_results_nonprovision');
+  }
+
+  if (
+    isOpenRequirementStatus(requirementStates['de_kritis_resilience_measures']) ||
+    isOpenRequirementStatus(requirementStates['de_kritis_resilience_plan'])
+  ) {
+    violations.push('order_violation');
+  }
+
+  return violations;
 }
