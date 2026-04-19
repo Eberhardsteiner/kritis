@@ -28,6 +28,30 @@ export type KritisEntityStatus =
 
 export type KritisSectorOverrideRegime = 'dora' | 'bsig_nis2' | 'light_regime' | 'none';
 
+export type AuthorityRole = 'coordination' | 'incident_reporting' | 'audit' | 'sector_supervision';
+
+export interface CompetentAuthority {
+  id: string;
+  shortName: string;
+  fullName: string;
+  jurisdiction: 'federal' | 'state' | 'eu';
+  website: string;
+  contactPath: string;
+}
+
+export interface AuthorityAssignment {
+  regimeId: RegulatoryRegimeId;
+  sector: string;
+  authorityId: string;
+  role: AuthorityRole;
+  lawRef: string;
+  note?: string;
+}
+
+export interface AuthorityAssignmentResolved extends AuthorityAssignment {
+  authority: CompetentAuthority;
+}
+
 export type RequirementOverrideStatus =
   | 'applicable'
   | 'covered_by_dora'
