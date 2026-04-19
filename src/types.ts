@@ -70,6 +70,39 @@ export interface StandardControlCatalogEntry {
   controlTitle: string;
 }
 
+export type EffortConfidence = 'low' | 'medium' | 'high';
+
+export interface EffortEstimate {
+  personDays: number;
+  confidence: EffortConfidence;
+  assumptions: string[];
+}
+
+export interface GapAnalysisEntry {
+  requirementId: string;
+  regimeId?: RegulatoryRegimeId;
+  category: string;
+  currentStatus: RequirementStatus;
+  targetStatus: RequirementStatus;
+  effortEstimate: EffortEstimate;
+  dependencies: string[];
+}
+
+export interface GapAnalysisByRegime {
+  regimeId: RegulatoryRegimeId;
+  regimeLabel: string;
+  totalPersonDays: number;
+  byCategory: Record<string, number>;
+  entries: GapAnalysisEntry[];
+}
+
+export interface GapAnalysisSummary {
+  totalPersonDays: number;
+  calendarWeeks: number;
+  entryCount: number;
+  byRegime: GapAnalysisByRegime[];
+}
+
 export type RequirementOverrideStatus =
   | 'applicable'
   | 'covered_by_dora'
