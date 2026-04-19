@@ -13,6 +13,7 @@ import type {
   RegulatoryRegimeSummary,
   RegimeScopeStatus,
   RequirementDefinition,
+  RequirementOverrideStatus,
   RequirementStatus,
 } from '../types';
 
@@ -65,7 +66,9 @@ function normalizeKritisEntityStatus(value: unknown): KritisEntityStatus {
 }
 
 function normalizeKritisSectorOverride(value: unknown): KritisSectorOverrideRegime {
-  return value === 'dora' || value === 'bsig_nis2' || value === 'none' ? value : 'none';
+  return value === 'dora' || value === 'bsig_nis2' || value === 'light_regime' || value === 'none'
+    ? value
+    : 'none';
 }
 
 function normalizeIsoDate(value: unknown): string {
@@ -108,6 +111,58 @@ export interface KritisMilestones {
 function addMonthsIso(base: Date, months: number): string {
   const result = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + months, base.getUTCDate()));
   return result.toISOString().slice(0, 10);
+}
+
+const LIGHT_REGIME_ONLY_APPLICABLE_REQUIREMENT = 'de_kritis_risk_assessment';
+const LEX_SPECIALIS_ONLY_APPLICABLE_REQUIREMENT = 'de_kritis_registration';
+
+export function getKritisRequirementOverride(
+  requirement: RequirementDefinition,
+  profile: RegulatoryProfile,
+): RequirementOverrideStatus {
+  if (requirement.regimeId !== 'de_kritisdachg') {
+    return 'applicable';
+  }
+  const override = profile.kritisSectorOverrideRegime ?? 'none';
+  if (override === 'dora') {
+    return requirement.id === LEX_SPECIALIS_ONLY_APPLICABLE_REQUIREMENT ? 'applicable' : 'covered_by_dora';
+  }
+  if (override === 'bsig_nis2') {
+    return requirement.id === LEX_SPECIALIS_ONLY_APPLICABLE_REQUIREMENT
+      ? 'applicable'
+      : 'covered_by_bsig_nis2';
+  }
+  if (override === 'light_regime') {
+    return requirement.id === LIGHT_REGIME_ONLY_APPLICABLE_REQUIREMENT
+      ? 'applicable'
+      : 'light_regime_not_required';
+  }
+  return 'applicable';
+}
+
+export function buildRequirementOverrideMap(
+  requirements: RequirementDefinition[],
+  profile: RegulatoryProfile,
+): Record<string, RequirementOverrideStatus> {
+  const result: Record<string, RequirementOverrideStatus> = {};
+  for (const requirement of requirements) {
+    result[requirement.id] = getKritisRequirementOverride(requirement, profile);
+  }
+  return result;
+}
+
+export function applyOverridesToRequirementStates(
+  requirements: RequirementDefinition[],
+  states: Record<string, RequirementStatus>,
+  profile: RegulatoryProfile,
+): Record<string, RequirementStatus> {
+  const overridden: Record<string, RequirementStatus> = { ...states };
+  for (const requirement of requirements) {
+    if (getKritisRequirementOverride(requirement, profile) !== 'applicable') {
+      overridden[requirement.id] = 'not_applicable';
+    }
+  }
+  return overridden;
 }
 
 export function computeKritisMilestones(registrationDate?: string): KritisMilestones {
@@ -249,11 +304,12 @@ export function buildRegimeSummaries(params: {
   regulatoryProfile: RegulatoryProfile;
 }): RegulatoryRegimeSummary[] {
   const profile = normalizeRegulatoryProfile(params.regulatoryProfile);
+  const overriddenStates = applyOverridesToRequirementStates(params.requirements, params.requirementStates, profile);
 
   return getRegimeDefinitions(profile.jurisdiction).map((definition) => {
     const regimeRequirements = filterRequirementsByRegime(params.requirements, definition.id);
     const regimeChecklist = filterChecklistByRegime(params.checklist, definition.id);
-    const requirementProgress = getRequirementProgress(regimeRequirements, params.requirementStates);
+    const requirementProgress = getRequirementProgress(regimeRequirements, overriddenStates);
     const checklistProgress = getChecklistProgress(regimeChecklist, params.checklistStates);
     const scopeStatus = profile.scopeByRegime[definition.id];
 
@@ -266,7 +322,7 @@ export function buildRegimeSummaries(params: {
       scopeStatus,
       requirementScore: requirementProgress.score,
       checklistScore: checklistProgress.score,
-      totalRequirements: regimeRequirements.filter((item) => (params.requirementStates[item.id] ?? 'open') !== 'not_applicable').length,
+      totalRequirements: regimeRequirements.filter((item) => (overriddenStates[item.id] ?? 'open') !== 'not_applicable').length,
       openRequirements: requirementProgress.openCount,
       readyRequirements: requirementProgress.readyCount,
       checklistTotal: checklistProgress.total,

@@ -42,9 +42,16 @@ import type {
   RegulatoryRegimeSummary,
   RegimeScopeStatus,
   RequirementDefinition,
+  RequirementOverrideStatus,
   RequirementStatus,
   SectorModuleDefinition,
 } from '../types';
+
+const requirementOverrideLabels: Record<Exclude<RequirementOverrideStatus, 'applicable'>, string> = {
+  covered_by_dora: 'durch DORA abgedeckt',
+  covered_by_bsig_nis2: 'durch BSIG/NIS2 abgedeckt',
+  light_regime_not_required: 'Light-Regime: nicht erforderlich',
+};
 
 interface KritisViewProps {
   applicability: KritisApplicability;
@@ -68,6 +75,7 @@ interface KritisViewProps {
   certificationAuthorityLabel: string;
   kritisMilestones: KritisMilestones;
   kritisPenaltyEstimate: PenaltyEstimate;
+  requirementOverrides: Record<string, RequirementOverrideStatus>;
   onUpdateJurisdiction: (value: RegulatoryProfile['jurisdiction']) => void;
   onUpdateRegulatoryProfileField: (
     field:
@@ -213,6 +221,7 @@ export function KritisView({
   certificationAuthorityLabel,
   kritisMilestones,
   kritisPenaltyEstimate,
+  requirementOverrides,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -256,6 +265,7 @@ export function KritisView({
     { value: 'none', label: 'Kein Lex-specialis-Überwurf' },
     { value: 'dora', label: 'DORA (Finanzunternehmen)' },
     { value: 'bsig_nis2', label: 'BSIG / NIS2 (IT und Telekommunikation)' },
+    { value: 'light_regime', label: 'Light-Regime (Sozialversicherung, Siedlungsabfall)' },
   ];
   const isGermanKritisInScope =
     regulatoryProfile.jurisdiction === 'DE' &&
@@ -726,13 +736,26 @@ export function KritisView({
                   <div className="work-list top-gap">
                     {items.map((requirement) => {
                       const currentStatus = requirementStates[requirement.id] ?? 'open';
+                      const overrideStatus = requirementOverrides[requirement.id] ?? 'applicable';
+                      const isOverridden = overrideStatus !== 'applicable';
+                      const overrideLabel = isOverridden
+                        ? requirementOverrideLabels[overrideStatus as Exclude<RequirementOverrideStatus, 'applicable'>]
+                        : '';
                       return (
-                        <article key={requirement.id} className="work-card compact-card">
+                        <article
+                          key={requirement.id}
+                          className="work-card compact-card"
+                          style={isOverridden ? { opacity: 0.65 } : undefined}
+                        >
                           <div className="work-card-head">
                             <div>
                               <div className="question-title-row">
                                 <strong>{requirement.title}</strong>
-                                <span className={`chip ${getRequirementTone(currentStatus)}`}>{statusLabels[currentStatus]}</span>
+                                {isOverridden ? (
+                                  <span className="chip outline">{overrideLabel}</span>
+                                ) : (
+                                  <span className={`chip ${getRequirementTone(currentStatus)}`}>{statusLabels[currentStatus]}</span>
+                                )}
                               </div>
                               <p className="muted small">{requirement.lawRef || 'ohne Referenz'}{requirement.dueHint ? ` · ${requirement.dueHint}` : ''}</p>
                             </div>
@@ -743,11 +766,18 @@ export function KritisView({
                           </div>
                           <p>{requirement.description}</p>
                           <p className="muted small top-gap">{requirement.guidance}</p>
+                          {isOverridden ? (
+                            <p className="muted small top-gap">
+                              Diese Pflicht wird vom gewählten Sektor-Überwurf verdrängt und fließt nicht in Scoring oder
+                              Bußgeldrechnung ein. Nachweise bleiben dokumentiert, Bearbeitung ist gesperrt.
+                            </p>
+                          ) : null}
                           <div className="form-grid two-column top-gap">
                             <label className="field-label">
                               Status
                               <select
                                 value={currentStatus}
+                                disabled={isOverridden}
                                 onChange={(event) => onChangeStatus(requirement.id, event.target.value as RequirementStatus)}
                               >
                                 {requirementStatuses.map((status) => (
@@ -756,11 +786,21 @@ export function KritisView({
                               </select>
                             </label>
                             <div className="hero-actions compact-actions align-end">
-                              <button type="button" className="button secondary" onClick={() => onCreateAction(requirement.id)}>
+                              <button
+                                type="button"
+                                className="button secondary"
+                                disabled={isOverridden}
+                                onClick={() => onCreateAction(requirement.id)}
+                              >
                                 <PlusCircle size={16} />
                                 Maßnahme
                               </button>
-                              <button type="button" className="button secondary" onClick={() => onCreateEvidence(requirement.id)}>
+                              <button
+                                type="button"
+                                className="button secondary"
+                                disabled={isOverridden}
+                                onClick={() => onCreateEvidence(requirement.id)}
+                              >
                                 <Sparkles size={16} />
                                 Evidenz
                               </button>

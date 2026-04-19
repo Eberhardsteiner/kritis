@@ -30,7 +30,9 @@ import {
   getResilienceSummary,
 } from '../lib/scoring';
 import {
+  applyOverridesToRequirementStates,
   buildRegimeSummaries,
+  buildRequirementOverrideMap,
   computeKritisMilestones,
   filterActiveChecklist,
   filterActiveRequirements,
@@ -204,9 +206,17 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     [currentModule, currentEvidenceItems],
   );
 
+  const requirementOverrides = useMemo(
+    () => buildRequirementOverrideMap(activeRequirements, regulatoryProfile),
+    [activeRequirements, regulatoryProfile],
+  );
+  const effectiveRequirementStates = useMemo(
+    () => applyOverridesToRequirementStates(activeRequirements, state.requirementStates, regulatoryProfile),
+    [activeRequirements, state.requirementStates, regulatoryProfile],
+  );
   const requirementProgress = useMemo(
-    () => getRequirementProgress(activeRequirements, state.requirementStates),
-    [activeRequirements, state.requirementStates],
+    () => getRequirementProgress(activeRequirements, effectiveRequirementStates),
+    [activeRequirements, effectiveRequirementStates],
   );
   const kritisApplicability = useMemo(
     () => assessKritisApplicability(state.companyProfile, currentModule, regulatoryProfile.jurisdiction),
@@ -261,8 +271,8 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     [regulatoryProfile.kritisRegistrationDate, state.complianceCalendar.registrationDate],
   );
   const kritisOpenViolations = useMemo(
-    () => deriveOpenViolations({ requirementStates: state.requirementStates, regulatoryProfile }),
-    [state.requirementStates, regulatoryProfile],
+    () => deriveOpenViolations({ requirementStates: effectiveRequirementStates, regulatoryProfile }),
+    [effectiveRequirementStates, regulatoryProfile],
   );
   const kritisPenaltyEstimate = useMemo(
     () => estimatePenalty(kritisOpenViolations),
@@ -334,6 +344,8 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     currentFindings,
     documentFolders,
     requirementProgress,
+    requirementOverrides,
+    effectiveRequirementStates,
     kritisApplicability,
     kritisMilestones,
     kritisOpenViolations,

@@ -26,7 +26,13 @@ export type KritisEntityStatus =
   | 'registered'
   | 'obligations_active';
 
-export type KritisSectorOverrideRegime = 'dora' | 'bsig_nis2' | 'none';
+export type KritisSectorOverrideRegime = 'dora' | 'bsig_nis2' | 'light_regime' | 'none';
+
+export type RequirementOverrideStatus =
+  | 'applicable'
+  | 'covered_by_dora'
+  | 'covered_by_bsig_nis2'
+  | 'light_regime_not_required';
 
 export type AnswerScore = 0 | 1 | 2 | 3 | 4 | null;
 

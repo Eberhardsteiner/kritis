@@ -75,4 +75,7 @@ test('normalizeRegulatoryProfile defaults and validates new KRITIS fields', () =
   const withContact = normalizeRegulatoryProfile({ managementBoardContact: 'Dr. Muster · CEO' });
   assert.equal(withContact.managementBoardContact, 'Dr. Muster · CEO');
   assert.equal(empty.managementBoardContact, '');
+
+  const lightRegime = normalizeRegulatoryProfile({ kritisSectorOverrideRegime: 'light_regime' });
+  assert.equal(lightRegime.kritisSectorOverrideRegime, 'light_regime');
 });

@@ -65,7 +65,9 @@ function normalizeKritisEntityStatus(value) {
 }
 
 function normalizeKritisSectorOverride(value) {
-  return value === 'dora' || value === 'bsig_nis2' || value === 'none' ? value : 'none';
+  return value === 'dora' || value === 'bsig_nis2' || value === 'light_regime' || value === 'none'
+    ? value
+    : 'none';
 }
 
 function normalizeIsoDate(value) {
