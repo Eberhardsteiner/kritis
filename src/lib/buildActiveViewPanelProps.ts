@@ -238,6 +238,7 @@ interface BuildActiveViewPanelPropsArgs {
   onExportManagementPdf: ReportViewProps['onExportManagementPdf'];
   onExportAuditPdf: ReportViewProps['onExportAuditPdf'];
   onExportFormalHtml: ReportViewProps['onExportFormalHtml'];
+  onExportGapAnalysisDocx: DashboardViewProps['onExportGapAnalysisDocx'];
   onCreateServerPackage: ReportViewProps['onCreateServerPackage'];
 }
 
@@ -459,6 +460,7 @@ export function buildActiveViewPanelProps({
   onExportManagementPdf,
   onExportAuditPdf,
   onExportFormalHtml,
+  onExportGapAnalysisDocx,
   onCreateServerPackage,
 }: BuildActiveViewPanelPropsArgs): ActiveViewPanelProps {
   return {
@@ -493,6 +495,7 @@ export function buildActiveViewPanelProps({
       onGoToGovernance: () => onGoToView('governance'),
       onGoToResilience: () => onGoToView('resilience'),
       onGoToKritis: () => onGoToView('kritis'),
+      onExportGapAnalysisDocx,
     },
     assessmentViewProps: {
       questions,

@@ -20,6 +20,7 @@ import {
   parseAndValidateModule,
 } from './lib/moduleRegistry';
 import { getAccessProfile } from './data/workspaceBase';
+import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './lib/gapAnalysisDocx';
 import { normalizeRegulatoryProfile } from './lib/regulatory';
 import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
 import {
@@ -4373,6 +4374,31 @@ export default function App() {
     });
   }
 
+  async function handleExportGapAnalysisDocx() {
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Angebotsgrundlagen-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const blob = await buildGapAnalysisBlob({
+        companyProfile: state.companyProfile,
+        gapAnalysisSummary,
+        requirements: activeRequirements,
+      });
+      const fileName = buildGapAnalysisFileName(state.companyProfile);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showNotice('error', `Angebotsgrundlage konnte nicht erzeugt werden: ${String(error)}`);
+    }
+  }
+
   const moduleOptions = effectiveModuleCatalog.map((module) => ({
     id: module.id,
     name: module.name,
@@ -4620,6 +4646,7 @@ export default function App() {
     onExportManagementPdf: handleExportManagementPdf,
     onExportAuditPdf: handleExportAuditPdf,
     onExportFormalHtml: handleExportFormalHtml,
+    onExportGapAnalysisDocx: handleExportGapAnalysisDocx,
     onCreateServerPackage: handleCreateServerExportPackage,
   });
 
