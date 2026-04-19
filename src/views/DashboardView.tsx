@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Target,
 } from 'lucide-react';
+import { GapAnalysisDashboard } from '../components/GapAnalysisDashboard';
 import { StatCard } from '../components/StatCard';
 import type {
   ActionSummary,
@@ -16,8 +17,10 @@ import type {
   CertificationProgress,
   ChecklistProgress,
   EvidenceSummary,
+  GapAnalysisSummary,
   GovernanceSummary,
   KritisApplicability,
+  RequirementDefinition,
   ResilienceSummary,
   ScoreSnapshot,
   SectorModuleDefinition,
@@ -37,11 +40,14 @@ interface DashboardViewProps {
   checklistProgress: ChecklistProgress;
   findingSummary: AuditFindingSummary;
   resilienceSummary: ResilienceSummary;
+  gapAnalysisSummary: GapAnalysisSummary;
+  activeRequirements: RequirementDefinition[];
   onGoToAssessment: () => void;
   onGoToMeasures: () => void;
   onGoToResilience: () => void;
   onGoToGovernance: () => void;
   onGoToKritis: () => void;
+  onExportGapAnalysisDocx?: () => void;
 }
 
 export function DashboardView({
@@ -58,11 +64,14 @@ export function DashboardView({
   checklistProgress,
   findingSummary,
   resilienceSummary,
+  gapAnalysisSummary,
+  activeRequirements,
   onGoToAssessment,
   onGoToMeasures,
   onGoToResilience,
   onGoToGovernance,
   onGoToKritis,
+  onExportGapAnalysisDocx,
 }: DashboardViewProps) {
   const lowDomains = [...scoreSnapshot.domainScores]
     .sort((a, b) => a.score - b.score)
@@ -320,6 +329,12 @@ export function DashboardView({
           </div>
         </article>
       </section>
+
+      <GapAnalysisDashboard
+        summary={gapAnalysisSummary}
+        requirements={activeRequirements}
+        onTriggerDocxExport={onExportGapAnalysisDocx}
+      />
     </div>
   );
 }

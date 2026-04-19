@@ -42,6 +42,7 @@ import {
 import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
 import { resolveAuthorities } from '../lib/authorities';
 import { enrichRequirementsWithMappings } from '../lib/standardMappings';
+import { computeGapAnalysis } from '../lib/gapAnalysis';
 import { KRITIS_ELIGIBLE_SECTORS } from '../data/kritisBase';
 import {
   buildDeadlineSummary,
@@ -283,6 +284,15 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     () => estimatePenalty(kritisOpenViolations),
     [kritisOpenViolations],
   );
+  const gapAnalysisSummary = useMemo(
+    () => computeGapAnalysis({
+      requirements: activeRequirements,
+      requirementStates: effectiveRequirementStates,
+      evidenceItems: currentEvidenceItems,
+      regimeDefinitions,
+    }),
+    [activeRequirements, effectiveRequirementStates, currentEvidenceItems, regimeDefinitions],
+  );
   const effectiveKritisSector = useMemo(() => {
     const sectorHints: string[] = [
       ...(currentModule?.kritisExtension?.eligibleSectors ?? []),
@@ -375,6 +385,7 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     kritisPenaltyEstimate,
     effectiveKritisSector,
     authorityAssignmentsByRegime,
+    gapAnalysisSummary,
     actionSummary,
     evidenceSummary,
     documentLibrarySummary,

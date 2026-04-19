@@ -9,6 +9,7 @@ import type {
   CertificationProgress,
   ChecklistProgress,
   CompanyProfile,
+  GapAnalysisSummary,
   RegulatoryProfile,
   RegulatoryRegimeId,
   RegulatoryRegimeSummary,
@@ -53,6 +54,7 @@ interface ReportViewProps {
   kritisMilestones: KritisMilestones;
   kritisPenaltyEstimate: PenaltyEstimate;
   authorityAssignmentsByRegime: Record<RegulatoryRegimeId, AuthorityAssignmentResolved[]>;
+  gapAnalysisSummary: GapAnalysisSummary;
   exportPackages: ExportPackageEntry[];
   exportApprovalRequired: boolean;
   onExportMarkdown: () => void;
@@ -95,6 +97,7 @@ export function ReportView({
   kritisMilestones,
   kritisPenaltyEstimate,
   authorityAssignmentsByRegime,
+  gapAnalysisSummary,
   exportPackages,
   exportApprovalRequired,
   onExportMarkdown,
@@ -495,6 +498,42 @@ export function ReportView({
                   </div>
                 );
               })}
+          </article>
+
+          <article className="report-card wide">
+            <h3>Gap-Analyse und Aufwandsschätzung</h3>
+            <p className="top-gap">
+              <strong>Geschätzter Restaufwand:</strong>{' '}
+              {gapAnalysisSummary.totalPersonDays.toLocaleString('de-DE', { maximumFractionDigits: 1 })} PT
+              {gapAnalysisSummary.totalPersonDays > 0
+                ? ` · ≈ ${gapAnalysisSummary.calendarWeeks} Kalenderwoche${gapAnalysisSummary.calendarWeeks === 1 ? '' : 'n'}`
+                : ''}
+            </p>
+            {gapAnalysisSummary.byRegime.length > 0 ? (
+              <ul className="plain-list top-gap">
+                {gapAnalysisSummary.byRegime.map((regime) => (
+                  <li key={regime.regimeId}>
+                    <strong>{regime.regimeLabel}:</strong>{' '}
+                    {regime.totalPersonDays.toLocaleString('de-DE', { maximumFractionDigits: 1 })} PT
+                    {Object.keys(regime.byCategory).length > 0 ? (
+                      <span className="muted small">
+                        {' '}(
+                        {Object.entries(regime.byCategory)
+                          .map(([category, pt]) => `${category}: ${pt.toLocaleString('de-DE', { maximumFractionDigits: 1 })}`)
+                          .join(', ')}
+                        )
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">Keine Pflichten im aktuellen Mandantenbild.</p>
+            )}
+            <p className="muted small top-gap">
+              Heuristik: Basis je Kategorie (2/5/10 PT) × Gap-Faktor je Status, reduziert um
+              Standard-Mappings und Evidenzen. Konservativ gewählt; Ausgangsbasis für Projektangebote.
+            </p>
           </article>
 
           <article className="report-card wide">
