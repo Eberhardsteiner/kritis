@@ -13,6 +13,9 @@ import { CertificationStageCard } from '../components/CertificationStageCard';
 import { FindingCard } from '../components/FindingCard';
 import { ManagementLiabilityCard } from '../components/ManagementLiabilityCard';
 import { PenaltyExposureCard } from '../components/PenaltyExposureCard';
+import { StandardMappingsPanel } from '../components/StandardMappingsPanel';
+import { ALL_STANDARD_IDS, standardLabels } from '../lib/standardMappings';
+import type { StandardId } from '../types';
 import { kritisCertificationStages } from '../data/kritisBase';
 import {
   getBsigEntityClassLabel,
@@ -245,6 +248,7 @@ export function KritisView({
   onDownloadExportPackage,
 }: KritisViewProps) {
   const gateStatus = getGateStatus(checklistProgress, findingSummary);
+  const [mappingFilter, setMappingFilter] = useState<'all' | StandardId>('all');
   const [dossierTitle, setDossierTitle] = useState('');
   const [dossierNote, setDossierNote] = useState('');
   const [dossierSignOffName, setDossierSignOffName] = useState(certificationState.auditLead || '');
@@ -761,14 +765,29 @@ export function KritisView({
             <h3>Bausteine, Maßnahmen und Evidenzen</h3>
           </div>
           <div className="chip-row">
-            <span className="chip outline">Maßnahmen aus Anforderungen ableitbar</span>
-            <span className="chip outline">Evidenzen direkt an Anforderungen ankoppeln</span>
+            <label className="field-label">
+              Filter nach Standard-Mapping
+              <select
+                value={mappingFilter}
+                onChange={(event) => setMappingFilter(event.target.value as 'all' | StandardId)}
+              >
+                <option value="all">Alle Pflichten</option>
+                {ALL_STANDARD_IDS.map((id) => (
+                  <option key={id} value={id}>Nur durch {standardLabels[id]} abgedeckt</option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
 
         <div className="content-grid two-column top-gap">
           {requirementsByRegime.map(({ regime, summary, items }) => {
             const isOutOfScope = regulatoryProfile.scopeByRegime[regime.id] === 'out_of_scope';
+            const filteredItems = mappingFilter === 'all'
+              ? items
+              : items.filter((item) =>
+                  (item.mappedControls ?? []).some((entry) => entry.standardId === mappingFilter),
+                );
             return (
               <article key={regime.id} className="card nested-card">
                 <div className="question-title-row">
@@ -780,9 +799,9 @@ export function KritisView({
                 <p className="muted">{regime.focus}</p>
                 {isOutOfScope ? (
                   <p className="muted top-gap">Dieses Regime ist aktuell als nicht im Scope markiert. Die Bausteine bleiben daher aus der Arbeitsliste ausgeblendet.</p>
-                ) : items.length ? (
+                ) : filteredItems.length ? (
                   <div className="work-list top-gap">
-                    {items.map((requirement) => {
+                    {filteredItems.map((requirement) => {
                       const currentStatus = requirementStates[requirement.id] ?? 'open';
                       const overrideStatus = requirementOverrides[requirement.id] ?? 'applicable';
                       const isOverridden = overrideStatus !== 'applicable';
@@ -854,10 +873,15 @@ export function KritisView({
                               </button>
                             </div>
                           </div>
+                          <StandardMappingsPanel mappings={requirement.mappedControls ?? []} />
                         </article>
                       );
                     })}
                   </div>
+                ) : items.length ? (
+                  <p className="muted top-gap">
+                    Kein Pflichtbaustein passt zum aktiven Standard-Filter. Setzen Sie den Filter auf „Alle Pflichten" zurück.
+                  </p>
                 ) : (
                   <p className="muted top-gap">Für dieses Regime sind derzeit keine aktiven Pflichtbausteine im Arbeitsbereich vorhanden.</p>
                 )}

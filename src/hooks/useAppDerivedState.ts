@@ -41,6 +41,7 @@ import {
 } from '../lib/regulatory';
 import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
 import { resolveAuthorities } from '../lib/authorities';
+import { enrichRequirementsWithMappings } from '../lib/standardMappings';
 import { KRITIS_ELIGIBLE_SECTORS } from '../data/kritisBase';
 import {
   buildDeadlineSummary,
@@ -130,7 +131,7 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     [regulatoryProfile.jurisdiction],
   );
   const activeRequirements = useMemo(
-    () => filterActiveRequirements(requirements, regulatoryProfile),
+    () => enrichRequirementsWithMappings(filterActiveRequirements(requirements, regulatoryProfile)),
     [requirements, regulatoryProfile],
   );
   const activeAuditChecklist = useMemo(
