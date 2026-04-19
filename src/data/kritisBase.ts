@@ -8,15 +8,14 @@ import type {
 export const KRITIS_ELIGIBLE_SECTORS = [
   'Energie',
   'Transport und Verkehr',
-  'Finanz- und Versicherungswesen',
+  'Finanzwesen',
+  'Leistungen der Sozialversicherung und Grundsicherung für Arbeitsuchende',
   'Gesundheit',
-  'Trinkwasser',
-  'Abwasser',
-  'Siedlungsabfallentsorgung',
-  'IT und Telekommunikation',
+  'Wasser (Trinkwasser und Abwasser)',
   'Ernährung',
+  'Informationstechnik und Telekommunikation',
   'Weltraum',
-  'Öffentliche Verwaltung',
+  'Siedlungsabfallentsorgung',
 ];
 
 export const germanyRegimeDefinitions: RegulatoryRegimeDefinition[] = [
@@ -27,10 +26,20 @@ export const germanyRegimeDefinitions: RegulatoryRegimeDefinition[] = [
     shortLabel: 'KRITIS-DachG',
     focus: 'Physische Resilienz und Betreiberpflichten',
     description:
-      'Dieses Regime bündelt Betreiberpflichten für kritische Anlagen mit Blick auf Risikoanalyse, Resilienzmaßnahmen, Resilienzplan, Nachweise und Vorfallmeldungen.',
-    lawRefs: ['§ 8 KRITISDachG', '§ 12 KRITISDachG', '§ 13 KRITISDachG', '§ 16 KRITISDachG', '§ 18 KRITISDachG', '§ 20 KRITISDachG'],
+      'Dieses Regime bündelt Betreiberpflichten für kritische Anlagen mit Blick auf Risikoanalyse, Resilienzmaßnahmen, Resilienzplan, Nachweise und Vorfallmeldungen. Das KRITISDachG wurde am 16.03.2026 im BGBl. 2026 I Nr. 66 verkündet und trat am 17.03.2026 in Kraft; es setzt die CER-Richtlinie (EU) 2022/2557 um. Sanktionen und behördliche Aufsicht werden erst ab 2027 wirksam.',
+    lawRefs: [
+      '§ 8 KRITISDachG',
+      '§ 12 KRITISDachG',
+      '§ 13 KRITISDachG',
+      '§ 14 KRITISDachG',
+      '§ 16 KRITISDachG',
+      '§ 17 KRITISDachG',
+      '§ 18 KRITISDachG',
+      '§ 20 KRITISDachG',
+      '§ 24 KRITISDachG',
+    ],
     defaultScopeHint:
-      'Relevanz vor allem für Betreiber kritischer Anlagen und kritischer Dienstleistungen. Physische Resilienz, organisatorische Vorsorge und behördliche Nachweisfähigkeit stehen im Vordergrund.',
+      'Relevanz vor allem für Betreiber kritischer Anlagen und kritischer Dienstleistungen. Physische Resilienz, organisatorische Vorsorge und behördliche Nachweisfähigkeit stehen im Vordergrund. Hinweis: Die sektorspezifische KRITIS-Rechtsverordnung nach § 4 Abs. 3 und § 5 KRITISDachG steht noch aus; konkrete Schwellenwerte unterhalb der Regel-Schwelle von 500.000 versorgten Personen können sich ändern.',
     incidentTimeline: [
       {
         id: 'kritis-24h',
