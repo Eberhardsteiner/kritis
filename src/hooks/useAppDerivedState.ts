@@ -42,7 +42,7 @@ import {
 import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
 import { resolveAuthorities } from '../lib/authorities';
 import { enrichRequirementsWithMappings } from '../lib/standardMappings';
-import { computeGapAnalysis } from '../lib/gapAnalysis';
+import { computeGapAnalysis } from '../features/gap';
 import { KRITIS_ELIGIBLE_SECTORS } from '../data/kritisBase';
 import {
   buildDeadlineSummary,

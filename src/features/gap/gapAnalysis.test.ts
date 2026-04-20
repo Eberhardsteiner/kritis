@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { computeGapAnalysis, getConfidenceLabel } from './gapAnalysis';
-import { germanyRegimeDefinitions } from '../data/kritisBase';
+import { germanyRegimeDefinitions } from '../../data/kritisBase';
 import type {
   EvidenceItem,
   RegulatoryRegimeDefinition,
   RequirementDefinition,
   RequirementStatus,
   StandardControlReference,
-} from '../types';
+} from '../../types';
 
 function makeRequirement(overrides: Partial<RequirementDefinition>): RequirementDefinition {
   return {

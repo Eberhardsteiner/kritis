@@ -10,12 +10,12 @@ import {
   TextRun,
   WidthType,
 } from 'docx';
-import { getConfidenceLabel } from './gapAnalysis';
+import { getConfidenceLabel } from '../gapAnalysis';
 import type {
   CompanyProfile,
   GapAnalysisSummary,
   RequirementDefinition,
-} from '../types';
+} from '../../../types';
 
 export interface GapAnalysisDocxInput {
   companyProfile: CompanyProfile;

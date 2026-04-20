@@ -8,7 +8,7 @@ import type {
   RegulatoryRegimeDefinition,
   RequirementDefinition,
   RequirementStatus,
-} from '../types';
+} from '../../types';
 
 type RequirementEffortSize = 'small' | 'medium' | 'large';
 

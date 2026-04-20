@@ -20,7 +20,7 @@ import {
   parseAndValidateModule,
 } from './lib/moduleRegistry';
 import { getAccessProfile } from './data/workspaceBase';
-import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './lib/gapAnalysisDocx';
+import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './features/gap';
 import {
   buildRiskAnalysisBlob,
   buildRiskAnalysisFileName,

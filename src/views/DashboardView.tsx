@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Target,
 } from 'lucide-react';
-import { GapAnalysisDashboard } from '../components/GapAnalysisDashboard';
+import { GapAnalysisDashboard } from '../features/gap';
 import { StatCard } from '../components/StatCard';
 import type {
   ActionSummary,

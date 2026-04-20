@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { GapAnalysisDashboard } from './GapAnalysisDashboard';
-import type { GapAnalysisSummary, RequirementDefinition } from '../types';
+import type { GapAnalysisSummary, RequirementDefinition } from '../../../types';
 
 const requirementFixture: RequirementDefinition[] = [
   {

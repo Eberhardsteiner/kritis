@@ -5,7 +5,7 @@ import {
   buildGapAnalysisDocument,
   buildGapAnalysisFileName,
 } from './gapAnalysisDocx';
-import type { CompanyProfile, GapAnalysisSummary, RequirementDefinition } from '../types';
+import type { CompanyProfile, GapAnalysisSummary, RequirementDefinition } from '../../../types';
 
 const companyProfile: CompanyProfile = {
   companyName: 'Demo-Unternehmen',

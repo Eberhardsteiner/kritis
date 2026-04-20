@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { BarChart3, Calculator, ChevronDown, ChevronRight } from 'lucide-react';
-import { getConfidenceLabel } from '../lib/gapAnalysis';
+import { getConfidenceLabel } from '../gapAnalysis';
 import type {
   EffortConfidence,
   GapAnalysisEntry,
   GapAnalysisSummary,
   RequirementDefinition,
-} from '../types';
+} from '../../../types';
 
 interface GapAnalysisDashboardProps {
   summary: GapAnalysisSummary;
