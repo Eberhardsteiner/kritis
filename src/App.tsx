@@ -111,6 +111,7 @@ import type {
   RegulatoryProfile,
   GermanyRegimeId,
   RegimeScopeStatus,
+  RiskEntry,
   JobRunSummary,
   ModulePackRegistryEntry,
   PermissionKey,
@@ -804,6 +805,7 @@ function buildAppStateFromLoaded(
       ...(loaded?.assessmentFilters ?? {}),
       ...(uiState?.assessmentFilters ?? {}),
     },
+    riskEntries: Array.isArray(loaded?.riskEntries) ? (loaded?.riskEntries as RiskEntry[]) : [],
   };
 }
 
@@ -837,6 +839,7 @@ function buildServerPayload(state: AppState): Partial<AppState> {
     auditChecklistStates: state.auditChecklistStates,
     auditFindings: state.auditFindings,
     certificationState: state.certificationState,
+    riskEntries: state.riskEntries,
   };
 }
 
@@ -4374,6 +4377,51 @@ export default function App() {
     });
   }
 
+  function handleSaveRiskEntry(entry: RiskEntry) {
+    runWithPermission('kritis_edit', 'Für Risiko-Erfassung fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        const existing = current.riskEntries.findIndex((item) => item.id === entry.id);
+        const next = [...current.riskEntries];
+        if (existing >= 0) {
+          next[existing] = entry;
+        } else {
+          next.push(entry);
+        }
+        return { ...current, riskEntries: next };
+      });
+    });
+  }
+
+  function handleDeleteRiskEntry(entry: RiskEntry) {
+    runWithPermission('kritis_edit', 'Für das Löschen von Risiken fehlt das Recht kritis_edit.', () => {
+      setState((current) => ({
+        ...current,
+        riskEntries: current.riskEntries.filter((item) => item.id !== entry.id),
+      }));
+    });
+  }
+
+  function handleExportRiskEntriesJson() {
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Risiko-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    const payload = JSON.stringify(
+      { version: 1, generatedAt: new Date().toISOString(), entries: state.riskEntries },
+      null,
+      2,
+    );
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Risikokatalog-${state.companyProfile.companyName || 'mandant'}-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   async function handleExportGapAnalysisDocx() {
     if (!hasPermission('reports_export')) {
       showNotice('error', 'Für Angebotsgrundlagen-Exporte fehlt das Recht reports_export.');
@@ -4647,6 +4695,10 @@ export default function App() {
     onExportAuditPdf: handleExportAuditPdf,
     onExportFormalHtml: handleExportFormalHtml,
     onExportGapAnalysisDocx: handleExportGapAnalysisDocx,
+    onSaveRiskEntry: handleSaveRiskEntry,
+    onDeleteRiskEntry: handleDeleteRiskEntry,
+    onExportRiskEntriesJson: handleExportRiskEntriesJson,
+    riskEntries: state.riskEntries,
     onCreateServerPackage: handleCreateServerExportPackage,
   });
 

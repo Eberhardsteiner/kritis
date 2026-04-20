@@ -239,6 +239,10 @@ interface BuildActiveViewPanelPropsArgs {
   onExportAuditPdf: ReportViewProps['onExportAuditPdf'];
   onExportFormalHtml: ReportViewProps['onExportFormalHtml'];
   onExportGapAnalysisDocx: DashboardViewProps['onExportGapAnalysisDocx'];
+  onSaveRiskEntry: KritisViewProps['onSaveRiskEntry'];
+  onDeleteRiskEntry: KritisViewProps['onDeleteRiskEntry'];
+  onExportRiskEntriesJson: KritisViewProps['onExportRiskEntriesJson'];
+  riskEntries: KritisViewProps['riskEntries'];
   onCreateServerPackage: ReportViewProps['onCreateServerPackage'];
 }
 
@@ -461,6 +465,10 @@ export function buildActiveViewPanelProps({
   onExportAuditPdf,
   onExportFormalHtml,
   onExportGapAnalysisDocx,
+  onSaveRiskEntry,
+  onDeleteRiskEntry,
+  onExportRiskEntriesJson,
+  riskEntries,
   onCreateServerPackage,
 }: BuildActiveViewPanelPropsArgs): ActiveViewPanelProps {
   return {
@@ -738,6 +746,10 @@ export function buildActiveViewPanelProps({
       kritisPenaltyEstimate,
       requirementOverrides,
       authorityAssignmentsByRegime,
+      riskEntries,
+      onSaveRiskEntry,
+      onDeleteRiskEntry,
+      onExportRiskEntriesJson,
       onUpdateJurisdiction,
       onUpdateRegulatoryProfileField,
       onUpdateRegimeScope,

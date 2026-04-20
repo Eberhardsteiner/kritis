@@ -1,3 +1,7 @@
+import type { RiskEntry } from './features/riskCatalog/types';
+
+export type { RiskEntry };
+
 export type ViewKey =
   | 'program'
   | 'dashboard'
@@ -1178,6 +1182,7 @@ export interface AppState {
   auditFindings: AuditFindingItem[];
   certificationState: CertificationState;
   assessmentFilters: AssessmentFilters;
+  riskEntries: RiskEntry[];
 }
 
 export interface DomainScore {

@@ -14,6 +14,10 @@ import { FindingCard } from '../components/FindingCard';
 import { ManagementLiabilityCard } from '../components/ManagementLiabilityCard';
 import { PenaltyExposureCard } from '../components/PenaltyExposureCard';
 import { StandardMappingsPanel } from '../components/StandardMappingsPanel';
+import { RiskEntryForm } from '../features/riskCatalog/views/RiskEntryForm';
+import { RiskMatrixView } from '../features/riskCatalog/views/RiskMatrixView';
+import { RiskRegisterView } from '../features/riskCatalog/views/RiskRegisterView';
+import type { RiskEntry } from '../features/riskCatalog/types';
 import { ALL_STANDARD_IDS, standardLabels } from '../lib/standardMappings';
 import type { StandardId } from '../types';
 import { kritisCertificationStages } from '../data/kritisBase';
@@ -83,6 +87,10 @@ interface KritisViewProps {
   kritisPenaltyEstimate: PenaltyEstimate;
   requirementOverrides: Record<string, RequirementOverrideStatus>;
   authorityAssignmentsByRegime: Record<RegulatoryRegimeId, AuthorityAssignmentResolved[]>;
+  riskEntries: RiskEntry[];
+  onSaveRiskEntry: (entry: RiskEntry) => void;
+  onDeleteRiskEntry: (entry: RiskEntry) => void;
+  onExportRiskEntriesJson: () => void;
   onUpdateJurisdiction: (value: RegulatoryProfile['jurisdiction']) => void;
   onUpdateRegulatoryProfileField: (
     field:
@@ -230,6 +238,10 @@ export function KritisView({
   kritisPenaltyEstimate,
   requirementOverrides,
   authorityAssignmentsByRegime,
+  riskEntries,
+  onSaveRiskEntry,
+  onDeleteRiskEntry,
+  onExportRiskEntriesJson,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -249,6 +261,8 @@ export function KritisView({
 }: KritisViewProps) {
   const gateStatus = getGateStatus(checklistProgress, findingSummary);
   const [mappingFilter, setMappingFilter] = useState<'all' | StandardId>('all');
+  const [riskFormMode, setRiskFormMode] = useState<'closed' | 'create' | 'edit'>('closed');
+  const [riskEditingTarget, setRiskEditingTarget] = useState<RiskEntry | null>(null);
   const [dossierTitle, setDossierTitle] = useState('');
   const [dossierNote, setDossierNote] = useState('');
   const [dossierSignOffName, setDossierSignOffName] = useState(certificationState.auditLead || '');
@@ -889,6 +903,60 @@ export function KritisView({
             );
           })}
         </div>
+      </section>
+
+      <section className="card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Risikoanalyse · § 12 KRITISDachG</p>
+            <h3>All-Gefahren-Risikokatalog</h3>
+          </div>
+          <div className="chip-row">
+            <span className="chip outline">{riskEntries.length} Risiken erfasst</span>
+          </div>
+        </div>
+        <p className="muted small top-gap">
+          Risiken werden nach dem All-Gefahren-Ansatz (Natur, Technik, Mensch, Interdependenzen, Cyber-physisch)
+          erfasst und über eine 5×5-Matrix (Eintrittswahrscheinlichkeit × Auswirkung) bewertet. Die Ergebnisse
+          fließen in den Resilienzplan nach § 13 und die Nachweisführung nach § 16 ein.
+        </p>
+
+        <div className="top-gap">
+          <RiskMatrixView entries={riskEntries} />
+        </div>
+
+        <div className="top-gap">
+          <RiskRegisterView
+            entries={riskEntries}
+            onAdd={() => {
+              setRiskEditingTarget(null);
+              setRiskFormMode('create');
+            }}
+            onEdit={(entry) => {
+              setRiskEditingTarget(entry);
+              setRiskFormMode('edit');
+            }}
+            onDelete={onDeleteRiskEntry}
+            onExportJson={onExportRiskEntriesJson}
+          />
+        </div>
+
+        {riskFormMode !== 'closed' ? (
+          <div className="top-gap">
+            <RiskEntryForm
+              initial={riskFormMode === 'edit' ? (riskEditingTarget ?? undefined) : undefined}
+              onSubmit={(entry) => {
+                onSaveRiskEntry(entry);
+                setRiskFormMode('closed');
+                setRiskEditingTarget(null);
+              }}
+              onCancel={() => {
+                setRiskFormMode('closed');
+                setRiskEditingTarget(null);
+              }}
+            />
+          </div>
+        ) : null}
       </section>
 
       <section className="card">
