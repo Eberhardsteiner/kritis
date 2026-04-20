@@ -33,6 +33,11 @@ export interface RiskCategory {
   subCategories: RiskSubCategory[];
 }
 
+/**
+ * All-Gefahren-Risikomatrix-Eintrag nach § 12 KRITISDachG (riskCatalog
+ * / B3). Nicht zu verwechseln mit ScenarioItem (operations/C2.5) oder
+ * Scenario (tabletopExercise/B5).
+ */
 export interface RiskEntry {
   id: string;
   categoryId: RiskCategoryId;

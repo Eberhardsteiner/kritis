@@ -37,6 +37,13 @@ import {
   normalizeLoadedEvidence,
   useEvidenceHandlers,
 } from './features/evidence';
+import {
+  normalizeLoadedBusinessProcesses,
+  normalizeLoadedDependencies,
+  normalizeLoadedExercises,
+  normalizeLoadedScenarios,
+  useOperationsHandlers,
+} from './features/operations';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -301,102 +308,6 @@ function normalizeCertificationState(input?: Partial<CertificationState>): Certi
     stageStates,
   };
 }
-
-function normalizeLoadedBusinessProcesses(items: unknown, fallbackModuleId: string): BusinessProcessItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<BusinessProcessItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('prc'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      owner: item.owner ?? '',
-      criticality: item.criticality ?? 'mittel',
-      mtpdHours: item.mtpdHours ?? '',
-      rtoHours: item.rtoHours ?? '',
-      rpoHours: item.rpoHours ?? '',
-      manualWorkaround: item.manualWorkaround ?? false,
-      dependencies: item.dependencies ?? '',
-      outputs: item.outputs ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedDependencies(items: unknown, fallbackModuleId: string): DependencyItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<DependencyItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('dep'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      category: item.category ?? 'lieferant',
-      criticality: item.criticality ?? 'mittel',
-      singlePointOfFailure: item.singlePointOfFailure ?? false,
-      fallback: item.fallback ?? '',
-      contractReference: item.contractReference ?? '',
-      contact: item.contact ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedScenarios(items: unknown, fallbackModuleId: string): ScenarioItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<ScenarioItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('scn'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      category: item.category ?? '',
-      description: item.description ?? '',
-      likelihood: typeof item.likelihood === 'number' && item.likelihood >= 1 && item.likelihood <= 5 ? item.likelihood : 3,
-      impact: typeof item.impact === 'number' && item.impact >= 1 && item.impact <= 5 ? item.impact : 3,
-      owner: item.owner ?? '',
-      linkedProcessIds: Array.isArray(item.linkedProcessIds) ? item.linkedProcessIds.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : [],
-      linkedAssetIds: Array.isArray(item.linkedAssetIds) ? item.linkedAssetIds.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : [],
-      linkedDependencyIds: Array.isArray(item.linkedDependencyIds) ? item.linkedDependencyIds.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : [],
-      exerciseStatus: item.exerciseStatus === 'planned' || item.exerciseStatus === 'tested' ? item.exerciseStatus : 'not_tested',
-      playbook: item.playbook ?? '',
-      lastExerciseDate: item.lastExerciseDate ?? '',
-      nextExerciseDate: item.nextExerciseDate ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedExercises(items: unknown, fallbackModuleId: string): ExerciseItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<ExerciseItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('exc'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      scenarioId: item.scenarioId ?? '',
-      title: item.title ?? '',
-      exerciseType: item.exerciseType === 'simulation' || item.exerciseType === 'technical' || item.exerciseType === 'alarm' || item.exerciseType === 'supplier' ? item.exerciseType : 'tabletop',
-      exerciseDate: item.exerciseDate ?? '',
-      owner: item.owner ?? '',
-      result: item.result === 'passed' || item.result === 'partial' || item.result === 'failed' ? item.result : 'planned',
-      participants: item.participants ?? '',
-      findings: item.findings ?? '',
-      followUpActionIds: Array.isArray(item.followUpActionIds) ? item.followUpActionIds.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : [],
-      nextExerciseDate: item.nextExerciseDate ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
 
 function normalizeRolloutPlan(input?: Partial<RolloutPlan>): RolloutPlan {
   return {
@@ -2659,355 +2570,34 @@ export default function App() {
   }
 
 
-  function handleCreateEmptyBusinessProcess() {
-    runWithPermission('governance_edit', 'Für BIA-Prozesse fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        businessProcesses: [
-          {
-            id: createId('bpr'),
-            moduleId: currentModule.id,
-            title: '',
-            owner: '',
-            criticality: 'mittel',
-            mtpdHours: '',
-            rtoHours: '',
-            rpoHours: '',
-            manualWorkaround: false,
-            dependencies: '',
-            outputs: '',
-            notes: '',
-          },
-          ...current.businessProcesses,
-        ],
-        activeView: 'resilience',
-      }));
-    });
-  }
-
-  function handleGenerateProcessTemplates() {
-    runWithPermission('governance_edit', 'Für Prozessvorlagen fehlt das Recht governance_edit.', () => {
-      setState((current) => {
-        const businessProcesses = [...current.businessProcesses];
-
-        processTemplates.forEach((template) => {
-          const exists = businessProcesses.some((item) => item.moduleId === currentModule.id && item.title === template.title);
-          if (!exists) {
-            businessProcesses.unshift({
-              id: createId('bpr'),
-              moduleId: currentModule.id,
-              title: template.title,
-              owner: template.ownerRole ?? '',
-              criticality: template.criticality ?? 'mittel',
-              mtpdHours: template.mtpdHours ?? '',
-              rtoHours: template.rtoHours ?? '',
-              rpoHours: template.rpoHours ?? '',
-              manualWorkaround: false,
-              dependencies: template.dependencies ?? '',
-              outputs: template.outputs ?? '',
-              notes: template.notes ?? '',
-            });
-          }
-        });
-
-        return {
-          ...current,
-          businessProcesses,
-          activeView: 'resilience',
-        };
-      });
-    });
-  }
-
-  function handleUpdateBusinessProcess(processId: string, patch: Partial<BusinessProcessItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an BIA-Prozessen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        businessProcesses: current.businessProcesses.map((item) => (
-          item.id === processId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteBusinessProcess(processId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von BIA-Prozessen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        businessProcesses: current.businessProcesses.filter((item) => item.id !== processId),
-        scenarios: current.scenarios.map((scenario) => ({
-          ...scenario,
-          linkedProcessIds: scenario.linkedProcessIds.filter((id) => id !== processId),
-        })),
-      }));
-    });
-  }
-
-  function handleCreateEmptyDependency() {
-    runWithPermission('governance_edit', 'Für Abhängigkeiten fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        dependencies: [
-          {
-            id: createId('dep'),
-            moduleId: currentModule.id,
-            title: '',
-            category: 'lieferant',
-            criticality: 'mittel',
-            singlePointOfFailure: false,
-            fallback: '',
-            contractReference: '',
-            contact: '',
-            notes: '',
-          },
-          ...current.dependencies,
-        ],
-        activeView: 'resilience',
-      }));
-    });
-  }
-
-  function handleGenerateDependencyTemplates() {
-    runWithPermission('governance_edit', 'Für Abhängigkeitsvorlagen fehlt das Recht governance_edit.', () => {
-      setState((current) => {
-        const dependencies = [...current.dependencies];
-
-        dependencyTemplates.forEach((template) => {
-          const exists = dependencies.some((item) => item.moduleId === currentModule.id && item.title === template.title && item.category === template.category);
-          if (!exists) {
-            dependencies.unshift({
-              id: createId('dep'),
-              moduleId: currentModule.id,
-              title: template.title,
-              category: template.category,
-              criticality: template.criticality ?? 'mittel',
-              singlePointOfFailure: Boolean(template.singlePointOfFailure),
-              fallback: template.fallback ?? '',
-              contractReference: template.contractReference ?? '',
-              contact: '',
-              notes: template.notes ?? '',
-            });
-          }
-        });
-
-        return {
-          ...current,
-          dependencies,
-          activeView: 'resilience',
-        };
-      });
-    });
-  }
-
-  function handleUpdateDependency(dependencyId: string, patch: Partial<DependencyItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Abhängigkeiten fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        dependencies: current.dependencies.map((item) => (
-          item.id === dependencyId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteDependency(dependencyId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Abhängigkeiten fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        dependencies: current.dependencies.filter((item) => item.id !== dependencyId),
-        scenarios: current.scenarios.map((scenario) => ({
-          ...scenario,
-          linkedDependencyIds: scenario.linkedDependencyIds.filter((id) => id !== dependencyId),
-        })),
-      }));
-    });
-  }
-
-  function handleCreateEmptyScenario() {
-    runWithPermission('governance_edit', 'Für Krisenszenarien fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        scenarios: [
-          {
-            id: createId('scn'),
-            moduleId: currentModule.id,
-            title: '',
-            category: '',
-            description: '',
-            likelihood: 3,
-            impact: 3,
-            owner: '',
-            linkedProcessIds: [],
-            linkedAssetIds: [],
-            linkedDependencyIds: [],
-            exerciseStatus: 'not_tested',
-            playbook: '',
-            lastExerciseDate: '',
-            nextExerciseDate: '',
-            notes: '',
-          },
-          ...current.scenarios,
-        ],
-        activeView: 'resilience',
-      }));
-    });
-  }
-
-  function handleGenerateScenarioTemplates() {
-    runWithPermission('governance_edit', 'Für Szenariovorlagen fehlt das Recht governance_edit.', () => {
-      setState((current) => {
-        const scenarios = [...current.scenarios];
-        const processMap = new Map(processTemplates.map((template) => {
-          const process = current.businessProcesses.find((item) => item.moduleId === currentModule.id && item.title === template.title);
-          return [template.id, process?.id ?? ''] as const;
-        }));
-        const dependencyMap = new Map(dependencyTemplates.map((template) => {
-          const dependency = current.dependencies.find((item) => item.moduleId === currentModule.id && item.title === template.title && item.category === template.category);
-          return [template.id, dependency?.id ?? ''] as const;
-        }));
-
-        scenarioTemplates.forEach((template) => {
-          const exists = scenarios.some((item) => item.moduleId === currentModule.id && item.title === template.title);
-          if (!exists) {
-            scenarios.unshift({
-              id: createId('scn'),
-              moduleId: currentModule.id,
-              title: template.title,
-              category: template.category,
-              description: template.description,
-              likelihood: template.likelihood ?? 3,
-              impact: template.impact ?? 3,
-              owner: template.ownerRole ?? '',
-              linkedProcessIds: (template.linkedProcessTemplateIds ?? []).map((id) => processMap.get(id) || '').filter(Boolean),
-              linkedAssetIds: [],
-              linkedDependencyIds: (template.linkedDependencyTemplateIds ?? []).map((id) => dependencyMap.get(id) || '').filter(Boolean),
-              exerciseStatus: 'not_tested',
-              playbook: template.playbook ?? '',
-              lastExerciseDate: '',
-              nextExerciseDate: template.exerciseTypeHint ? getDateOffset(90) : '',
-              notes: template.notes ?? '',
-            });
-          }
-        });
-
-        return {
-          ...current,
-          scenarios,
-          activeView: 'resilience',
-        };
-      });
-    });
-  }
-
-  function handleUpdateScenario(scenarioId: string, patch: Partial<ScenarioItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Szenarien fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        scenarios: current.scenarios.map((item) => (
-          item.id === scenarioId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteScenario(scenarioId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Szenarien fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        scenarios: current.scenarios.filter((item) => item.id !== scenarioId),
-        exercises: current.exercises.map((exercise) => (
-          exercise.scenarioId === scenarioId ? { ...exercise, scenarioId: '' } : exercise
-        )),
-      }));
-    });
-  }
-
-  function handleCreateEmptyExercise() {
-    runWithPermission('governance_edit', 'Für Übungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        exercises: [
-          {
-            id: createId('exr'),
-            moduleId: currentModule.id,
-            scenarioId: current.scenarios.find((item) => item.moduleId === currentModule.id)?.id ?? '',
-            title: '',
-            exerciseType: 'tabletop',
-            exerciseDate: '',
-            owner: '',
-            result: 'planned',
-            participants: '',
-            findings: '',
-            followUpActionIds: [],
-            nextExerciseDate: getDateOffset(120),
-            notes: '',
-          },
-          ...current.exercises,
-        ],
-        activeView: 'resilience',
-      }));
-    });
-  }
-
-  function handleGenerateExerciseTemplates() {
-    runWithPermission('governance_edit', 'Für Übungsvorlagen fehlt das Recht governance_edit.', () => {
-      setState((current) => {
-        const exercises = [...current.exercises];
-        const scenarioMap = new Map(scenarioTemplates.map((template) => {
-          const scenario = current.scenarios.find((item) => item.moduleId === currentModule.id && item.title === template.title);
-          return [template.id, scenario?.id ?? ''] as const;
-        }));
-
-        exerciseTemplates.forEach((template) => {
-          const exists = exercises.some((item) => item.moduleId === currentModule.id && item.title === template.title);
-          if (!exists) {
-            const cadenceDays = Math.max((template.cadenceMonths ?? 6) * 30, 30);
-            exercises.unshift({
-              id: createId('exr'),
-              moduleId: currentModule.id,
-              scenarioId: template.scenarioTemplateId ? (scenarioMap.get(template.scenarioTemplateId) || '') : '',
-              title: template.title,
-              exerciseType: template.exerciseType ?? 'tabletop',
-              exerciseDate: '',
-              owner: template.ownerRole ?? '',
-              result: 'planned',
-              participants: '',
-              findings: '',
-              followUpActionIds: [],
-              nextExerciseDate: getDateOffset(cadenceDays),
-              notes: template.notes ?? '',
-            });
-          }
-        });
-
-        return {
-          ...current,
-          exercises,
-          activeView: 'resilience',
-        };
-      });
-    });
-  }
-
-  function handleUpdateExercise(exerciseId: string, patch: Partial<ExerciseItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Übungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        exercises: current.exercises.map((item) => (
-          item.id === exerciseId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteExercise(exerciseId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Übungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        exercises: current.exercises.filter((item) => item.id !== exerciseId),
-      }));
-    });
-  }
+  const {
+    handleCreateEmptyBusinessProcess,
+    handleGenerateProcessTemplates,
+    handleUpdateBusinessProcess,
+    handleDeleteBusinessProcess,
+    handleCreateEmptyDependency,
+    handleGenerateDependencyTemplates,
+    handleUpdateDependency,
+    handleDeleteDependency,
+    handleCreateEmptyScenario,
+    handleGenerateScenarioTemplates,
+    handleUpdateScenario,
+    handleDeleteScenario,
+    handleCreateEmptyExercise,
+    handleGenerateExerciseTemplates,
+    handleUpdateExercise,
+    handleDeleteExercise,
+  } = useOperationsHandlers({
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    currentModule,
+    processTemplates,
+    dependencyTemplates,
+    scenarioTemplates,
+    exerciseTemplates,
+  });
 
   function getExportTypeLabel(type: ExportPackageType): string {
     if (type === 'management_report') {

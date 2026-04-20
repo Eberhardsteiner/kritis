@@ -600,6 +600,11 @@ export interface DependencyItem {
   notes: string;
 }
 
+/**
+ * Business-Continuity-Krisenszenario (operations-Feature).
+ * Nicht zu verwechseln mit RiskEntry (riskCatalog/B3) oder
+ * Scenario (tabletopExercise/B5).
+ */
 export interface ScenarioItem {
   id: string;
   moduleId: string;

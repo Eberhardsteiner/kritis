@@ -11,7 +11,7 @@ import type * as OperationsViewModule from '../views/OperationsView';
 import type * as PlatformViewModule from '../views/PlatformView';
 import type * as ProgramViewModule from '../views/ProgramView';
 import type * as ReportViewModule from '../views/ReportView';
-import type * as ResilienceViewModule from '../views/ResilienceView';
+import type * as ResilienceViewModule from '../features/operations/views/ResilienceView';
 import type * as ResiliencePlanViewModule from '../views/ResiliencePlanView';
 import type * as RolloutViewModule from '../views/RolloutView';
 import type * as TabletopExerciseViewModule from '../views/TabletopExerciseView';
@@ -27,7 +27,7 @@ const OperationsView = lazy(async () => ({ default: (await import('../views/Oper
 const PlatformView = lazy(async () => ({ default: (await import('../views/PlatformView')).PlatformView }));
 const ProgramView = lazy(async () => ({ default: (await import('../views/ProgramView')).ProgramView }));
 const ReportView = lazy(async () => ({ default: (await import('../views/ReportView')).ReportView }));
-const ResilienceView = lazy(async () => ({ default: (await import('../views/ResilienceView')).ResilienceView }));
+const ResilienceView = lazy(async () => ({ default: (await import('../features/operations')).ResilienceView }));
 const ResiliencePlanView = lazy(async () => ({ default: (await import('../views/ResiliencePlanView')).ResiliencePlanView }));
 const RolloutView = lazy(async () => ({ default: (await import('../views/RolloutView')).RolloutView }));
 const TabletopExerciseView = lazy(async () => ({ default: (await import('../views/TabletopExerciseView')).TabletopExerciseView }));

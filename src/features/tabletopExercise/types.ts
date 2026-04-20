@@ -64,6 +64,12 @@ export interface EvaluationCriterion {
   category?: EvaluationCategory;
 }
 
+/**
+ * Tabletop-Uebungsszenario (tabletopExercise/B5) mit Timeline, Injects,
+ * Entscheidungen. Nicht zu verwechseln mit ScenarioItem
+ * (operations/C2.5, Business-Continuity-Krisenszenario) oder RiskEntry
+ * (riskCatalog/B3, 5x5-Risikomatrix-Eintrag).
+ */
 export interface Scenario {
   id: string;
   version: string;

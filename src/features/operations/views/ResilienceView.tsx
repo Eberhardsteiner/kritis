@@ -1,5 +1,5 @@
 import { AlertTriangle, Layers3, Route, ShieldAlert, Siren, Wrench } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
+import { StatCard } from '../../../components/StatCard';
 import type {
   AssetItem,
   BusinessProcessItem,
@@ -13,7 +13,7 @@ import type {
   ScenarioItem,
   ScenarioTemplateDefinition,
   StructureCriticality,
-} from '../types';
+} from '../../../types';
 
 interface ResilienceViewProps {
   moduleName: string;
