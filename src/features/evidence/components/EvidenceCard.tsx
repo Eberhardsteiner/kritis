@@ -17,7 +17,7 @@ import type {
   EvidenceItem,
   EvidenceStatus,
   EvidenceType,
-} from '../types';
+} from '../../../types';
 
 interface EvidenceCardProps {
   evidence: EvidenceItem;

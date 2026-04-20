@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { FileText, LibraryBig, ListTodo, PlusCircle, Search, Sparkles } from 'lucide-react';
 import { ActionCard } from '../components/ActionCard';
-// EvidenceCard bleibt bis C2.4 (evidence-Extraktion) in src/components/.
-import { EvidenceCard } from '../../../components/EvidenceCard';
+// EvidenceCard wird seit C2.4 aus dem evidence-Feature bezogen (einziger
+// Feature-zu-Feature-Import, durch die evidence-Public-API abgesichert).
+import { EvidenceCard } from '../../evidence';
 import type {
   ActionItem,
   ActionSummary,

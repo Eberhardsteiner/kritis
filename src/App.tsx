@@ -32,6 +32,11 @@ import {
   normalizeReviewPlan,
   useGovernanceHandlers,
 } from './features/governance';
+import {
+  createEvidenceDraft,
+  normalizeLoadedEvidence,
+  useEvidenceHandlers,
+} from './features/evidence';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -169,6 +174,7 @@ import type {
   RestoreDrillSummary,
   ReviewPlan,
   ServerHealth,
+  ServerMode,
   SnapshotInfo,
   ScenarioItem,
   SectorModuleDefinition,
@@ -259,10 +265,6 @@ const defaultSystemSettings: SystemSettings = {
   notes: '',
 };
 
-const MAX_LOCAL_ATTACHMENT_BYTES = 450 * 1024;
-const MAX_SERVER_ATTACHMENT_BYTES = 12 * 1024 * 1024;
-
-type ServerMode = 'checking' | 'connected' | 'syncing' | 'offline' | 'error' | 'auth_required';
 
 function createDefaultCertificationState(): CertificationState {
   return {
@@ -298,113 +300,6 @@ function normalizeCertificationState(input?: Partial<CertificationState>): Certi
     decisionNote: input?.decisionNote ?? '',
     stageStates,
   };
-}
-
-function normalizeEvidenceClassification(value: string | undefined): EvidenceClassification {
-  if (
-    value === 'öffentlich'
-    || value === 'intern'
-    || value === 'vertraulich'
-    || value === 'streng_vertraulich'
-  ) {
-    return value;
-  }
-  return 'intern';
-}
-
-function normalizeAttachment(value: unknown): EvidenceAttachment | undefined {
-  if (!value || typeof value !== 'object') {
-    return undefined;
-  }
-
-  const candidate = value as Partial<EvidenceAttachment>;
-  if (
-    typeof candidate.fileName !== 'string'
-    || typeof candidate.mimeType !== 'string'
-    || typeof candidate.sizeKb !== 'number'
-    || typeof candidate.dataUrl !== 'string'
-  ) {
-    return undefined;
-  }
-
-  return {
-    fileName: candidate.fileName,
-    mimeType: candidate.mimeType,
-    sizeKb: candidate.sizeKb,
-    dataUrl: candidate.dataUrl,
-  };
-}
-
-function normalizeServerAttachment(value: unknown): EvidenceItem['serverAttachment'] | undefined {
-  if (!value || typeof value !== 'object') {
-    return undefined;
-  }
-
-  const candidate = value as Partial<NonNullable<EvidenceItem['serverAttachment']>>;
-  if (
-    typeof candidate.id !== 'string'
-    || typeof candidate.fileName !== 'string'
-    || typeof candidate.storedFileName !== 'string'
-    || typeof candidate.mimeType !== 'string'
-    || typeof candidate.sizeKb !== 'number'
-    || typeof candidate.url !== 'string'
-    || typeof candidate.uploadedAt !== 'string'
-    || typeof candidate.uploadedBy !== 'string'
-  ) {
-    return undefined;
-  }
-
-  return {
-    id: candidate.id,
-    fileName: candidate.fileName,
-    storedFileName: candidate.storedFileName,
-    mimeType: candidate.mimeType,
-    sizeKb: candidate.sizeKb,
-    url: candidate.url,
-    uploadedAt: candidate.uploadedAt,
-    uploadedBy: candidate.uploadedBy,
-    versionId: typeof candidate.versionId === 'string' ? candidate.versionId : undefined,
-    checksumSha256: typeof candidate.checksumSha256 === 'string' ? candidate.checksumSha256 : undefined,
-    historyCount: typeof candidate.historyCount === 'number' && Number.isFinite(candidate.historyCount)
-      ? candidate.historyCount
-      : undefined,
-  };
-}
-
-function normalizeLoadedEvidence(items: unknown, fallbackModuleId: string): EvidenceItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<EvidenceItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('evi'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      type: item.type ?? 'other',
-      owner: item.owner ?? '',
-      reviewer: item.reviewer ?? '',
-      version: item.version ?? '1.0',
-      classification: normalizeEvidenceClassification(item.classification),
-      folder: item.folder ?? 'Allgemein',
-      tags: Array.isArray(item.tags) ? item.tags.filter((value): value is string => typeof value === 'string' && Boolean(value.trim())) : [],
-      externalId: item.externalId ?? '',
-      link: item.link ?? '',
-      status: item.status ?? 'missing',
-      reviewDate: item.reviewDate ?? '',
-      validUntil: item.validUntil ?? '',
-      reviewCycleDays: typeof item.reviewCycleDays === 'number' && Number.isFinite(item.reviewCycleDays) ? item.reviewCycleDays : 180,
-      sourceType: item.sourceType ?? 'manual',
-      sourceId: item.sourceId,
-      sourceLabel: item.sourceLabel ?? 'Manuell',
-      relatedQuestionIds: item.relatedQuestionIds ?? [],
-      relatedRequirementIds: item.relatedRequirementIds ?? [],
-      notes: item.notes ?? '',
-      attachment: normalizeAttachment(item.attachment),
-      serverAttachment: normalizeServerAttachment(item.serverAttachment),
-      createdAt: item.createdAt ?? new Date().toISOString(),
-    }));
 }
 
 function normalizeLoadedBusinessProcesses(items: unknown, fallbackModuleId: string): BusinessProcessItem[] {
@@ -857,32 +752,6 @@ function isApiStatus(error: unknown, status: number): boolean {
   return Boolean(error && typeof error === 'object' && 'status' in error && (error as { status?: number }).status === status);
 }
 
-function guessEvidenceType(text: string): EvidenceType {
-  const normalized = text.toLowerCase();
-  if (normalized.includes('backup') || normalized.includes('restore')) {
-    return 'backup';
-  }
-  if (normalized.includes('übung') || normalized.includes('test') || normalized.includes('protokoll')) {
-    return 'test';
-  }
-  if (normalized.includes('schulung') || normalized.includes('training')) {
-    return 'training';
-  }
-  if (normalized.includes('vertrag') || normalized.includes('sla')) {
-    return 'contract';
-  }
-  if (normalized.includes('richtlinie') || normalized.includes('policy')) {
-    return 'policy';
-  }
-  if (normalized.includes('bericht')) {
-    return 'report';
-  }
-  if (normalized.includes('plan') || normalized.includes('konzept')) {
-    return 'plan';
-  }
-  return 'other';
-}
-
 function inferRoleProfileFromStakeholder(stakeholder: StakeholderItem): UserRoleProfile {
   const text = `${stakeholder.roleLabel} ${stakeholder.approvalScope} ${stakeholder.responsibilities}`.toLowerCase();
 
@@ -913,15 +782,6 @@ function inferRoleProfileFromStakeholder(stakeholder: StakeholderItem): UserRole
     return 'reviewer';
   }
   return 'editor';
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Datei konnte nicht gelesen werden.'));
-    reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.readAsDataURL(file);
-  });
 }
 
 function readAuthCallbackSearch() {
@@ -1548,59 +1408,6 @@ export default function App() {
     } catch (error) {
       const details = extractErrorDetails(error);
       showNotice('error', error instanceof Error ? error.message : 'Passwort konnte nicht zurückgesetzt werden.', details);
-    }
-  }
-
-  async function handleLoadEvidenceVersions(evidenceId: string) {
-    if (serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required') {
-      showNotice('error', 'Für Dokumentenhistorien muss ein erreichbarer Server-Arbeitsbereich aktiv sein.');
-      return;
-    }
-
-    try {
-      const response = await fetchEvidenceVersions(authToken || '', evidenceId);
-      setEvidenceVersionMap((current) => ({
-        ...current,
-        [evidenceId]: response.versions,
-      }));
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      showNotice('error', error instanceof Error ? error.message : 'Historie konnte nicht geladen werden.', details);
-    }
-  }
-
-  async function handleRestoreEvidenceVersion(evidenceId: string, versionId: string) {
-    if (serverMode === 'offline' || serverMode === 'checking' || serverMode === 'auth_required') {
-      showNotice('error', 'Für die Wiederherstellung muss ein erreichbarer Server-Arbeitsbereich aktiv sein.');
-      return;
-    }
-
-    try {
-      const response = await restoreEvidenceVersion(authToken || '', evidenceId, versionId);
-      setEvidenceVersionMap((current) => ({
-        ...current,
-        [evidenceId]: response.versions,
-      }));
-      setState((current) => {
-        const nextState = {
-          ...current,
-          evidenceItems: current.evidenceItems.map((item) => (
-            item.id === evidenceId ? response.evidence : item
-          )),
-        };
-        suppressNextServerSyncRef.current = true;
-        lastSyncedPayloadRef.current = serializeServerPayload(nextState);
-        return nextState;
-      });
-      setLastServerSyncAt(new Date().toISOString());
-      updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
-      setSyncError('');
-      setServerMode('connected');
-      await refreshServerSideData(authToken || '', authSession);
-      showNotice('success', 'Dokumentenversion wurde wieder als aktiv gesetzt.');
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      showNotice('error', error instanceof Error ? error.message : 'Dokumentenversion konnte nicht wiederhergestellt werden.', details);
     }
   }
 
@@ -2694,310 +2501,51 @@ export default function App() {
     actionTemplates,
   });
 
-  function upsertEvidenceDrafts(drafts: Array<Omit<EvidenceItem, 'id' | 'createdAt'>>) {
-    runWithPermission('evidence_edit', 'Für Evidenzänderungen fehlt das Recht evidence_edit.', () => {
-      setState((current) => {
-        const evidenceItems = [...current.evidenceItems];
-
-        drafts.forEach((draft) => {
-          const shouldDeduplicate = draft.sourceType !== 'manual' && Boolean(draft.sourceId);
-          const exists = shouldDeduplicate
-            ? evidenceItems.some(
-                (item) => item.moduleId === draft.moduleId
-                  && item.sourceType === draft.sourceType
-                  && item.sourceId === draft.sourceId,
-              )
-            : false;
-
-          if (!exists) {
-            evidenceItems.unshift({
-              ...draft,
-              id: createId('evi'),
-              createdAt: new Date().toISOString(),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          evidenceItems,
-          activeView: 'measures',
-        };
-      });
-    });
-  }
-
-  function createEvidenceDraft(
-    patch: Partial<Omit<EvidenceItem, 'id' | 'createdAt'>> = {},
-  ): Omit<EvidenceItem, 'id' | 'createdAt'> {
-    return {
-      moduleId: currentModule.id,
-      title: '',
-      type: 'other',
-      owner: '',
-      reviewer: '',
-      version: '1.0',
-      classification: tenantPolicy.defaultClassification,
-      folder: documentFolders[0] ?? 'Allgemein',
-      tags: [],
-      externalId: '',
-      link: '',
-      status: 'missing',
-      reviewDate: getDateOffset(60),
-      validUntil: getDateOffset(365),
-      reviewCycleDays: tenantPolicy.evidenceReviewCadenceDays,
-      sourceType: 'manual',
-      sourceLabel: 'Manuell',
-      relatedQuestionIds: [],
-      relatedRequirementIds: [],
-      notes: '',
-      attachment: undefined,
-      ...patch,
-    };
-  }
-
-  function createEvidenceFromQuestionDefinition(question: QuestionDefinition): Omit<EvidenceItem, 'id' | 'createdAt'> {
-    return createEvidenceDraft({
-      title: question.evidenceHint ? `${question.title} - Evidenz` : question.title,
-      type: guessEvidenceType(`${question.evidenceHint ?? ''} ${question.title}`),
-      sourceType: 'question',
-      sourceId: question.id,
-      sourceLabel: question.title,
-      relatedQuestionIds: [question.id],
-      notes: question.evidenceHint ?? question.guidance,
-      tags: question.tags ?? [],
-    });
-  }
-
-  function createEvidenceFromRequirementDefinition(
-    requirement: RequirementDefinition,
-  ): Omit<EvidenceItem, 'id' | 'createdAt'> {
-    return createEvidenceDraft({
-      title: `Nachweis - ${requirement.title}`,
-      type: guessEvidenceType(`${requirement.title} ${requirement.guidance}`),
-      reviewDate: getDateOffset(45),
-      sourceType: 'requirement',
-      sourceId: requirement.id,
-      sourceLabel: requirement.title,
-      relatedRequirementIds: [requirement.id],
-      notes: `${requirement.guidance}${requirement.dueHint ? ` | ${requirement.dueHint}` : ''}`,
-      tags: ['KRITIS'],
-    });
-  }
-
-  function handleCreateEvidenceFromQuestion(questionId: string) {
-    const question = questionLookup.get(questionId);
-    if (!question) {
-      return;
-    }
-    upsertEvidenceDrafts([createEvidenceFromQuestionDefinition(question)]);
-  }
-
-  function handleCreateEvidenceFromRequirement(requirementId: string) {
-    const requirement = requirementLookup.get(requirementId);
-    if (!requirement) {
-      return;
-    }
-    upsertEvidenceDrafts([createEvidenceFromRequirementDefinition(requirement)]);
-  }
-
-  function handleCreateEmptyEvidence() {
-    upsertEvidenceDrafts([createEvidenceDraft()]);
-  }
-
-  function handleGenerateCriticalQuestionEvidence() {
-    const drafts = scoreSnapshot.recommendations
-      .map((recommendation) => questionLookup.get(recommendation.questionId))
-      .filter((question): question is QuestionDefinition => Boolean(question))
-      .map((question) => createEvidenceFromQuestionDefinition(question));
-
-    upsertEvidenceDrafts(drafts);
-  }
-
-  function handleGenerateRequirementEvidence() {
-    const drafts = requirements
-      .filter((requirement) => {
-        const status = state.requirementStates[requirement.id] ?? 'open';
-        return status !== 'ready' && status !== 'not_applicable';
-      })
-      .map((requirement) => createEvidenceFromRequirementDefinition(requirement));
-
-    upsertEvidenceDrafts(drafts);
-  }
-
-  function handleGenerateModuleEvidenceTemplates() {
-    const drafts = evidenceTemplates.map((template) => createEvidenceDraft({
-      title: template.title,
-      type: template.type,
-      owner: template.ownerRole ?? '',
-      folder: template.folder ?? documentFolders[0] ?? 'Allgemein',
-      tags: template.tags ?? [],
-      reviewDate: getDateOffset(75),
-      reviewCycleDays: tenantPolicy.evidenceReviewCadenceDays,
-      sourceType: 'module_template',
-      sourceId: template.id,
-      sourceLabel: template.title,
-      relatedQuestionIds: template.relatedQuestionIds ?? [],
-      relatedRequirementIds: template.relatedRequirementIds ?? [],
-      notes: template.reviewCycleHint ?? '',
-    }));
-
-    upsertEvidenceDrafts(drafts);
-  }
-
-  function handleUpdateEvidence(evidenceId: string, patch: Partial<EvidenceItem>) {
-    runWithPermission('evidence_edit', 'Für Änderungen an Evidenzen fehlt das Recht evidence_edit.', () => {
-      setState((current) => ({
-        ...current,
-        evidenceItems: current.evidenceItems.map((item) => (
-          item.id === evidenceId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteEvidence(evidenceId: string) {
-    runWithPermission('evidence_edit', 'Für das Löschen von Evidenzen fehlt das Recht evidence_edit.', () => {
-      setEvidenceVersionMap((current) => {
-        const next = { ...current };
-        delete next[evidenceId];
-        return next;
-      });
-      setState((current) => ({
-        ...current,
-        evidenceItems: current.evidenceItems.filter((item) => item.id !== evidenceId),
-        auditFindings: current.auditFindings.map((finding) => ({
-          ...finding,
-          relatedEvidenceIds: finding.relatedEvidenceIds.filter((id) => id !== evidenceId),
-        })),
-      }));
-    });
-  }
-
-  async function handleAttachEvidenceFile(evidenceId: string, file: File | null) {
-    if (!file) {
-      return;
-    }
-
-    if (!hasPermission('evidence_edit')) {
-      showNotice('error', 'Für Dateianhänge fehlt das Recht evidence_edit.');
-      return;
-    }
-
-    if (serverMode === 'connected' || serverMode === 'syncing') {
-      if (file.size > MAX_SERVER_ATTACHMENT_BYTES) {
-        showNotice('error', 'Die Datei ist für den Prototyp zu groß. Bitte unter 12 MB bleiben.');
-        return;
-      }
-
-      try {
-        const response = await uploadEvidenceAttachment(authToken || '', evidenceId, file);
-        setEvidenceVersionMap((current) => {
-          const next = { ...current };
-          delete next[evidenceId];
-          return next;
-        });
-        setState((current) => {
-          const nextState = {
-            ...current,
-            evidenceItems: current.evidenceItems.map((item) => (
-              item.id === evidenceId
-                ? {
-                    ...item,
-                    serverAttachment: response.attachment,
-                    attachment: undefined,
-                    status: item.status === 'missing' ? 'draft' : item.status,
-                  }
-                : item
-            )),
-          };
-          lastSyncedPayloadRef.current = serializeServerPayload(nextState);
-          suppressNextServerSyncRef.current = true;
-          return nextState;
-        });
-        setLastServerSyncAt(new Date().toISOString());
-        updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
-        setSyncError('');
-        await refreshServerSideData(authToken || '', authSession);
-        showNotice('success', `Datei „${file.name}“ wurde serverseitig versioniert gespeichert.`);
-        return;
-      } catch (error) {
-        const details = extractErrorDetails(error);
-        showNotice('error', error instanceof Error ? error.message : 'Datei konnte nicht hochgeladen werden.', details);
-        return;
-      }
-    }
-
-    if (file.size > MAX_LOCAL_ATTACHMENT_BYTES) {
-      showNotice('error', 'Die Datei ist für den lokalen Browser-Prototyp zu groß. Bitte unter ca. 450 KB bleiben.');
-      return;
-    }
-
-    const dataUrl = await readFileAsDataUrl(file);
-    const attachment: EvidenceAttachment = {
-      fileName: file.name,
-      mimeType: file.type || 'application/octet-stream',
-      sizeKb: Math.round((file.size / 1024) * 10) / 10,
-      dataUrl,
-    };
-
-    setState((current) => ({
-      ...current,
-      evidenceItems: current.evidenceItems.map((item) => (
-        item.id === evidenceId
-          ? {
-              ...item,
-              attachment,
-              serverAttachment: undefined,
-              status: item.status === 'missing' ? 'draft' : item.status,
-            }
-          : item
-      )),
-    }));
-    showNotice('success', `Datei „${file.name}“ wurde lokal im Browser gespeichert.`);
-  }
-
-  async function handleRemoveEvidenceFile(evidenceId: string) {
-    if (!hasPermission('evidence_edit')) {
-      showNotice('error', 'Für das Entfernen von Dateianhängen fehlt das Recht evidence_edit.');
-      return;
-    }
-
-    const evidence = state.evidenceItems.find((item) => item.id === evidenceId);
-    if (evidence?.serverAttachment && (serverMode === 'connected' || serverMode === 'syncing')) {
-      try {
-        const response = await removeEvidenceAttachment(authToken || '', evidenceId);
-        updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
-        setEvidenceVersionMap((current) => {
-          const next = { ...current };
-          delete next[evidenceId];
-          return next;
-        });
-        await refreshServerSideData(authToken || '', authSession);
-      } catch (error) {
-        const details = extractErrorDetails(error);
-        showNotice('error', error instanceof Error ? error.message : 'Server-Datei konnte nicht entfernt werden.', details);
-        return;
-      }
-    }
-
-    setState((current) => {
-      const nextState = {
-        ...current,
-        evidenceItems: current.evidenceItems.map((item) => (
-          item.id === evidenceId ? { ...item, attachment: undefined, serverAttachment: undefined } : item
-        )),
-      };
-      if (evidence?.serverAttachment && (serverMode === 'connected' || serverMode === 'syncing')) {
-        lastSyncedPayloadRef.current = serializeServerPayload(nextState);
-        suppressNextServerSyncRef.current = true;
-      }
-      return nextState;
-    });
-    showNotice('success', evidence?.serverAttachment
-      ? 'Aktive Dateireferenz wurde entfernt. Historische Versionen bleiben erhalten.'
-      : 'Dateianhang wurde entfernt.');
-  }
+  const {
+    upsertEvidenceDrafts,
+    handleCreateEvidenceFromQuestion,
+    handleCreateEvidenceFromRequirement,
+    handleCreateEmptyEvidence,
+    handleGenerateCriticalQuestionEvidence,
+    handleGenerateRequirementEvidence,
+    handleGenerateModuleEvidenceTemplates,
+    handleUpdateEvidence,
+    handleDeleteEvidence,
+    handleAttachEvidenceFile,
+    handleRemoveEvidenceFile,
+    handleLoadEvidenceVersions,
+    handleRestoreEvidenceVersion,
+  } = useEvidenceHandlers({
+    // Kern
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Fach-Kontext
+    currentModule,
+    tenantPolicy,
+    documentFolders,
+    questionLookup,
+    requirementLookup,
+    activeRequirements,
+    recommendations: scoreSnapshot.recommendations,
+    evidenceTemplates,
+    // Server-Sync-Pipeline
+    hasPermission,
+    serverMode,
+    authToken,
+    authSession,
+    setEvidenceVersionMap,
+    setLastServerSyncAt,
+    setSyncError,
+    setServerMode,
+    updateServerStateMarkers,
+    refreshServerSideData,
+    serializeServerPayload,
+    lastSyncedPayloadRef,
+    suppressNextServerSyncRef,
+    extractErrorDetails,
+  });
 
   const {
     updateReviewPlan,
@@ -4412,15 +3960,18 @@ export default function App() {
       ? new Date(session.endedAt).toLocaleString('de-DE')
       : new Date().toLocaleString('de-DE');
     upsertEvidenceDrafts([
-      createEvidenceDraft({
-        title: `Übungsnachweis · ${scenario.title}`,
-        type: 'test',
-        sourceType: 'manual',
-        sourceLabel: `Tabletop-Übung ${scenario.id} (${scenario.version})`,
-        notes:
-          `§ 18 KRITISDachG · Verdict: ${verdictLabel} · ${percent} %. Abgeschlossen am ${endedLabel}.`,
-        tags: ['KRITIS', '§18', 'Tabletop'],
-      }),
+      createEvidenceDraft(
+        { module: currentModule, tenantPolicy, documentFolders },
+        {
+          title: `Übungsnachweis · ${scenario.title}`,
+          type: 'test',
+          sourceType: 'manual',
+          sourceLabel: `Tabletop-Übung ${scenario.id} (${scenario.version})`,
+          notes:
+            `§ 18 KRITISDachG · Verdict: ${verdictLabel} · ${percent} %. Abgeschlossen am ${endedLabel}.`,
+          tags: ['KRITIS', '§18', 'Tabletop'],
+        },
+      ),
     ]);
     showNotice('success', 'Übungsnachweis als Evidenz-Entwurf hinterlegt.');
   }

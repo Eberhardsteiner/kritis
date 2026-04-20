@@ -156,6 +156,7 @@ export type PermissionKey =
   | 'modules_manage'
   | 'kritis_edit'
   | 'reports_export';
+export type ServerMode = 'checking' | 'connected' | 'syncing' | 'offline' | 'error' | 'auth_required';
 export type DeadlineCategory = 'regulatorisch' | 'review' | 'dokument' | 'maßnahme';
 export type DependencyCategory = 'lieferant' | 'it' | 'ot' | 'personal' | 'energie' | 'logistik' | 'kommunikation' | 'gebäude' | 'dienstleister';
 export type ScenarioExerciseStatus = 'not_tested' | 'planned' | 'tested';
