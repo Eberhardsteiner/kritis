@@ -25,6 +25,13 @@ import {
   normalizeLoadedActions,
   useActionHandlers,
 } from './features/measures';
+import {
+  normalizeLoadedAssets,
+  normalizeLoadedSites,
+  normalizeLoadedStakeholders,
+  normalizeReviewPlan,
+  useGovernanceHandlers,
+} from './features/governance';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -400,69 +407,6 @@ function normalizeLoadedEvidence(items: unknown, fallbackModuleId: string): Evid
     }));
 }
 
-function normalizeLoadedStakeholders(items: unknown, fallbackModuleId: string): StakeholderItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<StakeholderItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('stk'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      name: item.name ?? '',
-      roleLabel: item.roleLabel ?? '',
-      department: item.department ?? '',
-      email: item.email ?? '',
-      approvalScope: item.approvalScope ?? '',
-      responsibilities: item.responsibilities ?? '',
-      isPrimary: item.isPrimary ?? false,
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedSites(items: unknown, fallbackModuleId: string): SiteItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<SiteItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('site'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      name: item.name ?? '',
-      type: item.type ?? '',
-      location: item.location ?? '',
-      criticality: item.criticality ?? 'mittel',
-      primaryService: item.primaryService ?? '',
-      fallbackSite: item.fallbackSite ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedAssets(items: unknown, fallbackModuleId: string): AssetItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<AssetItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('ast'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      siteId: item.siteId ?? '',
-      name: item.name ?? '',
-      type: item.type ?? '',
-      criticality: item.criticality ?? 'mittel',
-      owner: item.owner ?? '',
-      rtoHours: item.rtoHours ?? '',
-      fallback: item.fallback ?? '',
-      dependencies: item.dependencies ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
 function normalizeLoadedBusinessProcesses(items: unknown, fallbackModuleId: string): BusinessProcessItem[] {
   if (!Array.isArray(items)) {
     return [];
@@ -644,18 +588,6 @@ function normalizeLoadedReleaseGates(items: unknown, fallbackModuleId: string): 
       notes: item.notes ?? '',
     }));
 }
-
-function normalizeReviewPlan(input?: Partial<ReviewPlan>): ReviewPlan {
-  return {
-    executiveSponsor: input?.executiveSponsor ?? '',
-    approver: input?.approver ?? '',
-    nextInternalAuditDate: input?.nextInternalAuditDate ?? '',
-    nextManagementReviewDate: input?.nextManagementReviewDate ?? '',
-    nextExerciseDate: input?.nextExerciseDate ?? '',
-    nextEvidenceReviewDate: input?.nextEvidenceReviewDate ?? '',
-  };
-}
-
 
 function normalizeUserRoleProfile(value: string | undefined): UserRoleProfile {
   if (
@@ -1914,19 +1846,6 @@ export default function App() {
     }));
   }
 
-  function updateReviewPlan(field: keyof ReviewPlan, value: string) {
-    runWithPermission('governance_edit', 'Für Änderungen am Reviewplan fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        reviewPlan: {
-          ...current.reviewPlan,
-          [field]: value,
-        },
-      }));
-    });
-  }
-
-
   function updateComplianceCalendar(field: keyof ComplianceCalendar, value: string) {
     runWithPermission('workspace_edit', 'Für Änderungen am Compliance-Kalender fehlt das Recht workspace_edit.', () => {
       setState((current) => ({
@@ -3080,175 +2999,26 @@ export default function App() {
       : 'Dateianhang wurde entfernt.');
   }
 
-  function handleCreateEmptyStakeholder() {
-    runWithPermission('governance_edit', 'Für Stakeholder-Änderungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        stakeholders: [
-          {
-            id: createId('stk'),
-            moduleId: currentModule.id,
-            name: '',
-            roleLabel: '',
-            department: '',
-            email: '',
-            approvalScope: '',
-            responsibilities: '',
-            isPrimary: false,
-            notes: '',
-          },
-          ...current.stakeholders,
-        ],
-        activeView: 'governance',
-      }));
-    });
-  }
-
-  function handleGenerateRoleTemplates() {
-    runWithPermission('governance_edit', 'Für Rollenvorlagen fehlt das Recht governance_edit.', () => {
-      setState((current) => {
-        const stakeholders = [...current.stakeholders];
-
-        roleTemplates.forEach((template) => {
-          const exists = stakeholders.some(
-            (item) => item.moduleId === currentModule.id && item.roleLabel === template.label,
-          );
-
-          if (!exists) {
-            stakeholders.unshift({
-              id: createId('stk'),
-              moduleId: currentModule.id,
-              name: '',
-              roleLabel: template.label,
-              department: '',
-              email: '',
-              approvalScope: template.approvalScope ?? '',
-              responsibilities: template.responsibility,
-              isPrimary: Boolean(template.approvalScope),
-              notes: template.focusAreas?.join(', ') ?? '',
-            });
-          }
-        });
-
-        return {
-          ...current,
-          stakeholders,
-          activeView: 'governance',
-        };
-      });
-    });
-  }
-
-  function handleUpdateStakeholder(stakeholderId: string, patch: Partial<StakeholderItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Stakeholdern fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        stakeholders: current.stakeholders.map((item) => (
-          item.id === stakeholderId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteStakeholder(stakeholderId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Stakeholdern fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        stakeholders: current.stakeholders.filter((item) => item.id !== stakeholderId),
-      }));
-    });
-  }
-
-  function handleCreateEmptySite() {
-    runWithPermission('governance_edit', 'Für Standortänderungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        sites: [
-          {
-            id: createId('site'),
-            moduleId: currentModule.id,
-            name: '',
-            type: '',
-            location: '',
-            criticality: 'mittel',
-            primaryService: '',
-            fallbackSite: '',
-            notes: '',
-          },
-          ...current.sites,
-        ],
-        activeView: 'governance',
-      }));
-    });
-  }
-
-  function handleUpdateSite(siteId: string, patch: Partial<SiteItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Standorten fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        sites: current.sites.map((item) => (
-          item.id === siteId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteSite(siteId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Standorten fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        sites: current.sites.filter((item) => item.id !== siteId),
-        assets: current.assets.map((asset) => (
-          asset.siteId === siteId ? { ...asset, siteId: '' } : asset
-        )),
-      }));
-    });
-  }
-
-  function handleCreateEmptyAsset() {
-    runWithPermission('governance_edit', 'Für Asset-Änderungen fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        assets: [
-          {
-            id: createId('ast'),
-            moduleId: currentModule.id,
-            siteId: '',
-            name: '',
-            type: '',
-            criticality: 'mittel',
-            owner: '',
-            rtoHours: '',
-            fallback: '',
-            dependencies: '',
-            notes: '',
-          },
-          ...current.assets,
-        ],
-        activeView: 'governance',
-      }));
-    });
-  }
-
-  function handleUpdateAsset(assetId: string, patch: Partial<AssetItem>) {
-    runWithPermission('governance_edit', 'Für Änderungen an Assets fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        assets: current.assets.map((item) => (
-          item.id === assetId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteAsset(assetId: string) {
-    runWithPermission('governance_edit', 'Für das Löschen von Assets fehlt das Recht governance_edit.', () => {
-      setState((current) => ({
-        ...current,
-        assets: current.assets.filter((item) => item.id !== assetId),
-      }));
-    });
-  }
+  const {
+    updateReviewPlan,
+    handleCreateEmptyStakeholder,
+    handleGenerateRoleTemplates,
+    handleUpdateStakeholder,
+    handleDeleteStakeholder,
+    handleCreateEmptySite,
+    handleUpdateSite,
+    handleDeleteSite,
+    handleCreateEmptyAsset,
+    handleUpdateAsset,
+    handleDeleteAsset,
+  } = useGovernanceHandlers({
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    currentModule,
+    roleTemplates,
+  });
 
   function handleCreateFinding() {
     runWithPermission('kritis_edit', 'Für Feststellungen fehlt das Recht kritis_edit.', () => {

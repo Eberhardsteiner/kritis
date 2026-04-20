@@ -1,5 +1,5 @@
 import { Clock3, Trash2, UserRound } from 'lucide-react';
-import type { AssetItem, SiteItem, StructureCriticality } from '../types';
+import type { AssetItem, SiteItem, StructureCriticality } from '../../../types';
 
 interface AssetCardProps {
   asset: AssetItem;

@@ -3,7 +3,7 @@ import type { ViewKey } from '../types';
 import type * as AssessmentViewModule from '../views/AssessmentView';
 import type * as ControlViewModule from '../views/ControlView';
 import type * as DashboardViewModule from '../views/DashboardView';
-import type * as GovernanceViewModule from '../views/GovernanceView';
+import type * as GovernanceViewModule from '../features/governance/views/GovernanceView';
 import type * as KritisViewModule from '../views/KritisView';
 import type * as MeasuresViewModule from '../features/measures/views/MeasuresView';
 import type * as ModulesViewModule from '../views/ModulesView';
@@ -19,7 +19,7 @@ import type * as TabletopExerciseViewModule from '../views/TabletopExerciseView'
 const AssessmentView = lazy(async () => ({ default: (await import('../views/AssessmentView')).AssessmentView }));
 const ControlView = lazy(async () => ({ default: (await import('../views/ControlView')).ControlView }));
 const DashboardView = lazy(async () => ({ default: (await import('../views/DashboardView')).DashboardView }));
-const GovernanceView = lazy(async () => ({ default: (await import('../views/GovernanceView')).GovernanceView }));
+const GovernanceView = lazy(async () => ({ default: (await import('../features/governance')).GovernanceView }));
 const KritisView = lazy(async () => ({ default: (await import('../views/KritisView')).KritisView }));
 const MeasuresView = lazy(async () => ({ default: (await import('../features/measures')).MeasuresView }));
 const ModulesView = lazy(async () => ({ default: (await import('../views/ModulesView')).ModulesView }));

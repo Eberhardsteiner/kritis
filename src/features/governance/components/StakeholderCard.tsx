@@ -1,5 +1,5 @@
 import { Mail, Star, Trash2, UserRound } from 'lucide-react';
-import type { StakeholderItem } from '../types';
+import type { StakeholderItem } from '../../../types';
 
 interface StakeholderCardProps {
   stakeholder: StakeholderItem;

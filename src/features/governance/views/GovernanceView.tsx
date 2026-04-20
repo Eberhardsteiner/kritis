@@ -12,7 +12,7 @@ import type {
   SectorModuleDefinition,
   SiteItem,
   StakeholderItem,
-} from '../types';
+} from '../../../types';
 
 interface GovernanceViewProps {
   module?: SectorModuleDefinition;

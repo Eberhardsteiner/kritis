@@ -1,5 +1,5 @@
 import { MapPin, Trash2 } from 'lucide-react';
-import type { SiteItem, StructureCriticality } from '../types';
+import type { SiteItem, StructureCriticality } from '../../../types';
 
 interface SiteCardProps {
   site: SiteItem;
