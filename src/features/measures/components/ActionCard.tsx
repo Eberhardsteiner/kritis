@@ -1,5 +1,5 @@
 import { CalendarDays, Trash2, UserRound } from 'lucide-react';
-import type { ActionItem, ActionPriority, ActionStatus } from '../types';
+import type { ActionItem, ActionPriority, ActionStatus } from '../../../types';
 
 interface ActionCardProps {
   action: ActionItem;

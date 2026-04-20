@@ -22,6 +22,12 @@ import {
 import { getAccessProfile } from './data/workspaceBase';
 import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './features/gap';
 import {
+  normalizeLoadedActions,
+  useActionHandlers,
+} from './features/measures';
+import { createId } from './shared/ids';
+import { getDateOffset } from './shared/dates';
+import {
   buildRiskAnalysisBlob,
   buildRiskAnalysisFileName,
 } from './features/riskCatalog/export/riskAnalysisDocx';
@@ -251,19 +257,6 @@ const MAX_SERVER_ATTACHMENT_BYTES = 12 * 1024 * 1024;
 
 type ServerMode = 'checking' | 'connected' | 'syncing' | 'offline' | 'error' | 'auth_required';
 
-function createId(prefix: string): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return `${prefix}-${crypto.randomUUID()}`;
-  }
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function getDateOffset(days: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
 function createDefaultCertificationState(): CertificationState {
   return {
     auditLead: '',
@@ -298,13 +291,6 @@ function normalizeCertificationState(input?: Partial<CertificationState>): Certi
     decisionNote: input?.decisionNote ?? '',
     stageStates,
   };
-}
-
-function normalizeActionPriority(value: string | undefined): ActionPriority {
-  if (value === 'kritisch' || value === 'hoch' || value === 'mittel' || value === 'niedrig') {
-    return value;
-  }
-  return 'mittel';
 }
 
 function normalizeEvidenceClassification(value: string | undefined): EvidenceClassification {
@@ -376,32 +362,6 @@ function normalizeServerAttachment(value: unknown): EvidenceItem['serverAttachme
       ? candidate.historyCount
       : undefined,
   };
-}
-
-function normalizeLoadedActions(items: unknown, fallbackModuleId: string): ActionItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<ActionItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('act'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      description: item.description ?? '',
-      owner: item.owner ?? '',
-      dueDate: item.dueDate ?? '',
-      status: item.status ?? 'open',
-      priority: normalizeActionPriority(item.priority),
-      sourceType: item.sourceType ?? 'manual',
-      sourceId: item.sourceId,
-      sourceLabel: item.sourceLabel ?? 'Manuell',
-      relatedQuestionIds: item.relatedQuestionIds ?? [],
-      relatedRequirementIds: item.relatedRequirementIds ?? [],
-      notes: item.notes ?? '',
-      createdAt: item.createdAt ?? new Date().toISOString(),
-    }));
 }
 
 function normalizeLoadedEvidence(items: unknown, fallbackModuleId: string): EvidenceItem[] {
@@ -2792,38 +2752,28 @@ export default function App() {
     }
   }
 
-  function upsertActionDrafts(drafts: Array<Omit<ActionItem, 'id' | 'createdAt'>>) {
-    runWithPermission('actions_edit', 'Für Maßnahmenänderungen fehlt das Recht actions_edit.', () => {
-      setState((current) => {
-        const actionItems = [...current.actionItems];
-
-        drafts.forEach((draft) => {
-          const shouldDeduplicate = draft.sourceType !== 'manual' && Boolean(draft.sourceId);
-          const exists = shouldDeduplicate
-            ? actionItems.some(
-                (item) => item.moduleId === draft.moduleId
-                  && item.sourceType === draft.sourceType
-                  && item.sourceId === draft.sourceId,
-              )
-            : false;
-
-          if (!exists) {
-            actionItems.unshift({
-              ...draft,
-              id: createId('act'),
-              createdAt: new Date().toISOString(),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          actionItems,
-          activeView: 'measures',
-        };
-      });
-    });
-  }
+  const {
+    upsertActionDrafts,
+    handleCreateActionFromQuestion,
+    handleCreateActionFromRequirement,
+    handleCreateEmptyAction,
+    handleGenerateRecommendationActions,
+    handleGenerateRequirementActions,
+    handleGenerateModuleActionTemplates,
+    handleUpdateAction,
+    handleDeleteAction,
+  } = useActionHandlers({
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    currentModule,
+    questionLookup,
+    requirementLookup,
+    activeRequirements,
+    recommendations: scoreSnapshot.recommendations,
+    actionTemplates,
+  });
 
   function upsertEvidenceDrafts(drafts: Array<Omit<EvidenceItem, 'id' | 'createdAt'>>) {
     runWithPermission('evidence_edit', 'Für Evidenzänderungen fehlt das Recht evidence_edit.', () => {
@@ -2887,24 +2837,6 @@ export default function App() {
     };
   }
 
-  function createActionFromQuestionDefinition(question: QuestionDefinition): Omit<ActionItem, 'id' | 'createdAt'> {
-    return {
-      moduleId: currentModule.id,
-      title: question.title,
-      description: question.recommendation,
-      owner: '',
-      dueDate: getDateOffset(question.critical ? 21 : 35),
-      status: 'open',
-      priority: question.critical ? 'kritisch' : 'hoch',
-      sourceType: 'question',
-      sourceId: question.id,
-      sourceLabel: question.title,
-      relatedQuestionIds: [question.id],
-      relatedRequirementIds: [],
-      notes: question.guidance,
-    };
-  }
-
   function createEvidenceFromQuestionDefinition(question: QuestionDefinition): Omit<EvidenceItem, 'id' | 'createdAt'> {
     return createEvidenceDraft({
       title: question.evidenceHint ? `${question.title} - Evidenz` : question.title,
@@ -2916,31 +2848,6 @@ export default function App() {
       notes: question.evidenceHint ?? question.guidance,
       tags: question.tags ?? [],
     });
-  }
-
-  function createActionFromRequirementDefinition(
-    requirement: RequirementDefinition,
-  ): Omit<ActionItem, 'id' | 'createdAt'> {
-    return {
-      moduleId: currentModule.id,
-      title: requirement.title,
-      description: requirement.guidance,
-      owner: '',
-      dueDate: getDateOffset(requirement.severity === 'high' ? 21 : 45),
-      status: 'open',
-      priority:
-        requirement.severity === 'high'
-          ? 'kritisch'
-          : requirement.severity === 'medium'
-            ? 'hoch'
-            : 'mittel',
-      sourceType: 'requirement',
-      sourceId: requirement.id,
-      sourceLabel: requirement.title,
-      relatedQuestionIds: [],
-      relatedRequirementIds: [requirement.id],
-      notes: requirement.dueHint ?? '',
-    };
   }
 
   function createEvidenceFromRequirementDefinition(
@@ -2959,28 +2866,12 @@ export default function App() {
     });
   }
 
-  function handleCreateActionFromQuestion(questionId: string) {
-    const question = questionLookup.get(questionId);
-    if (!question) {
-      return;
-    }
-    upsertActionDrafts([createActionFromQuestionDefinition(question)]);
-  }
-
   function handleCreateEvidenceFromQuestion(questionId: string) {
     const question = questionLookup.get(questionId);
     if (!question) {
       return;
     }
     upsertEvidenceDrafts([createEvidenceFromQuestionDefinition(question)]);
-  }
-
-  function handleCreateActionFromRequirement(requirementId: string) {
-    const requirement = requirementLookup.get(requirementId);
-    if (!requirement) {
-      return;
-    }
-    upsertActionDrafts([createActionFromRequirementDefinition(requirement)]);
   }
 
   function handleCreateEvidenceFromRequirement(requirementId: string) {
@@ -2991,67 +2882,8 @@ export default function App() {
     upsertEvidenceDrafts([createEvidenceFromRequirementDefinition(requirement)]);
   }
 
-  function handleCreateEmptyAction() {
-    upsertActionDrafts([
-      {
-        moduleId: currentModule.id,
-        title: '',
-        description: '',
-        owner: '',
-        dueDate: getDateOffset(30),
-        status: 'open',
-        priority: 'mittel',
-        sourceType: 'manual',
-        sourceLabel: 'Manuell',
-        relatedQuestionIds: [],
-        relatedRequirementIds: [],
-        notes: '',
-      },
-    ]);
-  }
-
   function handleCreateEmptyEvidence() {
     upsertEvidenceDrafts([createEvidenceDraft()]);
-  }
-
-  function handleGenerateRecommendationActions() {
-    const drafts = scoreSnapshot.recommendations
-      .map((recommendation) => questionLookup.get(recommendation.questionId))
-      .filter((question): question is QuestionDefinition => Boolean(question))
-      .map((question) => createActionFromQuestionDefinition(question));
-
-    upsertActionDrafts(drafts);
-  }
-
-  function handleGenerateRequirementActions() {
-    const drafts = requirements
-      .filter((requirement) => {
-        const status = state.requirementStates[requirement.id] ?? 'open';
-        return status !== 'ready' && status !== 'not_applicable';
-      })
-      .map((requirement) => createActionFromRequirementDefinition(requirement));
-
-    upsertActionDrafts(drafts);
-  }
-
-  function handleGenerateModuleActionTemplates() {
-    const drafts = actionTemplates.map((template) => ({
-      moduleId: currentModule.id,
-      title: template.title,
-      description: template.description,
-      owner: template.ownerRole ?? '',
-      dueDate: getDateOffset(35),
-      status: 'planned' as const,
-      priority: template.priority ?? 'mittel',
-      sourceType: 'module_template' as const,
-      sourceId: template.id,
-      sourceLabel: template.title,
-      relatedQuestionIds: template.relatedQuestionIds ?? [],
-      relatedRequirementIds: template.relatedRequirementIds ?? [],
-      notes: currentModule.uiHints?.accentLabel ? `Modulkontext: ${currentModule.uiHints.accentLabel}` : '',
-    }));
-
-    upsertActionDrafts(drafts);
   }
 
   function handleGenerateCriticalQuestionEvidence() {
@@ -3092,26 +2924,6 @@ export default function App() {
     }));
 
     upsertEvidenceDrafts(drafts);
-  }
-
-  function handleUpdateAction(actionId: string, patch: Partial<ActionItem>) {
-    runWithPermission('actions_edit', 'Für Änderungen an Maßnahmen fehlt das Recht actions_edit.', () => {
-      setState((current) => ({
-        ...current,
-        actionItems: current.actionItems.map((item) => (
-          item.id === actionId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteAction(actionId: string) {
-    runWithPermission('actions_edit', 'Für das Löschen von Maßnahmen fehlt das Recht actions_edit.', () => {
-      setState((current) => ({
-        ...current,
-        actionItems: current.actionItems.filter((item) => item.id !== actionId),
-      }));
-    });
   }
 
   function handleUpdateEvidence(evidenceId: string, patch: Partial<EvidenceItem>) {

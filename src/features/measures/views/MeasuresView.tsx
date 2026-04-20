@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { FileText, LibraryBig, ListTodo, PlusCircle, Search, Sparkles } from 'lucide-react';
 import { ActionCard } from '../components/ActionCard';
-import { EvidenceCard } from '../components/EvidenceCard';
+// EvidenceCard bleibt bis C2.4 (evidence-Extraktion) in src/components/.
+import { EvidenceCard } from '../../../components/EvidenceCard';
 import type {
   ActionItem,
   ActionSummary,
@@ -14,7 +15,7 @@ import type {
   RequirementDefinition,
   RequirementStatus,
   SectorModuleDefinition,
-} from '../types';
+} from '../../../types';
 
 interface MeasuresViewProps {
   module?: SectorModuleDefinition;
