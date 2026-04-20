@@ -3,7 +3,7 @@ import type { ModulePackContainer, ModulePackManifest, ModulePackRegistryEntry, 
 import { buildSyntheticManifestFromModule } from '../lib/moduleRegistry';
 
 interface ImportFeedback {
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'info';
   text: string;
   details?: string[];
 }

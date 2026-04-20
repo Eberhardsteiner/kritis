@@ -186,7 +186,7 @@ import type {
 } from './types';
 
 interface ImportFeedback {
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'info';
   text: string;
   details?: string[];
 }

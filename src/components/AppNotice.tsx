@@ -1,5 +1,5 @@
 interface NoticeContent {
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'info';
   text: string;
   details?: string[];
 }

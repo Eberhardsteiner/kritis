@@ -40,7 +40,7 @@ export interface ActionHandlerDependencies {
     action: () => void,
   ) => boolean;
   showNotice: (
-    tone: 'success' | 'error',
+    tone: 'success' | 'error' | 'info',
     message: string,
     details?: string[],
   ) => void;

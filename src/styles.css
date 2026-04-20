@@ -647,6 +647,11 @@ textarea:focus {
   border-color: #ffd0d5;
 }
 
+.feedback-box.info {
+  background: #f0f9ff;
+  border-color: #c7e0f4;
+}
+
 .feedback-box ul {
   margin-top: 10px;
 }
