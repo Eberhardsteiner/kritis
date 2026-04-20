@@ -15,6 +15,7 @@ import type {
   ServerMode,
   TenantPolicy,
 } from '../../../types';
+import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   fetchEvidenceVersions,
   removeEvidenceAttachment,
@@ -46,21 +47,7 @@ import { readFileAsDataUrl } from '../utils';
  * platform voraussichtlich in eine eigene Abstraktion -- bis dahin
  * bleiben die Refs und Setter direkt durchgereicht.
  */
-export interface EvidenceHandlerDependencies {
-  // === Kern (parallel zu Action/Governance) =================================
-  state: AppState;
-  setState: Dispatch<SetStateAction<AppState>>;
-  runWithPermission: (
-    permission: PermissionKey,
-    message: string,
-    action: () => void,
-  ) => boolean;
-  showNotice: (
-    tone: 'success' | 'error' | 'info',
-    message: string,
-    details?: string[],
-  ) => void;
-
+export interface EvidenceHandlerDependencies extends FeatureHandlerDependencies {
   // === Fach-Kontext (Drafts, Lookups) =======================================
   currentModule: SectorModuleDefinition;
   tenantPolicy: TenantPolicy;

@@ -1,9 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import type {
-  AppState,
   AssetItem,
-  PermissionKey,
   ReviewPlan,
   RoleTemplateDefinition,
   SectorModuleDefinition,
@@ -11,6 +8,7 @@ import type {
   StakeholderItem,
 } from '../../../types';
 import { createId } from '../../../shared/ids';
+import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 
 /**
  * Abhaengigkeiten, die `useGovernanceHandlers` fuer seine elf Governance-Handler
@@ -24,19 +22,8 @@ import { createId } from '../../../shared/ids';
  * dem C2.2-Muster, damit spaetere Features ohne Signatur-Bruch uebernehmen
  * koennen.
  */
-export interface GovernanceHandlerDependencies {
-  state: AppState;
-  setState: Dispatch<SetStateAction<AppState>>;
-  runWithPermission: (
-    permission: PermissionKey,
-    message: string,
-    action: () => void,
-  ) => boolean;
-  showNotice: (
-    tone: 'success' | 'error' | 'info',
-    message: string,
-    details?: string[],
-  ) => void;
+export interface GovernanceHandlerDependencies extends FeatureHandlerDependencies {
+  // Fach-Kontext
   currentModule: SectorModuleDefinition;
   roleTemplates: RoleTemplateDefinition[];
 }

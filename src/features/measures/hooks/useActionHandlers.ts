@@ -1,16 +1,14 @@
 import { useCallback, useMemo } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import type {
   ActionItem,
   ActionTemplateDefinition,
-  AppState,
-  PermissionKey,
   QuestionDefinition,
   RecommendationItem,
   RequirementDefinition,
   SectorModuleDefinition,
 } from '../../../types';
 import { createId } from '../../../shared/ids';
+import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   createActionFromQuestionDefinition,
   createActionFromRequirementDefinition,
@@ -31,19 +29,8 @@ import {
  * spaetere Features (z. B. Upload-Fehler in evidence) direkten Zugriff
  * brauchen werden.
  */
-export interface ActionHandlerDependencies {
-  state: AppState;
-  setState: Dispatch<SetStateAction<AppState>>;
-  runWithPermission: (
-    permission: PermissionKey,
-    message: string,
-    action: () => void,
-  ) => boolean;
-  showNotice: (
-    tone: 'success' | 'error' | 'info',
-    message: string,
-    details?: string[],
-  ) => void;
+export interface ActionHandlerDependencies extends FeatureHandlerDependencies {
+  // Fach-Kontext fuer Draft-Creation
   currentModule: SectorModuleDefinition;
   questionLookup: Map<string, QuestionDefinition>;
   requirementLookup: Map<string, RequirementDefinition>;
