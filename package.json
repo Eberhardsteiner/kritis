@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "test": "npm run test:server && npm run test:ui",
     "test:server": "node --test server/security.test.js server/persistence.test.js server/module-packs.test.js server/regulatory-dach.test.js server/hardening.test.js server/auth-provider.test.js server/object-storage.test.js server/evidence-platform.test.js",
-    "test:ui": "vitest run"
+    "test:ui": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
@@ -25,6 +28,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/express": "^5.0.6",
