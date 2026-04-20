@@ -242,6 +242,7 @@ interface BuildActiveViewPanelPropsArgs {
   onSaveRiskEntry: KritisViewProps['onSaveRiskEntry'];
   onDeleteRiskEntry: KritisViewProps['onDeleteRiskEntry'];
   onExportRiskEntriesJson: KritisViewProps['onExportRiskEntriesJson'];
+  onExportRiskAnalysisDocx: KritisViewProps['onExportRiskAnalysisDocx'];
   riskEntries: KritisViewProps['riskEntries'];
   onCreateServerPackage: ReportViewProps['onCreateServerPackage'];
 }
@@ -468,6 +469,7 @@ export function buildActiveViewPanelProps({
   onSaveRiskEntry,
   onDeleteRiskEntry,
   onExportRiskEntriesJson,
+  onExportRiskAnalysisDocx,
   riskEntries,
   onCreateServerPackage,
 }: BuildActiveViewPanelPropsArgs): ActiveViewPanelProps {
@@ -750,6 +752,7 @@ export function buildActiveViewPanelProps({
       onSaveRiskEntry,
       onDeleteRiskEntry,
       onExportRiskEntriesJson,
+      onExportRiskAnalysisDocx,
       onUpdateJurisdiction,
       onUpdateRegulatoryProfileField,
       onUpdateRegimeScope,

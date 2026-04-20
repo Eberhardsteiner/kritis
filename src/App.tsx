@@ -21,6 +21,10 @@ import {
 } from './lib/moduleRegistry';
 import { getAccessProfile } from './data/workspaceBase';
 import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './lib/gapAnalysisDocx';
+import {
+  buildRiskAnalysisBlob,
+  buildRiskAnalysisFileName,
+} from './features/riskCatalog/export/riskAnalysisDocx';
 import { normalizeRegulatoryProfile } from './lib/regulatory';
 import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
 import {
@@ -4422,6 +4426,30 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  async function handleExportRiskAnalysisDocx() {
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für DOCX-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const blob = await buildRiskAnalysisBlob({
+        companyProfile: state.companyProfile,
+        riskEntries: state.riskEntries,
+      });
+      const fileName = buildRiskAnalysisFileName(state.companyProfile);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showNotice('error', `Betreiber-Risikoanalyse konnte nicht erzeugt werden: ${String(error)}`);
+    }
+  }
+
   async function handleExportGapAnalysisDocx() {
     if (!hasPermission('reports_export')) {
       showNotice('error', 'Für Angebotsgrundlagen-Exporte fehlt das Recht reports_export.');
@@ -4698,6 +4726,7 @@ export default function App() {
     onSaveRiskEntry: handleSaveRiskEntry,
     onDeleteRiskEntry: handleDeleteRiskEntry,
     onExportRiskEntriesJson: handleExportRiskEntriesJson,
+    onExportRiskAnalysisDocx: handleExportRiskAnalysisDocx,
     riskEntries: state.riskEntries,
     onCreateServerPackage: handleCreateServerExportPackage,
   });

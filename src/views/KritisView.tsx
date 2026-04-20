@@ -91,6 +91,7 @@ interface KritisViewProps {
   onSaveRiskEntry: (entry: RiskEntry) => void;
   onDeleteRiskEntry: (entry: RiskEntry) => void;
   onExportRiskEntriesJson: () => void;
+  onExportRiskAnalysisDocx: () => void;
   onUpdateJurisdiction: (value: RegulatoryProfile['jurisdiction']) => void;
   onUpdateRegulatoryProfileField: (
     field:
@@ -242,6 +243,7 @@ export function KritisView({
   onSaveRiskEntry,
   onDeleteRiskEntry,
   onExportRiskEntriesJson,
+  onExportRiskAnalysisDocx,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -938,6 +940,7 @@ export function KritisView({
             }}
             onDelete={onDeleteRiskEntry}
             onExportJson={onExportRiskEntriesJson}
+            onExportDocx={onExportRiskAnalysisDocx}
           />
         </div>
 
