@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   FolderCog,
   FileSpreadsheet,
@@ -38,6 +39,7 @@ const items: Array<{
   { key: 'rollout', label: 'Go-Live & Übergabe', icon: CheckCircle2 },
   { key: 'modules', label: 'Branchenmodule', icon: FolderCog },
   { key: 'kritis', label: 'KRITIS-Readiness', icon: ShieldCheck },
+  { key: 'resilience_plan', label: 'Resilienzplan', icon: BookOpen },
   { key: 'report', label: 'Reporting', icon: FileSpreadsheet },
 ];
 

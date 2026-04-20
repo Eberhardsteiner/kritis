@@ -25,6 +25,20 @@ import {
   buildRiskAnalysisBlob,
   buildRiskAnalysisFileName,
 } from './features/riskCatalog/export/riskAnalysisDocx';
+import { generateDraft as generateResiliencePlanDraft } from './features/resiliencePlan/generator';
+import {
+  buildResiliencePlanJsonFileName,
+  renderResiliencePlanJsonBlob,
+} from './features/resiliencePlan/renderers/jsonRenderer';
+import {
+  buildResiliencePlanDocxFileName,
+  renderResiliencePlanDocxBlob,
+} from './features/resiliencePlan/renderers/docxRenderer';
+import {
+  buildResiliencePlanPdfFileName,
+  renderResiliencePlanPdfBlob,
+} from './features/resiliencePlan/renderers/pdfRenderer';
+import type { ResiliencePlan } from './features/resiliencePlan/types';
 import { normalizeRegulatoryProfile } from './lib/regulatory';
 import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
 import {
@@ -810,6 +824,10 @@ function buildAppStateFromLoaded(
       ...(uiState?.assessmentFilters ?? {}),
     },
     riskEntries: Array.isArray(loaded?.riskEntries) ? (loaded?.riskEntries as RiskEntry[]) : [],
+    resiliencePlan: (loaded?.resiliencePlan ?? null) as ResiliencePlan | null,
+    archivedResiliencePlans: Array.isArray(loaded?.archivedResiliencePlans)
+      ? (loaded?.archivedResiliencePlans as ResiliencePlan[])
+      : [],
   };
 }
 
@@ -844,6 +862,8 @@ function buildServerPayload(state: AppState): Partial<AppState> {
     auditFindings: state.auditFindings,
     certificationState: state.certificationState,
     riskEntries: state.riskEntries,
+    resiliencePlan: state.resiliencePlan,
+    archivedResiliencePlans: state.archivedResiliencePlans,
   };
 }
 
@@ -4426,6 +4446,182 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  function triggerFileDownload(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleGenerateResiliencePlanDraft() {
+    runWithPermission('kritis_edit', 'Für die Erstellung des Resilienzplans fehlt das Recht kritis_edit.', () => {
+      const draft = generateResiliencePlanDraft({
+        companyProfile: state.companyProfile,
+        regulatoryProfile,
+        complianceCalendar: state.complianceCalendar,
+        module: currentModule,
+        riskEntries: state.riskEntries,
+        actionItems: state.actionItems,
+        evidenceItems: state.evidenceItems,
+        tenantId: authSession?.tenantId ?? publicTenant?.id ?? 'local',
+      });
+      setState((current) => ({ ...current, resiliencePlan: draft }));
+      showNotice('success', 'Resilienzplan-Entwurf aus den Mandantendaten erzeugt.');
+    });
+  }
+
+  function handleSaveResiliencePlan(plan: ResiliencePlan) {
+    runWithPermission('kritis_edit', 'Für Änderungen am Resilienzplan fehlt das Recht kritis_edit.', () => {
+      setState((current) => ({ ...current, resiliencePlan: plan }));
+    });
+  }
+
+  function handleSubmitResiliencePlanForReview() {
+    runWithPermission('kritis_edit', 'Für den Workflow fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.resiliencePlan) {
+          return current;
+        }
+        return {
+          ...current,
+          resiliencePlan: {
+            ...current.resiliencePlan,
+            status: 'review',
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      });
+    });
+  }
+
+  function handleApproveResiliencePlan(approvedBy: string) {
+    runWithPermission('kritis_edit', 'Für die Freigabe fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.resiliencePlan) {
+          return current;
+        }
+        const now = new Date().toISOString();
+        return {
+          ...current,
+          resiliencePlan: {
+            ...current.resiliencePlan,
+            status: 'approved',
+            approvedBy,
+            approvedAt: now,
+            updatedAt: now,
+          },
+        };
+      });
+    });
+  }
+
+  function handleReturnResiliencePlanToDraft() {
+    runWithPermission('kritis_edit', 'Für den Workflow fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.resiliencePlan) {
+          return current;
+        }
+        return {
+          ...current,
+          resiliencePlan: {
+            ...current.resiliencePlan,
+            status: 'draft',
+            approvedBy: undefined,
+            approvedAt: undefined,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      });
+    });
+  }
+
+  function handleArchiveResiliencePlan() {
+    runWithPermission('kritis_edit', 'Für die Archivierung fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.resiliencePlan) {
+          return current;
+        }
+        const archived: ResiliencePlan = {
+          ...current.resiliencePlan,
+          status: 'archived',
+          updatedAt: new Date().toISOString(),
+        };
+        return {
+          ...current,
+          resiliencePlan: null,
+          archivedResiliencePlans: [archived, ...current.archivedResiliencePlans],
+        };
+      });
+    });
+  }
+
+  function handleExportResiliencePlanJson() {
+    if (!state.resiliencePlan) {
+      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
+      return;
+    }
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const blob = renderResiliencePlanJsonBlob(state.resiliencePlan);
+      const fileName = buildResiliencePlanJsonFileName(
+        state.companyProfile.companyName,
+        state.resiliencePlan.version,
+      );
+      triggerFileDownload(blob, fileName);
+    } catch (error) {
+      showNotice('error', `JSON-Export fehlgeschlagen: ${String(error)}`);
+    }
+  }
+
+  async function handleExportResiliencePlanDocx() {
+    if (!state.resiliencePlan) {
+      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
+      return;
+    }
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const blob = await renderResiliencePlanDocxBlob(state.resiliencePlan);
+      const fileName = buildResiliencePlanDocxFileName(
+        state.companyProfile.companyName,
+        state.resiliencePlan.version,
+      );
+      triggerFileDownload(blob, fileName);
+    } catch (error) {
+      showNotice('error', `DOCX-Export fehlgeschlagen: ${String(error)}`);
+    }
+  }
+
+  function handleExportResiliencePlanPdf() {
+    if (!state.resiliencePlan) {
+      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
+      return;
+    }
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const blob = renderResiliencePlanPdfBlob(state.resiliencePlan);
+      const fileName = buildResiliencePlanPdfFileName(
+        state.companyProfile.companyName,
+        state.resiliencePlan.version,
+      );
+      triggerFileDownload(blob, fileName);
+    } catch (error) {
+      showNotice('error', `PDF-Export fehlgeschlagen: ${String(error)}`);
+    }
+  }
+
   async function handleExportRiskAnalysisDocx() {
     if (!hasPermission('reports_export')) {
       showNotice('error', 'Für DOCX-Exporte fehlt das Recht reports_export.');
@@ -4728,6 +4924,19 @@ export default function App() {
     onExportRiskEntriesJson: handleExportRiskEntriesJson,
     onExportRiskAnalysisDocx: handleExportRiskAnalysisDocx,
     riskEntries: state.riskEntries,
+    resiliencePlan: state.resiliencePlan,
+    archivedResiliencePlans: state.archivedResiliencePlans,
+    canEditResiliencePlan: hasPermission('kritis_edit'),
+    canExportResiliencePlan: hasPermission('reports_export'),
+    onGenerateResiliencePlanDraft: handleGenerateResiliencePlanDraft,
+    onSaveResiliencePlan: handleSaveResiliencePlan,
+    onSubmitResiliencePlanForReview: handleSubmitResiliencePlanForReview,
+    onApproveResiliencePlan: handleApproveResiliencePlan,
+    onReturnResiliencePlanToDraft: handleReturnResiliencePlanToDraft,
+    onArchiveResiliencePlan: handleArchiveResiliencePlan,
+    onExportResiliencePlanJson: handleExportResiliencePlanJson,
+    onExportResiliencePlanDocx: handleExportResiliencePlanDocx,
+    onExportResiliencePlanPdf: handleExportResiliencePlanPdf,
     onCreateServerPackage: handleCreateServerExportPackage,
   });
 

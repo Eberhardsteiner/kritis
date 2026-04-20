@@ -1,6 +1,8 @@
 import type { RiskEntry } from './features/riskCatalog/types';
+import type { ResiliencePlan } from './features/resiliencePlan/types';
 
 export type { RiskEntry };
+export type { ResiliencePlan };
 
 export type ViewKey =
   | 'program'
@@ -15,7 +17,8 @@ export type ViewKey =
   | 'modules'
   | 'kritis'
   | 'report'
-  | 'resilience';
+  | 'resilience'
+  | 'resilience_plan';
 
 export type JurisdictionCode = 'DE' | 'AT' | 'CH';
 export type RegulatoryRegimeId = 'de_kritisdachg' | 'de_bsig_nis2' | 'at_nisg_2026' | 'ch_bacs_ci';
@@ -1184,6 +1187,8 @@ export interface AppState {
   certificationState: CertificationState;
   assessmentFilters: AssessmentFilters;
   riskEntries: RiskEntry[];
+  resiliencePlan: ResiliencePlan | null;
+  archivedResiliencePlans: ResiliencePlan[];
 }
 
 export interface DomainScore {

@@ -11,6 +11,7 @@ import type {
   PlatformViewProps,
   ReportViewProps,
   ResilienceViewProps,
+  ResiliencePlanViewProps,
   RolloutViewProps,
 } from '../components/ActiveViewPanel';
 import {
@@ -244,6 +245,19 @@ interface BuildActiveViewPanelPropsArgs {
   onExportRiskEntriesJson: KritisViewProps['onExportRiskEntriesJson'];
   onExportRiskAnalysisDocx: KritisViewProps['onExportRiskAnalysisDocx'];
   riskEntries: KritisViewProps['riskEntries'];
+  resiliencePlan: ResiliencePlanViewProps['plan'];
+  archivedResiliencePlans: ResiliencePlanViewProps['archivedPlans'];
+  canEditResiliencePlan: ResiliencePlanViewProps['canEdit'];
+  canExportResiliencePlan: ResiliencePlanViewProps['canExport'];
+  onGenerateResiliencePlanDraft: ResiliencePlanViewProps['onGenerateDraft'];
+  onSaveResiliencePlan: ResiliencePlanViewProps['onSavePlan'];
+  onSubmitResiliencePlanForReview: ResiliencePlanViewProps['onSubmitForReview'];
+  onApproveResiliencePlan: ResiliencePlanViewProps['onApprove'];
+  onReturnResiliencePlanToDraft: ResiliencePlanViewProps['onReturnToDraft'];
+  onArchiveResiliencePlan: ResiliencePlanViewProps['onArchive'];
+  onExportResiliencePlanJson: ResiliencePlanViewProps['onExportJson'];
+  onExportResiliencePlanDocx: ResiliencePlanViewProps['onExportDocx'];
+  onExportResiliencePlanPdf: ResiliencePlanViewProps['onExportPdf'];
   onCreateServerPackage: ReportViewProps['onCreateServerPackage'];
 }
 
@@ -471,6 +485,19 @@ export function buildActiveViewPanelProps({
   onExportRiskEntriesJson,
   onExportRiskAnalysisDocx,
   riskEntries,
+  resiliencePlan,
+  archivedResiliencePlans,
+  canEditResiliencePlan,
+  canExportResiliencePlan,
+  onGenerateResiliencePlanDraft,
+  onSaveResiliencePlan,
+  onSubmitResiliencePlanForReview,
+  onApproveResiliencePlan,
+  onReturnResiliencePlanToDraft,
+  onArchiveResiliencePlan,
+  onExportResiliencePlanJson,
+  onExportResiliencePlanDocx,
+  onExportResiliencePlanPdf,
   onCreateServerPackage,
 }: BuildActiveViewPanelPropsArgs): ActiveViewPanelProps {
   return {
@@ -769,6 +796,21 @@ export function buildActiveViewPanelProps({
       onCreateCertificationDossier,
       onReleaseExportPackage,
       onDownloadExportPackage,
+    },
+    resiliencePlanViewProps: {
+      plan: resiliencePlan,
+      archivedPlans: archivedResiliencePlans,
+      canEdit: canEditResiliencePlan,
+      canExport: canExportResiliencePlan,
+      onGenerateDraft: onGenerateResiliencePlanDraft,
+      onSavePlan: onSaveResiliencePlan,
+      onSubmitForReview: onSubmitResiliencePlanForReview,
+      onApprove: onApproveResiliencePlan,
+      onReturnToDraft: onReturnResiliencePlanToDraft,
+      onArchive: onArchiveResiliencePlan,
+      onExportJson: onExportResiliencePlanJson,
+      onExportDocx: onExportResiliencePlanDocx,
+      onExportPdf: onExportResiliencePlanPdf,
     },
     reportViewProps: {
       companyProfile,

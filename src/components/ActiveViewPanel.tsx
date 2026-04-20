@@ -12,6 +12,7 @@ import type * as PlatformViewModule from '../views/PlatformView';
 import type * as ProgramViewModule from '../views/ProgramView';
 import type * as ReportViewModule from '../views/ReportView';
 import type * as ResilienceViewModule from '../views/ResilienceView';
+import type * as ResiliencePlanViewModule from '../views/ResiliencePlanView';
 import type * as RolloutViewModule from '../views/RolloutView';
 
 const AssessmentView = lazy(async () => ({ default: (await import('../views/AssessmentView')).AssessmentView }));
@@ -26,6 +27,7 @@ const PlatformView = lazy(async () => ({ default: (await import('../views/Platfo
 const ProgramView = lazy(async () => ({ default: (await import('../views/ProgramView')).ProgramView }));
 const ReportView = lazy(async () => ({ default: (await import('../views/ReportView')).ReportView }));
 const ResilienceView = lazy(async () => ({ default: (await import('../views/ResilienceView')).ResilienceView }));
+const ResiliencePlanView = lazy(async () => ({ default: (await import('../views/ResiliencePlanView')).ResiliencePlanView }));
 const RolloutView = lazy(async () => ({ default: (await import('../views/RolloutView')).RolloutView }));
 
 export type AssessmentViewProps = ComponentProps<typeof AssessmentViewModule.AssessmentView>;
@@ -40,6 +42,7 @@ export type PlatformViewProps = ComponentProps<typeof PlatformViewModule.Platfor
 export type ProgramViewProps = ComponentProps<typeof ProgramViewModule.ProgramView>;
 export type ReportViewProps = ComponentProps<typeof ReportViewModule.ReportView>;
 export type ResilienceViewProps = ComponentProps<typeof ResilienceViewModule.ResilienceView>;
+export type ResiliencePlanViewProps = ComponentProps<typeof ResiliencePlanViewModule.ResiliencePlanView>;
 export type RolloutViewProps = ComponentProps<typeof RolloutViewModule.RolloutView>;
 
 export interface ActiveViewPanelProps {
@@ -51,6 +54,7 @@ export interface ActiveViewPanelProps {
   measuresViewProps: MeasuresViewProps;
   governanceViewProps: GovernanceViewProps;
   resilienceViewProps: ResilienceViewProps;
+  resiliencePlanViewProps: ResiliencePlanViewProps;
   controlViewProps: ControlViewProps;
   platformViewProps: PlatformViewProps;
   operationsViewProps: OperationsViewProps;
@@ -69,6 +73,7 @@ export function ActiveViewPanel({
   measuresViewProps,
   governanceViewProps,
   resilienceViewProps,
+  resiliencePlanViewProps,
   controlViewProps,
   platformViewProps,
   operationsViewProps,
@@ -93,6 +98,7 @@ export function ActiveViewPanel({
           {activeView === 'measures' ? <MeasuresView {...measuresViewProps} /> : null}
           {activeView === 'governance' ? <GovernanceView {...governanceViewProps} /> : null}
           {activeView === 'resilience' ? <ResilienceView {...resilienceViewProps} /> : null}
+          {activeView === 'resilience_plan' ? <ResiliencePlanView {...resiliencePlanViewProps} /> : null}
           {activeView === 'control' ? <ControlView {...controlViewProps} /> : null}
           {activeView === 'platform' ? <PlatformView {...platformViewProps} /> : null}
           {activeView === 'operations' ? <OperationsView {...operationsViewProps} /> : null}
