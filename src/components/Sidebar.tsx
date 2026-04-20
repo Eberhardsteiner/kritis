@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   ClipboardList,
+  Dices,
   FolderCog,
   FileSpreadsheet,
   GanttChartSquare,
@@ -40,6 +41,7 @@ const items: Array<{
   { key: 'modules', label: 'Branchenmodule', icon: FolderCog },
   { key: 'kritis', label: 'KRITIS-Readiness', icon: ShieldCheck },
   { key: 'resilience_plan', label: 'Resilienzplan', icon: BookOpen },
+  { key: 'tabletop_exercise', label: 'Tabletop-Übungen', icon: Dices },
   { key: 'report', label: 'Reporting', icon: FileSpreadsheet },
 ];
 

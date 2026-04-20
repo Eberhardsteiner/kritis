@@ -25,6 +25,7 @@ describe('ActiveViewPanel', () => {
       governanceViewProps: {} as ActiveViewPanelProps['governanceViewProps'],
       resilienceViewProps: {} as ActiveViewPanelProps['resilienceViewProps'],
       resiliencePlanViewProps: {} as ActiveViewPanelProps['resiliencePlanViewProps'],
+      tabletopExerciseViewProps: {} as ActiveViewPanelProps['tabletopExerciseViewProps'],
       controlViewProps: {} as ActiveViewPanelProps['controlViewProps'],
       platformViewProps: {} as ActiveViewPanelProps['platformViewProps'],
       operationsViewProps: {} as ActiveViewPanelProps['operationsViewProps'],

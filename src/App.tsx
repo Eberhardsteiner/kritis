@@ -39,6 +39,22 @@ import {
   renderResiliencePlanPdfBlob,
 } from './features/resiliencePlan/renderers/pdfRenderer';
 import type { ResiliencePlan } from './features/resiliencePlan/types';
+import {
+  abandonSession as abandonTabletopSession,
+  acknowledgeInject as acknowledgeTabletopInject,
+  advanceStep as advanceTabletopStep,
+  completeSession as completeTabletopSession,
+  createSession as createTabletopSessionState,
+  getVerdictLabel as getTabletopVerdictLabel,
+  recordDecision as recordTabletopDecision,
+  startSession as startTabletopEngineSession,
+  updateParticipantNotes as updateTabletopNotes,
+} from './features/tabletopExercise/engine';
+import { builtInScenarios as tabletopBuiltInScenarios } from './features/tabletopExercise/scenarios';
+import type {
+  ExerciseSession as TabletopExerciseSession,
+  Scenario as TabletopScenarioDef,
+} from './features/tabletopExercise/types';
 import { normalizeRegulatoryProfile } from './lib/regulatory';
 import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
 import {
@@ -828,6 +844,13 @@ function buildAppStateFromLoaded(
     archivedResiliencePlans: Array.isArray(loaded?.archivedResiliencePlans)
       ? (loaded?.archivedResiliencePlans as ResiliencePlan[])
       : [],
+    currentTabletopSession: (loaded?.currentTabletopSession ?? null) as TabletopExerciseSession | null,
+    archivedTabletopSessions: Array.isArray(loaded?.archivedTabletopSessions)
+      ? (loaded?.archivedTabletopSessions as TabletopExerciseSession[])
+      : [],
+    importedTabletopScenarios: Array.isArray(loaded?.importedTabletopScenarios)
+      ? (loaded?.importedTabletopScenarios as TabletopScenarioDef[])
+      : [],
   };
 }
 
@@ -864,6 +887,9 @@ function buildServerPayload(state: AppState): Partial<AppState> {
     riskEntries: state.riskEntries,
     resiliencePlan: state.resiliencePlan,
     archivedResiliencePlans: state.archivedResiliencePlans,
+    currentTabletopSession: state.currentTabletopSession,
+    archivedTabletopSessions: state.archivedTabletopSessions,
+    importedTabletopScenarios: state.importedTabletopScenarios,
   };
 }
 
@@ -1066,6 +1092,7 @@ export default function App() {
   const [moduleRegistryEntries, setModuleRegistryEntries] = useState<ModulePackRegistryEntry[]>([]);
   const [issuedClientSecret, setIssuedClientSecret] = useState<{ label: string; secret: string; mode: 'created' | 'rotated' } | null>(null);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
+  const [tabletopActiveTab, setTabletopActiveTab] = useState<'library' | 'session' | 'review'>('library');
   const serverInitializedRef = useRef(false);
   const suppressNextServerSyncRef = useRef(false);
   const lastSyncedPayloadRef = useRef<string>(serializeServerPayload(state));
@@ -4622,6 +4649,229 @@ export default function App() {
     }
   }
 
+  function resolveActiveTabletopScenario(): TabletopScenarioDef | null {
+    const session = state.currentTabletopSession;
+    if (!session) {
+      return null;
+    }
+    const pool = [...tabletopBuiltInScenarios, ...state.importedTabletopScenarios];
+    return pool.find((entry) => entry.id === session.scenarioId) ?? null;
+  }
+
+  function handleStartTabletopExercise(scenario: TabletopScenarioDef) {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      const session = createTabletopSessionState({
+        scenario,
+        tenantId: authSession?.tenantId ?? publicTenant?.id ?? 'local',
+      });
+      setState((current) => ({
+        ...current,
+        currentTabletopSession: session,
+        activeView: 'tabletop_exercise',
+      }));
+      setTabletopActiveTab('session');
+    });
+  }
+
+  function handleImportTabletopScenario(scenario: TabletopScenarioDef) {
+    runWithPermission('kritis_edit', 'Für den Szenario-Import fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        const without = current.importedTabletopScenarios.filter((entry) => entry.id !== scenario.id);
+        return { ...current, importedTabletopScenarios: [scenario, ...without] };
+      });
+      showNotice('success', `Szenario „${scenario.title}" importiert.`);
+    });
+  }
+
+  function handleRemoveImportedTabletopScenario(scenarioId: string) {
+    runWithPermission('kritis_edit', 'Für Szenario-Änderungen fehlt das Recht kritis_edit.', () => {
+      setState((current) => ({
+        ...current,
+        importedTabletopScenarios: current.importedTabletopScenarios.filter((entry) => entry.id !== scenarioId),
+      }));
+    });
+  }
+
+  function handleBeginTabletopSession() {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        return {
+          ...current,
+          currentTabletopSession: startTabletopEngineSession(current.currentTabletopSession),
+        };
+      });
+    });
+  }
+
+  function handleAcknowledgeTabletopInject(injectId: string) {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        return {
+          ...current,
+          currentTabletopSession: acknowledgeTabletopInject(current.currentTabletopSession, injectId),
+        };
+      });
+    });
+  }
+
+  function handleRecordTabletopDecision(decisionId: string, optionId: string) {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      const scenario = resolveActiveTabletopScenario();
+      if (!scenario) {
+        return;
+      }
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        try {
+          return {
+            ...current,
+            currentTabletopSession: recordTabletopDecision(
+              current.currentTabletopSession,
+              scenario,
+              decisionId,
+              optionId,
+            ),
+          };
+        } catch (error) {
+          showNotice('error', `Entscheidung konnte nicht erfasst werden: ${String(error)}`);
+          return current;
+        }
+      });
+    });
+  }
+
+  function handleAdvanceTabletopStep() {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      const scenario = resolveActiveTabletopScenario();
+      if (!scenario) {
+        return;
+      }
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        return {
+          ...current,
+          currentTabletopSession: advanceTabletopStep(current.currentTabletopSession, scenario),
+        };
+      });
+    });
+  }
+
+  function handleCompleteTabletopSession() {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      const scenario = resolveActiveTabletopScenario();
+      if (!scenario) {
+        return;
+      }
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        return {
+          ...current,
+          currentTabletopSession: completeTabletopSession(current.currentTabletopSession, scenario),
+        };
+      });
+      setTabletopActiveTab('review');
+      showNotice('success', 'Übung abgeschlossen. Auswertung verfügbar.');
+    });
+  }
+
+  function handleAbandonTabletopSession() {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        const abandoned = abandonTabletopSession(current.currentTabletopSession);
+        return {
+          ...current,
+          currentTabletopSession: null,
+          archivedTabletopSessions: [abandoned, ...current.archivedTabletopSessions],
+        };
+      });
+      setTabletopActiveTab('library');
+    });
+  }
+
+  function handleUpdateTabletopNotes(notes: string) {
+    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
+      setState((current) => {
+        if (!current.currentTabletopSession) {
+          return current;
+        }
+        return {
+          ...current,
+          currentTabletopSession: updateTabletopNotes(current.currentTabletopSession, notes),
+        };
+      });
+    });
+  }
+
+  function handleCreateTabletopEvidenceFromResult() {
+    const session = state.currentTabletopSession;
+    const scenario = resolveActiveTabletopScenario();
+    if (!session || !scenario || !session.result) {
+      showNotice('error', 'Kein Auswertungsergebnis zum Hinterlegen vorhanden.');
+      return;
+    }
+    const verdictLabel = getTabletopVerdictLabel(session.result.verdict);
+    const percent = session.result.percentage.toFixed(1).replace('.', ',');
+    const endedLabel = session.endedAt
+      ? new Date(session.endedAt).toLocaleString('de-DE')
+      : new Date().toLocaleString('de-DE');
+    upsertEvidenceDrafts([
+      createEvidenceDraft({
+        title: `Übungsnachweis · ${scenario.title}`,
+        type: 'test',
+        sourceType: 'manual',
+        sourceLabel: `Tabletop-Übung ${scenario.id} (${scenario.version})`,
+        notes:
+          `§ 18 KRITISDachG · Verdict: ${verdictLabel} · ${percent} %. Abgeschlossen am ${endedLabel}.`,
+        tags: ['KRITIS', '§18', 'Tabletop'],
+      }),
+    ]);
+    showNotice('success', 'Übungsnachweis als Evidenz-Entwurf hinterlegt.');
+  }
+
+  function handleExportTabletopResultJson() {
+    if (!state.currentTabletopSession) {
+      showNotice('error', 'Kein Übungsergebnis zum Exportieren vorhanden.');
+      return;
+    }
+    if (!hasPermission('reports_export')) {
+      showNotice('error', 'Für Übungs-Exporte fehlt das Recht reports_export.');
+      return;
+    }
+    try {
+      const scenario = resolveActiveTabletopScenario();
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        scenario: scenario
+          ? { id: scenario.id, version: scenario.version, title: scenario.title }
+          : null,
+        session: state.currentTabletopSession,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const safeCompany = state.companyProfile.companyName.replace(/[^a-zA-Z0-9]+/g, '_') || 'tenant';
+      triggerFileDownload(
+        blob,
+        `tabletop-uebung-${safeCompany}-${state.currentTabletopSession.id}.json`,
+      );
+    } catch (error) {
+      showNotice('error', `JSON-Export fehlgeschlagen: ${String(error)}`);
+    }
+  }
+
   async function handleExportRiskAnalysisDocx() {
     if (!hasPermission('reports_export')) {
       showNotice('error', 'Für DOCX-Exporte fehlt das Recht reports_export.');
@@ -4937,6 +5187,27 @@ export default function App() {
     onExportResiliencePlanJson: handleExportResiliencePlanJson,
     onExportResiliencePlanDocx: handleExportResiliencePlanDocx,
     onExportResiliencePlanPdf: handleExportResiliencePlanPdf,
+    tabletopBuiltInScenarios,
+    tabletopImportedScenarios: state.importedTabletopScenarios,
+    currentTabletopSession: state.currentTabletopSession,
+    activeTabletopScenario: resolveActiveTabletopScenario(),
+    archivedTabletopSessions: state.archivedTabletopSessions,
+    canEditTabletopExercise: hasPermission('kritis_edit'),
+    canExportTabletopExercise: hasPermission('reports_export'),
+    tabletopActiveTab,
+    onSelectTabletopTab: setTabletopActiveTab,
+    onStartTabletopExercise: handleStartTabletopExercise,
+    onImportTabletopScenario: handleImportTabletopScenario,
+    onRemoveImportedTabletopScenario: handleRemoveImportedTabletopScenario,
+    onBeginTabletopSession: handleBeginTabletopSession,
+    onAcknowledgeTabletopInject: handleAcknowledgeTabletopInject,
+    onRecordTabletopDecision: handleRecordTabletopDecision,
+    onAdvanceTabletopStep: handleAdvanceTabletopStep,
+    onCompleteTabletopSession: handleCompleteTabletopSession,
+    onAbandonTabletopSession: handleAbandonTabletopSession,
+    onUpdateTabletopNotes: handleUpdateTabletopNotes,
+    onCreateTabletopEvidenceFromResult: handleCreateTabletopEvidenceFromResult,
+    onExportTabletopResultJson: handleExportTabletopResultJson,
     onCreateServerPackage: handleCreateServerExportPackage,
   });
 

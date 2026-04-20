@@ -14,6 +14,7 @@ import type * as ReportViewModule from '../views/ReportView';
 import type * as ResilienceViewModule from '../views/ResilienceView';
 import type * as ResiliencePlanViewModule from '../views/ResiliencePlanView';
 import type * as RolloutViewModule from '../views/RolloutView';
+import type * as TabletopExerciseViewModule from '../views/TabletopExerciseView';
 
 const AssessmentView = lazy(async () => ({ default: (await import('../views/AssessmentView')).AssessmentView }));
 const ControlView = lazy(async () => ({ default: (await import('../views/ControlView')).ControlView }));
@@ -29,6 +30,7 @@ const ReportView = lazy(async () => ({ default: (await import('../views/ReportVi
 const ResilienceView = lazy(async () => ({ default: (await import('../views/ResilienceView')).ResilienceView }));
 const ResiliencePlanView = lazy(async () => ({ default: (await import('../views/ResiliencePlanView')).ResiliencePlanView }));
 const RolloutView = lazy(async () => ({ default: (await import('../views/RolloutView')).RolloutView }));
+const TabletopExerciseView = lazy(async () => ({ default: (await import('../views/TabletopExerciseView')).TabletopExerciseView }));
 
 export type AssessmentViewProps = ComponentProps<typeof AssessmentViewModule.AssessmentView>;
 export type ControlViewProps = ComponentProps<typeof ControlViewModule.ControlView>;
@@ -44,6 +46,7 @@ export type ReportViewProps = ComponentProps<typeof ReportViewModule.ReportView>
 export type ResilienceViewProps = ComponentProps<typeof ResilienceViewModule.ResilienceView>;
 export type ResiliencePlanViewProps = ComponentProps<typeof ResiliencePlanViewModule.ResiliencePlanView>;
 export type RolloutViewProps = ComponentProps<typeof RolloutViewModule.RolloutView>;
+export type TabletopExerciseViewProps = ComponentProps<typeof TabletopExerciseViewModule.TabletopExerciseView>;
 
 export interface ActiveViewPanelProps {
   activeView: ViewKey;
@@ -55,6 +58,7 @@ export interface ActiveViewPanelProps {
   governanceViewProps: GovernanceViewProps;
   resilienceViewProps: ResilienceViewProps;
   resiliencePlanViewProps: ResiliencePlanViewProps;
+  tabletopExerciseViewProps: TabletopExerciseViewProps;
   controlViewProps: ControlViewProps;
   platformViewProps: PlatformViewProps;
   operationsViewProps: OperationsViewProps;
@@ -74,6 +78,7 @@ export function ActiveViewPanel({
   governanceViewProps,
   resilienceViewProps,
   resiliencePlanViewProps,
+  tabletopExerciseViewProps,
   controlViewProps,
   platformViewProps,
   operationsViewProps,
@@ -99,6 +104,7 @@ export function ActiveViewPanel({
           {activeView === 'governance' ? <GovernanceView {...governanceViewProps} /> : null}
           {activeView === 'resilience' ? <ResilienceView {...resilienceViewProps} /> : null}
           {activeView === 'resilience_plan' ? <ResiliencePlanView {...resiliencePlanViewProps} /> : null}
+          {activeView === 'tabletop_exercise' ? <TabletopExerciseView {...tabletopExerciseViewProps} /> : null}
           {activeView === 'control' ? <ControlView {...controlViewProps} /> : null}
           {activeView === 'platform' ? <PlatformView {...platformViewProps} /> : null}
           {activeView === 'operations' ? <OperationsView {...operationsViewProps} /> : null}

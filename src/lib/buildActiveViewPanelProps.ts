@@ -13,6 +13,7 @@ import type {
   ResilienceViewProps,
   ResiliencePlanViewProps,
   RolloutViewProps,
+  TabletopExerciseViewProps,
 } from '../components/ActiveViewPanel';
 import {
   exportActionPlanAsCsv,
@@ -258,6 +259,27 @@ interface BuildActiveViewPanelPropsArgs {
   onExportResiliencePlanJson: ResiliencePlanViewProps['onExportJson'];
   onExportResiliencePlanDocx: ResiliencePlanViewProps['onExportDocx'];
   onExportResiliencePlanPdf: ResiliencePlanViewProps['onExportPdf'];
+  tabletopBuiltInScenarios: TabletopExerciseViewProps['builtInScenarios'];
+  tabletopImportedScenarios: TabletopExerciseViewProps['importedScenarios'];
+  currentTabletopSession: TabletopExerciseViewProps['currentSession'];
+  activeTabletopScenario: TabletopExerciseViewProps['activeScenario'];
+  archivedTabletopSessions: TabletopExerciseViewProps['archivedSessions'];
+  canEditTabletopExercise: TabletopExerciseViewProps['canEdit'];
+  canExportTabletopExercise: TabletopExerciseViewProps['canExport'];
+  tabletopActiveTab: TabletopExerciseViewProps['activeTab'];
+  onSelectTabletopTab: TabletopExerciseViewProps['onSelectTab'];
+  onStartTabletopExercise: TabletopExerciseViewProps['onStartExercise'];
+  onImportTabletopScenario: TabletopExerciseViewProps['onImportScenario'];
+  onRemoveImportedTabletopScenario: TabletopExerciseViewProps['onRemoveImportedScenario'];
+  onBeginTabletopSession: TabletopExerciseViewProps['onBeginSession'];
+  onAcknowledgeTabletopInject: TabletopExerciseViewProps['onAcknowledgeInject'];
+  onRecordTabletopDecision: TabletopExerciseViewProps['onRecordDecision'];
+  onAdvanceTabletopStep: TabletopExerciseViewProps['onAdvanceStep'];
+  onCompleteTabletopSession: TabletopExerciseViewProps['onCompleteSession'];
+  onAbandonTabletopSession: TabletopExerciseViewProps['onAbandonSession'];
+  onUpdateTabletopNotes: TabletopExerciseViewProps['onUpdateNotes'];
+  onCreateTabletopEvidenceFromResult: TabletopExerciseViewProps['onCreateEvidenceFromResult'];
+  onExportTabletopResultJson: TabletopExerciseViewProps['onExportResultJson'];
   onCreateServerPackage: ReportViewProps['onCreateServerPackage'];
 }
 
@@ -498,6 +520,27 @@ export function buildActiveViewPanelProps({
   onExportResiliencePlanJson,
   onExportResiliencePlanDocx,
   onExportResiliencePlanPdf,
+  tabletopBuiltInScenarios,
+  tabletopImportedScenarios,
+  currentTabletopSession,
+  activeTabletopScenario,
+  archivedTabletopSessions,
+  canEditTabletopExercise,
+  canExportTabletopExercise,
+  tabletopActiveTab,
+  onSelectTabletopTab,
+  onStartTabletopExercise,
+  onImportTabletopScenario,
+  onRemoveImportedTabletopScenario,
+  onBeginTabletopSession,
+  onAcknowledgeTabletopInject,
+  onRecordTabletopDecision,
+  onAdvanceTabletopStep,
+  onCompleteTabletopSession,
+  onAbandonTabletopSession,
+  onUpdateTabletopNotes,
+  onCreateTabletopEvidenceFromResult,
+  onExportTabletopResultJson,
   onCreateServerPackage,
 }: BuildActiveViewPanelPropsArgs): ActiveViewPanelProps {
   return {
@@ -811,6 +854,29 @@ export function buildActiveViewPanelProps({
       onExportJson: onExportResiliencePlanJson,
       onExportDocx: onExportResiliencePlanDocx,
       onExportPdf: onExportResiliencePlanPdf,
+    },
+    tabletopExerciseViewProps: {
+      builtInScenarios: tabletopBuiltInScenarios,
+      importedScenarios: tabletopImportedScenarios,
+      currentSession: currentTabletopSession,
+      activeScenario: activeTabletopScenario,
+      archivedSessions: archivedTabletopSessions,
+      canEdit: canEditTabletopExercise,
+      canExport: canExportTabletopExercise,
+      activeTab: tabletopActiveTab,
+      onSelectTab: onSelectTabletopTab,
+      onStartExercise: onStartTabletopExercise,
+      onImportScenario: onImportTabletopScenario,
+      onRemoveImportedScenario: onRemoveImportedTabletopScenario,
+      onBeginSession: onBeginTabletopSession,
+      onAcknowledgeInject: onAcknowledgeTabletopInject,
+      onRecordDecision: onRecordTabletopDecision,
+      onAdvanceStep: onAdvanceTabletopStep,
+      onCompleteSession: onCompleteTabletopSession,
+      onAbandonSession: onAbandonTabletopSession,
+      onUpdateNotes: onUpdateTabletopNotes,
+      onCreateEvidenceFromResult: onCreateTabletopEvidenceFromResult,
+      onExportResultJson: onExportTabletopResultJson,
     },
     reportViewProps: {
       companyProfile,

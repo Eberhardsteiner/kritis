@@ -1,8 +1,10 @@
 import type { RiskEntry } from './features/riskCatalog/types';
 import type { ResiliencePlan } from './features/resiliencePlan/types';
+import type { ExerciseSession, Scenario as TabletopScenario } from './features/tabletopExercise/types';
 
 export type { RiskEntry };
 export type { ResiliencePlan };
+export type { ExerciseSession, TabletopScenario };
 
 export type ViewKey =
   | 'program'
@@ -18,7 +20,8 @@ export type ViewKey =
   | 'kritis'
   | 'report'
   | 'resilience'
-  | 'resilience_plan';
+  | 'resilience_plan'
+  | 'tabletop_exercise';
 
 export type JurisdictionCode = 'DE' | 'AT' | 'CH';
 export type RegulatoryRegimeId = 'de_kritisdachg' | 'de_bsig_nis2' | 'at_nisg_2026' | 'ch_bacs_ci';
@@ -1189,6 +1192,9 @@ export interface AppState {
   riskEntries: RiskEntry[];
   resiliencePlan: ResiliencePlan | null;
   archivedResiliencePlans: ResiliencePlan[];
+  currentTabletopSession: ExerciseSession | null;
+  archivedTabletopSessions: ExerciseSession[];
+  importedTabletopScenarios: TabletopScenario[];
 }
 
 export interface DomainScore {
