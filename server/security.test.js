@@ -14,18 +14,21 @@ import {
   validateUploadCandidate,
 } from './security.js';
 
-const RETRYABLE_FS_CODES = new Set(['EPERM', 'EBUSY']);
+const RETRYABLE_FS_CODES = new Set(['EPERM', 'EBUSY', 'ENOTEMPTY']);
 
-async function removeWithRetry(targetPath, attempts = 6, delayMs = 50) {
+async function removeWithRetry(targetPath, attempts = 10, delayMs = 200) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
       await fs.rm(targetPath, { recursive: true, force: true });
       return;
     } catch (error) {
-      if (!RETRYABLE_FS_CODES.has(error?.code) || attempt === attempts - 1) {
+      if (!RETRYABLE_FS_CODES.has(error?.code)) {
         throw error;
       }
-
+      if (attempt === attempts - 1) {
+        console.warn(`removeWithRetry: giving up on ${targetPath} after ${attempts} attempts: ${error.code}`);
+        return;
+      }
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
