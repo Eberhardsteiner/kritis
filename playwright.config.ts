@@ -14,7 +14,9 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Gemeinsamer Server-SQLite-State -> seriell fahren (Option 1 der
+  // Fixture-Strategie), sonst Race-Bedingungen beim Schreib-Zugriff.
+  workers: 1,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],

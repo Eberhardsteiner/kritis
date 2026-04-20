@@ -19,6 +19,8 @@ export async function openFreshApp(page: Page) {
   await expect(page.getByRole('heading', { name: 'Krisenfestigkeit Monitor' })).toBeVisible();
   // Arbeitsprofil-Dropdown muss auf usr-public stehen, bevor wir umschalten.
   await expect(page.getByLabel('Arbeitsprofil')).toHaveValue('usr-public');
+  // Initialer Server-Sync abgeschlossen abwarten.
+  await page.waitForLoadState('networkidle');
 }
 
 /**
@@ -37,10 +39,18 @@ export async function switchToAdminProfile(page: Page) {
 }
 
 /**
- * Navigiert zur Sidebar-View mit dem gegebenen Label.
+ * Navigiert zur Sidebar-View mit dem gegebenen Label und wartet, bis
+ * der Tab als aktiv gekennzeichnet ist.
  */
 export async function navigateTo(page: Page, label: string) {
-  await page.getByRole('button', { name: label, exact: true }).click();
+  const sidebar = page.getByRole('navigation');
+  const button = sidebar.getByRole('button', { name: label, exact: true });
+  await button.click();
+  await expect(button).toHaveClass(/active/);
+  // Lazy-geladene Views brauchen einen Tick. Ausserdem kann ein
+  // Server-Sync die Ansicht kurz ueberschreiben -- wir warten bis der
+  // DOM stabil ist.
+  await page.waitForLoadState('networkidle');
 }
 
 /**
