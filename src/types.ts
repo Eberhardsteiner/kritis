@@ -470,6 +470,7 @@ export interface ActionItem {
   relatedRequirementIds: string[];
   notes: string;
   createdAt: string;
+  resilienceGoal?: 'prevent' | 'protect' | 'respond' | 'recover';
 }
 
 export interface EvidenceAttachment {
