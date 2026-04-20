@@ -1,0 +1,283 @@
+{
+  "id": "scenario-cyber-energy-2026",
+  "version": "1.0.0",
+  "title": "Cyber-Angriff auf zentralen IT-Dienstleister eines Energieversorgers",
+  "summary": "Ein Supply-Chain-Angriff kompromittiert den gemeinsam genutzten IT-Dienstleister mehrerer Energieversorger. Ungewöhnlicher OT-Traffic wird beobachtet, manipulierte Schalterstellungen gefährden die Netzstabilität. Der Krisenstab steht vor der Kernfrage: 24-Stunden-Meldung, Netztrennung oder Aufrechterhaltung der Versorgung?",
+  "sectors": ["Energie"],
+  "applicableRegimes": ["de_kritisdachg", "de_bsig_nis2"],
+  "durationMinutes": 120,
+  "roles": [
+    {
+      "id": "ceo",
+      "title": "Vorstandsvorsitzender",
+      "briefing": "Sie tragen die persönliche Haftung nach § 20 KRITISDachG und müssen über Prioritäten (Versorgungssicherheit vs. Forensik), externe Kommunikation und Meldungen an die Aufsicht entscheiden."
+    },
+    {
+      "id": "ciso",
+      "title": "CISO (Chief Information Security Officer)",
+      "briefing": "Sie leiten die technische Reaktion. Sie müssen zwischen Isolation der OT, Beweissicherung und Fortsetzung des Betriebs abwägen und sind fachlich zuständig für die BSI-Meldung nach § 18."
+    },
+    {
+      "id": "ops",
+      "title": "Leitung Netzleitstelle",
+      "briefing": "Sie sind für die Stromnetzführung verantwortlich. Jede Maßnahme muss die N-1-Sicherheit und die Versorgung der Kunden berücksichtigen."
+    },
+    {
+      "id": "press",
+      "title": "Pressesprecher",
+      "briefing": "Sie koordinieren die externe Kommunikation mit Medien, Kunden und Kommunen. Ihre Taktung muss mit der BSI-Meldung und der Geschäftsleitung abgestimmt sein."
+    },
+    {
+      "id": "legal",
+      "title": "Leitung Recht und Compliance",
+      "briefing": "Sie überwachen Meldepflichten nach BSIG, KRITISDachG und DSGVO und stellen die regulatorische Nachvollziehbarkeit sicher."
+    }
+  ],
+  "evaluationCriteria": [
+    {
+      "id": "timely_24h_report",
+      "description": "Die Erstmeldung nach § 18 KRITISDachG erfolgt fristgerecht innerhalb von 24 Stunden.",
+      "weight": 5,
+      "category": "reporting"
+    },
+    {
+      "id": "board_involvement",
+      "description": "Die Geschäftsleitung wird unverzüglich einbezogen und ist entscheidungsfähig (§ 20).",
+      "weight": 4,
+      "category": "governance"
+    },
+    {
+      "id": "ot_containment",
+      "description": "Die OT-Umgebung wird technisch kontrolliert isoliert, bevor weitere Manipulationen möglich sind.",
+      "weight": 4,
+      "category": "operations"
+    },
+    {
+      "id": "customer_continuity",
+      "description": "Die Versorgungssicherheit der Kunden bleibt auf einem akzeptablen Mindestniveau erhalten.",
+      "weight": 5,
+      "category": "operations"
+    },
+    {
+      "id": "external_comms",
+      "description": "Externe Kommunikation (Medien, Kunden, Kommunen) erfolgt abgestimmt und ohne Panik.",
+      "weight": 3,
+      "category": "communication"
+    },
+    {
+      "id": "forensics",
+      "description": "Forensische Beweissicherung wird vor vollständiger Bereinigung sichergestellt.",
+      "weight": 2,
+      "category": "operations"
+    }
+  ],
+  "timeline": [
+    {
+      "t": 0,
+      "phase": "discovery",
+      "injects": [
+        {
+          "id": "inj-1-soc",
+          "title": "SOC-Meldung: ungewöhnlicher Traffic",
+          "description": "Das Security Operations Center meldet ungewöhnliche ausgehende Verbindungen von drei OT-Jumphosts zu einer unbekannten Gegenstelle. Zeit: 02:47 Uhr.",
+          "roleId": "ciso"
+        },
+        {
+          "id": "inj-1-ops",
+          "title": "Netzleitstelle beobachtet Schaltanomalie",
+          "description": "Zwei Mittelspannungsschalter ändern ihre Position ohne Leitstelleneingabe. Versorgung noch stabil.",
+          "roleId": "ops"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-1-escalate",
+          "question": "Wie eskalieren Sie den Vorfall innerhalb der ersten 15 Minuten?",
+          "roleId": "ciso",
+          "relatedCriteria": ["board_involvement"],
+          "options": [
+            {
+              "id": "opt-crisis-staff",
+              "label": "Krisenstab einberufen, Vorstand und BSI-Kontakt vorinformieren",
+              "consequence": "Vorstand ist ab t+10 Minuten entscheidungsfähig im Raum.",
+              "evaluationHints": ["board_involvement"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-tech-only",
+              "label": "Zunächst nur technische Teams alarmieren, Vorstand nach weiterer Analyse",
+              "consequence": "Vorstand erfährt erst ab t+45 Minuten; dadurch verzögerte Entscheidungen.",
+              "evaluationHints": ["board_involvement"],
+              "scoreContribution": 2
+            },
+            {
+              "id": "opt-wait",
+              "label": "Entwicklung beobachten, noch keine Eskalation",
+              "consequence": "Kritische Zeit geht verloren; Medien-Leak wahrscheinlicher.",
+              "evaluationHints": ["board_involvement"],
+              "scoreContribution": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 20,
+      "phase": "early_response",
+      "injects": [
+        {
+          "id": "inj-2-confirm",
+          "title": "Forensik bestätigt Fremdzugriff",
+          "description": "Ein externer Zugriff über den gemeinsamen IT-Dienstleister ist nachgewiesen. Laterale Bewegung in die OT ist möglich.",
+          "roleId": "ciso"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-2-containment",
+          "question": "Welche Eindämmungsmaßnahme wählen Sie?",
+          "roleId": "ciso",
+          "guidance": "Abwägung zwischen Sicherheit und Versorgungsstabilität.",
+          "relatedCriteria": ["ot_containment", "customer_continuity"],
+          "options": [
+            {
+              "id": "opt-segment",
+              "label": "OT-Segment kontrolliert vom IT-Dienstleister trennen, manuelle Steuerung aktivieren",
+              "consequence": "Angriffsfläche wird geschlossen; leichte Einbußen in der Betriebsdatenverarbeitung.",
+              "evaluationHints": ["ot_containment", "customer_continuity"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-full-shutdown",
+              "label": "Gesamt-OT und Anbindung komplett abschalten",
+              "consequence": "Angriff gestoppt, aber Versorgung massiv eingeschränkt; politische Folgen.",
+              "evaluationHints": ["ot_containment"],
+              "scoreContribution": 3
+            },
+            {
+              "id": "opt-observe",
+              "label": "Nur passiv monitoren, keine Trennung",
+              "consequence": "Angreifer behält Zugriff; Manipulationen eskalieren.",
+              "evaluationHints": ["ot_containment"],
+              "scoreContribution": 1
+            }
+          ]
+        },
+        {
+          "id": "dec-2-forensics",
+          "question": "Wie sichern Sie Beweise vor der Bereinigung?",
+          "roleId": "ciso",
+          "relatedCriteria": ["forensics"],
+          "options": [
+            {
+              "id": "opt-image-now",
+              "label": "Speicherabbilder aller betroffenen Systeme vor Bereinigung",
+              "consequence": "Saubere forensische Kette, Strafanzeige bleibt belastbar.",
+              "evaluationHints": ["forensics"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-skip",
+              "label": "Direkt bereinigen, Beweissicherung später",
+              "consequence": "Flüchtige Artefakte verloren; Strafanzeige ggf. unverwertbar.",
+              "evaluationHints": ["forensics"],
+              "scoreContribution": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 60,
+      "phase": "24h_reporting",
+      "injects": [
+        {
+          "id": "inj-3-bsi-frist",
+          "title": "24-Stunden-Frist nähert sich",
+          "description": "Die § 18-Frist für die Erstmeldung an BSI/BBK läuft. Zusätzlich fragen Regionalmedien zu Stromausfällen nach."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-3-report",
+          "question": "Wann melden Sie an BSI und BBK?",
+          "roleId": "legal",
+          "relatedCriteria": ["timely_24h_report"],
+          "options": [
+            {
+              "id": "opt-report-now",
+              "label": "Jetzt melden, auch wenn Lagebild noch unvollständig ist",
+              "consequence": "Frist eingehalten, Nachmeldungen folgen regulär.",
+              "evaluationHints": ["timely_24h_report"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-report-after-fix",
+              "label": "Erst nach Bereinigung melden, dafür vollständig",
+              "consequence": "Frist gerissen; Bußgeldrisiko nach § 24.",
+              "evaluationHints": ["timely_24h_report"],
+              "scoreContribution": 0
+            }
+          ]
+        },
+        {
+          "id": "dec-3-comms",
+          "question": "Wie kommunizieren Sie nach außen?",
+          "roleId": "press",
+          "relatedCriteria": ["external_comms"],
+          "options": [
+            {
+              "id": "opt-factual",
+              "label": "Abgestimmtes Factsheet mit Geschäftsleitung, CISO und Recht",
+              "consequence": "Medien berichten sachlich; Kunden bleiben ruhig.",
+              "evaluationHints": ["external_comms"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-denial",
+              "label": "Keine Stellungnahme, bis Forensik abgeschlossen ist",
+              "consequence": "Spekulationen, Gerüchte und Panik in sozialen Medien.",
+              "evaluationHints": ["external_comms"],
+              "scoreContribution": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 120,
+      "phase": "stabilization",
+      "injects": [
+        {
+          "id": "inj-4-restart",
+          "title": "Wiederanlaufplanung",
+          "description": "Die OT ist bereinigt. Wiederanlauf steht an."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-4-restart",
+          "question": "Wie gestalten Sie den Wiederanlauf?",
+          "roleId": "ops",
+          "relatedCriteria": ["customer_continuity"],
+          "options": [
+            {
+              "id": "opt-staged",
+              "label": "Gestufter Wiederanlauf mit Lastabgleich; parallele Überwachung durch SOC",
+              "consequence": "Stabiler Wiederanlauf, kein Rückfall.",
+              "evaluationHints": ["customer_continuity"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-all-at-once",
+              "label": "Alle Systeme gleichzeitig wieder hochfahren",
+              "consequence": "Last- und Überwachungsprobleme; Risiko neuer Vorfälle.",
+              "evaluationHints": ["customer_continuity"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

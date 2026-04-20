@@ -1,0 +1,263 @@
+{
+  "id": "scenario-flood-cascade-2026",
+  "version": "1.0.0",
+  "title": "Hochwasser mit Kaskadeneffekt auf Wasserversorgung und Stromnetz",
+  "summary": "Ein HQ200-Ereignis trifft einen regionalen Wasserversorger. Das Hebewerk ist abgeschnitten, das Umspannwerk fällt aus; die Trinkwasserversorgung droht zu kippen. Die Entscheidungen betreffen Notbetrieb, Evakuierung der Leitstelle, Interdependenz-Kommunikation mit dem Netzbetreiber und die § 18-Meldung.",
+  "sectors": ["Wasser (Trinkwasser und Abwasser)"],
+  "applicableRegimes": ["de_kritisdachg"],
+  "durationMinutes": 180,
+  "roles": [
+    {
+      "id": "crisis-lead",
+      "title": "Krisenstabsleitung",
+      "briefing": "Sie koordinieren Krisenstab, Kommunikation mit Landesbehörde und dem Netzbetreiber und tragen die operative Entscheidungsverantwortung."
+    },
+    {
+      "id": "water-ops",
+      "title": "Betriebsleitung Wasserwerk",
+      "briefing": "Sie bewerten die hydraulische Lage und entscheiden über Notbetrieb, Druckabsenkung und Trinkwasserqualität."
+    },
+    {
+      "id": "grid-liaison",
+      "title": "Liaison Netzbetreiber",
+      "briefing": "Sie sind die technische Schnittstelle zum regionalen Netzbetreiber. Absprachen zu Ersatzspeisung und Prioritätskunden laufen über Sie."
+    },
+    {
+      "id": "public-comms",
+      "title": "Krisenkommunikation",
+      "briefing": "Sie versorgen Bevölkerung, Kommunen und Rettungsdienste mit abgestimmten Informationen."
+    },
+    {
+      "id": "authority-contact",
+      "title": "Behördenkontakt",
+      "briefing": "Sie koordinieren mit Landesbehörde, BBK und — falls ausgelöst — mit dem Katastrophenschutz."
+    }
+  ],
+  "evaluationCriteria": [
+    {
+      "id": "timely_reporting",
+      "description": "Die Meldung an die zuständige Landesbehörde und — soweit erforderlich — das BBK erfolgt fristgerecht.",
+      "weight": 4,
+      "category": "reporting"
+    },
+    {
+      "id": "cross_sector_coordination",
+      "description": "Die Koordination mit dem Stromnetzbetreiber (Ersatzspeisung/Prioritäten) ist aktiv und belastbar.",
+      "weight": 5,
+      "category": "operations"
+    },
+    {
+      "id": "public_safety",
+      "description": "Die Trinkwasserversorgung für Schutzbedürftige (Krankenhäuser, Pflege) bleibt zumindest als Notversorgung gesichert.",
+      "weight": 5,
+      "category": "operations"
+    },
+    {
+      "id": "public_comms_quality",
+      "description": "Die Bevölkerungs- und Kommunenkommunikation ist abgestimmt, klar und ruhig.",
+      "weight": 3,
+      "category": "communication"
+    },
+    {
+      "id": "crisis_governance",
+      "description": "Der Krisenstab ist formal aktiviert, Rollen und Entscheidungswege sind dokumentiert.",
+      "weight": 3,
+      "category": "governance"
+    }
+  ],
+  "timeline": [
+    {
+      "t": 0,
+      "phase": "discovery",
+      "injects": [
+        {
+          "id": "inj-flood-warn",
+          "title": "Hochwasserwarnung Stufe 4 (DWD)",
+          "description": "Das Unwetter­zentrum meldet für die Region HQ200-Ereignis innerhalb von 12 Stunden.",
+          "roleId": "crisis-lead"
+        },
+        {
+          "id": "inj-pump-stop",
+          "title": "Hebewerk nicht erreichbar",
+          "description": "Das Hebewerk am Standort Süd ist durch Zufahrtssperre nicht mehr anfahrbar. Fernbedienung noch möglich.",
+          "roleId": "water-ops"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-flood-activate",
+          "question": "Aktivieren Sie den Krisenstab formal?",
+          "roleId": "crisis-lead",
+          "relatedCriteria": ["crisis_governance"],
+          "options": [
+            {
+              "id": "opt-activate-full",
+              "label": "Krisenstab sofort aktivieren, Protokollführung starten",
+              "consequence": "Saubere Governance, alle Entscheidungen ab jetzt dokumentiert.",
+              "evaluationHints": ["crisis_governance"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-informal",
+              "label": "Nur technische Koordination, noch kein Krisenstab",
+              "consequence": "Keine dokumentierte Entscheidungsbasis; spätere Nachweise schwierig.",
+              "evaluationHints": ["crisis_governance"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 45,
+      "phase": "early_response",
+      "injects": [
+        {
+          "id": "inj-substation",
+          "title": "Umspannwerk ausgefallen",
+          "description": "Das regionale Umspannwerk ist durch Wassereintritt ausgefallen. Notstrom der Wasserwerke reicht für ca. 6 Stunden.",
+          "roleId": "grid-liaison"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-liaison",
+          "question": "Wie koordinieren Sie mit dem Netzbetreiber?",
+          "roleId": "grid-liaison",
+          "relatedCriteria": ["cross_sector_coordination"],
+          "options": [
+            {
+              "id": "opt-prio-call",
+              "label": "Sofort Prioritätsspeisung für Wasseraufbereitung anfragen; Notstrom-Lieferkette aktivieren",
+              "consequence": "Netzbetreiber aktiviert Ersatzspeisung; Versorgung stabilisierbar.",
+              "evaluationHints": ["cross_sector_coordination", "public_safety"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-standard-ticket",
+              "label": "Standard-Störungsticket öffnen",
+              "consequence": "Reguläre Bearbeitung, zu langsam für die Kaskade.",
+              "evaluationHints": ["cross_sector_coordination"],
+              "scoreContribution": 2
+            }
+          ]
+        },
+        {
+          "id": "dec-notbetrieb",
+          "question": "Wie schalten Sie auf Notbetrieb?",
+          "roleId": "water-ops",
+          "relatedCriteria": ["public_safety"],
+          "options": [
+            {
+              "id": "opt-pressure-down",
+              "label": "Druckabsenkung, Prioritätsversorgung Krankenhäuser/Pflege aktivieren",
+              "consequence": "Kritische Verbraucher abgesichert; allgemeine Versorgung eingeschränkt.",
+              "evaluationHints": ["public_safety"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-full-ops",
+              "label": "Normalbetrieb beibehalten, bis Notstrom ausläuft",
+              "consequence": "Harter Abriss der Versorgung nach 6 Stunden.",
+              "evaluationHints": ["public_safety"],
+              "scoreContribution": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 120,
+      "phase": "24h_reporting",
+      "injects": [
+        {
+          "id": "inj-authority",
+          "title": "Landesbehörde fordert Lageeinschätzung",
+          "description": "Das Umweltministerium bittet um formale Lagemeldung nach § 18 KRITISDachG.",
+          "roleId": "authority-contact"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-report",
+          "question": "Wie melden Sie?",
+          "roleId": "authority-contact",
+          "relatedCriteria": ["timely_reporting"],
+          "options": [
+            {
+              "id": "opt-report-prompt",
+              "label": "Unverzügliche Lagemeldung mit aktueller Einschätzung; Aktualisierung alle 6 h",
+              "consequence": "Behörde koordiniert Hilfe, politische Rückendeckung.",
+              "evaluationHints": ["timely_reporting"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-report-delayed",
+              "label": "Melden erst, wenn die Lage stabilisiert ist",
+              "consequence": "Behörde erfährt verspätet, parallele Maßnahmen verzögert.",
+              "evaluationHints": ["timely_reporting"],
+              "scoreContribution": 1
+            }
+          ]
+        },
+        {
+          "id": "dec-pubcomms",
+          "question": "Wie informieren Sie die Bevölkerung?",
+          "roleId": "public-comms",
+          "relatedCriteria": ["public_comms_quality"],
+          "options": [
+            {
+              "id": "opt-clear",
+              "label": "Abgestimmte Information mit Landkreis und Rettungsdiensten; klare Handlungsempfehlung",
+              "consequence": "Ruhige Bevölkerungsreaktion; Hilfsketten koordiniert.",
+              "evaluationHints": ["public_comms_quality"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-split",
+              "label": "Jedes Fachamt informiert getrennt",
+              "consequence": "Widersprüche in Botschaften; Vertrauensverlust.",
+              "evaluationHints": ["public_comms_quality"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 360,
+      "phase": "stabilization",
+      "injects": [
+        {
+          "id": "inj-handover",
+          "title": "Ablösung Krisenstab",
+          "description": "Die akute Lage entspannt sich, Wasserversorgung stabilisiert."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-handover",
+          "question": "Wie übergeben Sie in den Regelbetrieb?",
+          "roleId": "crisis-lead",
+          "relatedCriteria": ["crisis_governance"],
+          "options": [
+            {
+              "id": "opt-structured",
+              "label": "Strukturierte Übergabe mit Lessons-Learned-Termin innerhalb 14 Tagen",
+              "consequence": "Saubere Dokumentation, regulatorische Nachweisfähigkeit.",
+              "evaluationHints": ["crisis_governance"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-quick",
+              "label": "Schnelle mündliche Übergabe, Dokumentation später",
+              "consequence": "Details gehen verloren; Audit wird schwierig.",
+              "evaluationHints": ["crisis_governance"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

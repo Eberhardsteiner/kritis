@@ -1,0 +1,261 @@
+{
+  "id": "scenario-supply-chain-logistics-2026",
+  "version": "1.0.0",
+  "title": "Lieferkettenunterbrechung eines kritischen Logistikanbieters",
+  "summary": "Der alleinige Logistikdienstleister für den Just-in-Time-Nachschub wird durch Ransomware lahmgelegt. Binnen Stunden droht der Stillstand der Produktion; Kunden erwarten Lieferfähigkeit. Übung zu Notfallbeschaffung, Vertrags- und Versicherungsfragen, externer Kommunikation und Geschäftsleitungs-Entscheidung.",
+  "sectors": ["Transport und Verkehr"],
+  "applicableRegimes": ["de_kritisdachg"],
+  "durationMinutes": 120,
+  "roles": [
+    {
+      "id": "board-rep",
+      "title": "Vorstandsmitglied",
+      "briefing": "Sie vertreten die Geschäftsleitung; Sie treffen die Entscheidung über Notbeschaffungsbudget, externe Kommunikation und Liefer­unterbrechungen."
+    },
+    {
+      "id": "procurement",
+      "title": "Einkaufsleitung",
+      "briefing": "Sie kennen die aktiven Rahmenverträge, Zweitlieferanten und die Zertifizierungsanforderungen der Bauteile."
+    },
+    {
+      "id": "ops-manager",
+      "title": "Betriebsleitung",
+      "briefing": "Sie bewerten die Reichweite der Lagerbestände, Priorisierung der Produktionslinien und Anlauf eines Notbetriebs."
+    },
+    {
+      "id": "finance-lead",
+      "title": "CFO-Vertretung",
+      "briefing": "Sie beurteilen Liquiditätslage, Vertragsstrafen und Versicherungsdeckung."
+    },
+    {
+      "id": "bcm",
+      "title": "Business Continuity Manager",
+      "briefing": "Sie aktivieren das BCM-Konzept, koordinieren den Krisenstab und halten den Kontakt zu Kunden und Behörden."
+    }
+  ],
+  "evaluationCriteria": [
+    {
+      "id": "bcm_activation",
+      "description": "BCM-Plan und Krisenstab sind innerhalb definierter Zeitfenster aktiv.",
+      "weight": 4,
+      "category": "governance"
+    },
+    {
+      "id": "alternate_supplier",
+      "description": "Zweitlieferant oder Notbeschaffung wird zügig aktiviert; keine Abhängigkeit von Single-Source-Fallback.",
+      "weight": 5,
+      "category": "operations"
+    },
+    {
+      "id": "customer_comms",
+      "description": "Kunden werden proaktiv und transparent informiert; kritische Kundenbeziehungen priorisiert.",
+      "weight": 4,
+      "category": "communication"
+    },
+    {
+      "id": "contractual_handling",
+      "description": "Vertragliche Pflichten (Force Majeure, Fristen, Informationsrechte) werden formal korrekt gehandhabt.",
+      "weight": 3,
+      "category": "other"
+    },
+    {
+      "id": "board_decision",
+      "description": "Notbeschaffungsbudget und Priorisierung werden von der Geschäftsleitung formal freigegeben.",
+      "weight": 3,
+      "category": "governance"
+    }
+  ],
+  "timeline": [
+    {
+      "t": 0,
+      "phase": "discovery",
+      "injects": [
+        {
+          "id": "inj-alert",
+          "title": "Logistikdienstleister: Ransomware-Angriff",
+          "description": "Der Logistikdienstleister meldet Ransomware, Transport­management-System ist verschlüsselt. Erwartete Ausfallzeit: 72 Stunden.",
+          "roleId": "bcm"
+        },
+        {
+          "id": "inj-inventory",
+          "title": "Lagerbestandsanalyse",
+          "description": "Produktion kann mit aktuellem Bestand 18 Stunden laufen; danach Stillstand.",
+          "roleId": "ops-manager"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-bcm",
+          "question": "Aktivieren Sie das BCM-Konzept?",
+          "roleId": "bcm",
+          "relatedCriteria": ["bcm_activation"],
+          "options": [
+            {
+              "id": "opt-full",
+              "label": "Stufe 2 des BCM aktivieren, Krisenstab einberufen, Vorstand alarmieren",
+              "consequence": "Klare Governance ab sofort; Protokoll läuft.",
+              "evaluationHints": ["bcm_activation"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-partial",
+              "label": "Nur Einkauf und Produktion aktivieren, kein formaler Krisenstab",
+              "consequence": "Informelle Koordination; Governance-Lücken.",
+              "evaluationHints": ["bcm_activation"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 30,
+      "phase": "early_response",
+      "injects": [
+        {
+          "id": "inj-second-source",
+          "title": "Zweitlieferant-Status",
+          "description": "Ein Zweitlieferant wurde vor 18 Monaten qualifiziert, aber nie aktiv beliefert. Kapazität: ca. 40 % des Bedarfs, Vorlauf 12 Stunden."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-supply",
+          "question": "Wie beschaffen Sie das fehlende Material?",
+          "roleId": "procurement",
+          "relatedCriteria": ["alternate_supplier"],
+          "options": [
+            {
+              "id": "opt-activate-second",
+              "label": "Zweitlieferant aktivieren, gleichzeitig Spot-Beschaffung bei Drittlieferanten",
+              "consequence": "60 % Versorgung gesichert; Produktion kann bis Reparatur Überbrückung fahren.",
+              "evaluationHints": ["alternate_supplier"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-wait-primary",
+              "label": "Auf Primärlieferanten warten, nur Stillstand akzeptieren",
+              "consequence": "Voller Stillstand; Kundenverluste, Vertragsstrafen.",
+              "evaluationHints": ["alternate_supplier"],
+              "scoreContribution": 0
+            }
+          ]
+        },
+        {
+          "id": "dec-budget",
+          "question": "Wird das Notbeschaffungsbudget freigegeben?",
+          "roleId": "board-rep",
+          "relatedCriteria": ["board_decision"],
+          "options": [
+            {
+              "id": "opt-yes",
+              "label": "Ja, mit Protokoll und Obergrenze 2 Mio. €",
+              "consequence": "Einkauf kann handeln; Vorstand ist in der Dokumentation sichtbar.",
+              "evaluationHints": ["board_decision"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-delay",
+              "label": "Entscheidung vertagen, bis Angebote vorliegen",
+              "consequence": "12 Stunden Verzug; Zweitlieferant nicht rechtzeitig aktivierbar.",
+              "evaluationHints": ["board_decision"],
+              "scoreContribution": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 60,
+      "phase": "24h_reporting",
+      "injects": [
+        {
+          "id": "inj-customer",
+          "title": "Kundenanfragen",
+          "description": "Zwei Premiumkunden drohen mit Stornos, wenn sie nicht heute informiert werden."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-customer",
+          "question": "Wie kommunizieren Sie mit Kunden?",
+          "roleId": "bcm",
+          "relatedCriteria": ["customer_comms"],
+          "options": [
+            {
+              "id": "opt-proactive",
+              "label": "Proaktiv anrufen, realistische Lieferzusagen geben, Premium-Kunden persönlich",
+              "consequence": "Vertrauen bleibt erhalten; Stornos abgewendet.",
+              "evaluationHints": ["customer_comms"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-reactive",
+              "label": "Nur auf Anfragen reagieren, allgemeine Mail später",
+              "consequence": "Vertrauensverlust; mindestens ein Storno.",
+              "evaluationHints": ["customer_comms"],
+              "scoreContribution": 2
+            }
+          ]
+        },
+        {
+          "id": "dec-contract",
+          "question": "Wie adressieren Sie vertragliche Pflichten?",
+          "roleId": "finance-lead",
+          "relatedCriteria": ["contractual_handling"],
+          "options": [
+            {
+              "id": "opt-force-majeure",
+              "label": "Force-Majeure-Notifikation an Kunden, Versicherung parallel informieren",
+              "consequence": "Rechtlich saubere Grundlage; Versicherungsdeckung bleibt belastbar.",
+              "evaluationHints": ["contractual_handling"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-ignore",
+              "label": "Formale Schritte erst nach Rückkehr in den Regelbetrieb",
+              "consequence": "Versicherer könnte Deckung ablehnen; Kunden fordern Vertragsstrafen.",
+              "evaluationHints": ["contractual_handling"],
+              "scoreContribution": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "t": 90,
+      "phase": "stabilization",
+      "injects": [
+        {
+          "id": "inj-recovery",
+          "title": "Lieferkette stabilisiert",
+          "description": "Primärlieferant kündigt Wiederanlauf in 24 Stunden an."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "dec-transition",
+          "question": "Wie gestalten Sie den Übergang zurück zum Regelbetrieb?",
+          "roleId": "ops-manager",
+          "relatedCriteria": ["alternate_supplier"],
+          "options": [
+            {
+              "id": "opt-dual",
+              "label": "Zweitlieferant parallel halten, bis zwei Wochen Normalbetrieb erreicht sind",
+              "consequence": "Robuste Versorgung; Zweitlieferant bleibt als Option aktiv.",
+              "evaluationHints": ["alternate_supplier"],
+              "scoreContribution": 5
+            },
+            {
+              "id": "opt-switch-back",
+              "label": "Sofortige Rückkehr zur ursprünglichen Lieferkette",
+              "consequence": "Single-Point-of-Failure besteht weiter.",
+              "evaluationHints": ["alternate_supplier"],
+              "scoreContribution": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
