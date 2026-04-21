@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   buildRuntimeConfig,
   buildUploadPolicy,
@@ -16,7 +15,7 @@ import {
 } from './security.js';
 import { createPersistenceLayer } from './persistence.js';
 import { createObjectStorage, readSupabaseObjectStorageConfig } from './object-storage.js';
-import { parseImportedModulePack, sanitizeModulePackEntry, sortModulePackEntries } from './module-packs.js';
+import { parseImportedModulePack } from './module-packs.js';
 import {
   buildAuthStrategyConfig,
   buildPublicAuthProviders,
@@ -31,7 +30,7 @@ import {
   sanitizeAuthCallbackTicket,
   sanitizeAuthTransaction,
 } from './auth-provider.js';
-import { defaultRegulatoryProfile, normalizeRegulatoryProfile } from './regulatory-dach.js';
+import { normalizeRegulatoryProfile } from './regulatory-dach.js';
 import {
   buildSecurityGatesSummary,
   createObservabilityStore,
@@ -44,6 +43,73 @@ import { registerAuthRoutes } from './routes/auth.js';
 import { registerFileRoutes } from './routes/files.js';
 import { registerIntegrationRoutes } from './routes/integration.js';
 import { registerSystemRoutes } from './routes/system.js';
+// C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
+import {
+  rootDir,
+  storageDir,
+  systemDir,
+  tenantsDir,
+  globalTmpDir,
+  tenantsFile,
+  accountsFile,
+  sessionsFile,
+  pendingAuthFlowsFile,
+  authCallbackTicketsFile,
+  platformSettingsFile,
+  apiClientsFile,
+  jobsFile,
+  jobsArtifactsDir,
+  persistenceDbFile,
+  legacyStateFile,
+  legacyAuditLogFile,
+  legacyUploadsDir,
+  legacySnapshotsDir,
+} from './config/paths.js';
+import {
+  OIDC_PROVIDER_ID,
+  apiClientScopeSet,
+  buildDefaultPlatformSettings,
+  collaborativeStateDefaults,
+  defaultTenantSettings,
+  exportPackageTypes,
+  rolePermissions,
+  sectionPermissionMap,
+} from './config/defaults.js';
+import {
+  createApiClientSecret,
+  createId,
+  httpError,
+  maskSecret,
+  nowIso,
+  slugify,
+} from './services/ids.js';
+import {
+  buildSeedState,
+  buildSeedUser,
+  detectChangedSections,
+  getRolePermissions,
+  isLocalLoginAllowed,
+  isPlainObject,
+  normalizeAuthSource,
+  sanitizeAccountList,
+  sanitizeAccountRecord,
+  sanitizeApiClientRecord,
+  sanitizeApiClientScopes,
+  sanitizeArray,
+  sanitizeExportPackageType,
+  sanitizeIdentityRecord,
+  sanitizeJobRecord,
+  sanitizeMembershipRecord,
+  sanitizeModulePackRegistryEntries,
+  sanitizeObject,
+  sanitizePlatformSettings,
+  sanitizeRoleProfile,
+  sanitizeState,
+  sanitizeTenantList,
+  sanitizeTenantRecord,
+  sanitizeTenantSettings,
+  stableEqual,
+} from './services/sanitizers.js';
 
 const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
 const MAX_JSON_SIZE = '20mb';
@@ -65,32 +131,12 @@ const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
   : DEFAULT_DEMO_PASSWORD;
 const GUEST_ACCOUNT_ID = 'guest-access';
 const GUEST_USER_ID = 'usr-public';
-const OIDC_PROVIDER_ID = 'oidc';
+// OIDC_PROVIDER_ID lebt seit C3.0a in ./config/defaults.js (über Import oben).
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
-const storageDir = path.join(rootDir, 'server-storage');
-const systemDir = path.join(storageDir, 'system');
-const tenantsDir = path.join(storageDir, 'tenants');
-const globalTmpDir = path.join(storageDir, 'tmp');
-const tenantsFile = path.join(systemDir, 'tenants.json');
-const accountsFile = path.join(systemDir, 'auth.json');
-const sessionsFile = path.join(systemDir, 'sessions.json');
-const pendingAuthFlowsFile = path.join(systemDir, 'pending-auth-flows.json');
-const authCallbackTicketsFile = path.join(systemDir, 'auth-callback-tickets.json');
-const platformSettingsFile = path.join(systemDir, 'platform-settings.json');
-const apiClientsFile = path.join(systemDir, 'api-clients.json');
-const jobsFile = path.join(systemDir, 'job-runs.json');
-const jobsArtifactsDir = path.join(systemDir, 'job-artifacts');
-const persistenceDbFile = path.join(systemDir, 'krisenfest.sqlite');
+// Path-Konstanten, __dirname/__filename-Auflösung und rootDir leben
+// seit C3.0a in ./config/paths.js (siehe Imports oben).
 let persistenceLayerPromise = null;
 let objectStoragePromise = null;
-
-const legacyStateFile = path.join(storageDir, 'state.json');
-const legacyAuditLogFile = path.join(storageDir, 'audit-log.json');
-const legacyUploadsDir = path.join(storageDir, 'uploads');
-const legacySnapshotsDir = path.join(storageDir, 'snapshots');
 
 const uploadPolicy = buildUploadPolicy(MAX_UPLOAD_BYTES);
 const upload = multer({
@@ -103,426 +149,18 @@ const observability = createObservabilityStore({
   maxLatencySamplesPerRoute: 240,
 });
 
-const collaborativeStateDefaults = {
-  uploadedModules: [],
-  answers: {},
-  requirementStates: {},
-  companyProfile: {
-    companyName: '',
-    industryLabel: '',
-    locations: '',
-    employees: '',
-    criticalService: '',
-    personsServed: '',
-  },
-  regulatoryProfile: {
-    ...defaultRegulatoryProfile,
-  },
-  actionItems: [],
-  evidenceItems: [],
-  stakeholders: [],
-  sites: [],
-  assets: [],
-  businessProcesses: [],
-  dependencies: [],
-  scenarios: [],
-  exercises: [],
-  rolloutPlan: {
-    releaseVersion: '',
-    targetGoLiveDate: '',
-    freezeDate: '',
-    deploymentWindow: '',
-    hypercareDays: '14',
-    rollbackOwner: '',
-    supportLead: '',
-    communicationPlan: '',
-    decisionStatus: 'draft',
-    decisionNote: '',
-  },
-  hardeningChecks: [],
-  runbooks: [],
-  releaseGates: [],
-  reviewPlan: {
-    executiveSponsor: '',
-    approver: '',
-    nextInternalAuditDate: '',
-    nextManagementReviewDate: '',
-    nextExerciseDate: '',
-    nextEvidenceReviewDate: '',
-  },
-  users: [],
-  complianceCalendar: {
-    registrationDate: '',
-    lastRiskAssessmentDate: '',
-    lastResiliencePlanUpdate: '',
-    lastBsiEvidenceAuditDate: '',
-    incidentContact: '',
-    incidentBackupContact: '',
-    bsigRegistrationDate: '',
-    lastCyberRiskAssessmentDate: '',
-    lastIncidentExerciseDate: '',
-  },
-  auditChecklistStates: {},
-  auditFindings: [],
-  certificationState: {
-    auditLead: '',
-    targetDate: '',
-    decisionNote: '',
-    stageStates: {},
-  },
-};
+// Defaults (collaborativeStateDefaults, defaultTenantSettings,
+// apiClientScopeSet, exportPackageTypes, rolePermissions,
+// sectionPermissionMap, OIDC_PROVIDER_ID) leben seit C3.0a in
+// ./config/defaults.js. defaultPlatformSettings wird hier zur
+// Bootstrap-Zeit über den Factory-Aufruf erzeugt (runtimeConfig-abhängig).
+const defaultPlatformSettings = buildDefaultPlatformSettings(runtimeConfig);
 
-const defaultTenantSettings = {
-  retentionDays: 365,
-  evidenceReviewCadenceDays: 180,
-  exportApprovalRequired: true,
-  requireReleaseForCertification: true,
-  defaultClassification: 'intern',
-  certificationAuthorityLabel: 'Interne KRITIS-Readiness-Prüfstelle',
-  incidentMailbox: '',
-};
-
-const defaultPlatformSettings = {
-  environmentLabel: 'Bolt / Local',
-  deploymentStage: runtimeConfig.appMode === 'production' ? 'production' : 'pilot',
-  appBaseUrl: 'http://localhost:5173',
-  allowedOrigins: runtimeConfig.allowedOrigins.length ? runtimeConfig.allowedOrigins : ['http://localhost:5173', 'http://127.0.0.1:5173'],
-  persistenceDriver: 'sqlite-document-store',
-  persistenceTarget: 'server-storage/system/krisenfest.sqlite',
-  backupCadenceHours: 24,
-  maintenanceMode: false,
-  publicApiEnabled: runtimeConfig.appMode === 'demo',
-  requireSignedWebhooks: true,
-  wafLiteEnabled: true,
-  observabilityMode: 'basic',
-  logRetentionDays: 30,
-  restoreDrillCadenceDays: 30,
-  securityReviewCadenceDays: 90,
-  notes: '',
-};
-
-const apiClientScopeSet = new Set([
-  'readiness:read',
-  'tenant:read',
-  'exports:read',
-  'state:read',
-]);
-
-const exportPackageTypes = new Set([
-  'management_report',
-  'audit_pack',
-  'formal_report',
-  'state_snapshot',
-  'certification_dossier',
-  'handover_bundle',
-]);
-
-const rolePermissions = {
-  admin: [
-    'assessment_edit',
-    'actions_edit',
-    'evidence_edit',
-    'governance_edit',
-    'workspace_edit',
-    'modules_manage',
-    'kritis_edit',
-    'reports_export',
-  ],
-  lead: [
-    'assessment_edit',
-    'actions_edit',
-    'evidence_edit',
-    'governance_edit',
-    'workspace_edit',
-    'kritis_edit',
-    'reports_export',
-  ],
-  editor: [
-    'assessment_edit',
-    'actions_edit',
-    'evidence_edit',
-    'governance_edit',
-    'kritis_edit',
-    'reports_export',
-  ],
-  reviewer: ['evidence_edit', 'kritis_edit', 'reports_export'],
-  auditor: ['reports_export'],
-  viewer: [],
-};
-
-const sectionPermissionMap = {
-  uploadedModules: 'modules_manage',
-  answers: 'assessment_edit',
-  requirementStates: 'kritis_edit',
-  companyProfile: 'assessment_edit',
-  regulatoryProfile: 'kritis_edit',
-  actionItems: 'actions_edit',
-  evidenceItems: 'evidence_edit',
-  stakeholders: 'governance_edit',
-  sites: 'governance_edit',
-  assets: 'governance_edit',
-  businessProcesses: 'governance_edit',
-  dependencies: 'governance_edit',
-  scenarios: 'governance_edit',
-  exercises: 'governance_edit',
-  rolloutPlan: 'workspace_edit',
-  hardeningChecks: 'workspace_edit',
-  runbooks: 'workspace_edit',
-  releaseGates: 'workspace_edit',
-  reviewPlan: 'governance_edit',
-  users: 'workspace_edit',
-  complianceCalendar: 'workspace_edit',
-  auditChecklistStates: 'kritis_edit',
-  auditFindings: 'kritis_edit',
-  certificationState: 'kritis_edit',
-};
-
-function nowIso() {
-  return new Date().toISOString();
-}
-
-function isPlainObject(value) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
-function sanitizeArray(value) {
-  return Array.isArray(value) ? value : [];
-}
-
-function sanitizeObject(value) {
-  return isPlainObject(value) ? value : {};
-}
-
-function createId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function slugify(value) {
-  return String(value || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9äöüß_.-]+/gi, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 70);
-}
-
-function sanitizeTenantRecord(value) {
-  const raw = sanitizeObject(value);
-  const id = slugify(raw.id || raw.slug || raw.name || '');
-  const createdAt = String(raw.createdAt || '').trim();
-  const deploymentStage = ['local', 'pilot', 'staging', 'production'].includes(raw.deploymentStage)
-    ? raw.deploymentStage
-    : 'pilot';
-  const serviceTier = ['standard', 'plus', 'enterprise'].includes(raw.serviceTier)
-    ? raw.serviceTier
-    : 'standard';
-
-  return {
-    id,
-    name: String(raw.name || id || 'Mandant').trim() || id,
-    slug: slugify(raw.slug || id || raw.name || '') || id,
-    industryLabel: String(raw.industryLabel || '').trim(),
-    createdAt: createdAt || nowIso(),
-    active: raw.active !== false,
-    deploymentStage,
-    serviceTier,
-    dataRegion: String(raw.dataRegion || 'DE').trim() || 'DE',
-    primaryContactName: String(raw.primaryContactName || '').trim(),
-    primaryContactEmail: String(raw.primaryContactEmail || '').trim(),
-    technicalContactName: String(raw.technicalContactName || '').trim(),
-    technicalContactEmail: String(raw.technicalContactEmail || '').trim(),
-    notes: String(raw.notes || '').trim(),
-  };
-}
-
-function sanitizeTenantList(value) {
-  return sanitizeArray(value)
-    .map((entry) => sanitizeTenantRecord(entry))
-    .filter((entry) => entry.id);
-}
-
-function sanitizePlatformSettings(value) {
-  const raw = sanitizeObject(value);
-  const backupCadenceHours = Number(raw.backupCadenceHours);
-  const logRetentionDays = Number(raw.logRetentionDays);
-  const restoreDrillCadenceDays = Number(raw.restoreDrillCadenceDays);
-  const securityReviewCadenceDays = Number(raw.securityReviewCadenceDays);
-
-  return {
-    environmentLabel: String(raw.environmentLabel || defaultPlatformSettings.environmentLabel).trim() || defaultPlatformSettings.environmentLabel,
-    deploymentStage: ['local', 'pilot', 'staging', 'production'].includes(raw.deploymentStage)
-      ? raw.deploymentStage
-      : defaultPlatformSettings.deploymentStage,
-    appBaseUrl: String(raw.appBaseUrl || defaultPlatformSettings.appBaseUrl).trim(),
-    allowedOrigins: sanitizeArray(raw.allowedOrigins)
-      .map((entry) => String(entry || '').trim())
-      .filter(Boolean),
-    persistenceDriver: ['sqlite-document-store', 'supabase-rest-store', 'tenant-filesystem', 'json-adapter', 'external-adapter'].includes(raw.persistenceDriver)
-      ? raw.persistenceDriver
-      : defaultPlatformSettings.persistenceDriver,
-    persistenceTarget: String(raw.persistenceTarget || defaultPlatformSettings.persistenceTarget).trim() || defaultPlatformSettings.persistenceTarget,
-    backupCadenceHours: Number.isFinite(backupCadenceHours)
-      ? Math.min(Math.max(Math.round(backupCadenceHours), 1), 720)
-      : defaultPlatformSettings.backupCadenceHours,
-    maintenanceMode: Boolean(raw.maintenanceMode),
-    publicApiEnabled: raw.publicApiEnabled === undefined ? defaultPlatformSettings.publicApiEnabled : Boolean(raw.publicApiEnabled),
-    requireSignedWebhooks: raw.requireSignedWebhooks === undefined ? defaultPlatformSettings.requireSignedWebhooks : Boolean(raw.requireSignedWebhooks),
-    wafLiteEnabled: raw.wafLiteEnabled === undefined ? defaultPlatformSettings.wafLiteEnabled : Boolean(raw.wafLiteEnabled),
-    observabilityMode: ['off', 'basic', 'detailed'].includes(String(raw.observabilityMode || '').trim())
-      ? String(raw.observabilityMode).trim()
-      : defaultPlatformSettings.observabilityMode,
-    logRetentionDays: Number.isFinite(logRetentionDays)
-      ? Math.min(Math.max(Math.round(logRetentionDays), 7), 3650)
-      : defaultPlatformSettings.logRetentionDays,
-    restoreDrillCadenceDays: Number.isFinite(restoreDrillCadenceDays)
-      ? Math.min(Math.max(Math.round(restoreDrillCadenceDays), 1), 365)
-      : defaultPlatformSettings.restoreDrillCadenceDays,
-    securityReviewCadenceDays: Number.isFinite(securityReviewCadenceDays)
-      ? Math.min(Math.max(Math.round(securityReviewCadenceDays), 7), 365)
-      : defaultPlatformSettings.securityReviewCadenceDays,
-    notes: String(raw.notes || '').trim(),
-  };
-}
-
-function sanitizeApiClientScopes(value) {
-  const scopes = sanitizeArray(value)
-    .map((entry) => String(entry || '').trim())
-    .filter((entry) => apiClientScopeSet.has(entry));
-
-  return scopes.length ? scopes : ['readiness:read'];
-}
-
-function sanitizeApiClientRecord(value, tenantLookup = new Map()) {
-  const raw = sanitizeObject(value);
-  const tenantId = String(raw.tenantId || '').trim();
-  const tenantName = tenantId ? (tenantLookup.get(tenantId)?.name || tenantId) : 'Systemweit';
-
-  return {
-    id: String(raw.id || '').trim(),
-    label: String(raw.label || '').trim() || 'API-Client',
-    tenantId,
-    tenantName,
-    integrationType: ['reporting', 'backup', 'siem', 'bi', 'custom'].includes(raw.integrationType)
-      ? raw.integrationType
-      : 'custom',
-    scopes: sanitizeApiClientScopes(raw.scopes),
-    status: raw.status === 'revoked' ? 'revoked' : 'active',
-    createdAt: String(raw.createdAt || '').trim(),
-    createdBy: String(raw.createdBy || '').trim(),
-    lastUsedAt: String(raw.lastUsedAt || '').trim(),
-    expiresAt: String(raw.expiresAt || '').trim(),
-    secretHint: String(raw.secretHint || '').trim(),
-    note: String(raw.note || '').trim(),
-    secretSalt: String(raw.secretSalt || '').trim(),
-    secretHash: String(raw.secretHash || '').trim(),
-  };
-}
-
-function sanitizeJobRecord(value, tenantLookup = new Map()) {
-  const raw = sanitizeObject(value);
-  const tenantId = String(raw.tenantId || '').trim();
-  const tenantName = tenantId ? (tenantLookup.get(tenantId)?.name || tenantId) : 'Systemweit';
-  const artifactFileName = String(raw.artifactFileName || '').trim();
-
-  return {
-    id: String(raw.id || '').trim(),
-    type: ['tenant_backup', 'integrity_scan', 'export_inventory', 'restore_drill', 'retention_review'].includes(raw.type)
-      ? raw.type
-      : 'integrity_scan',
-    label: String(raw.label || '').trim() || 'Systemjob',
-    tenantId,
-    tenantName,
-    status: ['done', 'failed', 'running'].includes(raw.status) ? raw.status : 'done',
-    startedAt: String(raw.startedAt || '').trim(),
-    completedAt: String(raw.completedAt || '').trim(),
-    triggeredBy: String(raw.triggeredBy || '').trim(),
-    summary: String(raw.summary || '').trim(),
-    artifactFileName,
-    downloadUrl: artifactFileName ? `/api/system/jobs/${encodeURIComponent(String(raw.id || '').trim())}/download?download=${encodeURIComponent(artifactFileName)}` : '',
-  };
-}
-
-function createApiClientSecret() {
-  return `kfapi_${crypto.randomBytes(24).toString('hex')}`;
-}
-
-function maskSecret(secret) {
-  return secret ? `${secret.slice(0, 8)}…${secret.slice(-4)}` : '';
-}
-
-function httpError(status, message, details) {
-  const error = new Error(message);
-  error.status = status;
-  error.details = details;
-  return error;
-}
-
-function sanitizeRoleProfile(value) {
-  return rolePermissions[value] ? value : 'viewer';
-}
-
-function normalizeAuthSource(value) {
-  return ['local', 'oidc', 'hybrid'].includes(String(value || '').trim())
-    ? String(value || '').trim()
-    : 'local';
-}
-
-function sanitizeMembershipRecord(value) {
-  const raw = sanitizeObject(value);
-  return {
-    tenantId: String(raw.tenantId || '').trim(),
-    roleProfile: sanitizeRoleProfile(raw.roleProfile),
-    workspaceUserId: String(raw.workspaceUserId || createId('usr')).trim(),
-    scope: String(raw.scope || '').trim(),
-  };
-}
-
-function sanitizeIdentityRecord(value) {
-  const raw = sanitizeObject(value);
-  return {
-    providerId: String(raw.providerId || OIDC_PROVIDER_ID).trim() || OIDC_PROVIDER_ID,
-    subject: String(raw.subject || '').trim(),
-    issuer: String(raw.issuer || '').trim(),
-    email: String(raw.email || '').trim().toLowerCase(),
-    linkedAt: String(raw.linkedAt || '').trim(),
-    lastLoginAt: String(raw.lastLoginAt || '').trim(),
-    tenantHint: String(raw.tenantHint || '').trim(),
-    roleHint: String(raw.roleHint || '').trim(),
-    scopeHint: String(raw.scopeHint || '').trim(),
-  };
-}
-
-function sanitizeAccountRecord(value) {
-  const raw = sanitizeObject(value);
-  const authSource = normalizeAuthSource(raw.authSource || (raw.identities ? 'hybrid' : 'local'));
-  return {
-    id: String(raw.id || '').trim() || createId('acct'),
-    name: String(raw.name || '').trim(),
-    email: String(raw.email || '').trim().toLowerCase(),
-    status: ['active', 'invited', 'inactive'].includes(String(raw.status || '').trim())
-      ? String(raw.status || '').trim()
-      : 'active',
-    isSystemAdmin: Boolean(raw.isSystemAdmin),
-    authSource,
-    passwordSalt: String(raw.passwordSalt || '').trim(),
-    passwordHash: String(raw.passwordHash || '').trim(),
-    lastLoginAt: String(raw.lastLoginAt || '').trim(),
-    lastAuthProvider: String(raw.lastAuthProvider || '').trim(),
-    memberships: sanitizeArray(raw.memberships).map((entry) => sanitizeMembershipRecord(entry)).filter((entry) => entry.tenantId),
-    identities: sanitizeArray(raw.identities).map((entry) => sanitizeIdentityRecord(entry)).filter((entry) => entry.subject),
-  };
-}
-
-function sanitizeAccountList(value) {
-  return sanitizeArray(value)
-    .map((entry) => sanitizeAccountRecord(entry))
-    .filter((entry) => entry.email);
-}
-
-function isLocalLoginAllowed(account) {
-  const authSource = normalizeAuthSource(account?.authSource);
-  return authSource === 'local' || authSource === 'hybrid';
-}
+// Pure Helpers (ids, sanitizers, seeds, state-diff) leben seit C3.0a
+// in ./services/ids.js und ./services/sanitizers.js. Die Signatur von
+// sanitizePlatformSettings hat einen zweiten Param `defaults`
+// bekommen, damit die runtime-abhängige Baseline explizit gereicht
+// wird (früher: impliziter Closure-Zugriff).
 
 function findAccountByIdentity(accounts, providerId, subject) {
   return sanitizeArray(accounts).find((account) => sanitizeArray(account.identities).some((identity) => identity?.providerId === providerId && identity?.subject === subject));
@@ -578,88 +216,8 @@ function buildAutoCreatedMembership(profile, tenantId, tenantName) {
   });
 }
 
-function sanitizeState(input) {
-  const raw = sanitizeObject(input);
-  return {
-    uploadedModules: sanitizeArray(raw.uploadedModules),
-    answers: sanitizeObject(raw.answers),
-    requirementStates: sanitizeObject(raw.requirementStates),
-    companyProfile: {
-      ...collaborativeStateDefaults.companyProfile,
-      ...sanitizeObject(raw.companyProfile),
-    },
-    regulatoryProfile: normalizeRegulatoryProfile(raw.regulatoryProfile),
-    actionItems: sanitizeArray(raw.actionItems),
-    evidenceItems: sanitizeArray(raw.evidenceItems),
-    stakeholders: sanitizeArray(raw.stakeholders),
-    sites: sanitizeArray(raw.sites),
-    assets: sanitizeArray(raw.assets),
-    businessProcesses: sanitizeArray(raw.businessProcesses),
-    dependencies: sanitizeArray(raw.dependencies),
-    scenarios: sanitizeArray(raw.scenarios),
-    exercises: sanitizeArray(raw.exercises),
-    rolloutPlan: {
-      ...collaborativeStateDefaults.rolloutPlan,
-      ...sanitizeObject(raw.rolloutPlan),
-    },
-    hardeningChecks: sanitizeArray(raw.hardeningChecks),
-    runbooks: sanitizeArray(raw.runbooks),
-    releaseGates: sanitizeArray(raw.releaseGates),
-    reviewPlan: {
-      ...collaborativeStateDefaults.reviewPlan,
-      ...sanitizeObject(raw.reviewPlan),
-    },
-    users: sanitizeArray(raw.users),
-    complianceCalendar: {
-      ...collaborativeStateDefaults.complianceCalendar,
-      ...sanitizeObject(raw.complianceCalendar),
-    },
-    auditChecklistStates: sanitizeObject(raw.auditChecklistStates),
-    auditFindings: sanitizeArray(raw.auditFindings),
-    certificationState: {
-      ...collaborativeStateDefaults.certificationState,
-      ...sanitizeObject(raw.certificationState),
-      stageStates: sanitizeObject(raw?.certificationState?.stageStates),
-    },
-  };
-}
-
-function getRolePermissions(roleProfile) {
-  return rolePermissions[sanitizeRoleProfile(roleProfile)] ?? rolePermissions.viewer;
-}
-
-function buildSeedUser({ id, name, email, roleProfile = 'admin', scope = 'Gesamtprogramm' }) {
-  return {
-    id,
-    name,
-    email,
-    department: '',
-    roleProfile,
-    status: 'active',
-    scope,
-    notes: 'Automatisch angelegter Zugriff',
-  };
-}
-
-function buildSeedState({ companyName, adminName, adminEmail, workspaceUserId, roleProfile = 'admin', industryLabel = '' }) {
-  const state = sanitizeState({
-    ...collaborativeStateDefaults,
-    companyProfile: {
-      ...collaborativeStateDefaults.companyProfile,
-      companyName,
-      industryLabel,
-    },
-    users: [buildSeedUser({
-      id: workspaceUserId,
-      name: adminName,
-      email: adminEmail,
-      roleProfile,
-      scope: companyName || 'Gesamtprogramm',
-    })],
-  });
-
-  return state;
-}
+// sanitizeState, getRolePermissions, buildSeedUser, buildSeedState
+// leben seit C3.0a in ./services/sanitizers.js.
 
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, 32, 'sha256').toString('hex');
@@ -932,7 +490,7 @@ function presentPersistenceTarget(targetPath) {
 
 async function readPlatformSettings() {
   const persistence = await getPersistenceLayer();
-  const settings = sanitizePlatformSettings(await readJsonFile(platformSettingsFile, defaultPlatformSettings));
+  const settings = sanitizePlatformSettings(await readJsonFile(platformSettingsFile, defaultPlatformSettings), defaultPlatformSettings);
   return {
     ...settings,
     persistenceDriver: persistence.driver || settings.persistenceDriver,
@@ -942,7 +500,7 @@ async function readPlatformSettings() {
 
 async function writePlatformSettings(value) {
   const persistence = await getPersistenceLayer();
-  const sanitized = sanitizePlatformSettings(value);
+  const sanitized = sanitizePlatformSettings(value, defaultPlatformSettings);
   const persisted = {
     ...sanitized,
     persistenceDriver: persistence.driver || sanitized.persistenceDriver,
@@ -1078,27 +636,8 @@ async function writeVersions(tenantId, value) {
   await writeJsonFile(paths.versionsFile, sanitizeArray(value));
 }
 
-function sanitizeExportPackageType(value) {
-  return exportPackageTypes.has(value) ? value : 'state_snapshot';
-}
-
-function sanitizeTenantSettings(value) {
-  const raw = sanitizeObject(value);
-  const retentionDays = Number(raw.retentionDays);
-  const evidenceReviewCadenceDays = Number(raw.evidenceReviewCadenceDays);
-
-  return {
-    retentionDays: Number.isFinite(retentionDays) ? Math.min(Math.max(Math.round(retentionDays), 30), 3650) : defaultTenantSettings.retentionDays,
-    evidenceReviewCadenceDays: Number.isFinite(evidenceReviewCadenceDays) ? Math.min(Math.max(Math.round(evidenceReviewCadenceDays), 30), 730) : defaultTenantSettings.evidenceReviewCadenceDays,
-    exportApprovalRequired: raw.exportApprovalRequired === undefined ? defaultTenantSettings.exportApprovalRequired : Boolean(raw.exportApprovalRequired),
-    requireReleaseForCertification: raw.requireReleaseForCertification === undefined ? defaultTenantSettings.requireReleaseForCertification : Boolean(raw.requireReleaseForCertification),
-    defaultClassification: ['öffentlich', 'intern', 'vertraulich', 'streng_vertraulich'].includes(raw.defaultClassification)
-      ? raw.defaultClassification
-      : defaultTenantSettings.defaultClassification,
-    certificationAuthorityLabel: String(raw.certificationAuthorityLabel || defaultTenantSettings.certificationAuthorityLabel).trim(),
-    incidentMailbox: String(raw.incidentMailbox || '').trim(),
-  };
-}
+// sanitizeExportPackageType, sanitizeTenantSettings leben seit C3.0a
+// in ./services/sanitizers.js.
 
 async function readTenantSettings(tenantId) {
   const paths = tenantPaths(tenantId);
@@ -1112,9 +651,8 @@ async function writeTenantSettings(tenantId, value) {
   return sanitized;
 }
 
-function sanitizeModulePackRegistryEntries(value) {
-  return sortModulePackEntries(sanitizeArray(value).map((entry) => sanitizeModulePackEntry(entry))).filter((entry) => entry.id);
-}
+// sanitizeModulePackRegistryEntries lebt seit C3.0a in
+// ./services/sanitizers.js.
 
 async function readModulePackRegistry(tenantId) {
   const paths = tenantPaths(tenantId);
@@ -1427,13 +965,8 @@ async function getSnapshotPayload(tenantId, snapshotId) {
   return payload;
 }
 
-function stableEqual(left, right) {
-  return JSON.stringify(left) === JSON.stringify(right);
-}
-
-function detectChangedSections(currentState, nextState) {
-  return Object.keys(sectionPermissionMap).filter((section) => !stableEqual(currentState?.[section], nextState?.[section]));
-}
+// stableEqual, detectChangedSections leben seit C3.0a in
+// ./services/sanitizers.js.
 
 function extractAuthToken(req) {
   const authHeader = String(req.header('authorization') || '').trim();

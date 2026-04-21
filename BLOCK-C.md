@@ -262,12 +262,13 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
 - `admin.js`, `auth.js`, `files.js`, `integration.js`, `system.js`, `utils.js`
 
 **Zu ergänzende Route-Module**:
-- `tenants.js` – Mandanten-Verwaltung
+- `tenants.js` – Mandanten-Verwaltung (Tenant-Settings plus Admin-Overlap)
 - `evidence.js` – Evidenzen, Retention, Upload/Download
-- `regulatory.js` – Regime-spezifische Endpunkte (KRITIS-Dachgesetz, BSIG, AT, CH)
-- `reporting.js` – Report-Exports, Management-Report
-- `assessments.js` – Assessment-Flows, Requirement-State
+- `reporting.js` – Report-Exports, Management-Report (Export-Register)
 - `modules.js` – Container-Pack-Registry, Overlay-Management
+- `state.js` – Tenant-State-Sync, Audit-Log, Snapshots
+
+> **Plan-Korrektur (C3.0a-Freigabe)**: Die ursprünglich gelisteten Module `regulatory.js` und `assessments.js` sind gestrichen — diese Domänen haben keine dedizierten HTTP-Endpunkte. Regulatorik-Daten fließen über `/api/state` als Payload; die Regulatorik-Logik wohnt bereits in `server/regulatory-dach.js`. Assessments fließen ebenfalls über `/api/state` und die State-Sanitize-Kette. Kein Code-Move nötig.
 
 **Zerlegungsstrategie**:
 
@@ -277,7 +278,20 @@ Analog zu C2 iterativ, eine Domäne pro Iteration. Jede Iteration:
 3. In `server/index.js` durch `app.use('/api/tenants', tenantsRouter)` ersetzen
 4. Bestehende Tests grün halten, ggf. neue Tests für das Route-Modul
 
-**Service-Layer**: Wenn pro Domäne mehr als reine Routen-Logik extrahiert wird (DB-Zugriff, Business-Logik), entsteht ein paralleler `server/services/`-Ordner. Faustregel: wenn eine Route-Handler-Funktion mehr als 50 Zeilen hat, wird die Business-Logik in einen Service ausgelagert.
+**Service-Layer**: Wenn pro Domäne mehr als reine Routen-Logik extrahiert wird (DB-Zugriff, Business-Logik, Sanitizer), entsteht ein paralleler `server/services/`-Ordner. Faustregel: wenn eine Route-Handler-Funktion mehr als 50 Zeilen hat, wird die Business-Logik in einen Service ausgelagert. Zusätzlich entsteht `server/config/` für runtime-immutable Referenzdaten (Paths, Default-Objekte, Role-Permission-Maps).
+
+**Tatsächliche Reihenfolge** (10 Sub-Iterationen, nach der C3.0a-Scoping-Analyse präzisiert; Foundation-Phase in drei Commits, weil die gemessene Foundation-Größe deutlich über der ursprünglichen C3-Scoping-Schätzung lag):
+
+1. 🔄 **C3.0a · Service-Foundation I** — Pure Helpers + Defaults + Paths. Neu: `config/paths.js` (18 Path-Konstanten), `config/defaults.js` (7 Default-/Konstanten-Blöcke plus OIDC-Provider-ID), `services/ids.js` (nowIso, createId, slugify, maskSecret, createApiClientSecret, httpError), `services/sanitizers.js` (~25 Pure-Funktionen inklusive sanitize*, normalize*, seed-Factories, stableEqual, detectChangedSections). Einziger Signatur-Change: `sanitizePlatformSettings(value, defaults)` nimmt runtime-abhängige Defaults explizit als zweiten Param.
+2. **C3.0b · Service-Foundation II** — Persistence-Wrappers: alle typisierten JSON-I/O-Fassaden (readTenants, writeTenants, readState, writeState, readAuditLog, appendAuditLog, readVersions, readTenantSettings, readModulePackRegistry, readExportLog etc.) plus tenantPaths + ensureTenantStorage + buildStateEnvelope. Sanitize-on-Write-Invariante byte-identisch bewahrt.
+3. **C3.0c · Service-Foundation III** — Auth-Session-Service: getAuthContext, assertPermissions, ensureSystemAdmin, createServerSession, presentSession, cleanupExpiredSessions/AuthFlows/AuthCallbackTickets, resolveOidcLoginContext, buildAnonymousContext, hashPassword/verifyPassword/createSessionToken/plusHours, ensureWorkspaceUser, buildSuccessfulAuthResponse, consumeAuthCallbackTicket, extractAuthToken, findAccountByIdentity, upsertExternalIdentity, resolveMembershipForAccount, buildAutoCreatedMembership, buildWorkspaceUserSeedFromContext. Plus GUEST_ACCOUNT_ID/GUEST_USER_ID nach config.
+4. **C3.1 · routes/modules.js + services/module-packs-extended.js** — 4 Endpoints (/api/modules/registry/*).
+5. **C3.2 · routes/reporting.js + services/exports.js** — 4 Endpoints (/api/exports/*).
+6. **C3.3 · routes/tenant-settings.js** — 2 Endpoints (/api/tenant-settings).
+7. **C3.4 · routes/evidence.js + services/evidence.js** — 6 Endpoints (/api/evidence/*, /api/document-ledger/summary, /api/evidence-retention/summary). Vorab-Commit: `test(server): add integration tests for evidence endpoints` (3–5 supertest-Tests gegen monolithischen Ist-Stand, als Safety-Net).
+8. **C3.5 · routes/state.js + services/snapshots.js** — 5 Endpoints (/api/state GET/PUT, /api/audit-log, /api/snapshots GET/POST/restore). Vorab-Commit: `test(server): add integration tests for state endpoints`.
+9. **C3.6 · Service-Residuen** — tenants-service, system-summaries, storage-init, plus `runSystemJob` (~200-Zeilen-Switch-Funktion; eigener Risikopunkt, weil die Switch-Arms quer durch fast alle Domänen dispatchen: tenant_backup, integrity_scan, export_inventory, restore_drill, retention_review).
+10. **C3.7 · Endreduktion `server/index.js`** — Imports konsolidieren, Konstanten-Reste aufräumen, Ziel <400 Zeilen.
 
 **Express-5-Vorteile nutzen**:
 - Async-Handler direkt, ohne manuelle `next(err)`-Weiterleitung
@@ -287,9 +301,9 @@ Analog zu C2 iterativ, eine Domäne pro Iteration. Jede Iteration:
 **Akzeptanzkriterien C3**:
 - `server/index.js` unter 400 Zeilen
 - Jedes Route-Modul hat eine eigene Testdatei
-- Alle 37+ Backend-Tests grün
-- Backend-Tests erweitert auf mindestens 60 durch die Route-Modul-Tests
-- Alle 12 E2E-Szenarien grün
+- Alle 38+ Backend-Tests grün
+- Backend-Tests erweitert auf mindestens 60 durch die Route-Modul-Tests und die Vorab-Integration-Tests (C3.4, C3.5)
+- Alle 16 E2E-Szenarien grün (Chromium)
 
 **Aufwandsschätzung**: 2,5 Sprints. Kann parallel zu C2 laufen, ist weniger verzahnt.
 
