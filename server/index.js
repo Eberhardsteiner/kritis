@@ -66,7 +66,13 @@ import {
   legacySnapshotsDir,
 } from './config/paths.js';
 import {
+  MAX_AUDIT_ENTRIES,
+  MAX_JSON_SIZE,
+  MAX_UPLOAD_BYTES,
   OIDC_PROVIDER_ID,
+  PASSWORD_ITERATIONS,
+  SESSION_HOURS,
+  SNAPSHOT_LIMIT,
   apiClientScopeSet,
   buildDefaultPlatformSettings,
   collaborativeStateDefaults,
@@ -110,14 +116,54 @@ import {
   sanitizeTenantSettings,
   stableEqual,
 } from './services/sanitizers.js';
+// C3.0b: Persistence-Wrappers (Generic JSON-I/O + typisierte Collection-
+// Fassaden + Singleton-Fassade + Tenant-Paths) ausgelagert.
+import {
+  appendAuditLog,
+  ensureDir,
+  ensureTenantStorage,
+  getJsonDocumentMeta,
+  getObjectStorage,
+  getPersistenceLayer,
+  jsonDocumentExists,
+  presentPersistenceTarget,
+  readAccounts,
+  readApiClients,
+  readAuditLog,
+  readAuthCallbackTickets,
+  readExportLog,
+  readJobRuns,
+  readJsonFile,
+  readModulePackRegistry,
+  readPendingAuthFlows,
+  readPlatformSettings as readPlatformSettingsRaw,
+  readSessions,
+  readState,
+  readStateMeta,
+  readTenantSettings,
+  readTenants,
+  readVersions,
+  resolvePersistenceReference,
+  tenantPaths,
+  writeAccounts,
+  writeApiClients,
+  writeAuthCallbackTickets,
+  writeExportLog,
+  writeJobRuns,
+  writeJsonFile,
+  writeModulePackRegistry,
+  writePendingAuthFlows,
+  writePlatformSettings as writePlatformSettingsRaw,
+  writeSessions,
+  writeState,
+  writeTenantSettings,
+  writeTenants,
+  writeVersions,
+} from './services/persistence-wrappers.js';
 
 const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
-const MAX_JSON_SIZE = '20mb';
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
-const MAX_AUDIT_ENTRIES = 300;
-const SNAPSHOT_LIMIT = 40;
-const SESSION_HOURS = 12;
-const PASSWORD_ITERATIONS = 120_000;
+// Persistence-/Auth-/Upload-Limits leben seit C3.0b in ./config/defaults.js
+// (siehe Import-Block unten).
 const runtimeConfig = buildRuntimeConfig(process.env);
 const authStrategy = buildAuthStrategyConfig(process.env, runtimeConfig);
 const DEFAULT_DEMO_PASSWORD = String(process.env.KRISENFEST_DEMO_ADMIN_PASSWORD || 'Krisenfest2026!').trim() || 'Krisenfest2026!';
@@ -134,9 +180,9 @@ const GUEST_USER_ID = 'usr-public';
 // OIDC_PROVIDER_ID lebt seit C3.0a in ./config/defaults.js (über Import oben).
 
 // Path-Konstanten, __dirname/__filename-Auflösung und rootDir leben
-// seit C3.0a in ./config/paths.js (siehe Imports oben).
-let persistenceLayerPromise = null;
-let objectStoragePromise = null;
+// seit C3.0a in ./config/paths.js. Die Singleton-Caches
+// (persistenceLayerPromise, objectStoragePromise) sind seit C3.0b
+// in ./services/persistence-wrappers.js.
 
 const uploadPolicy = buildUploadPolicy(MAX_UPLOAD_BYTES);
 const upload = multer({
@@ -241,350 +287,25 @@ function plusHours(value, hours) {
   return date.toISOString();
 }
 
-async function getPersistenceLayer() {
-  if (!persistenceLayerPromise) {
-    persistenceLayerPromise = createPersistenceLayer({ dbPath: persistenceDbFile, logger: console });
-  }
-  return persistenceLayerPromise;
-}
+// getPersistenceLayer, getObjectStorage, resolvePersistenceReference,
+// readJsonFile, writeJsonFile, jsonDocumentExists, getJsonDocumentMeta,
+// ensureDir, tenantPaths, ensureTenantStorage, readTenants, writeTenants
+// leben seit C3.0b in ./services/persistence-wrappers.js (Import oben).
 
-async function getObjectStorage() {
-  if (!objectStoragePromise) {
-    objectStoragePromise = createObjectStorage({
-      localDir: legacyUploadsDir,
-      supabase: readSupabaseObjectStorageConfig(process.env),
-    }, console);
-  }
-  return objectStoragePromise;
-}
-
-function resolvePersistenceReference(filePath) {
-  const normalized = path.resolve(filePath);
-  const systemMap = {
-    [path.resolve(tenantsFile)]: { kind: 'system', namespace: 'tenants' },
-    [path.resolve(accountsFile)]: { kind: 'system', namespace: 'accounts' },
-    [path.resolve(sessionsFile)]: { kind: 'system', namespace: 'sessions' },
-    [path.resolve(pendingAuthFlowsFile)]: { kind: 'system', namespace: 'pending-auth-flows' },
-    [path.resolve(authCallbackTicketsFile)]: { kind: 'system', namespace: 'auth-callback-tickets' },
-    [path.resolve(platformSettingsFile)]: { kind: 'system', namespace: 'platform-settings' },
-    [path.resolve(apiClientsFile)]: { kind: 'system', namespace: 'api-clients' },
-    [path.resolve(jobsFile)]: { kind: 'system', namespace: 'job-runs' },
-  };
-
-  if (systemMap[normalized]) {
-    return systemMap[normalized];
-  }
-
-  const relative = path.relative(tenantsDir, normalized);
-  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
-    return null;
-  }
-
-  const parts = relative.split(path.sep);
-  if (parts.length < 2) {
-    return null;
-  }
-
-  const [tenantId, leaf] = parts;
-  const namespaceByFile = {
-    'state.json': 'state',
-    'document-versions.json': 'document-versions',
-    'export-log.json': 'export-log',
-    'module-pack-registry.json': 'module-pack-registry',
-    'tenant-settings.json': 'tenant-settings',
-    'backup-log.json': 'backup-log',
-  };
-
-  if (leaf === 'audit-log.json') {
-    return { kind: 'audit', tenantId, namespace: 'audit-log' };
-  }
-
-  if (namespaceByFile[leaf]) {
-    return { kind: 'tenant', tenantId, namespace: namespaceByFile[leaf] };
-  }
-
-  return null;
-}
-
-async function readJsonFile(filePath, fallback) {
-  const reference = resolvePersistenceReference(filePath);
-  if (!reference) {
-    try {
-      const raw = await fs.readFile(filePath, 'utf8');
-      return raw.trim() ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  const persistence = await getPersistenceLayer();
-  if (reference.kind === 'audit') {
-    const entries = await persistence.listAuditEvents(reference.tenantId, { limit: MAX_AUDIT_ENTRIES });
-    if (entries.length) {
-      return entries;
-    }
-
-    try {
-      const raw = await fs.readFile(filePath, 'utf8');
-      const parsed = raw.trim() ? JSON.parse(raw) : fallback;
-      if (Array.isArray(parsed) && parsed.length) {
-        await persistence.replaceAuditEvents(reference.tenantId, parsed, {
-          limit: MAX_AUDIT_ENTRIES,
-          mirrorPath: filePath,
-        });
-      }
-      return parsed;
-    } catch {
-      return fallback;
-    }
-  }
-
-  const stored = await persistence.readDocument(reference, fallback, { mirrorPath: filePath });
-  if (stored.source === 'database') {
-    return stored.value;
-  }
-
-  try {
-    const raw = await fs.readFile(filePath, 'utf8');
-    const parsed = raw.trim() ? JSON.parse(raw) : fallback;
-    await persistence.writeDocument(reference, parsed, { mirrorPath: filePath });
-    return parsed;
-  } catch {
-    return fallback;
-  }
-}
-
-async function writeJsonFile(filePath, value, options = {}) {
-  const reference = resolvePersistenceReference(filePath);
-  if (!reference) {
-    const tempPath = `${filePath}.tmp`;
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(tempPath, JSON.stringify(value, null, 2), 'utf8');
-    await fs.rename(tempPath, filePath);
-    return;
-  }
-
-  const persistence = await getPersistenceLayer();
-  if (reference.kind === 'audit') {
-    await persistence.replaceAuditEvents(reference.tenantId, sanitizeArray(value), {
-      limit: MAX_AUDIT_ENTRIES,
-      mirrorPath: filePath,
-      updatedAt: options.updatedAt,
-    });
-    return;
-  }
-
-  await persistence.writeDocument(reference, value, {
-    expectedVersion: options.expectedVersion,
-    mirrorPath: filePath,
-    updatedAt: options.updatedAt,
-  });
-}
-
-async function jsonDocumentExists(filePath) {
-  const reference = resolvePersistenceReference(filePath);
-  if (!reference) {
-    return fsSync.existsSync(filePath);
-  }
-
-  const persistence = await getPersistenceLayer();
-  if (reference.kind === 'audit') {
-    const entries = await persistence.listAuditEvents(reference.tenantId, { limit: 1 });
-    return entries.length > 0 || fsSync.existsSync(filePath);
-  }
-
-  return (await persistence.hasDocument(reference, { mirrorPath: filePath })) || fsSync.existsSync(filePath);
-}
-
-async function getJsonDocumentMeta(filePath) {
-  const reference = resolvePersistenceReference(filePath);
-  if (reference && reference.kind !== 'audit') {
-    const persistence = await getPersistenceLayer();
-    const meta = await persistence.getDocumentMeta(reference, { mirrorPath: filePath });
-    if (meta) {
-      return meta;
-    }
-  }
-
-  const stat = await fs.stat(filePath).catch(() => null);
-  if (!stat) {
-    return null;
-  }
-
-  return {
-    version: 0,
-    updatedAt: stat.mtime?.toISOString?.() || '',
-  };
-}
-
-async function ensureDir(dirPath) {
-  await fs.mkdir(dirPath, { recursive: true });
-}
-
-function tenantPaths(tenantId) {
-  const dir = path.join(tenantsDir, tenantId);
-  return {
-    dir,
-    stateFile: path.join(dir, 'state.json'),
-    auditLogFile: path.join(dir, 'audit-log.json'),
-    snapshotsDir: path.join(dir, 'snapshots'),
-    uploadsDir: path.join(dir, 'uploads'),
-    exportsDir: path.join(dir, 'exports'),
-    backupsDir: path.join(dir, 'backups'),
-    versionsFile: path.join(dir, 'document-versions.json'),
-    exportLogFile: path.join(dir, 'export-log.json'),
-    modulePackRegistryFile: path.join(dir, 'module-pack-registry.json'),
-    settingsFile: path.join(dir, 'tenant-settings.json'),
-    backupLogFile: path.join(dir, 'backup-log.json'),
-  };
-}
-
-async function ensureTenantStorage(tenantId, initialState = undefined) {
-  const paths = tenantPaths(tenantId);
-  await ensureDir(paths.dir);
-  await ensureDir(paths.snapshotsDir);
-  await ensureDir(paths.uploadsDir);
-  await ensureDir(paths.exportsDir);
-  await ensureDir(paths.backupsDir);
-  if (!(await jsonDocumentExists(paths.stateFile))) {
-    await writeJsonFile(paths.stateFile, sanitizeState(initialState ?? collaborativeStateDefaults));
-  }
-  if (!(await jsonDocumentExists(paths.auditLogFile))) {
-    await writeJsonFile(paths.auditLogFile, []);
-  }
-  if (!(await jsonDocumentExists(paths.versionsFile))) {
-    await writeJsonFile(paths.versionsFile, []);
-  }
-  if (!(await jsonDocumentExists(paths.exportLogFile))) {
-    await writeJsonFile(paths.exportLogFile, []);
-  }
-  if (!(await jsonDocumentExists(paths.modulePackRegistryFile))) {
-    await writeJsonFile(paths.modulePackRegistryFile, []);
-  }
-  if (!(await jsonDocumentExists(paths.settingsFile))) {
-    await writeJsonFile(paths.settingsFile, defaultTenantSettings);
-  }
-  if (!(await jsonDocumentExists(paths.backupLogFile))) {
-    await writeJsonFile(paths.backupLogFile, []);
-  }
-}
-
-async function readTenants() {
-  return sanitizeTenantList(await readJsonFile(tenantsFile, []));
-}
-
-async function writeTenants(value) {
-  await writeJsonFile(tenantsFile, sanitizeTenantList(value));
-}
-
-function presentPersistenceTarget(targetPath) {
-  const normalized = String(targetPath || '').trim();
-  if (!normalized) {
-    return '';
-  }
-  if (/^https?:\/\//i.test(normalized)) {
-    return normalized;
-  }
-  return path.relative(rootDir, normalized) || normalized;
-}
-
-async function readPlatformSettings() {
-  const persistence = await getPersistenceLayer();
-  const settings = sanitizePlatformSettings(await readJsonFile(platformSettingsFile, defaultPlatformSettings), defaultPlatformSettings);
-  return {
-    ...settings,
-    persistenceDriver: persistence.driver || settings.persistenceDriver,
-    persistenceTarget: presentPersistenceTarget(persistence.targetPath || persistenceDbFile) || settings.persistenceTarget,
-  };
-}
-
-async function writePlatformSettings(value) {
-  const persistence = await getPersistenceLayer();
-  const sanitized = sanitizePlatformSettings(value, defaultPlatformSettings);
-  const persisted = {
-    ...sanitized,
-    persistenceDriver: persistence.driver || sanitized.persistenceDriver,
-    persistenceTarget: presentPersistenceTarget(persistence.targetPath || persistenceDbFile) || sanitized.persistenceTarget,
-  };
-  await writeJsonFile(platformSettingsFile, persisted);
-  return persisted;
-}
-
-async function readApiClients() {
-  const tenants = await readTenants();
-  const tenantLookup = new Map(tenants.map((tenant) => [tenant.id, tenant]));
-  return sanitizeArray(await readJsonFile(apiClientsFile, []))
-    .map((entry) => sanitizeApiClientRecord(entry, tenantLookup))
-    .filter((entry) => entry.id);
-}
-
-async function writeApiClients(value) {
-  const tenants = await readTenants();
-  const tenantLookup = new Map(tenants.map((tenant) => [tenant.id, tenant]));
-  await writeJsonFile(apiClientsFile, sanitizeArray(value).map((entry) => sanitizeApiClientRecord(entry, tenantLookup)));
-}
-
-async function readJobRuns() {
-  const tenants = await readTenants();
-  const tenantLookup = new Map(tenants.map((tenant) => [tenant.id, tenant]));
-  return sanitizeArray(await readJsonFile(jobsFile, []))
-    .map((entry) => sanitizeJobRecord(entry, tenantLookup))
-    .filter((entry) => entry.id)
-    .sort((left, right) => String(right?.startedAt || '').localeCompare(String(left?.startedAt || '')));
-}
-
-async function writeJobRuns(value) {
-  const tenants = await readTenants();
-  const tenantLookup = new Map(tenants.map((tenant) => [tenant.id, tenant]));
-  await writeJsonFile(jobsFile, sanitizeArray(value).map((entry) => sanitizeJobRecord(entry, tenantLookup)));
-}
-
-async function readAccounts() {
-  return sanitizeAccountList(await readJsonFile(accountsFile, []));
-}
-
-async function writeAccounts(value) {
-  await writeJsonFile(accountsFile, sanitizeAccountList(value));
-}
-
-async function readSessions() {
-  return sanitizeArray(await readJsonFile(sessionsFile, []));
-}
-
-async function writeSessions(value) {
-  await writeJsonFile(sessionsFile, sanitizeArray(value));
-}
-
-async function readPendingAuthFlows() {
-  return sanitizeArray(await readJsonFile(pendingAuthFlowsFile, [])).map((entry) => sanitizeAuthTransaction(entry));
-}
-
-async function writePendingAuthFlows(value) {
-  await writeJsonFile(pendingAuthFlowsFile, sanitizeArray(value).map((entry) => sanitizeAuthTransaction(entry)));
-}
-
-async function readAuthCallbackTickets() {
-  return sanitizeArray(await readJsonFile(authCallbackTicketsFile, [])).map((entry) => sanitizeAuthCallbackTicket(entry));
-}
-
-async function writeAuthCallbackTickets(value) {
-  await writeJsonFile(authCallbackTicketsFile, sanitizeArray(value).map((entry) => sanitizeAuthCallbackTicket(entry)));
-}
-
-async function readState(tenantId) {
-  const paths = tenantPaths(tenantId);
-  const value = await readJsonFile(paths.stateFile, {});
-  return sanitizeState(value);
-}
-
-async function readStateMeta(tenantId) {
-  const paths = tenantPaths(tenantId);
-  const meta = await getJsonDocumentMeta(paths.stateFile);
-  return {
-    version: Number(meta?.version || 0),
-    updatedAt: String(meta?.updatedAt || ''),
-  };
-}
+// presentPersistenceTarget, readPlatformSettings, writePlatformSettings,
+// readApiClients/writeApiClients, readJobRuns/writeJobRuns,
+// readAccounts/writeAccounts, readSessions/writeSessions,
+// readPendingAuthFlows/writePendingAuthFlows,
+// readAuthCallbackTickets/writeAuthCallbackTickets,
+// readState/readStateMeta leben seit C3.0b in
+// ./services/persistence-wrappers.js (Import oben).
+//
+// Dünne Adapter für die 2 Platform-Settings-Wrapper, damit die
+// bestehenden 0-/1-arg-Signaturen an Route-Module und Call-Sites
+// erhalten bleiben — runtime-abhängige Defaults werden hier einmal
+// zur Bootstrap-Zeit gebunden:
+const readPlatformSettings = () => readPlatformSettingsRaw(defaultPlatformSettings);
+const writePlatformSettings = (value) => writePlatformSettingsRaw(value, defaultPlatformSettings);
 
 async function buildStateEnvelope(tenantId, state) {
   const versionedState = await attachVersionMetadata(tenantId, state);
@@ -596,75 +317,13 @@ async function buildStateEnvelope(tenantId, state) {
   };
 }
 
-async function writeState(tenantId, value, options = {}) {
-  const sanitized = sanitizeState(value);
-  const paths = tenantPaths(tenantId);
-  await writeJsonFile(paths.stateFile, sanitized, {
-    expectedVersion: options.expectedVersion,
-    updatedAt: options.updatedAt,
-  });
-  return sanitized;
-}
-
-async function readAuditLog(tenantId) {
-  const persistence = await getPersistenceLayer();
-  const paths = tenantPaths(tenantId);
-  const entries = await persistence.listAuditEvents(tenantId, { limit: MAX_AUDIT_ENTRIES });
-  if (entries.length) {
-    return sanitizeArray(entries);
-  }
-  return sanitizeArray(await readJsonFile(paths.auditLogFile, []));
-}
-
-async function appendAuditLog(tenantId, entry) {
-  const persistence = await getPersistenceLayer();
-  const paths = tenantPaths(tenantId);
-  await persistence.appendAuditEvent(tenantId, entry, {
-    limit: MAX_AUDIT_ENTRIES,
-    mirrorPath: paths.auditLogFile,
-    updatedAt: entry?.at || nowIso(),
-  });
-}
-
-async function readVersions(tenantId) {
-  const paths = tenantPaths(tenantId);
-  return sanitizeArray(await readJsonFile(paths.versionsFile, []));
-}
-
-async function writeVersions(tenantId, value) {
-  const paths = tenantPaths(tenantId);
-  await writeJsonFile(paths.versionsFile, sanitizeArray(value));
-}
-
-// sanitizeExportPackageType, sanitizeTenantSettings leben seit C3.0a
-// in ./services/sanitizers.js.
-
-async function readTenantSettings(tenantId) {
-  const paths = tenantPaths(tenantId);
-  return sanitizeTenantSettings(await readJsonFile(paths.settingsFile, defaultTenantSettings));
-}
-
-async function writeTenantSettings(tenantId, value) {
-  const paths = tenantPaths(tenantId);
-  const sanitized = sanitizeTenantSettings(value);
-  await writeJsonFile(paths.settingsFile, sanitized);
-  return sanitized;
-}
-
-// sanitizeModulePackRegistryEntries lebt seit C3.0a in
+// writeState, readAuditLog, appendAuditLog, readVersions, writeVersions,
+// readTenantSettings, writeTenantSettings, readModulePackRegistry,
+// writeModulePackRegistry leben seit C3.0b in
+// ./services/persistence-wrappers.js (Import oben).
+// sanitizeExportPackageType, sanitizeTenantSettings,
+// sanitizeModulePackRegistryEntries leben seit C3.0a in
 // ./services/sanitizers.js.
-
-async function readModulePackRegistry(tenantId) {
-  const paths = tenantPaths(tenantId);
-  return sanitizeModulePackRegistryEntries(await readJsonFile(paths.modulePackRegistryFile, []));
-}
-
-async function writeModulePackRegistry(tenantId, value) {
-  const paths = tenantPaths(tenantId);
-  const sanitized = sanitizeModulePackRegistryEntries(value);
-  await writeJsonFile(paths.modulePackRegistryFile, sanitized);
-  return sanitized;
-}
 
 function presentModulePackEntry(entry) {
   return sanitizeModulePackEntry(entry);
@@ -821,15 +480,8 @@ async function retireModulePackVersion(tenantId, authContext, entryId, note = ''
   return presentModulePackEntry(nextEntries.find((entry) => entry.id === entryId));
 }
 
-async function readExportLog(tenantId) {
-  const paths = tenantPaths(tenantId);
-  return sanitizeArray(await readJsonFile(paths.exportLogFile, []));
-}
-
-async function writeExportLog(tenantId, value) {
-  const paths = tenantPaths(tenantId);
-  await writeJsonFile(paths.exportLogFile, sanitizeArray(value));
-}
+// readExportLog, writeExportLog leben seit C3.0b in
+// ./services/persistence-wrappers.js (Import oben).
 
 function buildExportDownloadUrl(exportId, fileName = '') {
   const requestedName = fileName || `${exportId}.json`;

@@ -1,10 +1,9 @@
 /**
  * defaults.js · Domain-Default-Werte und Referenz-Konstanten.
  *
- * Extrahiert in C3.0a aus server/index.js. Enthält sieben Default-
- * bzw. Konstanten-Blöcke plus einen Auth-Identifier (OIDC), die von
- * der Sanitize-Schicht und der Persistenz-Schicht als Baseline
- * benötigt werden:
+ * Extrahiert in C3.0a aus server/index.js, in C3.0b um drei
+ * thematische Konstanten-Gruppen (Persistence-Limits, Auth-Limits,
+ * Upload-Limits) erweitert. Inhalt:
  *   - collaborativeStateDefaults (Neu-Tenant-Basis-State)
  *   - defaultTenantSettings (Retention/Cadence/Classification)
  *   - buildDefaultPlatformSettings (Factory, runtimeConfig-abhängig)
@@ -13,6 +12,10 @@
  *   - rolePermissions (Rollen -> Permissions)
  *   - sectionPermissionMap (State-Sections -> Required-Permission)
  *   - OIDC_PROVIDER_ID (Default-Identifier für externe Identities)
+ *   - PERSISTENCE_LIMITS (MAX_AUDIT_ENTRIES, SNAPSHOT_LIMIT,
+ *     MAX_JSON_SIZE)
+ *   - AUTH_LIMITS (SESSION_HOURS, PASSWORD_ITERATIONS)
+ *   - UPLOAD_LIMITS (MAX_UPLOAD_BYTES)
  *
  * Bewusst in `server/config/` (nicht `server/services/`) abgelegt:
  * Das sind runtime-immutable Referenzdaten, keine Service-Logik.
@@ -20,9 +23,10 @@
  * Rollen) haben hier ihren Einhak-Punkt.
  *
  * Konsumenten: sanitizers.js (direkte Imports), persistence-wrappers
- * (C3.0b, fallback-Defaults beim Read), auth-session (C3.0c,
- * rolePermissions + sectionPermissionMap), storage-init (C3.6,
- * seedFreshSystemIfEmpty).
+ * (C3.0b, fallback-Defaults beim Read + PERSISTENCE_LIMITS),
+ * auth-session (C3.0c, rolePermissions + sectionPermissionMap +
+ * AUTH_LIMITS), storage-init (C3.6, seedFreshSystemIfEmpty),
+ * evidence (C3.4, UPLOAD_LIMITS).
  */
 import { defaultRegulatoryProfile } from '../regulatory-dach.js';
 
@@ -210,3 +214,37 @@ export const sectionPermissionMap = {
   auditFindings: 'kritis_edit',
   certificationState: 'kritis_edit',
 };
+
+// === Persistence-Limits (C3.0b) =============================================
+// Invarianten der Document-Store-Schicht und der Express-JSON-Parser-Grenze.
+// Konsumiert von services/persistence-wrappers.js (MAX_AUDIT_ENTRIES), dem
+// Snapshot-Service in C3.5 (SNAPSHOT_LIMIT) und der Middleware-Kette in
+// server/index.js (MAX_JSON_SIZE, express.json({ limit: ... })).
+
+/** Maximale Anzahl Audit-Log-Einträge pro Tenant im Document-Store. */
+export const MAX_AUDIT_ENTRIES = 300;
+
+/** Maximale Anzahl Snapshots pro Tenant, älteste werden rotiert. */
+export const SNAPSHOT_LIMIT = 40;
+
+/** Express-JSON-Body-Parser-Limit (Upload-Metadata + Bulk-State-PUT). */
+export const MAX_JSON_SIZE = '20mb';
+
+// === Auth-Limits (C3.0c-Konsumenten) ========================================
+// Werden von services/auth-session.js (C3.0c) importiert. PBKDF2-Iterationen
+// und Session-TTL sind Security-Invarianten — Änderungen hier invalidieren
+// bestehende Passwort-Hashes bzw. verkürzen/verlängern aktive Sessions.
+
+/** PBKDF2-Iterationen für hashPassword/verifyPassword. */
+export const PASSWORD_ITERATIONS = 120_000;
+
+/** Gültigkeitsdauer neuer Server-Sessions in Stunden. */
+export const SESSION_HOURS = 12;
+
+// === Upload-Limits (C3.4-Konsument) =========================================
+// MAX_UPLOAD_BYTES gilt für die multer-Upload-Policy (Evidence-Attachments).
+// Wird vom Frontend auch als UI-Hinweistext konsumiert; Änderungen hier
+// müssen mit features/evidence/constants.ts abgeglichen werden.
+
+/** Obergrenze einzelner Datei-Uploads in Bytes (12 MiB). */
+export const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
