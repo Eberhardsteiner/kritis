@@ -473,4 +473,14 @@ Gelten aus `CLAUDE.md` Abschnitt 5 unverändert weiter. Ergänzungen für C:
 - Grundlage für **Produktpaket P5** (Produktionsplattform) ist gelegt
 - **Produktpaket P6** (Pilotbetrieb und Rollout) ist der nächste Schritt nach C7 – dort wird die App beim ersten echten Kunden eingeführt
 
+### Meta-Review nach C2.11
+
+Nach Abschluss von **C2.11** (App-Shell) ein kleines Polish-Paket einschieben: Meta-Review über die zehn Feature-Slices unter `src/features/` (gap, measures, governance, evidence, operations, assessment, platform, programRollout, regulatory, reporting). Fokus auf:
+
+- **Naming-Konsistenz**: Handler-Namen, Dep-Interface-Namen, Hook-Namen einheitlich (`use<Feature>Handlers`, `<Feature>HandlerDependencies`, `<Feature>Handlers`).
+- **Kommentar-Qualität**: Group-Comments in allen Dependencies-Interfaces, JSDoc auf Public-API-Exports, Transient-Markierungen einheitlich.
+- **Public-API-Homogenität**: `index.ts` je Feature mit gleichem Aufbau (Views → Hooks → Pure-Helper), einheitliche Re-Export-Reihenfolge.
+
+Zeitbudget: 30–60 Minuten. Ergebnis ist ein einzelner Polish-Commit, keine funktionale Änderung. Vor C3 (server/index.js-Zerlegung) sinnvoll, weil die Feature-Slice-Muster dort als Vorbild dienen.
+
 Viel Erfolg.
