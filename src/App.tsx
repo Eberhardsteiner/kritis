@@ -32,10 +32,6 @@ import {
   serializeServerPayload,
 } from './features/platform/serverPayload';
 import {
-  clearAuthCallbackSearch,
-  readAuthCallbackSearch,
-} from './features/platform/authCallback';
-import {
   usePlatformAuthHandlers,
   usePlatformControlHandlers,
   usePlatformSystemHandlers,
@@ -48,7 +44,9 @@ import {
   defaultSystemSettings,
   defaultTenantPolicy,
 } from './app/state/defaults';
-import { isApiStatus } from './shared/httpError';
+import { useServerSync } from './app/serverSync/useServerSync';
+import { useAppShellEffects } from './app/effects/useAppShellEffects';
+import { useModuleSelectionGuard } from './app/effects/useModuleSelectionGuard';
 import { useResiliencePlanHandlers } from './features/resiliencePlan';
 import type { ResiliencePlan } from './features/resiliencePlan';
 import {
@@ -60,32 +58,10 @@ import type {
   ExerciseSession as TabletopExerciseSession,
   Scenario as TabletopScenarioDef,
 } from './features/tabletopExercise';
-import { clearAuthToken, loadAuthToken, saveAuthToken, saveState } from './lib/storage';
+import { clearAuthToken, loadAuthToken, saveAuthToken } from './lib/storage';
 import {
   createTenant,
-  completeOidcLogin,
-  fetchAccessAccounts,
-  fetchModuleRegistry,
-  fetchApiClients,
-  fetchAuditLog,
-  fetchAuthBootstrap,
-  fetchCurrentSession,
-  fetchDocumentLedgerSummary,
-  fetchEvidenceRetentionSummary,
   fetchEvidenceVersions,
-  fetchExportPackages,
-  fetchHostingReadiness,
-  fetchIntegritySummary,
-  fetchObservabilitySummary,
-  fetchRestoreDrills,
-  fetchSecurityGateSummary,
-  fetchServerHealth,
-  fetchServerState,
-  fetchSnapshots,
-  fetchSystemJobs,
-  fetchSystemSettings,
-  fetchTenantList,
-  fetchTenantSettings,
   loginToServer,
   logoutFromServer,
   removeEvidenceAttachment,
@@ -281,52 +257,6 @@ export default function App() {
       : undefined;
   }
 
-  function updateServerStateMarkers(version?: number | null, updatedAt?: string | null) {
-    setServerStateVersion(typeof version === 'number' && Number.isFinite(version) ? version : null);
-    setServerStateUpdatedAt(updatedAt ? String(updatedAt) : '');
-  }
-
-  async function fetchAdminServerDetails(token = authToken, isSystemAdmin = authSession?.isSystemAdmin ?? false): Promise<void> {
-    if (!token || !isSystemAdmin) {
-      setSystemSettings(defaultSystemSettings);
-      setHostingReadiness(null);
-      setIntegritySummary(null);
-      setSecurityGateSummary(null);
-      setObservabilitySummary(null);
-      setRestoreDrills([]);
-      return;
-    }
-
-    const [systemResponse, readinessResponse, integrityResponse, securityResponse, observabilityResponse, restoreResponse] = await Promise.all([
-      fetchSystemSettings(token),
-      fetchHostingReadiness(token),
-      fetchIntegritySummary(token),
-      fetchSecurityGateSummary(token),
-      fetchObservabilitySummary(token),
-      fetchRestoreDrills(token),
-    ]);
-    setSystemSettings(systemResponse.settings);
-    setHostingReadiness(readinessResponse.summary);
-    setIntegritySummary(integrityResponse.summary);
-    setSecurityGateSummary(securityResponse.summary);
-    setObservabilitySummary(observabilityResponse.summary);
-    setRestoreDrills(restoreResponse.drills);
-  }
-
-  async function refreshModuleRegistry(token = authToken): Promise<void> {
-    try {
-      const response = await fetchModuleRegistry(token || '');
-      setModuleRegistryEntries(response.entries);
-    } catch (error) {
-      if (!token && serverMode === 'offline') {
-        setModuleRegistryEntries([]);
-        return;
-      }
-      const message = error instanceof Error ? error.message : 'Paket-Registry konnte nicht geladen werden.';
-      showNotice('error', message);
-    }
-  }
-
   function runWithPermission(
     permission: PermissionKey,
     text: string,
@@ -341,281 +271,76 @@ export default function App() {
     return true;
   }
 
-  async function refreshServerSideData(token = authToken, session = authSession): Promise<void> {
-    try {
-      const [health, bootstrap] = await Promise.all([
-        fetchServerHealth(),
-        fetchAuthBootstrap(),
-      ]);
-      setServerHealth(health);
-      setServerAuthRequired(Boolean(bootstrap.authenticationRequired));
-      setAuthMode(bootstrap.authMode ?? 'local_only');
-      setAuthProviders(bootstrap.authProviders ?? []);
-      setPublicTenant(bootstrap.publicTenant ?? null);
-      setAvailableTenants(bootstrap.tenants.length ? bootstrap.tenants : (bootstrap.publicTenant ? [bootstrap.publicTenant] : []));
-      await fetchAdminServerDetails(token, Boolean(token && session?.isSystemAdmin));
+  // Cycle-Breaker fuer die zirkulaere Abhaengigkeit zwischen
+  // useServerSync und usePlatformAuthHandlers: clearAuthenticatedContext
+  // wird aus usePlatformAuthHandlers zurueckgegeben, das NACH
+  // useServerSync aufgerufen wird. useServerSync liest im 401-Branch
+  // via Ref (Invariante 3). Der Ref wird weiter unten per useEffect
+  // verdrahtet, nachdem beide Hooks aufgerufen sind.
+  const clearAuthenticatedContextRef = useRef<(message?: string) => void>(() => {});
 
-      if (!token && bootstrap.authenticationRequired) {
-        setAuditLogEntries([]);
-        setSnapshots([]);
-        setExportPackages([]);
-        setAccessAccounts([]);
-        setApiClients([]);
-        setSystemJobs([]);
-        setDocumentLedger(null);
-        setEvidenceRetentionSummary(null);
-        setTenantPolicy(defaultTenantPolicy);
-        setModuleRegistryEntries([]);
-        setSecurityGateSummary(null);
-        setObservabilitySummary(null);
-        setRestoreDrills([]);
-        setServerMode('auth_required');
-        return;
-      }
-
-      try {
-        const accountRequest = token && session && getAccessProfile(session.roleProfile).permissions.includes('workspace_edit')
-          ? fetchAccessAccounts(token).catch(() => ({ ok: true, accounts: [] as AccessAccountSummary[] }))
-          : Promise.resolve({ ok: true, accounts: [] as AccessAccountSummary[] });
-
-        const tenantRequest = token
-          ? fetchTenantList(token).catch(() => ({ ok: true, tenants: bootstrap.tenants }))
-          : Promise.resolve({ ok: true, tenants: bootstrap.tenants.length ? bootstrap.tenants : (bootstrap.publicTenant ? [bootstrap.publicTenant] : []) });
-
-        const apiClientRequest = token && session?.isSystemAdmin
-          ? fetchApiClients(token).catch(() => ({ ok: true, clients: [] as ApiClientSummary[] }))
-          : Promise.resolve({ ok: true, clients: [] as ApiClientSummary[] });
-
-        const systemJobRequest = token && session?.isSystemAdmin
-          ? fetchSystemJobs(token).catch(() => ({ ok: true, jobs: [] as JobRunSummary[] }))
-          : Promise.resolve({ ok: true, jobs: [] as JobRunSummary[] });
-
-        const [audit, snapshotList, ledger, retentionSummaryResponse, tenantList, accountList, exportList, settingsResponse, apiClientList, jobList, moduleRegistryResponse] = await Promise.all([
-          fetchAuditLog(token || ''),
-          fetchSnapshots(token || ''),
-          fetchDocumentLedgerSummary(token || ''),
-          fetchEvidenceRetentionSummary(token || '').catch(() => ({ ok: true, summary: null as EvidenceRetentionSummary | null })),
-          tenantRequest,
-          accountRequest,
-          fetchExportPackages(token || ''),
-          fetchTenantSettings(token || ''),
-          apiClientRequest,
-          systemJobRequest,
-          fetchModuleRegistry(token || '').catch(() => ({ ok: true, entries: [] as ModulePackRegistryEntry[] })),
-        ]);
-
-        setAuditLogEntries(audit.entries);
-        setSnapshots(snapshotList.snapshots);
-        setExportPackages(exportList.packages);
-        setDocumentLedger(ledger.summary);
-        setEvidenceRetentionSummary(retentionSummaryResponse.summary);
-        setTenantPolicy(settingsResponse.settings);
-        setAvailableTenants(tenantList.tenants.length ? tenantList.tenants : (bootstrap.tenants.length ? bootstrap.tenants : (bootstrap.publicTenant ? [bootstrap.publicTenant] : [])));
-        setAccessAccounts(accountList.accounts);
-        setApiClients(apiClientList.clients);
-        setSystemJobs(jobList.jobs);
-        setModuleRegistryEntries(moduleRegistryResponse.entries);
-        setSyncError('');
-        setServerMode('connected');
-      } catch (error) {
-        if (isApiStatus(error, 401)) {
-          if (bootstrap.authenticationRequired) {
-            clearAuthenticatedContext();
-          } else {
-            clearAuthToken();
-            setAuthToken('');
-            setAuthSession(null);
-            setAccessAccounts([]);
-            setApiClients([]);
-            setModuleRegistryEntries([]);
-            setSystemJobs([]);
-            setSecurityGateSummary(null);
-            setObservabilitySummary(null);
-            setRestoreDrills([]);
-            await loadStateFromServer();
-          }
-          return;
-        }
-        throw error;
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Serverdaten konnten nicht geladen werden.';
-      setServerMode('offline');
-      setSyncError(message);
-    }
-  }
-
-  async function loadStateFromServer(): Promise<boolean> {
-    setServerMode('checking');
-
-    let bootstrapRequired = false;
-    let bootstrapPublicTenant: TenantSummary | null = null;
-    let bootstrapAllowsAnonymous = false;
-
-    try {
-      const [health, bootstrap] = await Promise.all([
-        fetchServerHealth(),
-        fetchAuthBootstrap(),
-      ]);
-      setServerHealth(health);
-      setServerAuthRequired(Boolean(bootstrap.authenticationRequired));
-      setAuthMode(bootstrap.authMode ?? 'local_only');
-      setAuthProviders(bootstrap.authProviders ?? []);
-      setPublicTenant(bootstrap.publicTenant ?? null);
-      setAvailableTenants(bootstrap.tenants.length ? bootstrap.tenants : (bootstrap.publicTenant ? [bootstrap.publicTenant] : []));
-      await fetchAdminServerDetails(authToken, Boolean(authToken && authSession?.isSystemAdmin));
-      bootstrapRequired = Boolean(bootstrap.authenticationRequired);
-      bootstrapPublicTenant = bootstrap.publicTenant ?? null;
-      bootstrapAllowsAnonymous = Boolean(bootstrap.anonymousAccessEnabled);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Server ist aktuell nicht erreichbar.';
-      setServerMode('offline');
-      setSyncError(message);
-      serverInitializedRef.current = true;
-      return false;
-    }
-
-    try {
-      const callbackState = readAuthCallbackSearch();
-      if (callbackState.error) {
-        clearAuthCallbackSearch();
-        showNotice('error', `SSO-Anmeldung fehlgeschlagen: ${callbackState.error}`);
-      }
-
-      if (!authToken && callbackState.ticket) {
-        const response = await completeOidcLogin(callbackState.ticket);
-        const nextToken = response.session.token || '';
-        saveAuthToken(nextToken);
-        setAuthToken(nextToken);
-        setAuthSession(response.session);
-        const hydrated = applyRemoteState(response.state ?? {}, state, response.session, response.workspaceUserSeed);
-        suppressNextServerSyncRef.current = true;
-        setState(hydrated);
-        lastSyncedPayloadRef.current = serializeServerPayload(hydrated);
-        setLastServerLoadAt(new Date().toISOString());
-        updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
-        setSyncError('');
-        setServerMode('connected');
-        serverInitializedRef.current = true;
-        clearAuthCallbackSearch();
-        await refreshServerSideData(nextToken, response.session);
-        showNotice('success', `SSO-Anmeldung für Mandant „${response.session.tenantName}“ erfolgreich.`);
-        return true;
-      }
-
-      if (authToken) {
-        const sessionResponse = await fetchCurrentSession(authToken);
-        setAuthSession(sessionResponse.session);
-        const remote = await fetchServerState(authToken);
-        const hydrated = applyRemoteState(remote.state ?? {}, state, sessionResponse.session, sessionResponse.workspaceUserSeed);
-        suppressNextServerSyncRef.current = true;
-        setState(hydrated);
-        lastSyncedPayloadRef.current = serializeServerPayload(hydrated);
-        setLastServerLoadAt(new Date().toISOString());
-        updateServerStateMarkers(remote.stateVersion, remote.stateUpdatedAt);
-        setSyncError('');
-        setServerMode('connected');
-        serverInitializedRef.current = true;
-        await refreshServerSideData(authToken, sessionResponse.session);
-        return true;
-      }
-
-      if (bootstrapRequired && !bootstrapAllowsAnonymous) {
-        setAuthSession(null);
-        setAccessAccounts([]);
-        setApiClients([]);
-        setSystemJobs([]);
-        setIntegritySummary(null);
-        setSecurityGateSummary(null);
-        setObservabilitySummary(null);
-        setRestoreDrills([]);
-        setAuditLogEntries([]);
-        setSnapshots([]);
-        setExportPackages([]);
-        setDocumentLedger(null);
-        setEvidenceRetentionSummary(null);
-        setTenantPolicy(defaultTenantPolicy);
-        setModuleRegistryEntries([]);
-        setServerMode('auth_required');
-        setSyncError('Server erreichbar. Bitte anmelden, um mandantenbezogene Serverfunktionen zu nutzen.');
-        serverInitializedRef.current = true;
-        return false;
-      }
-
-      const remote = await fetchServerState('');
-      setAuthSession(null);
-      const hydrated = applyRemoteState(remote.state ?? {}, state, null, remote.workspaceUserSeed);
-      suppressNextServerSyncRef.current = true;
-      setState(hydrated);
-      lastSyncedPayloadRef.current = serializeServerPayload(hydrated);
-      setLastServerLoadAt(new Date().toISOString());
-      updateServerStateMarkers(remote.stateVersion, remote.stateUpdatedAt);
-      setSyncError(bootstrapPublicTenant
-        ? `Offener Lesemodus geladen: ${bootstrapPublicTenant.name}. Bearbeitung und Verwaltung erfordern eine Anmeldung.`
-        : 'Offener Lesemodus geladen. Bearbeitung und Verwaltung erfordern eine Anmeldung.');
-      setServerMode('connected');
-      serverInitializedRef.current = true;
-      await refreshServerSideData('', null);
-      return true;
-    } catch (error) {
-      serverInitializedRef.current = true;
-      if (isApiStatus(error, 401)) {
-        if (bootstrapRequired && !bootstrapAllowsAnonymous) {
-          clearAuthenticatedContext();
-          return false;
-        }
-        clearAuthToken();
-        setAuthToken('');
-        setAuthSession(null);
-        setAccessAccounts([]);
-        setApiClients([]);
-        setSystemJobs([]);
-        setIntegritySummary(null);
-        setSecurityGateSummary(null);
-        setObservabilitySummary(null);
-        setRestoreDrills([]);
-        setExportPackages([]);
-        setTenantPolicy(defaultTenantPolicy);
-        const message = 'Authentifizierte Serversitzung ist nicht mehr gültig. Der offene Lesemodus wurde wieder aktiviert.';
-        setSyncError(message);
-        await loadStateFromServer();
-        return false;
-      }
-      const message = error instanceof Error ? error.message : 'Serverdaten konnten nicht geladen werden.';
-      setServerMode('error');
-      setSyncError(message);
-      return false;
-    }
-  }
-
+  const {
+    loadStateFromServer,
+    refreshServerSideData,
+    refreshModuleRegistry,
+    updateServerStateMarkers,
+  } = useServerSync({
+    // Core-State
+    state,
+    setState,
+    // Auth-State
+    authToken,
+    setAuthToken,
+    authSession,
+    setAuthSession,
+    setServerAuthRequired,
+    setAuthMode,
+    setAuthProviders,
+    setPublicTenant,
+    setAvailableTenants,
+    setAccessAccounts,
+    // Server-Connection-State
+    setServerMode,
+    setServerHealth,
+    setLastServerLoadAt,
+    setSyncError,
+    setServerStateVersion,
+    setServerStateUpdatedAt,
+    // Server-Side-Data-Setter
+    setAuditLogEntries,
+    setSnapshots,
+    setExportPackages,
+    setDocumentLedger,
+    setEvidenceRetentionSummary,
+    setTenantPolicy,
+    setApiClients,
+    setSystemJobs,
+    setModuleRegistryEntries,
+    // Admin-Details-Setter
+    setSystemSettings,
+    setHostingReadiness,
+    setIntegritySummary,
+    setSecurityGateSummary,
+    setObservabilitySummary,
+    setRestoreDrills,
+    // Refs
+    serverInitializedRef,
+    suppressNextServerSyncRef,
+    lastSyncedPayloadRef,
+    // Cycle-Breaker + Notice
+    clearAuthenticatedContextRef,
+    showNotice,
+  });
 
   const readOnlyHint = getReadOnlyHint(state.activeView, hasPermission);
 
-  useEffect(() => {
-    void loadStateFromServer();
-  }, []);
-
-  useEffect(() => {
-    if (!notice) {
-      return undefined;
-    }
-
-    const timeout = window.setTimeout(() => setNotice(null), 6000);
-    return () => window.clearTimeout(timeout);
-  }, [notice]);
-
-  useEffect(() => {
-    saveState(state);
-  }, [state]);
-
-  useEffect(() => {
-    if (!getModuleByIdFromCatalog(state.selectedModuleId, effectiveModuleCatalog)) {
-      setState((current) => ({
-        ...current,
-        selectedModuleId: effectiveModuleCatalog[0]?.id ?? builtInModules[0].id,
-      }));
-    }
-  }, [state.selectedModuleId, effectiveModuleCatalog]);
+  // Die vier useEffects (Bootstrap-Load, Notice-Timer, LocalStorage-
+  // Persistenz, Module-Selection-Guard) wurden in C2.11c nach
+  // src/app/effects/useAppShellEffects.ts und
+  // src/app/effects/useModuleSelectionGuard.ts ausgelagert.
+  // useAppShellEffects-Call + useModuleSelectionGuard-Call liegen
+  // weiter unten, nachdem loadStateFromServer aus useServerSync
+  // verfuegbar ist.
 
   function setActiveView(activeView: AppState['activeView']) {
     setState((current) => ({ ...current, activeView }));
@@ -700,6 +425,17 @@ export default function App() {
     applyRemoteState,
     extractErrorDetails,
   });
+
+  // Cycle-Breaker wiring: sobald usePlatformAuthHandlers eine
+  // clearAuthenticatedContext-Funktion zurueckgibt, wird sie im
+  // Ref hinterlegt. useServerSync liest im 401-Branch via Ref.
+  // Dieses useEffect wird registriert BEVOR useAppShellEffects
+  // (das den initial-load triggert) — React-Hook-Reihenfolge
+  // garantiert, dass der Ref populiert ist, wenn der initial-load
+  // feuert.
+  useEffect(() => {
+    clearAuthenticatedContextRef.current = clearAuthenticatedContext;
+  }, [clearAuthenticatedContext]);
 
   const {
     pushStateToServer,
@@ -1709,6 +1445,22 @@ export default function App() {
     onExportTabletopResultJson: handleExportTabletopResultJson,
     onCreateServerPackage: handleCreateServerExportPackage,
   });
+
+  // App-Shell-Effects (Bootstrap, Notice-Dismiss-Timer, LocalStorage-
+  // Persistenz). Bootstrap feuert NACH dem ref-wiring-useEffect oben,
+  // sodass clearAuthenticatedContextRef.current gesetzt ist, falls
+  // der erste loadStateFromServer-Call direkt eine 401-Antwort
+  // bekommt (Invariante 3).
+  useAppShellEffects({
+    loadStateFromServer,
+    notice,
+    setNotice,
+    state,
+  });
+
+  // Module-Selection-Guard (fachlich modules-nah, siehe JSDoc in
+  // src/app/effects/useModuleSelectionGuard.ts).
+  useModuleSelectionGuard(state.selectedModuleId, effectiveModuleCatalog, setState);
 
   return (
     <div className="app-shell">
