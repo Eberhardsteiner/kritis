@@ -3,7 +3,7 @@ import type {
   UserItem,
   UserRoleProfile,
   UserStatus,
-} from '../types';
+} from '../../../types';
 
 interface UserCardProps {
   user: UserItem;

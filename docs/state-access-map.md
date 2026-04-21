@@ -43,6 +43,8 @@ Hook-Deps weitergereicht bleiben.
 | `apiClients`, `systemJobs`, `integritySummary`, `systemSettings`, `issuedClientSecret`, `availableTenants` | platform-system-Hook (C2.7c) | OperationsView (System-Dashboard) | nein — feature-intern zu platform-System |
 | `hostingReadiness`, `securityGateSummary`, `observabilitySummary`, `restoreDrills` | App-Shell `refreshServerSideData` | OperationsView (Read-Only-Panels) | nein — nur Leser, kein Schreiber ausserhalb App-Shell |
 | `moduleRegistryEntries` | platform-auth-Hook (Login-Reset), Module-Handler | ModulesView, PlatformView | nein |
+| `users`, `activeUserId` | platform-control-Hook (C2.7d), platform-auth-Hook (Login-User-Sync) | ControlView (UserCard-Liste), `useAppDerivedState.activeUser` (fast jede View) | **ja** — `activeUser` ist der stärkste Cross-Feature-Read |
+| `complianceCalendar` | platform-control-Hook (C2.7d Transient) | ControlView (Compliance-Kalender-Formular), `useAppDerivedState.deadlineSummary` | **evtl.** — Entscheidung in C2.9 (regulatory): Panel + Handler gemeinsam migrieren oder Handler getrennt |
 
 ## Noch offene Feature-Inventare
 
@@ -51,7 +53,7 @@ Ergänzt mit den jeweiligen Extraktionen:
 | Iteration | Was ergänzt wird |
 |---|---|
 | ~~C2.7c · Platform-System (OperationsView)~~ | ✅ erledigt — `pushStateToServer`, useEffect #4, 20 System-Handler, OperationsView im `features/platform`-Slice. App.tsx -465 Z. |
-| C2.7d · User-Management (ControlView) | User-State-Reads aus ControlView + der 5 User-Handler |
+| ~~C2.7d · User-Management (ControlView)~~ | ✅ erledigt — 5 User-Handler + `updateComplianceCalendar` (Transient) + `inferRoleProfileFromStakeholder` + ControlView + UserCard im `features/platform`-Slice. E2E 16 ergänzt. App.tsx -119 Z. |
 | C2.8 · programRollout | ProgramView/RolloutView-Zugriffe auf `exportPackages`, `tenantPolicy`, `serverMode` |
 | C2.9 · regulatory | KritisView-Zugriffe auf `tenantPolicy`, `authToken`, `authSession`, Bußgeldrechner-Datenflüsse |
 | C2.10 · reporting | ReportView-Querschnitts-Reads |

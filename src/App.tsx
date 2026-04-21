@@ -54,7 +54,11 @@ import {
   clearAuthCallbackSearch,
   readAuthCallbackSearch,
 } from './features/platform/authCallback';
-import { usePlatformAuthHandlers, usePlatformSystemHandlers } from './features/platform';
+import {
+  usePlatformAuthHandlers,
+  usePlatformControlHandlers,
+  usePlatformSystemHandlers,
+} from './features/platform';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -183,7 +187,6 @@ import type {
   RolloutPlan,
   RunbookItem,
   SiteItem,
-  StakeholderItem,
   SecurityGateSummary,
   SystemSettings,
   TenantPolicy,
@@ -575,37 +578,10 @@ function isApiStatus(error: unknown, status: number): boolean {
   return Boolean(error && typeof error === 'object' && 'status' in error && (error as { status?: number }).status === status);
 }
 
-function inferRoleProfileFromStakeholder(stakeholder: StakeholderItem): UserRoleProfile {
-  const text = `${stakeholder.roleLabel} ${stakeholder.approvalScope} ${stakeholder.responsibilities}`.toLowerCase();
-
-  if (text.includes('admin') || text.includes('administrator')) {
-    return 'admin';
-  }
-  if (
-    text.includes('leiter')
-    || text.includes('lead')
-    || text.includes('sponsor')
-    || text.includes('geschäfts')
-    || text.includes('vorstand')
-  ) {
-    return 'lead';
-  }
-  if (
-    text.includes('audit')
-    || text.includes('prüf')
-    || text.includes('revision')
-  ) {
-    return 'auditor';
-  }
-  if (
-    text.includes('review')
-    || text.includes('freigabe')
-    || text.includes('compliance')
-  ) {
-    return 'reviewer';
-  }
-  return 'editor';
-}
+// inferRoleProfileFromStakeholder wurde in C2.7d nach
+// src/features/platform/userNormalization.ts ausgelagert (einziger
+// Konsument ist handleGenerateUsersFromStakeholders im
+// usePlatformControlHandlers-Hook).
 
 export default function App() {
   const [state, setState] = useState<AppState>(createInitialState);
@@ -1226,17 +1202,28 @@ export default function App() {
     isApiStatus,
   });
 
-  function updateComplianceCalendar(field: keyof ComplianceCalendar, value: string) {
-    runWithPermission('workspace_edit', 'Für Änderungen am Compliance-Kalender fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        complianceCalendar: {
-          ...current.complianceCalendar,
-          [field]: value,
-        },
-      }));
-    });
-  }
+  const {
+    selectActiveUser,
+    handleCreateUser,
+    handleGenerateUsersFromStakeholders,
+    handleUpdateUser,
+    handleDeleteUser,
+    updateComplianceCalendar,
+  } = usePlatformControlHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Auth-/Session-Read-State
+    authSession,
+    // Fach-Kontext
+    currentModule,
+    // Pure-Helper-Deps (bleiben in App.tsx wegen Mehrfachnutzung)
+    normalizeLoadedUsers,
+    normalizeUserRoleProfile,
+    normalizeUserStatus,
+  });
 
   function updateRegulatoryProfileField(field: Exclude<keyof RegulatoryProfile, 'scopeByRegime' | 'jurisdiction'>, value: string) {
     runWithPermission('kritis_edit', 'Für Änderungen am Regelwerks-Cockpit fehlt das Recht kritis_edit.', () => {
@@ -1652,117 +1639,11 @@ export default function App() {
     });
   }
 
-  function selectActiveUser(userId: string) {
-    if (authSession) {
-      showNotice('error', 'Bei aktiver Serversitzung wird das Arbeitsprofil aus der Anmeldung abgeleitet.');
-      return;
-    }
-
-    setState((current) => ({
-      ...current,
-      activeUserId: userId,
-    }));
-  }
-
-  function handleCreateUser() {
-    runWithPermission('workspace_edit', 'Für das Anlegen von Nutzern fehlt das Recht workspace_edit.', () => {
-      setState((current) => {
-        const newUser: UserItem = {
-          id: createId('usr'),
-          name: '',
-          email: '',
-          department: '',
-          roleProfile: 'editor',
-          status: 'active',
-          scope: currentModule.name,
-          notes: '',
-        };
-
-        return {
-          ...current,
-          users: [newUser, ...current.users],
-          activeUserId: newUser.id,
-          activeView: 'control',
-        };
-      });
-    });
-  }
-
-  function handleGenerateUsersFromStakeholders() {
-    runWithPermission('workspace_edit', 'Für die Ableitung von Nutzern fehlt das Recht workspace_edit.', () => {
-      setState((current) => {
-        const moduleStakeholders = current.stakeholders.filter((item) => item.moduleId === currentModule.id);
-        const users = [...current.users];
-
-        moduleStakeholders.forEach((stakeholder) => {
-          const exists = users.some(
-            (user) => user.linkedStakeholderId === stakeholder.id
-              || (user.email && stakeholder.email && user.email === stakeholder.email),
-          );
-
-          if (!exists) {
-            users.unshift({
-              id: createId('usr'),
-              name: stakeholder.name,
-              email: stakeholder.email,
-              department: stakeholder.department,
-              roleProfile: inferRoleProfileFromStakeholder(stakeholder),
-              status: 'active',
-              scope: stakeholder.approvalScope || stakeholder.roleLabel || currentModule.name,
-              notes: stakeholder.notes,
-              linkedStakeholderId: stakeholder.id,
-            });
-          }
-        });
-
-        return {
-          ...current,
-          users,
-          activeView: 'control',
-        };
-      });
-    });
-  }
-
-  function handleUpdateUser(userId: string, patch: Partial<UserItem>) {
-    runWithPermission('workspace_edit', 'Für Änderungen an Nutzerprofilen fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        users: current.users.map((item) => (
-          item.id === userId
-            ? {
-                ...item,
-                ...patch,
-                roleProfile: normalizeUserRoleProfile((patch.roleProfile as string | undefined) ?? item.roleProfile),
-                status: normalizeUserStatus((patch.status as string | undefined) ?? item.status),
-              }
-            : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteUser(userId: string) {
-    runWithPermission('workspace_edit', 'Für das Löschen von Nutzern fehlt das Recht workspace_edit.', () => {
-      setState((current) => {
-        const remainingUsers = current.users.filter((item) => item.id !== userId);
-        if (!remainingUsers.length) {
-          const fallbackUsers = normalizeLoadedUsers([]);
-          return {
-            ...current,
-            users: fallbackUsers,
-            activeUserId: fallbackUsers[0]?.id ?? '',
-          };
-        }
-
-        return {
-          ...current,
-          users: remainingUsers,
-          activeUserId: current.activeUserId === userId ? remainingUsers[0]?.id ?? '' : current.activeUserId,
-        };
-      });
-    });
-  }
+  // selectActiveUser, handleCreateUser, handleGenerateUsersFromStakeholders,
+  // handleUpdateUser, handleDeleteUser und updateComplianceCalendar wurden
+  // in C2.7d nach src/features/platform/hooks/usePlatformControlHandlers.ts
+  // ausgelagert. updateComplianceCalendar ist dort als Transient markiert
+  // und wird in C2.9 (regulatory) neu bewertet.
 
   function updateCertificationField(
     field: 'auditLead' | 'targetDate' | 'decisionNote',

@@ -7,9 +7,9 @@ import {
   Sparkles,
   Users2,
 } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
+import { StatCard } from '../../../components/StatCard';
 import { UserCard } from '../components/UserCard';
-import { accessProfiles, permissionLabels } from '../data/workspaceBase';
+import { accessProfiles, permissionLabels } from '../../../data/workspaceBase';
 import type {
   AccessProfileDefinition,
   ComplianceCalendar,
@@ -17,7 +17,7 @@ import type {
   DeadlineSummary,
   DocumentLibrarySummary,
   UserItem,
-} from '../types';
+} from '../../../types';
 
 interface ControlViewProps {
   users: UserItem[];

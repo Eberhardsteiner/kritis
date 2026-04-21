@@ -1,7 +1,7 @@
 import { Suspense, lazy, type ComponentProps } from 'react';
 import type { ViewKey } from '../types';
 import type * as AssessmentViewModule from '../features/assessment/views/AssessmentView';
-import type * as ControlViewModule from '../views/ControlView';
+import type * as ControlViewModule from '../features/platform/views/ControlView';
 import type * as DashboardViewModule from '../views/DashboardView';
 import type * as GovernanceViewModule from '../features/governance/views/GovernanceView';
 import type * as KritisViewModule from '../views/KritisView';
@@ -17,7 +17,7 @@ import type * as RolloutViewModule from '../views/RolloutView';
 import type * as TabletopExerciseViewModule from '../views/TabletopExerciseView';
 
 const AssessmentView = lazy(async () => ({ default: (await import('../features/assessment')).AssessmentView }));
-const ControlView = lazy(async () => ({ default: (await import('../views/ControlView')).ControlView }));
+const ControlView = lazy(async () => ({ default: (await import('../features/platform')).ControlView }));
 const DashboardView = lazy(async () => ({ default: (await import('../views/DashboardView')).DashboardView }));
 const GovernanceView = lazy(async () => ({ default: (await import('../features/governance')).GovernanceView }));
 const KritisView = lazy(async () => ({ default: (await import('../views/KritisView')).KritisView }));

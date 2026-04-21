@@ -205,9 +205,10 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
    - ✅ C2.7a: Pure-Transforms `serverPayload` + `authCallback`.
    - ✅ C2.7b: Auth-/Session-Handler + PlatformView + User-Sync-useEffect. Commit `49639862`. E2E 15 ergänzt (Commit `189447e6`).
    - ✅ C2.7c: OperationsView (1:1 Umzug, C4b-Kandidat für 6-Panel-Split) + `pushStateToServer` + useEffect #4 (Server-Sync-Push-Loop) + 20 System-Ops-Handler. Fünf Push-Loop-Invarianten als Top-of-File-Kommentar in `usePlatformSystemHandlers.ts`. App.tsx -465 Z.
-   - C2.7d: ControlView + UserCard + 5 User-Handler.
+   - ✅ C2.7d: ControlView + UserCard + 5 User-Handler + `updateComplianceCalendar` (Transient, regulatory-nah) + `inferRoleProfileFromStakeholder`-Pure-Helper. C4b-Kandidat für 2-Panel-Split (UserManagementPanel + ComplianceOverviewPanel). E2E 16 ergänzt. App.tsx -119 Z.
 8. `programRollout/` (mittel) – ProgramView, RolloutView, Sprints, Zertifizierungsdossier.
 9. `regulatory/` (komplex) – das verflechtetste Feature mit Regime-/Jurisdiktions-Zuständen, die fast jedes andere Feature liest. Erst extrahierbar, wenn die anderen Features ihren Zustand sauber konsumieren.
+   - **Arbeitsnotiz aus C2.7d** (Compliance-Kalender-Migration): `updateComplianceCalendar` lebt seit C2.7d transient in `usePlatformControlHandlers` (ControlView-Bundle). In C2.9 entscheiden, ob die Compliance-Sektion aus ControlView (Compliance-Kalender-Formular + Fristen-Cockpit + Dokumentenbibliothek) als `ComplianceOverviewPanel` ins regulatory-Feature migriert – **Option A**: Panel + Handler ziehen gemeinsam um, dann reicht ControlView nur noch User-Management – oder ob die Panels bei platform bleiben und **Option B**: nur der Handler wandert in einen neuen regulatory-Hook und wird als Prop zurück nach ControlView gereicht. Die Transient-Markierung steht in der JSDoc von `PlatformControlHandlers.updateComplianceCalendar` und als Gruppenkommentar im Hook.
 10. `reporting/` (Querschnitt) – Management-Report zieht Daten aus Regulatorik, Gap-Analyse, Risiken und Evidenzen zusammen. Extraktion macht erst Sinn, wenn alle Quell-Features sauber strukturiert sind.
 11. App-Shell `src/app/`: Provider, Router, Layout – die Reste aus `App.tsx` landen im App-Shell-Ordner, `App.tsx` selbst wird auf < 500 Zeilen reduziert.
 
