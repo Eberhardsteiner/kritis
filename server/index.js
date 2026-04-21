@@ -6,18 +6,14 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import {
-  buildRuntimeConfig,
   buildUploadPolicy,
   createCorsMiddleware,
   createRateLimitMiddleware,
   runAntivirusScan,
   validateUploadCandidate,
 } from './security.js';
-import { createPersistenceLayer } from './persistence.js';
-import { createObjectStorage, readSupabaseObjectStorageConfig } from './object-storage.js';
 import { parseImportedModulePack } from './module-packs.js';
 import {
-  buildAuthStrategyConfig,
   buildPublicAuthProviders,
   createAuthCallbackTicket,
   createOidcTransaction,
@@ -26,9 +22,6 @@ import {
   extractOidcProfile,
   fetchOidcDiscovery,
   fetchOidcUserProfile,
-  isTimedRecordActive,
-  sanitizeAuthCallbackTicket,
-  sanitizeAuthTransaction,
 } from './auth-provider.js';
 import { normalizeRegulatoryProfile } from './regulatory-dach.js';
 import {
@@ -160,24 +153,57 @@ import {
   writeTenants,
   writeVersions,
 } from './services/persistence-wrappers.js';
+// C3.0c: Runtime-Config + Auth-Session-Service ausgelagert.
+import {
+  ANONYMOUS_ACCESS_ENABLED,
+  AUTHENTICATION_REQUIRED,
+  DEFAULT_DEMO_PASSWORD,
+  GUEST_ACCOUNT_ID,
+  GUEST_USER_ID,
+  authStrategy,
+  defaultPlatformSettings,
+  runtimeConfig,
+} from './config/runtime.js';
+import {
+  assertApiClientScopes,
+  assertPermissions,
+  buildAnonymousContext,
+  buildSuccessfulAuthResponse,
+  buildWorkspaceUserSeedFromContext,
+  cleanupExpiredAuthCallbackTickets,
+  cleanupExpiredAuthFlows,
+  cleanupExpiredSessions,
+  consumeAuthCallbackTicket,
+  ensureSystemAdmin,
+  ensureWorkspaceUser,
+  extractAuthToken,
+  getApiClientContext,
+  getAuthContext,
+  getPublicTenant,
+  hashPassword,
+  presentSession,
+  resolveMembershipForAccount,
+  resolveOidcLoginContext,
+  verifyPassword,
+} from './services/auth-session.js';
 
 const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
-// Persistence-/Auth-/Upload-Limits leben seit C3.0b in ./config/defaults.js
+// Persistence-/Auth-/Upload-Limits leben seit C3.0b in ./config/defaults.js.
+// runtimeConfig, authStrategy, AUTHENTICATION_REQUIRED,
+// ANONYMOUS_ACCESS_ENABLED, GUEST_*, DEFAULT_DEMO_PASSWORD und
+// defaultPlatformSettings leben seit C3.0c in ./config/runtime.js
 // (siehe Import-Block unten).
-const runtimeConfig = buildRuntimeConfig(process.env);
-const authStrategy = buildAuthStrategyConfig(process.env, runtimeConfig);
-const DEFAULT_DEMO_PASSWORD = String(process.env.KRISENFEST_DEMO_ADMIN_PASSWORD || 'Krisenfest2026!').trim() || 'Krisenfest2026!';
-const AUTHENTICATION_REQUIRED = runtimeConfig.authRequired;
-const ANONYMOUS_ACCESS_ENABLED = runtimeConfig.anonymousAccessEnabled;
+//
+// Seeding-Passwörter bleiben hier, weil sie nur von
+// seedFreshSystemIfEmpty + migrateLegacyStorageIfNeeded + buildHealthResponse
+// konsumiert werden — diese drei Funktionen ziehen in C3.6 nach
+// services/storage-init.js um und nehmen die Passwort-Konstanten mit.
 const GENERATED_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production' && !process.env.KRISENFEST_BOOTSTRAP_PASSWORD
   ? crypto.randomBytes(18).toString('base64url')
   : '';
 const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
   ? (String(process.env.KRISENFEST_BOOTSTRAP_PASSWORD || GENERATED_BOOTSTRAP_PASSWORD).trim() || DEFAULT_DEMO_PASSWORD)
   : DEFAULT_DEMO_PASSWORD;
-const GUEST_ACCOUNT_ID = 'guest-access';
-const GUEST_USER_ID = 'usr-public';
-// OIDC_PROVIDER_ID lebt seit C3.0a in ./config/defaults.js (über Import oben).
 
 // Path-Konstanten, __dirname/__filename-Auflösung und rootDir leben
 // seit C3.0a in ./config/paths.js. Die Singleton-Caches
@@ -195,97 +221,18 @@ const observability = createObservabilityStore({
   maxLatencySamplesPerRoute: 240,
 });
 
-// Defaults (collaborativeStateDefaults, defaultTenantSettings,
-// apiClientScopeSet, exportPackageTypes, rolePermissions,
-// sectionPermissionMap, OIDC_PROVIDER_ID) leben seit C3.0a in
-// ./config/defaults.js. defaultPlatformSettings wird hier zur
-// Bootstrap-Zeit über den Factory-Aufruf erzeugt (runtimeConfig-abhängig).
-const defaultPlatformSettings = buildDefaultPlatformSettings(runtimeConfig);
-
 // Pure Helpers (ids, sanitizers, seeds, state-diff) leben seit C3.0a
 // in ./services/ids.js und ./services/sanitizers.js. Die Signatur von
 // sanitizePlatformSettings hat einen zweiten Param `defaults`
 // bekommen, damit die runtime-abhängige Baseline explizit gereicht
 // wird (früher: impliziter Closure-Zugriff).
 
-function findAccountByIdentity(accounts, providerId, subject) {
-  return sanitizeArray(accounts).find((account) => sanitizeArray(account.identities).some((identity) => identity?.providerId === providerId && identity?.subject === subject));
-}
-
-function upsertExternalIdentity(account, profile, linkedAt = nowIso()) {
-  const identities = sanitizeArray(account.identities).map((identity) => sanitizeIdentityRecord(identity));
-  const nextIdentity = sanitizeIdentityRecord({
-    providerId: profile.providerId,
-    subject: profile.subject,
-    issuer: profile.issuer,
-    email: profile.email,
-    linkedAt: identities.find((identity) => identity.providerId === profile.providerId && identity.subject === profile.subject)?.linkedAt || linkedAt,
-    lastLoginAt: linkedAt,
-    tenantHint: profile.tenantHint,
-    roleHint: profile.roleHint,
-    scopeHint: profile.scopeHint,
-  });
-  const index = identities.findIndex((identity) => identity.providerId === nextIdentity.providerId && identity.subject === nextIdentity.subject);
-  if (index >= 0) {
-    identities[index] = { ...identities[index], ...nextIdentity };
-  } else {
-    identities.push(nextIdentity);
-  }
-
-  return sanitizeAccountRecord({
-    ...account,
-    authSource: isLocalLoginAllowed(account) ? 'hybrid' : 'oidc',
-    lastAuthProvider: profile.providerId,
-    identities,
-  });
-}
-
-function resolveMembershipForAccount(account, requestedTenantId, tenantLookup) {
-  const memberships = sanitizeArray(account.memberships).map((entry) => sanitizeMembershipRecord(entry));
-  if (requestedTenantId) {
-    const match = memberships.find((entry) => entry.tenantId === requestedTenantId);
-    if (match) {
-      return match;
-    }
-  }
-
-  const activeMembership = memberships.find((entry) => tenantLookup.has(entry.tenantId));
-  return activeMembership || memberships[0] || null;
-}
-
-function buildAutoCreatedMembership(profile, tenantId, tenantName) {
-  return sanitizeMembershipRecord({
-    tenantId,
-    roleProfile: sanitizeRoleProfile(profile.roleHint || authStrategy.oidc.defaultRoleProfile),
-    workspaceUserId: createId('usr'),
-    scope: profile.scopeHint || tenantName || tenantId,
-  });
-}
-
+// findAccountByIdentity, upsertExternalIdentity,
+// resolveMembershipForAccount, buildAutoCreatedMembership,
+// hashPassword, verifyPassword, createSessionToken, plusHours
+// leben seit C3.0c in ./services/auth-session.js.
 // sanitizeState, getRolePermissions, buildSeedUser, buildSeedState
 // leben seit C3.0a in ./services/sanitizers.js.
-
-function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
-  const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, 32, 'sha256').toString('hex');
-  return { salt, hash };
-}
-
-function verifyPassword(password, salt, expectedHash) {
-  const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, 32, 'sha256').toString('hex');
-  const left = Buffer.from(hash, 'hex');
-  const right = Buffer.from(expectedHash, 'hex');
-  return left.length === right.length && crypto.timingSafeEqual(left, right);
-}
-
-function createSessionToken() {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-function plusHours(value, hours) {
-  const date = new Date(value);
-  date.setHours(date.getHours() + hours);
-  return date.toISOString();
-}
 
 // getPersistenceLayer, getObjectStorage, resolvePersistenceReference,
 // readJsonFile, writeJsonFile, jsonDocumentExists, getJsonDocumentMeta,
@@ -620,341 +567,15 @@ async function getSnapshotPayload(tenantId, snapshotId) {
 // stableEqual, detectChangedSections leben seit C3.0a in
 // ./services/sanitizers.js.
 
-function extractAuthToken(req) {
-  const authHeader = String(req.header('authorization') || '').trim();
-  if (authHeader.toLowerCase().startsWith('bearer ')) {
-    return authHeader.slice(7).trim();
-  }
+// extractAuthToken, cleanupExpiredSessions, cleanupExpiredAuthFlows,
+// cleanupExpiredAuthCallbackTickets, createServerSession, presentSession,
+// getPublicTenant, buildAnonymousAccount, buildAnonymousMembership,
+// buildWorkspaceUserSeedFromContext, findActiveTenant,
+// resolveOidcTargetTenant, ensureOidcCapableAccount, resolveOidcAccount,
+// resolveOidcLoginContext, buildAnonymousContext, getAuthContext,
+// assertPermissions, ensureSystemAdmin leben seit C3.0c in
+// ./services/auth-session.js (Import oben).
 
-  return '';
-}
-
-async function cleanupExpiredSessions() {
-  const sessions = await readSessions();
-  const now = Date.now();
-  const active = sessions.filter((entry) => {
-    const expiresAt = new Date(entry?.expiresAt || '').getTime();
-    return Number.isFinite(expiresAt) && expiresAt > now;
-  });
-
-  if (active.length !== sessions.length) {
-    await writeSessions(active);
-  }
-}
-
-async function cleanupExpiredAuthFlows() {
-  const flows = await readPendingAuthFlows();
-  const active = flows.filter((entry) => isTimedRecordActive(entry));
-  if (active.length !== flows.length) {
-    await writePendingAuthFlows(active);
-  }
-}
-
-async function cleanupExpiredAuthCallbackTickets() {
-  const tickets = await readAuthCallbackTickets();
-  const active = tickets.filter((entry) => isTimedRecordActive(entry));
-  if (active.length !== tickets.length) {
-    await writeAuthCallbackTickets(active);
-  }
-}
-
-async function createServerSession(account, membership, tenant, { providerId = 'local' } = {}) {
-  const token = createSessionToken();
-  const createdAt = nowIso();
-  const expiresAt = plusHours(createdAt, SESSION_HOURS);
-  const nextSessions = [
-    {
-      token,
-      accountId: account.id,
-      tenantId: membership.tenantId,
-      createdAt,
-      expiresAt,
-      providerId,
-    },
-    ...(await readSessions()).filter((entry) => !(entry?.accountId === account.id && entry?.tenantId === membership.tenantId)),
-  ];
-  await writeSessions(nextSessions);
-  return { token, createdAt, expiresAt };
-}
-
-function presentSession({ session, account, membership, tenantName, includeToken = false }) {
-  return {
-    ...(includeToken ? { token: session.token } : {}),
-    expiresAt: session.expiresAt,
-    accountId: account.id,
-    userId: membership.workspaceUserId,
-    name: account.name,
-    email: account.email,
-    tenantId: membership.tenantId,
-    tenantName,
-    roleProfile: sanitizeRoleProfile(membership.roleProfile),
-    permissions: getRolePermissions(membership.roleProfile),
-    isSystemAdmin: Boolean(account.isSystemAdmin),
-    authProvider: String(session.providerId || account.lastAuthProvider || 'local').trim() || 'local',
-    status: account.status || 'active',
-  };
-}
-
-async function getPublicTenant(requestedTenantId = '') {
-  const tenants = await readTenants();
-  const activeTenants = sanitizeArray(tenants).filter((entry) => entry?.active !== false);
-  if (!activeTenants.length) {
-    throw httpError(503, 'Es ist noch kein Arbeitsbereich auf dem Server vorhanden.');
-  }
-
-  if (requestedTenantId) {
-    const selected = activeTenants.find((entry) => entry?.id === requestedTenantId);
-    if (selected) {
-      return selected;
-    }
-  }
-
-  return activeTenants[0];
-}
-
-function buildAnonymousAccount() {
-  return {
-    id: GUEST_ACCOUNT_ID,
-    name: 'Offener Lesemodus',
-    email: '',
-    status: 'active',
-    isSystemAdmin: false,
-  };
-}
-
-function buildAnonymousMembership(tenant) {
-  return {
-    tenantId: tenant.id,
-    roleProfile: runtimeConfig.anonymousRoleProfile,
-    workspaceUserId: GUEST_USER_ID,
-    scope: tenant.name || tenant.id,
-  };
-}
-
-function buildWorkspaceUserSeedFromContext(authContext) {
-  return buildSeedUser({
-    id: authContext.membership.workspaceUserId,
-    name: authContext.account.name,
-    email: authContext.account.email,
-    roleProfile: sanitizeRoleProfile(authContext.membership.roleProfile),
-    scope: authContext.membership.scope || authContext.tenant.name || authContext.membership.tenantId,
-  });
-}
-
-function findActiveTenant(tenants, tenantId) {
-  return sanitizeArray(tenants).find((entry) => entry?.id === tenantId && entry?.active !== false) || null;
-}
-
-function resolveOidcTargetTenant(tenants, requestedTenantId, profile) {
-  const candidateIds = [requestedTenantId, profile?.tenantHint, authStrategy.oidc.defaultTenantId]
-    .map((entry) => String(entry || '').trim())
-    .filter(Boolean);
-
-  for (const candidateId of candidateIds) {
-    const tenant = findActiveTenant(tenants, candidateId);
-    if (tenant) {
-      return tenant;
-    }
-  }
-
-  const activeTenants = sanitizeArray(tenants).filter((entry) => entry?.active !== false);
-  if (activeTenants.length === 1) {
-    return activeTenants[0];
-  }
-
-  return null;
-}
-
-function ensureOidcCapableAccount(account, profile) {
-  const nextName = String(account?.name || '').trim() || profile.name || profile.email || profile.subject;
-  const nextEmail = String(account?.email || '').trim().toLowerCase() || profile.email;
-  return sanitizeAccountRecord({
-    ...account,
-    name: nextName,
-    email: nextEmail,
-    authSource: isLocalLoginAllowed(account) ? 'hybrid' : 'oidc',
-    lastAuthProvider: profile.providerId,
-  });
-}
-
-function resolveOidcAccount(accounts, profile) {
-  const direct = findAccountByIdentity(accounts, profile.providerId, profile.subject);
-  if (direct) {
-    return { account: direct, resolution: 'identity' };
-  }
-
-  if (authStrategy.oidc.linkByEmail && profile.email) {
-    const byEmail = sanitizeArray(accounts).find((entry) => entry?.email === profile.email && entry?.status !== 'inactive');
-    if (byEmail) {
-      return { account: byEmail, resolution: 'email' };
-    }
-  }
-
-  return { account: null, resolution: 'none' };
-}
-
-async function resolveOidcLoginContext({ profile, requestedTenantId }) {
-  const [accounts, tenants] = await Promise.all([readAccounts(), readTenants()]);
-  const tenantLookup = new Map(sanitizeArray(tenants).filter((entry) => entry?.active !== false).map((entry) => [entry.id, entry]));
-  const resolved = resolveOidcAccount(accounts, profile);
-  const loginAt = nowIso();
-
-  let account = resolved.account ? ensureOidcCapableAccount(resolved.account, profile) : null;
-  let accountIndex = account ? accounts.findIndex((entry) => entry.id === account.id) : -1;
-  let created = false;
-  let linked = false;
-
-  if (!account) {
-    if (!authStrategy.oidc.autoCreateAccounts) {
-      throw httpError(403, 'Für diesen SSO-Benutzer ist noch kein Zugriffskonto freigegeben.');
-    }
-    const targetTenant = resolveOidcTargetTenant(tenants, requestedTenantId, profile);
-    if (!targetTenant) {
-      throw httpError(403, 'Der SSO-Benutzer konnte keinem aktiven Mandanten zugeordnet werden.');
-    }
-    if (!profile.email) {
-      throw httpError(403, 'Das SSO-Profil enthält keine E-Mail-Adresse für die automatische Kontoanlage.');
-    }
-
-    const membership = buildAutoCreatedMembership(profile, targetTenant.id, targetTenant.name || targetTenant.id);
-    account = sanitizeAccountRecord({
-      id: createId('acct'),
-      name: profile.name || profile.email,
-      email: profile.email,
-      status: 'active',
-      isSystemAdmin: false,
-      authSource: 'oidc',
-      lastAuthProvider: profile.providerId,
-      lastLoginAt: loginAt,
-      memberships: [membership],
-      identities: [],
-    });
-    accounts.unshift(account);
-    accountIndex = 0;
-    created = true;
-  }
-
-  account = upsertExternalIdentity(account, profile, loginAt);
-  linked = resolved.resolution === 'email' || created;
-
-  let membership = resolveMembershipForAccount(account, requestedTenantId || profile.tenantHint, tenantLookup);
-  if (!membership) {
-    const targetTenant = resolveOidcTargetTenant(tenants, requestedTenantId, profile);
-    if (!targetTenant || !authStrategy.oidc.autoCreateAccounts) {
-      throw httpError(403, 'Dem SSO-Benutzer ist kein aktiver Mandant zugeordnet.');
-    }
-    membership = buildAutoCreatedMembership(profile, targetTenant.id, targetTenant.name || targetTenant.id);
-    account = sanitizeAccountRecord({
-      ...account,
-      memberships: [...sanitizeArray(account.memberships), membership],
-    });
-  }
-
-  const tenant = findActiveTenant(tenants, membership.tenantId);
-  if (!tenant) {
-    throw httpError(403, 'Der ausgewählte Mandant ist nicht mehr aktiv.');
-  }
-
-  account = sanitizeAccountRecord({
-    ...account,
-    lastLoginAt: loginAt,
-    lastAuthProvider: profile.providerId,
-  });
-
-  if (accountIndex >= 0) {
-    accounts[accountIndex] = account;
-  } else {
-    accounts.unshift(account);
-  }
-
-  await writeAccounts(accounts);
-  await ensureWorkspaceUser(membership.tenantId, membership, account);
-
-  return {
-    account,
-    membership,
-    tenant,
-    created,
-    linked,
-  };
-}
-
-async function buildAnonymousContext(req) {
-  const requestedTenantId = String(req.query.tenantId || '').trim();
-  const tenant = await getPublicTenant(requestedTenantId);
-  const account = buildAnonymousAccount();
-  const membership = buildAnonymousMembership(tenant);
-
-  return {
-    token: '',
-    account,
-    membership,
-    tenant,
-    session: null,
-    sessionPublic: null,
-    anonymous: true,
-  };
-}
-
-async function getAuthContext(req, allowAnonymous = false) {
-  const token = extractAuthToken(req);
-  if (!token) {
-    if (allowAnonymous && ANONYMOUS_ACCESS_ENABLED) {
-      return buildAnonymousContext(req);
-    }
-    throw httpError(401, 'Bitte zuerst anmelden, um Serverfunktionen zu nutzen.');
-  }
-
-  await Promise.all([cleanupExpiredSessions(), cleanupExpiredAuthFlows(), cleanupExpiredAuthCallbackTickets()]);
-  const [sessions, accounts, tenants] = await Promise.all([readSessions(), readAccounts(), readTenants()]);
-  const session = sessions.find((entry) => entry?.token === token);
-  if (!session) {
-    throw httpError(401, 'Die Serversitzung ist abgelaufen oder ungültig.');
-  }
-
-  const account = accounts.find((entry) => entry?.id === session.accountId && entry?.status !== 'inactive');
-  if (!account) {
-    throw httpError(401, 'Das Zugriffskonto ist nicht mehr verfügbar.');
-  }
-
-  const membership = sanitizeArray(account.memberships).find((entry) => entry?.tenantId === session.tenantId);
-  if (!membership) {
-    throw httpError(403, 'Für diesen Mandanten besteht keine gültige Mitgliedschaft mehr.');
-  }
-
-  const tenant = tenants.find((entry) => entry?.id === membership.tenantId);
-  if (!tenant || tenant.active === false) {
-    throw httpError(403, 'Der ausgewählte Mandant ist nicht mehr aktiv.');
-  }
-
-  return {
-    token,
-    account,
-    membership,
-    tenant,
-    session,
-    sessionPublic: presentSession({ session, account, membership, tenantName: tenant.name || membership.tenantId }),
-    anonymous: false,
-  };
-}
-
-function assertPermissions(requiredPermissions, authContext) {
-  const granted = getRolePermissions(authContext.membership.roleProfile);
-  const missing = requiredPermissions.filter((permission) => !granted.includes(permission));
-  if (missing.length) {
-    throw httpError(
-      403,
-      `Der angemeldete Nutzer ${authContext.account.name || authContext.account.email} darf diesen Schreibvorgang nicht ausführen.`,
-      missing.map((permission) => `Fehlende Berechtigung: ${permission}`),
-    );
-  }
-}
-
-function ensureSystemAdmin(authContext) {
-  if (!authContext.account?.isSystemAdmin) {
-    throw httpError(403, 'Für diesen Vorgang wird ein systemweites Administratorkonto benötigt.');
-  }
-}
 
 function attachmentFileNamesFromState(state) {
   const evidenceItems = sanitizeArray(state?.evidenceItems);
@@ -1197,37 +818,7 @@ function sanitizeAccountForResponse(account, tenantLookup) {
   };
 }
 
-async function ensureWorkspaceUser(tenantId, membership, account) {
-  const state = await readState(tenantId);
-  const nextUsers = [...sanitizeArray(state.users)];
-  const existingIndex = nextUsers.findIndex((user) => user?.id === membership.workspaceUserId || (user?.email && user.email === account.email));
-  const nextUser = buildSeedUser({
-    id: membership.workspaceUserId,
-    name: account.name,
-    email: account.email,
-    roleProfile: sanitizeRoleProfile(membership.roleProfile),
-    scope: membership.scope || state.companyProfile?.companyName || 'Gesamtprogramm',
-  });
-
-  if (existingIndex >= 0) {
-    nextUsers[existingIndex] = {
-      ...nextUsers[existingIndex],
-      ...nextUser,
-      id: membership.workspaceUserId,
-    };
-  } else {
-    nextUsers.unshift(nextUser);
-  }
-
-  if (!stableEqual(nextUsers, state.users)) {
-    await writeState(tenantId, {
-      ...state,
-      users: nextUsers,
-    });
-  }
-
-  return nextUser;
-}
+// ensureWorkspaceUser lebt seit C3.0c in ./services/auth-session.js.
 
 async function moveDirectoryContents(sourceDir, targetDir) {
   if (!fsSync.existsSync(sourceDir)) {
@@ -1751,64 +1342,8 @@ async function listRestoreDrillSummaries() {
   return summarizeRestoreDrills(drillJobs, artifactLookup);
 }
 
-async function getApiClientContext(req) {
-  const settings = await readPlatformSettings();
-  if (!settings.publicApiEnabled) {
-    throw httpError(403, 'Die öffentliche Integrations-API ist aktuell deaktiviert.');
-  }
-
-  const authHeader = String(req.header('authorization') || '').trim();
-  const headerToken = String(req.header('x-api-key') || '').trim();
-  const bearerToken = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : '';
-  const token = headerToken || bearerToken;
-
-  if (!token) {
-    throw httpError(401, 'Für die Integrations-API ist ein gültiger API-Schlüssel erforderlich.');
-  }
-
-  const [clients, tenants] = await Promise.all([readApiClients(), readTenants()]);
-  const clientIndex = clients.findIndex((client) => (
-    client.status === 'active'
-      && client.secretSalt
-      && client.secretHash
-      && verifyPassword(token, client.secretSalt, client.secretHash)
-  ));
-
-  if (clientIndex < 0) {
-    throw httpError(401, 'Der API-Schlüssel ist ungültig oder wurde widerrufen.');
-  }
-
-  const client = clients[clientIndex];
-  if (client.expiresAt) {
-    const expiresAt = new Date(client.expiresAt).getTime();
-    if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) {
-      throw httpError(401, 'Der API-Schlüssel ist abgelaufen.');
-    }
-  }
-
-  clients[clientIndex] = {
-    ...client,
-    lastUsedAt: nowIso(),
-  };
-  await writeApiClients(clients);
-
-  const tenant = client.tenantId
-    ? tenants.find((entry) => entry.id === client.tenantId) || null
-    : null;
-
-  return {
-    client: clients[clientIndex],
-    tenant,
-    settings,
-  };
-}
-
-function assertApiClientScopes(requiredScopes, apiContext) {
-  const missing = requiredScopes.filter((scope) => !sanitizeArray(apiContext.client.scopes).includes(scope));
-  if (missing.length) {
-    throw httpError(403, 'Dem API-Client fehlen erforderliche Scopes.', missing);
-  }
-}
+// getApiClientContext und assertApiClientScopes leben seit C3.0c in
+// ./services/auth-session.js (Import oben).
 
 async function buildIntegrationManifest(apiContext) {
   const [health, readiness] = await Promise.all([
@@ -2283,99 +1818,13 @@ registerIntegrationRoutes(app, {
   readState,
 });
 
-async function buildSuccessfulAuthResponse({ account, membership, tenant, providerId = 'local' }) {
-  await ensureWorkspaceUser(membership.tenantId, membership, account);
-  const sessionData = await createServerSession(account, membership, tenant, { providerId });
-  const updatedAccount = sanitizeAccountRecord({
-    ...account,
-    lastLoginAt: sessionData.createdAt,
-    lastAuthProvider: providerId,
-  });
-  const accounts = await readAccounts();
-  const nextAccounts = accounts.map((entry) => (entry.id === updatedAccount.id ? updatedAccount : entry));
-  await writeAccounts(nextAccounts);
-
-  const sessionPublic = presentSession({
-    session: { token: sessionData.token, expiresAt: sessionData.expiresAt },
-    account: updatedAccount,
-    membership,
-    tenantName: tenant.name || membership.tenantId,
-    includeToken: true,
-  });
-
-  const stateEnvelope = await buildStateEnvelope(membership.tenantId, await readState(membership.tenantId));
-  await appendAuditLog(membership.tenantId, {
-    id: createId('audit'),
-    at: sessionData.createdAt,
-    userId: updatedAccount.id,
-    userName: updatedAccount.name,
-    action: providerId === OIDC_PROVIDER_ID ? 'SSO-Anmeldung' : 'Anmeldung',
-    resource: 'auth',
-    summary: `${providerId === OIDC_PROVIDER_ID ? 'SSO' : 'Server'}-Anmeldung für Mandant „${tenant.name || membership.tenantId}“.`,
-    sections: ['auth'],
-  });
-
-  const tenantLookup = new Map((await readTenants()).map((entry) => [entry.id, entry]));
-
-  return {
-    ok: true,
-    session: sessionPublic,
-    ...stateEnvelope,
-    accessibleTenants: sanitizeArray(updatedAccount.memberships).map((entry) => ({
-      tenantId: entry.tenantId,
-      tenantName: tenantLookup.get(entry.tenantId)?.name || entry.tenantId,
-      roleProfile: sanitizeRoleProfile(entry.roleProfile),
-    })),
-    workspaceUserSeed: buildWorkspaceUserSeedFromContext({ account: updatedAccount, membership, tenant }),
-  };
-}
-
-async function consumeAuthCallbackTicket(ticketId) {
-  await cleanupExpiredAuthCallbackTickets();
-  const tickets = await readAuthCallbackTickets();
-  const ticket = tickets.find((entry) => entry.id === ticketId);
-  if (!ticket) {
-    throw httpError(401, 'Das Authentifizierungsticket ist abgelaufen oder wurde bereits verbraucht.');
-  }
-
-  const sessions = await readSessions();
-  const session = sessions.find((entry) => entry?.token === ticket.sessionToken);
-  if (!session) {
-    throw httpError(401, 'Die vorbereitete Serversitzung konnte nicht mehr gefunden werden.');
-  }
-
-  const [accounts, tenants] = await Promise.all([readAccounts(), readTenants()]);
-  const account = accounts.find((entry) => entry?.id === session.accountId && entry?.status !== 'inactive');
-  if (!account) {
-    throw httpError(401, 'Das zugehörige Zugriffskonto ist nicht mehr verfügbar.');
-  }
-  const membership = sanitizeArray(account.memberships).find((entry) => entry?.tenantId === session.tenantId);
-  const tenant = tenants.find((entry) => entry?.id === session.tenantId && entry?.active !== false);
-  if (!membership || !tenant) {
-    throw httpError(403, 'Der vorbereitete Mandant ist nicht mehr aktiv.');
-  }
-
-  await writeAuthCallbackTickets(tickets.filter((entry) => entry.id !== ticketId));
-  await ensureWorkspaceUser(membership.tenantId, membership, account);
-
-  return {
-    ok: true,
-    session: presentSession({
-      session,
-      account,
-      membership,
-      tenantName: tenant.name || membership.tenantId,
-      includeToken: true,
-    }),
-    ...(await buildStateEnvelope(membership.tenantId, await readState(membership.tenantId))),
-    accessibleTenants: sanitizeArray(account.memberships).map((entry) => ({
-      tenantId: entry.tenantId,
-      tenantName: tenants.find((tenantEntry) => tenantEntry.id === entry.tenantId)?.name || entry.tenantId,
-      roleProfile: sanitizeRoleProfile(entry.roleProfile),
-    })),
-    workspaceUserSeed: buildWorkspaceUserSeedFromContext({ account, membership, tenant }),
-  };
-}
+// buildSuccessfulAuthResponse und consumeAuthCallbackTicket leben seit
+// C3.0c in ./services/auth-session.js. Beide Service-Funktionen nehmen
+// `buildStateEnvelope` als zweiten Parameter (evidence-aware, bleibt
+// bis C3.4 in dieser Datei). Wir reichen die gebundenen Adapter an die
+// registerAuthRoutes-Deps unten weiter.
+const buildSuccessfulAuthResponseBound = (input) => buildSuccessfulAuthResponse(input, buildStateEnvelope);
+const consumeAuthCallbackTicketBound = (ticketId) => consumeAuthCallbackTicket(ticketId, buildStateEnvelope);
 
 registerAuthRoutes(app, {
   runtimeConfig,
@@ -2392,7 +1841,7 @@ registerAuthRoutes(app, {
   verifyPassword,
   sanitizeArray,
   resolveMembershipForAccount,
-  buildSuccessfulAuthResponse,
+  buildSuccessfulAuthResponse: buildSuccessfulAuthResponseBound,
   cleanupExpiredAuthFlows,
   fetchOidcDiscovery,
   createOidcTransaction,
@@ -2407,7 +1856,7 @@ registerAuthRoutes(app, {
   createAuthCallbackTicket,
   readAuthCallbackTickets,
   writeAuthCallbackTickets,
-  consumeAuthCallbackTicket,
+  consumeAuthCallbackTicket: consumeAuthCallbackTicketBound,
   getAuthContext,
   ensureWorkspaceUser,
   buildWorkspaceUserSeedFromContext,
