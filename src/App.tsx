@@ -15,7 +15,7 @@ import {
   getModuleByIdFromCatalog,
 } from './lib/moduleRegistry';
 import { getAccessProfile } from './data/workspaceBase';
-import { buildGapAnalysisBlob, buildGapAnalysisFileName } from './features/gap';
+import { useGapHandlers } from './features/gap';
 import {
   normalizeLoadedActions,
   useActionHandlers,
@@ -28,7 +28,6 @@ import {
   useGovernanceHandlers,
 } from './features/governance';
 import {
-  createEvidenceDraft,
   normalizeLoadedEvidence,
   useEvidenceHandlers,
 } from './features/evidence';
@@ -67,36 +66,17 @@ import {
   usePlatformSystemHandlers,
 } from './features/platform';
 import { createId } from './shared/ids';
-import { generateDraft as generateResiliencePlanDraft } from './features/resiliencePlan/generator';
+import { useResiliencePlanHandlers } from './features/resiliencePlan';
+import type { ResiliencePlan } from './features/resiliencePlan';
 import {
-  buildResiliencePlanJsonFileName,
-  renderResiliencePlanJsonBlob,
-} from './features/resiliencePlan/renderers/jsonRenderer';
-import {
-  buildResiliencePlanDocxFileName,
-  renderResiliencePlanDocxBlob,
-} from './features/resiliencePlan/renderers/docxRenderer';
-import {
-  buildResiliencePlanPdfFileName,
-  renderResiliencePlanPdfBlob,
-} from './features/resiliencePlan/renderers/pdfRenderer';
-import type { ResiliencePlan } from './features/resiliencePlan/types';
-import {
-  abandonSession as abandonTabletopSession,
-  acknowledgeInject as acknowledgeTabletopInject,
-  advanceStep as advanceTabletopStep,
-  completeSession as completeTabletopSession,
-  createSession as createTabletopSessionState,
-  getVerdictLabel as getTabletopVerdictLabel,
-  recordDecision as recordTabletopDecision,
-  startSession as startTabletopEngineSession,
-  updateParticipantNotes as updateTabletopNotes,
-} from './features/tabletopExercise/engine';
-import { builtInScenarios as tabletopBuiltInScenarios } from './features/tabletopExercise/scenarios';
+  builtInScenarios as tabletopBuiltInScenarios,
+  resolveActiveScenario,
+  useTabletopExerciseHandlers,
+} from './features/tabletopExercise';
 import type {
   ExerciseSession as TabletopExerciseSession,
   Scenario as TabletopScenarioDef,
-} from './features/tabletopExercise/types';
+} from './features/tabletopExercise';
 import { normalizeRegulatoryProfile } from './lib/regulatory';
 import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
 import {
@@ -1236,6 +1216,53 @@ export default function App() {
     deadlineSummary,
   });
 
+  const {
+    handleGenerateResiliencePlanDraft,
+    handleSaveResiliencePlan,
+    handleSubmitResiliencePlanForReview,
+    handleApproveResiliencePlan,
+    handleReturnResiliencePlanToDraft,
+    handleArchiveResiliencePlan,
+    handleExportResiliencePlanJson,
+    handleExportResiliencePlanDocx,
+    handleExportResiliencePlanPdf,
+  } = useResiliencePlanHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Permission-Gate (fuer 3 Export-Handler)
+    hasPermission,
+    // Fach-Kontext
+    currentModule,
+    companyProfile: state.companyProfile,
+    regulatoryProfile,
+    // Tenant-Kontext fuer Generator-Tenant-ID
+    authSession,
+    publicTenant,
+  });
+
+  // useTabletopExerciseHandlers liegt weiter unten NACH
+  // useEvidenceHandlers, weil der tabletop-Hook `upsertEvidenceDrafts`
+  // aus dessen Return als Cross-Feature-Dep benoetigt.
+
+  const { handleExportGapAnalysisDocx } = useGapHandlers({
+    // Kern (FeatureHandlerDependencies; setState + runWithPermission
+    // werden in gap bewusst NICHT genutzt — gap ist read-only,
+    // analog zu reporting)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Permission-Gate
+    hasPermission,
+    // Fach-Kontext
+    companyProfile: state.companyProfile,
+    activeRequirements,
+    gapAnalysisSummary,
+  });
+
   // Die 3 Regulatorik-Profil-Handler (updateRegulatoryProfileField,
   // updateJurisdiction, updateRegimeScope), die 3 Certification/
   // Checklist-Handler (updateCertificationField, updateCertificationStage,
@@ -1360,6 +1387,42 @@ export default function App() {
     lastSyncedPayloadRef,
     suppressNextServerSyncRef,
     extractErrorDetails,
+  });
+
+  const {
+    handleStartTabletopExercise,
+    handleImportTabletopScenario,
+    handleRemoveImportedTabletopScenario,
+    handleBeginTabletopSession,
+    handleAcknowledgeTabletopInject,
+    handleRecordTabletopDecision,
+    handleAdvanceTabletopStep,
+    handleCompleteTabletopSession,
+    handleAbandonTabletopSession,
+    handleUpdateTabletopNotes,
+    handleCreateTabletopEvidenceFromResult,
+    handleExportTabletopResultJson,
+  } = useTabletopExerciseHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Permission-Gate
+    hasPermission,
+    // Fach-Kontext
+    currentModule,
+    companyProfile: state.companyProfile,
+    tenantPolicy,
+    documentFolders,
+    // Tenant-Kontext
+    authSession,
+    publicTenant,
+    // UI-State-Setter (useState-Durchgriff aus App.tsx)
+    setTabletopActiveTab,
+    // Cross-Feature-Kopplung zu evidence-Hook (upsertEvidenceDrafts
+    // kommt aus useEvidenceHandlers unmittelbar darueber)
+    upsertEvidenceDrafts,
   });
 
   const {
@@ -1664,432 +1727,19 @@ export default function App() {
   // C2.9 nach src/features/riskCatalog/hooks/useRiskCatalogHandlers.ts
   // ausgelagert. Hook-Call + Destructuring liegt weiter unten.
 
-  function triggerFileDownload(blob: Blob, fileName: string) {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  function handleGenerateResiliencePlanDraft() {
-    runWithPermission('kritis_edit', 'Für die Erstellung des Resilienzplans fehlt das Recht kritis_edit.', () => {
-      const draft = generateResiliencePlanDraft({
-        companyProfile: state.companyProfile,
-        regulatoryProfile,
-        complianceCalendar: state.complianceCalendar,
-        module: currentModule,
-        riskEntries: state.riskEntries,
-        actionItems: state.actionItems,
-        evidenceItems: state.evidenceItems,
-        tenantId: authSession?.tenantId ?? publicTenant?.id ?? 'local',
-      });
-      setState((current) => ({ ...current, resiliencePlan: draft }));
-      showNotice('success', 'Resilienzplan-Entwurf aus den Mandantendaten erzeugt.');
-    });
-  }
-
-  function handleSaveResiliencePlan(plan: ResiliencePlan) {
-    runWithPermission('kritis_edit', 'Für Änderungen am Resilienzplan fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({ ...current, resiliencePlan: plan }));
-    });
-  }
-
-  function handleSubmitResiliencePlanForReview() {
-    runWithPermission('kritis_edit', 'Für den Workflow fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.resiliencePlan) {
-          return current;
-        }
-        return {
-          ...current,
-          resiliencePlan: {
-            ...current.resiliencePlan,
-            status: 'review',
-            updatedAt: new Date().toISOString(),
-          },
-        };
-      });
-    });
-  }
-
-  function handleApproveResiliencePlan(approvedBy: string) {
-    runWithPermission('kritis_edit', 'Für die Freigabe fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.resiliencePlan) {
-          return current;
-        }
-        const now = new Date().toISOString();
-        return {
-          ...current,
-          resiliencePlan: {
-            ...current.resiliencePlan,
-            status: 'approved',
-            approvedBy,
-            approvedAt: now,
-            updatedAt: now,
-          },
-        };
-      });
-    });
-  }
-
-  function handleReturnResiliencePlanToDraft() {
-    runWithPermission('kritis_edit', 'Für den Workflow fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.resiliencePlan) {
-          return current;
-        }
-        return {
-          ...current,
-          resiliencePlan: {
-            ...current.resiliencePlan,
-            status: 'draft',
-            approvedBy: undefined,
-            approvedAt: undefined,
-            updatedAt: new Date().toISOString(),
-          },
-        };
-      });
-    });
-  }
-
-  function handleArchiveResiliencePlan() {
-    runWithPermission('kritis_edit', 'Für die Archivierung fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.resiliencePlan) {
-          return current;
-        }
-        const archived: ResiliencePlan = {
-          ...current.resiliencePlan,
-          status: 'archived',
-          updatedAt: new Date().toISOString(),
-        };
-        return {
-          ...current,
-          resiliencePlan: null,
-          archivedResiliencePlans: [archived, ...current.archivedResiliencePlans],
-        };
-      });
-    });
-  }
-
-  function handleExportResiliencePlanJson() {
-    if (!state.resiliencePlan) {
-      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
-      return;
-    }
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const blob = renderResiliencePlanJsonBlob(state.resiliencePlan);
-      const fileName = buildResiliencePlanJsonFileName(
-        state.companyProfile.companyName,
-        state.resiliencePlan.version,
-      );
-      triggerFileDownload(blob, fileName);
-    } catch (error) {
-      showNotice('error', `JSON-Export fehlgeschlagen: ${String(error)}`);
-    }
-  }
-
-  async function handleExportResiliencePlanDocx() {
-    if (!state.resiliencePlan) {
-      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
-      return;
-    }
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const blob = await renderResiliencePlanDocxBlob(state.resiliencePlan);
-      const fileName = buildResiliencePlanDocxFileName(
-        state.companyProfile.companyName,
-        state.resiliencePlan.version,
-      );
-      triggerFileDownload(blob, fileName);
-    } catch (error) {
-      showNotice('error', `DOCX-Export fehlgeschlagen: ${String(error)}`);
-    }
-  }
-
-  function handleExportResiliencePlanPdf() {
-    if (!state.resiliencePlan) {
-      showNotice('error', 'Kein Resilienzplan zum Exportieren vorhanden.');
-      return;
-    }
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Resilienzplan-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const blob = renderResiliencePlanPdfBlob(state.resiliencePlan);
-      const fileName = buildResiliencePlanPdfFileName(
-        state.companyProfile.companyName,
-        state.resiliencePlan.version,
-      );
-      triggerFileDownload(blob, fileName);
-    } catch (error) {
-      showNotice('error', `PDF-Export fehlgeschlagen: ${String(error)}`);
-    }
-  }
-
-  function resolveActiveTabletopScenario(): TabletopScenarioDef | null {
-    const session = state.currentTabletopSession;
-    if (!session) {
-      return null;
-    }
-    const pool = [...tabletopBuiltInScenarios, ...state.importedTabletopScenarios];
-    return pool.find((entry) => entry.id === session.scenarioId) ?? null;
-  }
-
-  function handleStartTabletopExercise(scenario: TabletopScenarioDef) {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      const session = createTabletopSessionState({
-        scenario,
-        tenantId: authSession?.tenantId ?? publicTenant?.id ?? 'local',
-      });
-      setState((current) => ({
-        ...current,
-        currentTabletopSession: session,
-        activeView: 'tabletop_exercise',
-      }));
-      setTabletopActiveTab('session');
-    });
-  }
-
-  function handleImportTabletopScenario(scenario: TabletopScenarioDef) {
-    runWithPermission('kritis_edit', 'Für den Szenario-Import fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        const without = current.importedTabletopScenarios.filter((entry) => entry.id !== scenario.id);
-        return { ...current, importedTabletopScenarios: [scenario, ...without] };
-      });
-      showNotice('success', `Szenario „${scenario.title}" importiert.`);
-    });
-  }
-
-  function handleRemoveImportedTabletopScenario(scenarioId: string) {
-    runWithPermission('kritis_edit', 'Für Szenario-Änderungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        importedTabletopScenarios: current.importedTabletopScenarios.filter((entry) => entry.id !== scenarioId),
-      }));
-    });
-  }
-
-  function handleBeginTabletopSession() {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        return {
-          ...current,
-          currentTabletopSession: startTabletopEngineSession(current.currentTabletopSession),
-        };
-      });
-    });
-  }
-
-  function handleAcknowledgeTabletopInject(injectId: string) {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        return {
-          ...current,
-          currentTabletopSession: acknowledgeTabletopInject(current.currentTabletopSession, injectId),
-        };
-      });
-    });
-  }
-
-  function handleRecordTabletopDecision(decisionId: string, optionId: string) {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      const scenario = resolveActiveTabletopScenario();
-      if (!scenario) {
-        return;
-      }
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        try {
-          return {
-            ...current,
-            currentTabletopSession: recordTabletopDecision(
-              current.currentTabletopSession,
-              scenario,
-              decisionId,
-              optionId,
-            ),
-          };
-        } catch (error) {
-          showNotice('error', `Entscheidung konnte nicht erfasst werden: ${String(error)}`);
-          return current;
-        }
-      });
-    });
-  }
-
-  function handleAdvanceTabletopStep() {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      const scenario = resolveActiveTabletopScenario();
-      if (!scenario) {
-        return;
-      }
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        return {
-          ...current,
-          currentTabletopSession: advanceTabletopStep(current.currentTabletopSession, scenario),
-        };
-      });
-    });
-  }
-
-  function handleCompleteTabletopSession() {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      const scenario = resolveActiveTabletopScenario();
-      if (!scenario) {
-        return;
-      }
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        return {
-          ...current,
-          currentTabletopSession: completeTabletopSession(current.currentTabletopSession, scenario),
-        };
-      });
-      setTabletopActiveTab('review');
-      showNotice('success', 'Übung abgeschlossen. Auswertung verfügbar.');
-    });
-  }
-
-  function handleAbandonTabletopSession() {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        const abandoned = abandonTabletopSession(current.currentTabletopSession);
-        return {
-          ...current,
-          currentTabletopSession: null,
-          archivedTabletopSessions: [abandoned, ...current.archivedTabletopSessions],
-        };
-      });
-      setTabletopActiveTab('library');
-    });
-  }
-
-  function handleUpdateTabletopNotes(notes: string) {
-    runWithPermission('kritis_edit', 'Für Tabletop-Übungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        if (!current.currentTabletopSession) {
-          return current;
-        }
-        return {
-          ...current,
-          currentTabletopSession: updateTabletopNotes(current.currentTabletopSession, notes),
-        };
-      });
-    });
-  }
-
-  function handleCreateTabletopEvidenceFromResult() {
-    const session = state.currentTabletopSession;
-    const scenario = resolveActiveTabletopScenario();
-    if (!session || !scenario || !session.result) {
-      showNotice('error', 'Kein Auswertungsergebnis zum Hinterlegen vorhanden.');
-      return;
-    }
-    const verdictLabel = getTabletopVerdictLabel(session.result.verdict);
-    const percent = session.result.percentage.toFixed(1).replace('.', ',');
-    const endedLabel = session.endedAt
-      ? new Date(session.endedAt).toLocaleString('de-DE')
-      : new Date().toLocaleString('de-DE');
-    upsertEvidenceDrafts([
-      createEvidenceDraft(
-        { module: currentModule, tenantPolicy, documentFolders },
-        {
-          title: `Übungsnachweis · ${scenario.title}`,
-          type: 'test',
-          sourceType: 'manual',
-          sourceLabel: `Tabletop-Übung ${scenario.id} (${scenario.version})`,
-          notes:
-            `§ 18 KRITISDachG · Verdict: ${verdictLabel} · ${percent} %. Abgeschlossen am ${endedLabel}.`,
-          tags: ['KRITIS', '§18', 'Tabletop'],
-        },
-      ),
-    ]);
-    showNotice('success', 'Übungsnachweis als Evidenz-Entwurf hinterlegt.');
-  }
-
-  function handleExportTabletopResultJson() {
-    if (!state.currentTabletopSession) {
-      showNotice('error', 'Kein Übungsergebnis zum Exportieren vorhanden.');
-      return;
-    }
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Übungs-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const scenario = resolveActiveTabletopScenario();
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        scenario: scenario
-          ? { id: scenario.id, version: scenario.version, title: scenario.title }
-          : null,
-        session: state.currentTabletopSession,
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const safeCompany = state.companyProfile.companyName.replace(/[^a-zA-Z0-9]+/g, '_') || 'tenant';
-      triggerFileDownload(
-        blob,
-        `tabletop-uebung-${safeCompany}-${state.currentTabletopSession.id}.json`,
-      );
-    } catch (error) {
-      showNotice('error', `JSON-Export fehlgeschlagen: ${String(error)}`);
-    }
-  }
-
-  async function handleExportGapAnalysisDocx() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Angebotsgrundlagen-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const blob = await buildGapAnalysisBlob({
-        companyProfile: state.companyProfile,
-        gapAnalysisSummary,
-        requirements: activeRequirements,
-      });
-      const fileName = buildGapAnalysisFileName(state.companyProfile);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      showNotice('error', `Angebotsgrundlage konnte nicht erzeugt werden: ${String(error)}`);
-    }
-  }
+  // triggerFileDownload wurde in C2.11a nach src/shared/download.ts
+  // ausgelagert und wird dort von den neuen Feature-Hooks
+  // (resiliencePlan/tabletopExercise/gap) direkt konsumiert.
+  //
+  // Die 9 resiliencePlan-Handler (Generator, Workflow, Exports) sind
+  // jetzt in src/features/resiliencePlan/hooks/useResiliencePlanHandlers.ts.
+  // Die 12 tabletopExercise-Handler plus der frueher hier lebende
+  // resolveActiveTabletopScenario-Helper (jetzt als Pure-Function
+  // resolveActiveScenario in features/tabletopExercise/engine.ts) sind
+  // in src/features/tabletopExercise/hooks/useTabletopExerciseHandlers.ts.
+  // Der 1 gap-Handler ist in src/features/gap/hooks/useGapHandlers.ts.
+  // Hook-Call + Destructuring liegt weiter unten bei den anderen
+  // Feature-Hooks.
 
   const moduleOptions = effectiveModuleCatalog.map((module) => ({
     id: module.id,
@@ -2354,7 +2004,11 @@ export default function App() {
     tabletopBuiltInScenarios,
     tabletopImportedScenarios: state.importedTabletopScenarios,
     currentTabletopSession: state.currentTabletopSession,
-    activeTabletopScenario: resolveActiveTabletopScenario(),
+    activeTabletopScenario: resolveActiveScenario(
+      state.currentTabletopSession,
+      state.importedTabletopScenarios,
+      tabletopBuiltInScenarios,
+    ),
     archivedTabletopSessions: state.archivedTabletopSessions,
     canEditTabletopExercise: hasPermission('kritis_edit'),
     canExportTabletopExercise: hasPermission('reports_export'),

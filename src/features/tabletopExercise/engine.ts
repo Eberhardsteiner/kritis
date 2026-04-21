@@ -72,6 +72,28 @@ export function getStepByIndex(scenario: Scenario, index: number): TimelineStep 
   return scenario.timeline[index];
 }
 
+/**
+ * Pure-Helper: ermittelt aus einer Session + dem Pool
+ * (built-in + imported) das aktuelle Szenario. Gibt `null` zurueck,
+ * wenn keine Session aktiv oder das Scenario im Pool nicht mehr
+ * auffindbar ist.
+ *
+ * Seit C2.11a aus der App.tsx-inlined `resolveActiveTabletopScenario`-
+ * Funktion extrahiert; wird sowohl vom Hook (intern) als auch von
+ * App.tsx (Props-Building) konsumiert.
+ */
+export function resolveActiveScenario(
+  session: ExerciseSession | null,
+  importedScenarios: Scenario[],
+  builtInPool: Scenario[],
+): Scenario | null {
+  if (!session) {
+    return null;
+  }
+  const pool = [...builtInPool, ...importedScenarios];
+  return pool.find((entry) => entry.id === session.scenarioId) ?? null;
+}
+
 export function getCurrentStep(session: ExerciseSession, scenario: Scenario): TimelineStep | undefined {
   return getStepByIndex(scenario, session.currentStepIndex);
 }
