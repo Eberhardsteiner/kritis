@@ -8,10 +8,6 @@ import { buildActiveViewPanelProps } from './lib/buildActiveViewPanelProps';
 import { buildProjectTopbarProps } from './lib/buildProjectTopbarProps';
 import {
   exportAssessmentAsJson,
-  exportAuditPackAsPdf,
-  exportFormalAuditReportAsHtml,
-  exportManagementReportAsMarkdown,
-  exportManagementReportAsPdf,
 } from './lib/exporters';
 import {
   builtInModuleContainers,
@@ -52,6 +48,7 @@ import {
   useProgramRolloutHandlers,
 } from './features/programRollout';
 import { useRegulatoryHandlers } from './features/regulatory';
+import { useReportingHandlers } from './features/reporting';
 import { useRiskCatalogHandlers } from './features/riskCatalog';
 import { useAssessmentHandlers } from './features/assessment';
 import {
@@ -1199,6 +1196,46 @@ export default function App() {
     hasPermission,
   });
 
+  const {
+    handleExportMarkdown,
+    handleExportFormalHtml,
+    handleExportManagementPdf,
+    handleExportAuditPdf,
+  } = useReportingHandlers({
+    // Kern (FeatureHandlerDependencies; setState + runWithPermission
+    // werden in reporting bewusst NICHT genutzt — alle 4 Handler sind
+    // read-only und gate'n ueber hasPermission)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Permission-Gate
+    hasPermission,
+    // Fach-Kontext (aus useAppDerivedState)
+    currentModule,
+    regulatoryProfile,
+    regimeSummaries,
+    kritisApplicability,
+    activeRequirements,
+    // Scope-gefilterte Listen
+    currentActionItems,
+    currentEvidenceItems,
+    currentStakeholders,
+    currentSites,
+    currentFindings,
+    // Abgeleitete Summaries
+    scoreSnapshot,
+    benchmarkSnapshot,
+    requirementProgress,
+    evidenceSummary,
+    governanceSummary,
+    checklistProgress,
+    findingSummary,
+    certificationProgress,
+    documentLibrarySummary,
+    deadlineSummary,
+  });
+
   // Die 3 Regulatorik-Profil-Handler (updateRegulatoryProfileField,
   // updateJurisdiction, updateRegimeScope), die 3 Certification/
   // Checklist-Handler (updateCertificationField, updateCertificationStage,
@@ -1616,108 +1653,11 @@ export default function App() {
     });
   }
 
-  function handleExportMarkdown() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Report-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    exportManagementReportAsMarkdown({
-      companyProfile: state.companyProfile,
-      regulatoryProfile,
-      regimeSummaries,
-      module: currentModule,
-      scoreSnapshot,
-      applicability: kritisApplicability,
-      requirementProgress,
-      requirements: activeRequirements,
-      requirementStates: state.requirementStates,
-      actionItems: currentActionItems,
-      evidenceSummary,
-      stakeholders: currentStakeholders,
-      sites: currentSites,
-      reviewPlan: state.reviewPlan,
-      benchmark: benchmarkSnapshot,
-      governanceSummary,
-      checklistProgress,
-      findingSummary,
-      certificationState: state.certificationState,
-      certificationProgress,
-      documentLibrarySummary,
-      deadlineSummary,
-    });
-  }
-
-  function handleExportFormalHtml() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für formale Auditberichte fehlt das Recht reports_export.');
-      return;
-    }
-    exportFormalAuditReportAsHtml({
-      companyProfile: state.companyProfile,
-      module: currentModule,
-      scoreSnapshot,
-      applicability: kritisApplicability,
-      benchmark: benchmarkSnapshot,
-      governanceSummary,
-      requirementProgress,
-      regulatoryProfile,
-      regimeSummaries,
-      checklistProgress,
-      findingSummary,
-      evidenceSummary,
-      certificationProgress,
-      stakeholders: currentStakeholders,
-      sites: currentSites,
-      findings: currentFindings,
-      documentLibrarySummary,
-      deadlineSummary,
-    });
-  }
-
-  function handleExportManagementPdf() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Management-PDFs fehlt das Recht reports_export.');
-      return;
-    }
-    exportManagementReportAsPdf({
-      companyProfile: state.companyProfile,
-      module: currentModule,
-      scoreSnapshot,
-      benchmark: benchmarkSnapshot,
-      applicability: kritisApplicability,
-      requirementProgress,
-      regulatoryProfile,
-      regimeSummaries,
-      evidenceSummary,
-      governanceSummary,
-      certificationProgress,
-      actionItems: currentActionItems,
-      documentLibrarySummary,
-      deadlineSummary,
-    });
-  }
-
-  function handleExportAuditPdf() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Audit-PDFs fehlt das Recht reports_export.');
-      return;
-    }
-    exportAuditPackAsPdf({
-      companyProfile: state.companyProfile,
-      module: currentModule,
-      reviewPlan: state.reviewPlan,
-      complianceCalendar: state.complianceCalendar,
-      regulatoryProfile,
-      regimeSummaries,
-      requirements: activeRequirements,
-      requirementStates: state.requirementStates,
-      checklistProgress,
-      findingSummary,
-      findings: currentFindings,
-      evidenceItems: currentEvidenceItems,
-      deadlineSummary,
-    });
-  }
+  // handleExportMarkdown, handleExportFormalHtml, handleExportManagementPdf,
+  // handleExportAuditPdf wurden in C2.10 nach
+  // src/features/reporting/hooks/useReportingHandlers.ts ausgelagert.
+  // Hook-Call + Destructuring liegt weiter unten bei den anderen
+  // Feature-Hooks.
 
   // handleSaveRiskEntry, handleDeleteRiskEntry,
   // handleExportRiskEntriesJson, handleExportRiskAnalysisDocx wurden in

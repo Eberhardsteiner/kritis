@@ -63,7 +63,28 @@ Ergänzt mit den jeweiligen Extraktionen:
 | ~~C2.7d · User-Management (ControlView)~~ | ✅ erledigt — 5 User-Handler + `updateComplianceCalendar` (Transient) + `inferRoleProfileFromStakeholder` + ControlView + UserCard im `features/platform`-Slice. E2E 16 ergänzt. App.tsx -119 Z. |
 | ~~C2.8 · programRollout~~ | ✅ erledigt — ProgramView + RolloutView + 13 Handler + 4 Normalizer + `defaultRolloutPlan` im `features/programRollout`-Slice. Cross-Feature-Read-Befund: KritisView und ReportView lesen **keinen** programRollout-State direkt, sodass C2.9 durch C2.8 entkoppelt bleibt. App.tsx -428 Z. |
 | ~~C2.9 · regulatory + riskCatalog~~ | ✅ erledigt — 11 regulatory-Handler (inkl. `updateComplianceCalendar`-Migration) + 4 riskCatalog-Handler + Pure-Helper `clearEvidenceRefsFromFindings` fuer atomare Cross-Feature-Evidence-Delete-Kaskade. `regulatoryProfile` als Top-Context-Kandidat markiert (20+ Leser). KritisView bleibt in `src/views/` bis C4b — dokumentiert in features/regulatory/index.ts und BLOCK-C.md-Meta-Review. App.tsx -200 Z. |
-| C2.10 · reporting | ReportView-Querschnitts-Reads |
+| ~~C2.10 · reporting~~ | ✅ erledigt — 4 Export-Handler (Management-Report Markdown/PDF, Formaler Audit-Bericht HTML, Audit-Pack PDF) als `features/reporting/hooks/useReportingHandlers`. Lib-Exporter und ReportView bleiben wo sie sind (Multi-Consumer bzw. Querschnittsdaten). App.tsx -60 Z. Wichtige Architektur-Erkenntnis siehe unten. |
+
+## Architektur-Erkenntnis aus C2.10: Context-Einführung über `useAppDerivedState`-Return
+
+Bei der Extraktion des reporting-Slices (C2.10) hat sich gezeigt, dass **18 von 22** Read-Props der ReportView aus `useAppDerivedState` kommen; nur 4 Felder werden direkt aus `state.*` gelesen (`companyProfile`, `requirementStates`, `certificationState`, `reviewPlan`). Kein einziger Read läuft über eine Feature-Public-API (`features/X/index.ts`).
+
+Das ist die wichtigste Vorbereitungs-Erkenntnis für **C2.11**:
+
+- **`useAppDerivedState` ist der de-facto State-Access-Layer der App.** Jede View, die mehr als ein oder zwei Felder braucht, konsumiert ihn bereits.
+- Für C2.11 bedeutet das: Der natürliche **Context-Provider** ist nicht das rohe `state`-Objekt, sondern **das Return-Objekt von `useAppDerivedState`**. Damit wandern in einem Zug:
+  - 30+ abgeleitete Summaries (regimeSummaries, scoreSnapshot, benchmark, governanceSummary, certificationProgress, checklistProgress, findingSummary, evidenceSummary, documentLibrarySummary, deadlineSummary, kritisMilestones, kritisPenaltyEstimate, kritisApplicability, authorityAssignmentsByRegime, gapAnalysisSummary, requirementProgress, …)
+  - 8 Scope-gefilterte Listen (currentActionItems, currentEvidenceItems, currentStakeholders, currentSites, currentFindings, currentBusinessProcesses, currentDependencies, currentScenarios, currentExercises, currentHardeningChecks, currentRunbooks, currentReleaseGates)
+  - Der normalisierte `regulatoryProfile`
+  - `currentModule` und `activeUser`
+- **Nicht im Context**: rohe `state.*`-Primitives, die nur ein einzelner Handler schreibt (z. B. `state.answers` schreibt nur der assessment-Hook). Diese bleiben als direkte `state`-Reads im Hook-Call.
+
+Damit reduziert sich die Dep-Liste **jeder** bisherigen Feature-Hook drastisch:
+- `ReportingHandlerDependencies`: 22 Felder → ~5 Felder (nur state-Primitives + hasPermission + showNotice)
+- `PlatformSystemHandlerDependencies`: 35 Felder → ~12 Felder
+- `EvidenceHandlerDependencies`: 23 Felder → ~10 Felder
+
+**C2.11 Implementierungs-Leitbild**: `<AppDerivedStateProvider>` umschließt die Feature-Hooks; `useAppDerivedState()` wird zum Hook, den jeder Feature-Hook intern aufruft statt 20 Felder via Props zu bekommen. Die App.tsx-Bulk-Last kommt dann von State-Hydration (buildAppStateFromLoaded), useEffect-Bootstrap-Kette und den verbliebenen workspace-globalen Utilities (handleExportJson, selectModule, updateProfileField), nicht mehr von Handler-Hook-Dep-Verdrahtung.
 
 ## Verbundene Entscheidungen
 
