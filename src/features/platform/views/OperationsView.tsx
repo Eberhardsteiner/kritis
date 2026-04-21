@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   ShieldEllipsis,
 } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
+import { StatCard } from '../../../components/StatCard';
 import type {
   ApiClientScope,
   ApiClientSummary,
@@ -32,7 +32,7 @@ import type {
   ServerHealth,
   SystemSettings,
   TenantSummary,
-} from '../types';
+} from '../../../types';
 
 interface OperationsViewProps {
   serverMode: 'checking' | 'connected' | 'syncing' | 'offline' | 'error' | 'auth_required';

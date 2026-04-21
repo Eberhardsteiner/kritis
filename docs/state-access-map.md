@@ -40,7 +40,8 @@ Hook-Deps weitergereicht bleiben.
 | `availableTenants`, `accessAccounts`, `publicTenant`, `authProviders`, `authMode`, `serverAuthRequired` | platform-auth-Hook (Bootstrap-/Login-Updates) | PlatformView (Login-Form + Tenant-Switch) | nein — feature-intern |
 | `serverHealth` | App-Shell-Bootstrap (`refreshServerSideData`) | PlatformView, OperationsView (Health-Status), ProjectTopbar | nein |
 | `auditLogEntries`, `snapshots` | platform-auth-Hook + Snapshot-Handler | PlatformView | nein — feature-intern |
-| `apiClients`, `systemJobs`, `hostingReadiness`, `integritySummary`, `securityGateSummary`, `observabilitySummary`, `restoreDrills`, `systemSettings`, `issuedClientSecret` | C2.7c Platform-System-Hook | OperationsView (System-Dashboard) | nein — feature-intern zu platform-System |
+| `apiClients`, `systemJobs`, `integritySummary`, `systemSettings`, `issuedClientSecret`, `availableTenants` | platform-system-Hook (C2.7c) | OperationsView (System-Dashboard) | nein — feature-intern zu platform-System |
+| `hostingReadiness`, `securityGateSummary`, `observabilitySummary`, `restoreDrills` | App-Shell `refreshServerSideData` | OperationsView (Read-Only-Panels) | nein — nur Leser, kein Schreiber ausserhalb App-Shell |
 | `moduleRegistryEntries` | platform-auth-Hook (Login-Reset), Module-Handler | ModulesView, PlatformView | nein |
 
 ## Noch offene Feature-Inventare
@@ -49,7 +50,7 @@ Ergänzt mit den jeweiligen Extraktionen:
 
 | Iteration | Was ergänzt wird |
 |---|---|
-| C2.7c · Platform-System (OperationsView) | System-State-Reads der Operations-Domain (apiClients, systemJobs etc.) + Server-Sync-Push-Loop-Abhängigkeiten |
+| ~~C2.7c · Platform-System (OperationsView)~~ | ✅ erledigt — `pushStateToServer`, useEffect #4, 20 System-Handler, OperationsView im `features/platform`-Slice. App.tsx -465 Z. |
 | C2.7d · User-Management (ControlView) | User-State-Reads aus ControlView + der 5 User-Handler |
 | C2.8 · programRollout | ProgramView/RolloutView-Zugriffe auf `exportPackages`, `tenantPolicy`, `serverMode` |
 | C2.9 · regulatory | KritisView-Zugriffe auf `tenantPolicy`, `authToken`, `authSession`, Bußgeldrechner-Datenflüsse |
@@ -63,4 +64,12 @@ Ergänzt mit den jeweiligen Extraktionen:
   heute disziplinieren.
 - **Hook-Deps-Reduktion**: Jeder Context-Wechsel reduziert die
   Dependency-Liste des entsprechenden Feature-Hooks. `EvidenceHandlerDependencies`
-  (23 Felder) ist der stärkste Indikator — ~8 Felder wandern in Context.
+  (23 Felder) und `PlatformSystemHandlerDependencies` (35 Felder) sind
+  die stärksten Indikatoren — ~10 Felder wandern in Context.
+- **Server-Sync-Push-Loop-Invarianten**: Der Debounce-useEffect mit
+  seinen fünf Schutzregeln (Suppress-Flag, lastSyncedPayloadRef,
+  401-Immediacy, 409-No-setState, stabiles Dep-Array) liegt seit C2.7c
+  als dokumentierter Kommentarblock im Kopf von
+  `src/features/platform/hooks/usePlatformSystemHandlers.ts`.
+  Bei einem späteren Context-Umbau für `authToken`/`serverMode` muss
+  dieser Block zuerst erneut geprüft werden.

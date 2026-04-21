@@ -201,7 +201,11 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
 4. ✅ `evidence/` (mittel) – Commit `a2704ae6` (C2.4).
 5. ✅ `operations/` (mittel-groß) – Commit `80c8dbf2` (C2.5).
 6. ✅ `assessment/` (klein) – C2.6.
-7. `platform/` (groß, ~2.000 LoC in App.tsx, 24 useState, 15 Handler) – bewusst nach hinten verschoben, damit das Muster zum Extraktionszeitpunkt fest sitzt und der hohe Blast Radius abgefedert ist.
+7. 🔄 `platform/` – vier Sub-Iterationen C2.7a–d:
+   - ✅ C2.7a: Pure-Transforms `serverPayload` + `authCallback`.
+   - ✅ C2.7b: Auth-/Session-Handler + PlatformView + User-Sync-useEffect. Commit `49639862`. E2E 15 ergänzt (Commit `189447e6`).
+   - ✅ C2.7c: OperationsView (1:1 Umzug, C4b-Kandidat für 6-Panel-Split) + `pushStateToServer` + useEffect #4 (Server-Sync-Push-Loop) + 20 System-Ops-Handler. Fünf Push-Loop-Invarianten als Top-of-File-Kommentar in `usePlatformSystemHandlers.ts`. App.tsx -465 Z.
+   - C2.7d: ControlView + UserCard + 5 User-Handler.
 8. `programRollout/` (mittel) – ProgramView, RolloutView, Sprints, Zertifizierungsdossier.
 9. `regulatory/` (komplex) – das verflechtetste Feature mit Regime-/Jurisdiktions-Zuständen, die fast jedes andere Feature liest. Erst extrahierbar, wenn die anderen Features ihren Zustand sauber konsumieren.
 10. `reporting/` (Querschnitt) – Management-Report zieht Daten aus Regulatorik, Gap-Analyse, Risiken und Evidenzen zusammen. Extraktion macht erst Sinn, wenn alle Quell-Features sauber strukturiert sind.
