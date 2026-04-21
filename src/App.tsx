@@ -55,6 +55,7 @@ import {
   clearAuthCallbackSearch,
   readAuthCallbackSearch,
 } from './features/platform/authCallback';
+import { usePlatformAuthHandlers } from './features/platform';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -758,39 +759,6 @@ export default function App() {
     setServerStateUpdatedAt(updatedAt ? String(updatedAt) : '');
   }
 
-  function clearAuthenticatedContext(message = 'Server erreichbar. Bitte anmelden, um Synchronisierung und Versionierung zu nutzen.') {
-    clearAuthToken();
-    setAuthToken('');
-    setAuthSession(null);
-    setAccessAccounts([]);
-    setApiClients([]);
-    setSystemJobs([]);
-    setModuleRegistryEntries([]);
-    setIntegritySummary(null);
-    setSecurityGateSummary(null);
-    setObservabilitySummary(null);
-    setRestoreDrills([]);
-    setIssuedClientSecret(null);
-    setLastServerSyncAt('');
-    updateServerStateMarkers(null, '');
-    setSyncError(message);
-
-    if (serverAuthRequired) {
-      setAuditLogEntries([]);
-      setSnapshots([]);
-      setExportPackages([]);
-      setDocumentLedger(null);
-      setTenantPolicy(defaultTenantPolicy);
-      setEvidenceVersionMap({});
-      setServerMode('auth_required');
-      return;
-    }
-
-    setServerMode('checking');
-    void loadStateFromServer();
-  }
-
-
   async function fetchAdminServerDetails(token = authToken, isSystemAdmin = authSession?.isSystemAdmin ?? false): Promise<void> {
     if (!token || !isSystemAdmin) {
       setSystemSettings(defaultSystemSettings);
@@ -1093,139 +1061,6 @@ export default function App() {
     }
   }
 
-  async function handleServerLogin(email: string, password: string, tenantId: string) {
-    if (!email.trim() || !password.trim() || !tenantId.trim()) {
-      showNotice('error', 'Bitte E-Mail, Passwort und Mandant auswählen.');
-      return;
-    }
-
-    try {
-      setServerMode('checking');
-      const response = await loginToServer(email, password, tenantId);
-      const nextToken = response.session.token || '';
-      saveAuthToken(nextToken);
-      setAuthToken(nextToken);
-      setAuthSession(response.session);
-      const hydrated = applyRemoteState(response.state ?? {}, state, response.session, response.workspaceUserSeed);
-      suppressNextServerSyncRef.current = true;
-      setState(hydrated);
-      lastSyncedPayloadRef.current = serializeServerPayload(hydrated);
-      setLastServerLoadAt(new Date().toISOString());
-      updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
-      setSyncError('');
-      setServerMode('connected');
-      serverInitializedRef.current = true;
-      await refreshServerSideData(response.session.token, response.session);
-      showNotice('success', `Anmeldung für Mandant „${response.session.tenantName}“ erfolgreich.`);
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      const message = error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen.';
-      setServerMode(serverAuthRequired ? 'auth_required' : 'connected');
-      setSyncError(message);
-      showNotice('error', message, details);
-    }
-  }
-
-  async function handleStartOidcLogin(tenantId: string) {
-    if (!tenantId.trim()) {
-      showNotice('error', 'Bitte zuerst einen Mandanten für die SSO-Anmeldung auswählen.');
-      return;
-    }
-
-    try {
-      setServerMode('checking');
-      const response = await startOidcLogin(tenantId);
-      window.location.assign(response.redirectUrl);
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      const message = error instanceof Error ? error.message : 'SSO-Anmeldung konnte nicht gestartet werden.';
-      setServerMode(serverAuthRequired ? 'auth_required' : 'connected');
-      setSyncError(message);
-      showNotice('error', message, details);
-    }
-  }
-
-  async function handleServerLogout() {
-    const token = authToken;
-    if (token) {
-      try {
-        await logoutFromServer(token);
-      } catch {
-        // logout should still clear local session state
-      }
-    }
-
-    clearAuthenticatedContext('Server erreichbar. Der offene Arbeitsbereich ist wieder aktiv.');
-    showNotice('success', 'Serversitzung wurde beendet. Der offene Arbeitsbereich bleibt nutzbar.');
-  }
-
-  async function handleCreateTenantOnServer(payload: {
-    name: string;
-    slug: string;
-    industryLabel: string;
-    adminName: string;
-    adminEmail: string;
-    adminPassword: string;
-  }) {
-    if (!authToken) {
-      showNotice('error', 'Für neue Mandanten ist eine aktive Serversitzung erforderlich.');
-      return;
-    }
-
-    try {
-      const response = await createTenant(authToken, payload);
-      await refreshServerSideData(authToken || '', authSession);
-      showNotice('success', `Mandant „${response.tenant.name}“ wurde angelegt.`);
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      showNotice('error', error instanceof Error ? error.message : 'Mandant konnte nicht angelegt werden.', details);
-    }
-  }
-
-  async function handleUpsertAccessAccount(payload: {
-    tenantId?: string;
-    name: string;
-    email: string;
-    password: string;
-    roleProfile: UserRoleProfile;
-    authSource?: 'local' | 'oidc' | 'hybrid';
-    status?: UserStatus;
-    scope?: string;
-    workspaceUserId?: string;
-  }) {
-    if (!authToken) {
-      showNotice('error', 'Für Zugriffskonten ist eine aktive Serversitzung erforderlich.');
-      return;
-    }
-
-    try {
-      const response = await upsertAccessAccount(authToken, payload);
-      setAccessAccounts((current) => [
-        response.account,
-        ...current.filter((entry) => entry.id !== response.account.id),
-      ]);
-      await refreshServerSideData(authToken || '', authSession);
-      showNotice('success', `Zugriffskonto „${response.account.email}“ wurde gespeichert.`);
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      showNotice('error', error instanceof Error ? error.message : 'Zugriffskonto konnte nicht gespeichert werden.', details);
-    }
-  }
-
-  async function handleResetAccessAccountPassword(accountId: string, password: string) {
-    if (!authToken) {
-      showNotice('error', 'Für Passwortänderungen ist eine aktive Serversitzung erforderlich.');
-      return;
-    }
-
-    try {
-      await resetAccessAccountPassword(authToken, accountId, password);
-      showNotice('success', 'Passwort wurde zurückgesetzt.');
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      showNotice('error', error instanceof Error ? error.message : 'Passwort konnte nicht zurückgesetzt werden.', details);
-    }
-  }
 
   async function pushStateToServer(nextState: AppState, reason?: string): Promise<void> {
     if (serverAuthRequired && !authToken) {
@@ -1409,40 +1244,6 @@ export default function App() {
     }
   }, [state.selectedModuleId, effectiveModuleCatalog]);
 
-  useEffect(() => {
-    if (!state.users.length) {
-      const fallbackUsers = normalizeLoadedUsers([]);
-      setState((current) => ({
-        ...current,
-        users: fallbackUsers,
-        activeUserId: fallbackUsers[0]?.id ?? '',
-      }));
-      return;
-    }
-
-    if (authSession) {
-      if (!state.users.some((item) => item.id === authSession.userId)) {
-        setState((current) => mergeServerUserIntoState(current, authSession));
-        return;
-      }
-
-      if (state.activeUserId !== authSession.userId) {
-        setState((current) => ({
-          ...current,
-          activeUserId: authSession.userId,
-        }));
-      }
-      return;
-    }
-
-    if (!state.users.some((item) => item.id === state.activeUserId)) {
-      setState((current) => ({
-        ...current,
-        activeUserId: current.users[0]?.id ?? '',
-      }));
-    }
-  }, [state.users, state.activeUserId, authSession]);
-
   function setActiveView(activeView: AppState['activeView']) {
     setState((current) => ({ ...current, activeView }));
   }
@@ -1468,6 +1269,64 @@ export default function App() {
     setState,
     runWithPermission,
     showNotice,
+  });
+
+  const {
+    handleServerLogin,
+    handleStartOidcLogin,
+    handleServerLogout,
+    handleCreateTenantOnServer,
+    handleUpsertAccessAccount,
+    handleResetAccessAccountPassword,
+    handleUpdateTenantPolicy,
+    clearAuthenticatedContext,
+  } = usePlatformAuthHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Auth-/Session-State
+    authToken,
+    setAuthToken,
+    authSession,
+    setAuthSession,
+    setAccessAccounts,
+    hasPermission,
+    // Server-Connection-State
+    serverMode,
+    setServerMode,
+    serverAuthRequired,
+    setSyncError,
+    setLastServerLoadAt,
+    setLastServerSyncAt,
+    // Cross-Feature-Setter (Login/Logout-Aufraeumung)
+    setAuditLogEntries,
+    setSnapshots,
+    setExportPackages,
+    setDocumentLedger,
+    setEvidenceRetentionSummary,
+    setEvidenceVersionMap,
+    setApiClients,
+    setSystemJobs,
+    setModuleRegistryEntries,
+    setIntegritySummary,
+    setSecurityGateSummary,
+    setObservabilitySummary,
+    setRestoreDrills,
+    setIssuedClientSecret,
+    defaultTenantPolicy,
+    setTenantPolicy,
+    // Refs + Callbacks
+    serverInitializedRef,
+    suppressNextServerSyncRef,
+    lastSyncedPayloadRef,
+    updateServerStateMarkers,
+    loadStateFromServer,
+    refreshServerSideData,
+    applyRemoteState,
+    normalizeLoadedUsers,
+    extractErrorDetails,
   });
 
   function updateComplianceCalendar(field: keyof ComplianceCalendar, value: string) {
@@ -2726,28 +2585,6 @@ export default function App() {
     } catch (error) {
       const details = extractErrorDetails(error);
       const message = error instanceof Error ? error.message : 'Exportfreigabe fehlgeschlagen.';
-      showNotice('error', message, details);
-    }
-  }
-
-  async function handleUpdateTenantPolicy(patch: Partial<TenantPolicy>) {
-    if (!hasPermission('workspace_edit')) {
-      showNotice('error', 'Für Mandantenrichtlinien fehlt das Recht workspace_edit.');
-      return;
-    }
-
-    if (!(serverMode === 'connected' || serverMode === 'syncing')) {
-      showNotice('error', 'Der Server muss für Mandantenrichtlinien erreichbar sein.');
-      return;
-    }
-
-    try {
-      const response = await updateTenantSettings(authToken || '', patch);
-      setTenantPolicy(response.settings);
-      showNotice('success', 'Mandantenrichtlinien wurden aktualisiert.');
-    } catch (error) {
-      const details = extractErrorDetails(error);
-      const message = error instanceof Error ? error.message : 'Mandantenrichtlinien konnten nicht gespeichert werden.';
       showNotice('error', message, details);
     }
   }

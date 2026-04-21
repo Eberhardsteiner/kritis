@@ -8,7 +8,7 @@ import type * as KritisViewModule from '../views/KritisView';
 import type * as MeasuresViewModule from '../features/measures/views/MeasuresView';
 import type * as ModulesViewModule from '../views/ModulesView';
 import type * as OperationsViewModule from '../views/OperationsView';
-import type * as PlatformViewModule from '../views/PlatformView';
+import type * as PlatformViewModule from '../features/platform/views/PlatformView';
 import type * as ProgramViewModule from '../views/ProgramView';
 import type * as ReportViewModule from '../views/ReportView';
 import type * as ResilienceViewModule from '../features/operations/views/ResilienceView';
@@ -24,7 +24,7 @@ const KritisView = lazy(async () => ({ default: (await import('../views/KritisVi
 const MeasuresView = lazy(async () => ({ default: (await import('../features/measures')).MeasuresView }));
 const ModulesView = lazy(async () => ({ default: (await import('../views/ModulesView')).ModulesView }));
 const OperationsView = lazy(async () => ({ default: (await import('../views/OperationsView')).OperationsView }));
-const PlatformView = lazy(async () => ({ default: (await import('../views/PlatformView')).PlatformView }));
+const PlatformView = lazy(async () => ({ default: (await import('../features/platform')).PlatformView }));
 const ProgramView = lazy(async () => ({ default: (await import('../views/ProgramView')).ProgramView }));
 const ReportView = lazy(async () => ({ default: (await import('../views/ReportView')).ReportView }));
 const ResilienceView = lazy(async () => ({ default: (await import('../features/operations')).ResilienceView }));

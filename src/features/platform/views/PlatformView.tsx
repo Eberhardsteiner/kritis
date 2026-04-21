@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Users2,
 } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
+import { StatCard } from '../../../components/StatCard';
 import type {
   AccessAccountSummary,
   AccessProfileDefinition,
@@ -31,7 +31,7 @@ import type {
   TenantSummary,
   UserItem,
   UserRoleProfile,
-} from '../types';
+} from '../../../types';
 
 interface PlatformViewProps {
   serverMode: 'checking' | 'connected' | 'syncing' | 'offline' | 'error' | 'auth_required';
