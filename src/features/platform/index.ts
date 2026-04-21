@@ -68,7 +68,6 @@ export {
 
 export {
   usePlatformControlHandlers,
-  type PlatformControlHandlerDependencies,
   type PlatformControlHandlers,
 } from './hooks/usePlatformControlHandlers';
 

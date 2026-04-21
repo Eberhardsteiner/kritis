@@ -48,7 +48,6 @@
 
 export {
   useRegulatoryHandlers,
-  type RegulatoryHandlerDependencies,
   type RegulatoryHandlers,
 } from './hooks/useRegulatoryHandlers';
 

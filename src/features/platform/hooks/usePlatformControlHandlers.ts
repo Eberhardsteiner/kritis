@@ -17,8 +17,7 @@
  * Prop-Quelle wechselt nur.
  */
 import { useCallback, useMemo } from 'react';
-import type { AuthSession, SectorModuleDefinition, UserItem } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
+import type { UserItem } from '../../../types';
 import { createId } from '../../../shared/ids';
 import {
   inferRoleProfileFromStakeholder,
@@ -26,19 +25,8 @@ import {
   normalizeUserRoleProfile,
   normalizeUserStatus,
 } from '../userNormalization';
-
-export interface PlatformControlHandlerDependencies extends FeatureHandlerDependencies {
-  // === Auth-/Session-Read-State =============================================
-  authSession: AuthSession | null;
-
-  // === Fach-Kontext =========================================================
-  currentModule: SectorModuleDefinition;
-
-  // Pure-Helper (normalizeLoadedUsers/normalizeUserRoleProfile/
-  //  normalizeUserStatus) wurden in C2.11b aus dem Dep-Durchgriff
-  //  entfernt — der Hook importiert jetzt direkt aus
-  //  ../userNormalization.
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface PlatformControlHandlers {
   selectActiveUser: (userId: string) => void;
@@ -48,16 +36,13 @@ export interface PlatformControlHandlers {
   handleDeleteUser: (userId: string) => void;
 }
 
-export function usePlatformControlHandlers(
-  deps: PlatformControlHandlerDependencies,
-): PlatformControlHandlers {
-  const {
-    setState,
-    runWithPermission,
-    showNotice,
-    authSession,
-    currentModule,
-  } = deps;
+/**
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
+ */
+export function usePlatformControlHandlers(): PlatformControlHandlers {
+  const { setState, runWithPermission, showNotice, authSession } = useWorkspaceState();
+  const { currentModule } = useAppDerivedState();
 
   // =========================================================================
   // Nutzer-Auswahl (gesperrt bei aktiver Serversitzung — activeUserId wird

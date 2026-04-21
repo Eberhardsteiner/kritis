@@ -19,23 +19,9 @@
  * Download-Routine leise zu schlucken. 1:1-Pattern aus App.tsx.
  */
 import { useCallback, useMemo } from 'react';
-import type { CompanyProfile, PermissionKey } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import type { RiskEntry } from '../types';
 import { buildRiskAnalysisBlob, buildRiskAnalysisFileName } from '../export/riskAnalysisDocx';
-
-export interface RiskCatalogHandlerDependencies extends FeatureHandlerDependencies {
-  // === Fach-Kontext =========================================================
-  // companyProfile wird nur fuer Datei-Namen und DOCX-Titel gelesen
-  // (Read-Only). Kein Cross-Feature-Write.
-  companyProfile: CompanyProfile;
-
-  // === Permission-Gate =======================================================
-  // Zwei Export-Handler brauchen einen expliziten hasPermission-Check
-  // (statt runWithPermission), weil sie kein setState machen — sie
-  // erzeugen Blobs und triggern Downloads. 1:1 aus App.tsx.
-  hasPermission: (permission: PermissionKey) => boolean;
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
 
 export interface RiskCatalogHandlers {
   handleSaveRiskEntry: (entry: RiskEntry) => void;
@@ -44,10 +30,12 @@ export interface RiskCatalogHandlers {
   handleExportRiskAnalysisDocx: () => Promise<void>;
 }
 
-export function useRiskCatalogHandlers(
-  deps: RiskCatalogHandlerDependencies,
-): RiskCatalogHandlers {
-  const { state, setState, runWithPermission, showNotice, companyProfile, hasPermission } = deps;
+/**
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via useWorkspaceState().
+ */
+export function useRiskCatalogHandlers(): RiskCatalogHandlers {
+  const { state, setState, runWithPermission, showNotice, hasPermission } = useWorkspaceState();
+  const companyProfile = state.companyProfile;
 
   // =========================================================================
   // Upsert + Delete

@@ -5,47 +5,26 @@
  *   - handleExportGapAnalysisDocx (async, delegiert an
  *     buildGapAnalysisBlob aus features/gap)
  *
- * Extrahiert in C2.11a als drittes und kleinstes Feature. Wie reporting
- * (C2.10) ist gap ein **read-only-Feature**: setState und
- * runWithPermission aus FeatureHandlerDependencies werden bewusst
- * NICHT genutzt — Gate laeuft ueber hasPermission('reports_export').
+ * Extrahiert in C2.11a. Wie reporting ist gap ein read-only-Feature —
+ * Gate laeuft ueber hasPermission('reports_export').
  *
- * Nutzt triggerFileDownload aus src/shared/download.ts anstelle der
- * frueheren Inline-Duplicate des Download-Codes in App.tsx (byte-
- * identisch; Konsolidierung als Teil der C2.11a-Extraktion).
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
  */
 import { useCallback, useMemo } from 'react';
-import type {
-  CompanyProfile,
-  GapAnalysisSummary,
-  PermissionKey,
-  RequirementDefinition,
-} from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { triggerFileDownload } from '../../../shared/download';
 import { buildGapAnalysisBlob, buildGapAnalysisFileName } from '../export/gapAnalysisDocx';
-
-export interface GapHandlerDependencies extends FeatureHandlerDependencies {
-  // === Permission-Gate =======================================================
-  // setState und runWithPermission aus FeatureHandlerDependencies werden in
-  // diesem Hook bewusst NICHT genutzt — gap ist read-only, analog zum
-  // reporting-Feature (C2.10). Der Gate laeuft ueber
-  // hasPermission('reports_export') mit Error-Notice bei Fehlschlag.
-  hasPermission: (permission: PermissionKey) => boolean;
-
-  // === Fach-Kontext =========================================================
-  companyProfile: CompanyProfile;
-  activeRequirements: RequirementDefinition[];
-  gapAnalysisSummary: GapAnalysisSummary;
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface GapHandlers {
   handleExportGapAnalysisDocx: () => Promise<void>;
 }
 
-export function useGapHandlers(deps: GapHandlerDependencies): GapHandlers {
-  const { showNotice, hasPermission, companyProfile, activeRequirements, gapAnalysisSummary } =
-    deps;
+export function useGapHandlers(): GapHandlers {
+  const { state, showNotice, hasPermission } = useWorkspaceState();
+  const { activeRequirements, gapAnalysisSummary } = useAppDerivedState();
+  const companyProfile = state.companyProfile;
 
   const handleExportGapAnalysisDocx = useCallback(async () => {
     if (!hasPermission('reports_export')) {

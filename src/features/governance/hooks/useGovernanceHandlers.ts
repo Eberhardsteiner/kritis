@@ -2,31 +2,12 @@ import { useCallback, useMemo } from 'react';
 import type {
   AssetItem,
   ReviewPlan,
-  RoleTemplateDefinition,
-  SectorModuleDefinition,
   SiteItem,
   StakeholderItem,
 } from '../../../types';
 import { createId } from '../../../shared/ids';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
-
-/**
- * Abhaengigkeiten, die `useGovernanceHandlers` fuer seine elf Governance-Handler
- * benoetigt. Parallel zu `ActionHandlerDependencies` (C2.2) als benannter Typ
- * exportiert. Bewusst kein gemeinsames Basis-Interface: zwei konkrete
- * Feature-Hooks sind zu wenig Datenpunkte, um die Abstraktion zu rechtfertigen.
- * Das wird nach C2.4 (evidence) erneut bewertet.
- *
- * `showNotice` bleibt im Vertrag, auch wenn keiner der 11 Handler sie direkt
- * ruft (alle UI-Feedback laeuft ueber `runWithPermission`). Konsistenz mit
- * dem C2.2-Muster, damit spaetere Features ohne Signatur-Bruch uebernehmen
- * koennen.
- */
-export interface GovernanceHandlerDependencies extends FeatureHandlerDependencies {
-  // Fach-Kontext
-  currentModule: SectorModuleDefinition;
-  roleTemplates: RoleTemplateDefinition[];
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface GovernanceHandlers {
   updateReviewPlan: (field: keyof ReviewPlan, value: string) => void;
@@ -50,11 +31,13 @@ export interface GovernanceHandlers {
  * Atomare Zustandsaenderungen (insbesondere `handleDeleteSite` mit seinem
  * Seiteneffekt auf zugehoerige Assets) bleiben in einer einzigen `setState`-
  * Transaktion, damit kein Zwischenzustand sichtbar wird.
+ *
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
  */
-export function useGovernanceHandlers(
-  deps: GovernanceHandlerDependencies,
-): GovernanceHandlers {
-  const { setState, runWithPermission, currentModule, roleTemplates } = deps;
+export function useGovernanceHandlers(): GovernanceHandlers {
+  const { setState, runWithPermission } = useWorkspaceState();
+  const { currentModule, roleTemplates } = useAppDerivedState();
 
   const updateReviewPlan = useCallback(
     (field: keyof ReviewPlan, value: string) => {

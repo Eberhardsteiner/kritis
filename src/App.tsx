@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ActiveViewPanel } from './components/ActiveViewPanel';
 import { AppNotice } from './components/AppNotice';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
-import { getReadOnlyHint, useAppDerivedState } from './hooks/useAppDerivedState';
 import { buildActiveViewPanelProps } from './lib/buildActiveViewPanelProps';
 import { buildProjectTopbarProps } from './lib/buildProjectTopbarProps';
-import {
-  exportAssessmentAsJson,
-} from './lib/exporters';
+import { exportAssessmentAsJson } from './lib/exporters';
 import {
   builtInModuleContainers,
   builtInModules,
   getModuleByIdFromCatalog,
 } from './lib/moduleRegistry';
-import { getAccessProfile } from './data/workspaceBase';
 import { useGapHandlers } from './features/gap';
 import { useActionHandlers } from './features/measures';
 import { useGovernanceHandlers } from './features/governance';
@@ -26,170 +22,133 @@ import { useReportingHandlers } from './features/reporting';
 import { useRiskCatalogHandlers } from './features/riskCatalog';
 import { useAssessmentHandlers } from './features/assessment';
 import {
-  buildServerPayload,
-  buildSessionBackedUser,
-  mergeServerUserIntoState,
-  serializeServerPayload,
-} from './features/platform/serverPayload';
-import {
   usePlatformAuthHandlers,
   usePlatformControlHandlers,
   usePlatformSystemHandlers,
 } from './features/platform';
 import {
-  applyRemoteState,
-  createInitialState,
-} from './app/state/buildAppState';
-import {
-  defaultSystemSettings,
-  defaultTenantPolicy,
-} from './app/state/defaults';
+  buildServerExportPackagePayload as buildServerExportPackagePayloadPure,
+  getExportTypeLabel,
+} from './features/platform/serverExportPayload';
 import { useServerSync } from './app/serverSync/useServerSync';
 import { useAppShellEffects } from './app/effects/useAppShellEffects';
 import { useModuleSelectionGuard } from './app/effects/useModuleSelectionGuard';
 import { useResiliencePlanHandlers } from './features/resiliencePlan';
-import type { ResiliencePlan } from './features/resiliencePlan';
 import {
   builtInScenarios as tabletopBuiltInScenarios,
   resolveActiveScenario,
   useTabletopExerciseHandlers,
 } from './features/tabletopExercise';
-import type {
-  ExerciseSession as TabletopExerciseSession,
-  Scenario as TabletopScenarioDef,
-} from './features/tabletopExercise';
-import { clearAuthToken, loadAuthToken, saveAuthToken } from './lib/storage';
+import { AppProvider } from './app/AppProvider';
 import {
-  createTenant,
-  fetchEvidenceVersions,
-  loginToServer,
-  logoutFromServer,
-  removeEvidenceAttachment,
-  resetAccessAccountPassword,
-  startOidcLogin,
-  restoreEvidenceVersion,
-  updateTenantSettings,
-  uploadEvidenceAttachment,
-  upsertAccessAccount,
-} from './lib/serverApi';
-import { kritisCertificationStages } from './data/kritisBase';
-import type {
-  AppState,
-  AuditLogEntry,
-  ApiClientSummary,
-  AccessAccountSummary,
-  AuthMode,
-  AuthProviderSummary,
-  AuthSession,
-  CompanyProfile,
-  DocumentLedgerSummaryServer,
-  EvidenceRetentionSummary,
-  DocumentVersionEntry,
-  ExportPackageEntry,
-  ExportPackageType,
-  HostingReadinessSummary,
-  IntegritySummary,
-  ObservabilitySummary,
-  JobRunSummary,
-  ModulePackRegistryEntry,
-  PermissionKey,
-  RequirementStatus,
-  RestoreDrillSummary,
-  ServerHealth,
-  ServerMode,
-  SnapshotInfo,
-  SecurityGateSummary,
-  SystemSettings,
-  TenantPolicy,
-  TenantSummary,
-} from './types';
-
-interface ImportFeedback {
-  type: 'success' | 'error' | 'info';
-  text: string;
-  details?: string[];
-}
-
-// Module-Level-Defaults + Normalizer + State-Hydration-Funktionen wurden
-// in C2.11b ausgelagert:
-//  - Defaults (defaultCompanyProfile, defaultAssessmentFilters,
-//    defaultTenantPolicy, defaultSystemSettings) -> src/app/state/defaults.ts
-//  - buildAppStateFromLoaded, createInitialState, applyRemoteState ->
-//    src/app/state/buildAppState.ts
-//  - normalizeCertificationState -> features/regulatory/certification.ts
-//  - normalizeComplianceCalendar -> features/regulatory/complianceCalendar.ts
-//  - normalizeLoadedFindings -> features/regulatory/findings.ts
-//  - normalizeUserRoleProfile, normalizeUserStatus, normalizeLoadedUsers
-//    -> features/platform/userNormalization.ts
-//  - isApiStatus -> src/shared/httpError.ts
-//
-// Dead Code in C2.11b geloescht (repository-wide grep bestaetigt 0 ext.
-// references): defaultReviewPlan, createDefaultCertificationState,
-// Dead-Indirection-Wrapper normalizeLoadedRegulatoryProfile.
+  useWorkspaceState,
+} from './app/context/WorkspaceStateContext';
+import { useAppDerivedState } from './app/context/AppDerivedStateContext';
+import type { AppState, CompanyProfile, RequirementStatus } from './types';
 
 export default function App() {
-  const [state, setState] = useState<AppState>(createInitialState);
-  const [feedback, setFeedback] = useState<ImportFeedback | null>(null);
-  const [notice, setNotice] = useState<ImportFeedback | null>(null);
-  const [serverMode, setServerMode] = useState<ServerMode>('checking');
-  const [serverHealth, setServerHealth] = useState<ServerHealth | null>(null);
-  const [serverAuthRequired, setServerAuthRequired] = useState(false);
-  const [authMode, setAuthMode] = useState<AuthMode>('local_only');
-  const [authProviders, setAuthProviders] = useState<AuthProviderSummary[]>([]);
-  const [publicTenant, setPublicTenant] = useState<TenantSummary | null>(null);
-  const [authToken, setAuthToken] = useState<string>(() => loadAuthToken());
-  const [authSession, setAuthSession] = useState<AuthSession | null>(null);
-  const [availableTenants, setAvailableTenants] = useState<TenantSummary[]>([]);
-  const [accessAccounts, setAccessAccounts] = useState<AccessAccountSummary[]>([]);
-  const [documentLedger, setDocumentLedger] = useState<DocumentLedgerSummaryServer | null>(null);
-  const [evidenceRetentionSummary, setEvidenceRetentionSummary] = useState<EvidenceRetentionSummary | null>(null);
-  const [evidenceVersionMap, setEvidenceVersionMap] = useState<Record<string, DocumentVersionEntry[]>>({});
-  const [lastServerLoadAt, setLastServerLoadAt] = useState('');
-  const [lastServerSyncAt, setLastServerSyncAt] = useState('');
-  const [serverStateVersion, setServerStateVersion] = useState<number | null>(null);
-  const [serverStateUpdatedAt, setServerStateUpdatedAt] = useState('');
-  const [syncError, setSyncError] = useState('');
-  const [auditLogEntries, setAuditLogEntries] = useState<AuditLogEntry[]>([]);
-  const [snapshots, setSnapshots] = useState<SnapshotInfo[]>([]);
-  const [exportPackages, setExportPackages] = useState<ExportPackageEntry[]>([]);
-  const [tenantPolicy, setTenantPolicy] = useState<TenantPolicy>(defaultTenantPolicy);
-  const [systemSettings, setSystemSettings] = useState<SystemSettings>(defaultSystemSettings);
-  const [hostingReadiness, setHostingReadiness] = useState<HostingReadinessSummary | null>(null);
-  const [integritySummary, setIntegritySummary] = useState<IntegritySummary | null>(null);
-  const [securityGateSummary, setSecurityGateSummary] = useState<SecurityGateSummary | null>(null);
-  const [observabilitySummary, setObservabilitySummary] = useState<ObservabilitySummary | null>(null);
-  const [restoreDrills, setRestoreDrills] = useState<RestoreDrillSummary[]>([]);
-  const [apiClients, setApiClients] = useState<ApiClientSummary[]>([]);
-  const [systemJobs, setSystemJobs] = useState<JobRunSummary[]>([]);
-  const [moduleRegistryEntries, setModuleRegistryEntries] = useState<ModulePackRegistryEntry[]>([]);
-  const [issuedClientSecret, setIssuedClientSecret] = useState<{ label: string; secret: string; mode: 'created' | 'rotated' } | null>(null);
-  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const [tabletopActiveTab, setTabletopActiveTab] = useState<'library' | 'session' | 'review'>('library');
-  const serverInitializedRef = useRef(false);
-  const suppressNextServerSyncRef = useRef(false);
-  const lastSyncedPayloadRef = useRef<string>(serializeServerPayload(state));
+  return (
+    <AppProvider>
+      <AppShell />
+    </AppProvider>
+  );
+}
 
+/**
+ * AppShell · Orchestrierung aller Feature-Hooks + UI-Root.
+ *
+ * Liest State/Derived/Helpers aus zwei Contexts, ruft die 15
+ * Feature-Hooks in Strength-Order auf (Server-Sync + Auth + System
+ * zuerst, weil Cross-Hook-Kopplungen bestehen) und baut die
+ * Panel-Props zusammen. Die Shell-Effects (Bootstrap, Notice-Timer,
+ * LocalStorage-Persistenz, Module-Selection-Guard) sind ganz am Ende
+ * registriert, nachdem alle Hooks initialisiert sind.
+ *
+ * Das frueher verdrahtete Cycle-Breaker-Ref-Muster (C2.11c) ist in
+ * C2.11d durch den Pure-Helper `clearAuthenticatedContext` abgeloest
+ * — useServerSync und usePlatformAuthHandlers rufen den Helper
+ * direkt auf, ohne Ref-Indirection.
+ */
+function AppShell() {
+  const ws = useWorkspaceState();
+  const {
+    state,
+    setState,
+    notice,
+    setNotice,
+    autoSyncEnabled,
+    setAutoSyncEnabled,
+    tabletopActiveTab,
+    setTabletopActiveTab,
+    feedback,
+    runWithPermission,
+    hasPermission,
+    showNotice,
+    activeUser,
+    activeAccessProfile,
+    hasSystemAdminAccess,
+    readOnlyHint,
+    authToken,
+    authSession,
+    authMode,
+    authProviders,
+    publicTenant,
+    availableTenants,
+    accessAccounts,
+    serverMode,
+    serverHealth,
+    serverAuthRequired,
+    lastServerLoadAt,
+    lastServerSyncAt,
+    syncError,
+    auditLogEntries,
+    snapshots,
+    exportPackages,
+    tenantPolicy,
+    systemSettings,
+    hostingReadiness,
+    integritySummary,
+    securityGateSummary,
+    observabilitySummary,
+    restoreDrills,
+    apiClients,
+    systemJobs,
+    moduleRegistryEntries,
+    issuedClientSecret,
+    setIssuedClientSecret,
+    documentLedger,
+    evidenceRetentionSummary,
+    evidenceVersionMap,
+  } = ws;
+
+  const derived = useAppDerivedState();
   const {
     effectiveModuleCatalog,
     currentModule,
     questions,
-    questionLookup,
-    requirements,
-    requirementLookup,
-    actionTemplates,
-    evidenceTemplates,
-    processTemplates,
-    dependencyTemplates,
-    scenarioTemplates,
-    exerciseTemplates,
-    roleTemplates,
-    auditChecklist,
     regulatoryProfile,
     regimeDefinitions,
+    regimeSummaries,
     activeRequirements,
     activeAuditChecklist,
-    regimeSummaries,
     scoreSnapshot,
+    benchmarkSnapshot,
+    requirementProgress,
+    requirementOverrides,
+    kritisApplicability,
+    kritisMilestones,
+    kritisPenaltyEstimate,
+    authorityAssignmentsByRegime,
+    gapAnalysisSummary,
+    actionSummary,
+    evidenceSummary,
+    documentLibrarySummary,
+    governanceSummary,
+    resilienceSummary,
+    deadlineSummary,
+    checklistProgress,
+    findingSummary,
+    certificationProgress,
     currentActionItems,
     currentEvidenceItems,
     currentStakeholders,
@@ -204,900 +163,89 @@ export default function App() {
     currentReleaseGates,
     currentFindings,
     documentFolders,
-    requirementProgress,
-    requirementOverrides,
-    kritisApplicability,
-    kritisMilestones,
-    kritisPenaltyEstimate,
-    authorityAssignmentsByRegime,
-    gapAnalysisSummary,
-    actionSummary,
-    evidenceSummary,
-    documentLibrarySummary,
-    governanceSummary,
-    resilienceSummary,
-    deadlineSummary,
-    benchmarkSnapshot,
-    checklistProgress,
-    findingSummary,
-    certificationProgress,
+    processTemplates,
+    dependencyTemplates,
+    scenarioTemplates,
+    exerciseTemplates,
+    roleTemplates,
     questionActionCounts,
     questionEvidenceCounts,
     requirementActionCounts,
     requirementEvidenceCounts,
     attachmentCount,
-  } = useAppDerivedState({ state, moduleRegistryEntries });
-  const activeUser = useMemo(() => {
-    if (authSession) {
-      return state.users.find((item) => item.id === authSession.userId)
-        ?? buildSessionBackedUser(authSession)
-        ?? state.users[0]
-        ?? null;
-    }
+  } = derived;
 
-    return state.users.find((item) => item.id === state.activeUserId) ?? state.users[0] ?? null;
-  }, [authSession, state.users, state.activeUserId]);
-  const activeAccessProfile = useMemo(
-    () => getAccessProfile(authSession?.roleProfile ?? activeUser?.roleProfile ?? 'admin'),
-    [authSession, activeUser],
+  // === UI-Glue-Helper (Inline, weil reine App-Shell-Konvenienz) =============
+  const setActiveView = useCallback(
+    (activeView: AppState['activeView']) => {
+      setState((current) => ({ ...current, activeView }));
+    },
+    [setState],
   );
-  const hasSystemAdminAccess = Boolean(authSession?.isSystemAdmin);
 
-  function hasPermission(permission: PermissionKey): boolean {
-    return activeAccessProfile.permissions.includes(permission);
-  }
-
-  function showNotice(type: ImportFeedback['type'], text: string, details?: string[]) {
-    setNotice({ type, text, details });
-  }
-
-  function extractErrorDetails(error: unknown): string[] | undefined {
-    return error instanceof Error && 'details' in error && Array.isArray((error as Error & { details?: string[] }).details)
-      ? (error as Error & { details?: string[] }).details
-      : undefined;
-  }
-
-  function runWithPermission(
-    permission: PermissionKey,
-    text: string,
-    action: () => void,
-  ): boolean {
-    if (!hasPermission(permission)) {
-      showNotice('error', text, [`Aktives Profil: ${activeAccessProfile.label}`, `Erforderliches Recht: ${permission}`]);
-      return false;
-    }
-
-    action();
-    return true;
-  }
-
-  // Cycle-Breaker fuer die zirkulaere Abhaengigkeit zwischen
-  // useServerSync und usePlatformAuthHandlers: clearAuthenticatedContext
-  // wird aus usePlatformAuthHandlers zurueckgegeben, das NACH
-  // useServerSync aufgerufen wird. useServerSync liest im 401-Branch
-  // via Ref (Invariante 3). Der Ref wird weiter unten per useEffect
-  // verdrahtet, nachdem beide Hooks aufgerufen sind.
-  const clearAuthenticatedContextRef = useRef<(message?: string) => void>(() => {});
-
-  const {
-    loadStateFromServer,
-    refreshServerSideData,
-    refreshModuleRegistry,
-    updateServerStateMarkers,
-  } = useServerSync({
-    // Core-State
-    state,
-    setState,
-    // Auth-State
-    authToken,
-    setAuthToken,
-    authSession,
-    setAuthSession,
-    setServerAuthRequired,
-    setAuthMode,
-    setAuthProviders,
-    setPublicTenant,
-    setAvailableTenants,
-    setAccessAccounts,
-    // Server-Connection-State
-    setServerMode,
-    setServerHealth,
-    setLastServerLoadAt,
-    setSyncError,
-    setServerStateVersion,
-    setServerStateUpdatedAt,
-    // Server-Side-Data-Setter
-    setAuditLogEntries,
-    setSnapshots,
-    setExportPackages,
-    setDocumentLedger,
-    setEvidenceRetentionSummary,
-    setTenantPolicy,
-    setApiClients,
-    setSystemJobs,
-    setModuleRegistryEntries,
-    // Admin-Details-Setter
-    setSystemSettings,
-    setHostingReadiness,
-    setIntegritySummary,
-    setSecurityGateSummary,
-    setObservabilitySummary,
-    setRestoreDrills,
-    // Refs
-    serverInitializedRef,
-    suppressNextServerSyncRef,
-    lastSyncedPayloadRef,
-    // Cycle-Breaker + Notice
-    clearAuthenticatedContextRef,
-    showNotice,
-  });
-
-  const readOnlyHint = getReadOnlyHint(state.activeView, hasPermission);
-
-  // Die vier useEffects (Bootstrap-Load, Notice-Timer, LocalStorage-
-  // Persistenz, Module-Selection-Guard) wurden in C2.11c nach
-  // src/app/effects/useAppShellEffects.ts und
-  // src/app/effects/useModuleSelectionGuard.ts ausgelagert.
-  // useAppShellEffects-Call + useModuleSelectionGuard-Call liegen
-  // weiter unten, nachdem loadStateFromServer aus useServerSync
-  // verfuegbar ist.
-
-  function setActiveView(activeView: AppState['activeView']) {
-    setState((current) => ({ ...current, activeView }));
-  }
-
-  function updateProfileField(field: keyof CompanyProfile, value: string) {
-    runWithPermission('assessment_edit', 'Für Änderungen am Unternehmensprofil fehlt das Recht assessment_edit.', () => {
-      setState((current) => ({
-        ...current,
-        companyProfile: {
-          ...current.companyProfile,
-          [field]: value,
-        },
-      }));
-    });
-  }
-
-  const {
-    updateAssessmentFilter,
-    handleScoreChange,
-    handleNoteChange,
-  } = useAssessmentHandlers({
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-  });
-
-  const {
-    handleServerLogin,
-    handleStartOidcLogin,
-    handleServerLogout,
-    handleCreateTenantOnServer,
-    handleUpsertAccessAccount,
-    handleResetAccessAccountPassword,
-    handleUpdateTenantPolicy,
-    clearAuthenticatedContext,
-  } = usePlatformAuthHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Auth-/Session-State
-    authToken,
-    setAuthToken,
-    authSession,
-    setAuthSession,
-    setAccessAccounts,
-    hasPermission,
-    // Server-Connection-State
-    serverMode,
-    setServerMode,
-    serverAuthRequired,
-    setSyncError,
-    setLastServerLoadAt,
-    setLastServerSyncAt,
-    // Cross-Feature-Setter (Login/Logout-Aufraeumung)
-    setAuditLogEntries,
-    setSnapshots,
-    setExportPackages,
-    setDocumentLedger,
-    setEvidenceRetentionSummary,
-    setEvidenceVersionMap,
-    setApiClients,
-    setSystemJobs,
-    setModuleRegistryEntries,
-    setIntegritySummary,
-    setSecurityGateSummary,
-    setObservabilitySummary,
-    setRestoreDrills,
-    setIssuedClientSecret,
-    defaultTenantPolicy,
-    setTenantPolicy,
-    // Refs + Callbacks
-    serverInitializedRef,
-    suppressNextServerSyncRef,
-    lastSyncedPayloadRef,
-    updateServerStateMarkers,
-    loadStateFromServer,
-    refreshServerSideData,
-    applyRemoteState,
-    extractErrorDetails,
-  });
-
-  // Cycle-Breaker wiring: sobald usePlatformAuthHandlers eine
-  // clearAuthenticatedContext-Funktion zurueckgibt, wird sie im
-  // Ref hinterlegt. useServerSync liest im 401-Branch via Ref.
-  // Dieses useEffect wird registriert BEVOR useAppShellEffects
-  // (das den initial-load triggert) — React-Hook-Reihenfolge
-  // garantiert, dass der Ref populiert ist, wenn der initial-load
-  // feuert.
-  useEffect(() => {
-    clearAuthenticatedContextRef.current = clearAuthenticatedContext;
-  }, [clearAuthenticatedContext]);
-
-  const {
-    pushStateToServer,
-    handleRefreshServer,
-    handleSyncNow,
-    handleCreateSnapshotOnServer,
-    handleRestoreSnapshot,
-    handleRefreshIntegritySummary,
-    handleImportFiles,
-    handleActivateModulePack,
-    handleRetireModulePack,
-    handleCreateServerExportPackage,
-    handleCreateHandoverBundle,
-    handleReleaseRegisteredExport,
-    handleUpdateSystemSettings,
-    handleCreateApiClientOnServer,
-    handleRotateApiClient,
-    handleRevokeApiClient,
-    handleRunSystemJobOnServer,
-    handleUpdateTenantAdminMeta,
-    handleDownloadJobArtifact,
-    handleDownloadRegisteredExport,
-    handleDownloadServerFile,
-  } = usePlatformSystemHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Auth-/Session-Read-State
-    authToken,
-    authSession,
-    activeUser,
-    serverMode,
-    setServerMode,
-    serverAuthRequired,
-    autoSyncEnabled,
-    hasPermission,
-    serverStateVersion,
-    serverStateUpdatedAt,
-    // Sync-/Status-Setter
-    setSyncError,
-    setLastServerSyncAt,
-    updateServerStateMarkers,
-    // Domain-State-Setter
-    setSnapshots,
-    setExportPackages,
-    setApiClients,
-    setSystemJobs,
-    setSystemSettings,
-    setIntegritySummary,
-    setModuleRegistryEntries,
-    setIssuedClientSecret,
-    setAvailableTenants,
-    setFeedback,
-    // Refs + Callbacks
-    serverInitializedRef,
-    suppressNextServerSyncRef,
-    lastSyncedPayloadRef,
-    clearAuthenticatedContext,
-    loadStateFromServer,
-    refreshServerSideData,
-    applyRemoteState,
-    buildServerExportPackagePayload,
-    getExportTypeLabel,
-    extractErrorDetails,
-  });
-
-  const {
-    selectActiveUser,
-    handleCreateUser,
-    handleGenerateUsersFromStakeholders,
-    handleUpdateUser,
-    handleDeleteUser,
-  } = usePlatformControlHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Auth-/Session-Read-State
-    authSession,
-    // Fach-Kontext
-    currentModule,
-    // Die frueheren Pure-Helper-Deps (normalizeLoadedUsers,
-    // normalizeUserRoleProfile, normalizeUserStatus) wurden in C2.11b
-    // aus dem Dep-Durchgriff entfernt — usePlatformControlHandlers
-    // importiert sie jetzt direkt aus ../userNormalization.
-  });
-
-  const {
-    updateRolloutPlan,
-    handleCreateEmptyHardeningCheck,
-    handleGenerateHardeningBaseline,
-    handleUpdateHardeningCheck,
-    handleDeleteHardeningCheck,
-    handleCreateEmptyRunbook,
-    handleGenerateRunbookTemplates,
-    handleUpdateRunbook,
-    handleDeleteRunbook,
-    handleCreateEmptyReleaseGate,
-    handleGenerateReleaseGateBaseline,
-    handleUpdateReleaseGate,
-    handleDeleteReleaseGate,
-  } = useProgramRolloutHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Fach-Kontext
-    currentModule,
-    activeUser,
-    // Cross-Feature-Read (nur fuer Baseline-Defaults)
-    reviewPlan: state.reviewPlan,
-  });
-
-  const {
-    updateRegulatoryProfileField,
-    updateJurisdiction,
-    updateRegimeScope,
-    updateCertificationField,
-    updateCertificationStage,
-    updateChecklistState,
-    handleCreateFinding,
-    handleGenerateFindingsFromChecklist,
-    handleUpdateFinding,
-    handleDeleteFinding,
-    updateComplianceCalendar,
-  } = useRegulatoryHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Fach-Kontext
-    currentModule,
-    // Audit-Kontext (unfilterte Checklist, wie im Original-Pfad vor C2.9)
-    auditChecklist,
-  });
-
-  const {
-    handleSaveRiskEntry,
-    handleDeleteRiskEntry,
-    handleExportRiskEntriesJson,
-    handleExportRiskAnalysisDocx,
-  } = useRiskCatalogHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Fach-Kontext
-    companyProfile: state.companyProfile,
-    hasPermission,
-  });
-
-  const {
-    handleExportMarkdown,
-    handleExportFormalHtml,
-    handleExportManagementPdf,
-    handleExportAuditPdf,
-  } = useReportingHandlers({
-    // Kern (FeatureHandlerDependencies; setState + runWithPermission
-    // werden in reporting bewusst NICHT genutzt — alle 4 Handler sind
-    // read-only und gate'n ueber hasPermission)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Permission-Gate
-    hasPermission,
-    // Fach-Kontext (aus useAppDerivedState)
-    currentModule,
-    regulatoryProfile,
-    regimeSummaries,
-    kritisApplicability,
-    activeRequirements,
-    // Scope-gefilterte Listen
-    currentActionItems,
-    currentEvidenceItems,
-    currentStakeholders,
-    currentSites,
-    currentFindings,
-    // Abgeleitete Summaries
-    scoreSnapshot,
-    benchmarkSnapshot,
-    requirementProgress,
-    evidenceSummary,
-    governanceSummary,
-    checklistProgress,
-    findingSummary,
-    certificationProgress,
-    documentLibrarySummary,
-    deadlineSummary,
-  });
-
-  const {
-    handleGenerateResiliencePlanDraft,
-    handleSaveResiliencePlan,
-    handleSubmitResiliencePlanForReview,
-    handleApproveResiliencePlan,
-    handleReturnResiliencePlanToDraft,
-    handleArchiveResiliencePlan,
-    handleExportResiliencePlanJson,
-    handleExportResiliencePlanDocx,
-    handleExportResiliencePlanPdf,
-  } = useResiliencePlanHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Permission-Gate (fuer 3 Export-Handler)
-    hasPermission,
-    // Fach-Kontext
-    currentModule,
-    companyProfile: state.companyProfile,
-    regulatoryProfile,
-    // Tenant-Kontext fuer Generator-Tenant-ID
-    authSession,
-    publicTenant,
-  });
-
-  // useTabletopExerciseHandlers liegt weiter unten NACH
-  // useEvidenceHandlers, weil der tabletop-Hook `upsertEvidenceDrafts`
-  // aus dessen Return als Cross-Feature-Dep benoetigt.
-
-  const { handleExportGapAnalysisDocx } = useGapHandlers({
-    // Kern (FeatureHandlerDependencies; setState + runWithPermission
-    // werden in gap bewusst NICHT genutzt — gap ist read-only,
-    // analog zu reporting)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Permission-Gate
-    hasPermission,
-    // Fach-Kontext
-    companyProfile: state.companyProfile,
-    activeRequirements,
-    gapAnalysisSummary,
-  });
-
-  // Die 3 Regulatorik-Profil-Handler (updateRegulatoryProfileField,
-  // updateJurisdiction, updateRegimeScope), die 3 Certification/
-  // Checklist-Handler (updateCertificationField, updateCertificationStage,
-  // updateChecklistState), die 4 Findings-Handler (handleCreateFinding,
-  // handleGenerateFindingsFromChecklist, handleUpdateFinding,
-  // handleDeleteFinding) und updateComplianceCalendar wurden in C2.9
-  // nach src/features/regulatory/hooks/useRegulatoryHandlers.ts
-  // ausgelagert. Hook-Call + Destructuring liegt weiter unten bei den
-  // anderen Feature-Hooks.
-
-  // Die 13 programRollout-Handler (updateRolloutPlan + je 4 CRUD-
-  // Handler fuer Haertungschecks, Runbooks, Release-Gates) wurden in
-  // C2.8 nach src/features/programRollout/hooks/useProgramRolloutHandlers.ts
-  // ausgelagert. Hook-Call + Destructuring liegt weiter unten bei den
-  // anderen Feature-Hooks.
-
-  // selectActiveUser, handleCreateUser, handleGenerateUsersFromStakeholders,
-  // handleUpdateUser, handleDeleteUser wurden in C2.7d nach
-  // src/features/platform/hooks/usePlatformControlHandlers.ts ausgelagert.
-  // updateComplianceCalendar (fruehere C2.7d-Transient) ist in C2.9
-  // nach useRegulatoryHandlers migriert — Option B aus der C2.9-Analyse.
-
-  function selectModule(moduleId: string) {
-    const selected = getModuleByIdFromCatalog(moduleId, effectiveModuleCatalog) ?? effectiveModuleCatalog[0] ?? builtInModules[0];
-
-    setState((current) => {
-      const shouldPrefillIndustry = !current.companyProfile.industryLabel.trim();
-
-      return {
-        ...current,
-        selectedModuleId: moduleId,
-        companyProfile: shouldPrefillIndustry
-          ? {
+  const updateProfileField = useCallback(
+    (field: keyof CompanyProfile, value: string) => {
+      runWithPermission(
+        'assessment_edit',
+        'Für Änderungen am Unternehmensprofil fehlt das Recht assessment_edit.',
+        () => {
+          setState((current) => ({
+            ...current,
+            companyProfile: {
               ...current.companyProfile,
-              industryLabel: selected.sectorCategory ?? selected.name,
-            }
-          : current.companyProfile,
-      };
-    });
-  }
-
-  function handleRequirementChange(requirementId: string, status: RequirementStatus) {
-    runWithPermission('kritis_edit', 'Für Statusänderungen bei KRITIS-Bausteinen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        requirementStates: {
-          ...current.requirementStates,
-          [requirementId]: status,
+              [field]: value,
+            },
+          }));
         },
-      }));
-    });
-  }
+      );
+    },
+    [runWithPermission, setState],
+  );
 
-  // handleImportFiles, handleActivateModulePack, handleRetireModulePack
-  // sowie pushStateToServer + useEffect #4 wurden in C2.7c nach
-  // src/features/platform/hooks/usePlatformSystemHandlers.ts ausgelagert.
-
-  const {
-    upsertActionDrafts,
-    handleCreateActionFromQuestion,
-    handleCreateActionFromRequirement,
-    handleCreateEmptyAction,
-    handleGenerateRecommendationActions,
-    handleGenerateRequirementActions,
-    handleGenerateModuleActionTemplates,
-    handleUpdateAction,
-    handleDeleteAction,
-  } = useActionHandlers({
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    currentModule,
-    questionLookup,
-    requirementLookup,
-    activeRequirements,
-    recommendations: scoreSnapshot.recommendations,
-    actionTemplates,
-  });
-
-  const {
-    upsertEvidenceDrafts,
-    handleCreateEvidenceFromQuestion,
-    handleCreateEvidenceFromRequirement,
-    handleCreateEmptyEvidence,
-    handleGenerateCriticalQuestionEvidence,
-    handleGenerateRequirementEvidence,
-    handleGenerateModuleEvidenceTemplates,
-    handleUpdateEvidence,
-    handleDeleteEvidence,
-    handleAttachEvidenceFile,
-    handleRemoveEvidenceFile,
-    handleLoadEvidenceVersions,
-    handleRestoreEvidenceVersion,
-  } = useEvidenceHandlers({
-    // Kern
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Fach-Kontext
-    currentModule,
-    tenantPolicy,
-    documentFolders,
-    questionLookup,
-    requirementLookup,
-    activeRequirements,
-    recommendations: scoreSnapshot.recommendations,
-    evidenceTemplates,
-    // Server-Sync-Pipeline
-    hasPermission,
-    serverMode,
-    authToken,
-    authSession,
-    setEvidenceVersionMap,
-    setLastServerSyncAt,
-    setSyncError,
-    setServerMode,
-    updateServerStateMarkers,
-    refreshServerSideData,
-    serializeServerPayload,
-    lastSyncedPayloadRef,
-    suppressNextServerSyncRef,
-    extractErrorDetails,
-  });
-
-  const {
-    handleStartTabletopExercise,
-    handleImportTabletopScenario,
-    handleRemoveImportedTabletopScenario,
-    handleBeginTabletopSession,
-    handleAcknowledgeTabletopInject,
-    handleRecordTabletopDecision,
-    handleAdvanceTabletopStep,
-    handleCompleteTabletopSession,
-    handleAbandonTabletopSession,
-    handleUpdateTabletopNotes,
-    handleCreateTabletopEvidenceFromResult,
-    handleExportTabletopResultJson,
-  } = useTabletopExerciseHandlers({
-    // Kern (FeatureHandlerDependencies)
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    // Permission-Gate
-    hasPermission,
-    // Fach-Kontext
-    currentModule,
-    companyProfile: state.companyProfile,
-    tenantPolicy,
-    documentFolders,
-    // Tenant-Kontext
-    authSession,
-    publicTenant,
-    // UI-State-Setter (useState-Durchgriff aus App.tsx)
-    setTabletopActiveTab,
-    // Cross-Feature-Kopplung zu evidence-Hook (upsertEvidenceDrafts
-    // kommt aus useEvidenceHandlers unmittelbar darueber)
-    upsertEvidenceDrafts,
-  });
-
-  const {
-    updateReviewPlan,
-    handleCreateEmptyStakeholder,
-    handleGenerateRoleTemplates,
-    handleUpdateStakeholder,
-    handleDeleteStakeholder,
-    handleCreateEmptySite,
-    handleUpdateSite,
-    handleDeleteSite,
-    handleCreateEmptyAsset,
-    handleUpdateAsset,
-    handleDeleteAsset,
-  } = useGovernanceHandlers({
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    currentModule,
-    roleTemplates,
-  });
-
-  const {
-    handleCreateEmptyBusinessProcess,
-    handleGenerateProcessTemplates,
-    handleUpdateBusinessProcess,
-    handleDeleteBusinessProcess,
-    handleCreateEmptyDependency,
-    handleGenerateDependencyTemplates,
-    handleUpdateDependency,
-    handleDeleteDependency,
-    handleCreateEmptyScenario,
-    handleGenerateScenarioTemplates,
-    handleUpdateScenario,
-    handleDeleteScenario,
-    handleCreateEmptyExercise,
-    handleGenerateExerciseTemplates,
-    handleUpdateExercise,
-    handleDeleteExercise,
-  } = useOperationsHandlers({
-    state,
-    setState,
-    runWithPermission,
-    showNotice,
-    currentModule,
-    processTemplates,
-    dependencyTemplates,
-    scenarioTemplates,
-    exerciseTemplates,
-  });
-
-  function getExportTypeLabel(type: ExportPackageType): string {
-    if (type === 'management_report') {
-      return 'Managementpaket';
-    }
-    if (type === 'audit_pack') {
-      return 'Auditpaket';
-    }
-    if (type === 'formal_report') {
-      return 'Formaler Auditbericht';
-    }
-    if (type === 'certification_dossier') {
-      return 'KRITIS-Readiness-Dossier';
-    }
-    if (type === 'handover_bundle') {
-      return 'Übergabebündel';
-    }
-    return 'Status-Snapshot';
-  }
-
-  function buildServerExportPackagePayload(
-    type: ExportPackageType,
-    options: {
-      title?: string;
-      note?: string;
-      signOffName?: string;
-      signOffRole?: string;
-    } = {},
-  ) {
-    const companyName = state.companyProfile.companyName.trim() || 'Arbeitsbereich';
-    const sectionsByType: Record<ExportPackageType, string[]> = {
-      management_report: ['summary', 'scores', 'governance', 'actions', 'evidence', 'deadlines'],
-      audit_pack: ['requirements', 'checklist', 'findings', 'evidence', 'deadlines'],
-      formal_report: ['formal-report', 'findings', 'evidence'],
-      state_snapshot: ['state', 'meta'],
-      certification_dossier: ['applicability', 'requirements', 'checklist', 'findings', 'certification', 'evidence'],
-      handover_bundle: ['rollout', 'hardening', 'runbooks', 'release-gates', 'integrity', 'exports'],
-    };
-
-    const basePayload = {
-      exportedAt: new Date().toISOString(),
-      companyProfile: state.companyProfile,
-      regulatoryProfile,
-      regimeSummaries,
-      module: currentModule,
-      scoreSnapshot,
-      benchmark: benchmarkSnapshot,
-      requirementProgress,
-      requirements: activeRequirements,
-      requirementStates: state.requirementStates,
-      governanceSummary,
-      evidenceSummary,
-      documentLibrarySummary,
-      deadlineSummary,
-      certificationState: state.certificationState,
-      certificationProgress,
-      checklistProgress,
-      findingSummary,
-      actionItems: currentActionItems,
-      evidenceItems: currentEvidenceItems,
-      stakeholders: currentStakeholders,
-      sites: currentSites,
-      assets: currentAssets,
-      businessProcesses: currentBusinessProcesses,
-      dependencies: currentDependencies,
-      scenarios: currentScenarios,
-      exercises: currentExercises,
-      reviewPlan: state.reviewPlan,
-      complianceCalendar: state.complianceCalendar,
-    };
-
-    if (type === 'audit_pack') {
-      return {
-        type,
-        title: options.title || `${companyName} Audit Pack`,
-        note: options.note || '',
-        signOffName: options.signOffName || '',
-        signOffRole: options.signOffRole || 'Auditkoordination',
-        moduleId: currentModule.id,
-        moduleName: currentModule.name,
-        companyName,
-        sections: sectionsByType[type],
-        payload: {
-          ...basePayload,
-          auditChecklist: activeAuditChecklist.map((item) => ({
-            ...item,
-            state: state.auditChecklistStates[item.id] ?? { status: 'not_started', notes: '' },
-          })),
-          findings: currentFindings,
+  const handleRequirementChange = useCallback(
+    (requirementId: string, status: RequirementStatus) => {
+      runWithPermission(
+        'kritis_edit',
+        'Für Statusänderungen bei KRITIS-Bausteinen fehlt das Recht kritis_edit.',
+        () => {
+          setState((current) => ({
+            ...current,
+            requirementStates: {
+              ...current.requirementStates,
+              [requirementId]: status,
+            },
+          }));
         },
-      };
-    }
+      );
+    },
+    [runWithPermission, setState],
+  );
 
-    if (type === 'formal_report') {
-      return {
-        type,
-        title: options.title || `${companyName} Formeller Auditbericht`,
-        note: options.note || '',
-        signOffName: options.signOffName || '',
-        signOffRole: options.signOffRole || 'Revision',
-        moduleId: currentModule.id,
-        moduleName: currentModule.name,
-        companyName,
-        sections: sectionsByType[type],
-        payload: {
-          ...basePayload,
-          applicability: kritisApplicability,
-          findings: currentFindings,
-        },
-      };
-    }
+  const selectModule = useCallback(
+    (moduleId: string) => {
+      const selected =
+        getModuleByIdFromCatalog(moduleId, effectiveModuleCatalog)
+          ?? effectiveModuleCatalog[0]
+          ?? builtInModules[0];
 
-    if (type === 'certification_dossier') {
-      return {
-        type,
-        title: options.title || `${companyName} KRITIS-Readiness-Dossier`,
-        note: options.note || state.certificationState.decisionNote || '',
-        signOffName: options.signOffName || state.certificationState.auditLead || '',
-        signOffRole: options.signOffRole || tenantPolicy.certificationAuthorityLabel || 'Interne Prüfstelle',
-        moduleId: currentModule.id,
-        moduleName: currentModule.name,
-        companyName,
-        sections: sectionsByType[type],
-        payload: {
-          ...basePayload,
-          applicability: kritisApplicability,
-          auditChecklist: activeAuditChecklist.map((item) => ({
-            ...item,
-            state: state.auditChecklistStates[item.id] ?? { status: 'not_started', notes: '' },
-          })),
-          findings: currentFindings,
-          policy: tenantPolicy,
-        },
-      };
-    }
+      setState((current) => {
+        const shouldPrefillIndustry = !current.companyProfile.industryLabel.trim();
+        return {
+          ...current,
+          selectedModuleId: moduleId,
+          companyProfile: shouldPrefillIndustry
+            ? {
+                ...current.companyProfile,
+                industryLabel: selected.sectorCategory ?? selected.name,
+              }
+            : current.companyProfile,
+        };
+      });
+    },
+    [effectiveModuleCatalog, setState],
+  );
 
-    if (type === 'handover_bundle') {
-      return {
-        type,
-        title: options.title || `${companyName} Übergabebündel ${state.rolloutPlan.releaseVersion || '1.0.0'}`,
-        note: options.note || state.rolloutPlan.decisionNote || '',
-        signOffName: options.signOffName || state.reviewPlan.approver || state.certificationState.auditLead || '',
-        signOffRole: options.signOffRole || 'Go-Live / Übergabe',
-        moduleId: currentModule.id,
-        moduleName: currentModule.name,
-        companyName,
-        sections: sectionsByType[type],
-        payload: {
-          ...basePayload,
-          applicability: kritisApplicability,
-          rolloutPlan: state.rolloutPlan,
-          hardeningChecks: currentHardeningChecks,
-          runbooks: currentRunbooks,
-          releaseGates: currentReleaseGates,
-          findings: currentFindings,
-          integritySummary,
-          tenantPolicy,
-          systemSettings,
-          priorHandoverBundles: exportPackages.filter((entry) => entry.type === 'handover_bundle'),
-        },
-      };
-    }
-
-    if (type === 'management_report') {
-      return {
-        type,
-        title: options.title || `${companyName} Management Report`,
-        note: options.note || '',
-        signOffName: options.signOffName || '',
-        signOffRole: options.signOffRole || 'Management',
-        moduleId: currentModule.id,
-        moduleName: currentModule.name,
-        companyName,
-        sections: sectionsByType[type],
-        payload: {
-          ...basePayload,
-          applicability: kritisApplicability,
-        },
-      };
-    }
-
-    return {
-      type,
-      title: options.title || `${companyName} Status Snapshot`,
-      note: options.note || '',
-      signOffName: options.signOffName || '',
-      signOffRole: options.signOffRole || 'Programmleitung',
-      moduleId: currentModule.id,
-      moduleName: currentModule.name,
-      companyName,
-      sections: sectionsByType[type],
-      payload: {
-        ...basePayload,
-        state: buildServerPayload(state),
-        applicability: kritisApplicability,
-      },
-    };
-  }
-
-  // handleCreateServerExportPackage, handleReleaseRegisteredExport,
-  // handleUpdateSystemSettings, handleCreate/Rotate/RevokeApiClientOnServer,
-  // handleRunSystemJobOnServer, handleUpdateTenantAdminMeta,
-  // handleDownloadJobArtifact, handleDownloadRegisteredExport wurden
-  // in C2.7c nach src/features/platform/hooks/usePlatformSystemHandlers.ts
-  // ausgelagert.
-
-  function handleExportJson() {
+  const handleExportJson = useCallback(() => {
     if (!hasPermission('reports_export')) {
       showNotice('error', 'Für JSON-Exporte fehlt das Recht reports_export.');
       return;
@@ -1131,38 +279,83 @@ export default function App() {
       deadlineSummary,
       certificationState: state.certificationState,
     });
-  }
+  }, [
+    activeAuditChecklist,
+    benchmarkSnapshot,
+    currentActionItems,
+    currentAssets,
+    currentBusinessProcesses,
+    currentDependencies,
+    currentEvidenceItems,
+    currentExercises,
+    currentFindings,
+    currentModule,
+    currentScenarios,
+    currentSites,
+    currentStakeholders,
+    deadlineSummary,
+    documentLibrarySummary,
+    hasPermission,
+    scoreSnapshot,
+    showNotice,
+    state,
+  ]);
 
-  // handleExportMarkdown, handleExportFormalHtml, handleExportManagementPdf,
-  // handleExportAuditPdf wurden in C2.10 nach
-  // src/features/reporting/hooks/useReportingHandlers.ts ausgelagert.
-  // Hook-Call + Destructuring liegt weiter unten bei den anderen
-  // Feature-Hooks.
+  // === Server-Sync + Auth + System (Strength-Order, Cross-Hook-Couplings) ===
+  const serverSync = useServerSync();
+  const authHandlers = usePlatformAuthHandlers({ serverSync });
+  const { clearAuthenticatedContext } = authHandlers;
 
-  // handleSaveRiskEntry, handleDeleteRiskEntry,
-  // handleExportRiskEntriesJson, handleExportRiskAnalysisDocx wurden in
-  // C2.9 nach src/features/riskCatalog/hooks/useRiskCatalogHandlers.ts
-  // ausgelagert. Hook-Call + Destructuring liegt weiter unten.
+  // buildServerExportPackagePayload-Wrapper: bindet Context-Daten an
+  // die Pure-Function. Wird an usePlatformSystemHandlers gereicht.
+  const buildServerExportPackagePayload = useCallback(
+    (
+      type: Parameters<typeof buildServerExportPackagePayloadPure>[0]['type'],
+      options: Parameters<typeof buildServerExportPackagePayloadPure>[0]['options'] = {},
+    ) =>
+      buildServerExportPackagePayloadPure({
+        type,
+        options,
+        state,
+        derived,
+        tenantPolicy,
+        systemSettings,
+        integritySummary,
+        exportPackages,
+      }),
+    [derived, exportPackages, integritySummary, state, systemSettings, tenantPolicy],
+  );
 
-  // triggerFileDownload wurde in C2.11a nach src/shared/download.ts
-  // ausgelagert und wird dort von den neuen Feature-Hooks
-  // (resiliencePlan/tabletopExercise/gap) direkt konsumiert.
-  //
-  // Die 9 resiliencePlan-Handler (Generator, Workflow, Exports) sind
-  // jetzt in src/features/resiliencePlan/hooks/useResiliencePlanHandlers.ts.
-  // Die 12 tabletopExercise-Handler plus der frueher hier lebende
-  // resolveActiveTabletopScenario-Helper (jetzt als Pure-Function
-  // resolveActiveScenario in features/tabletopExercise/engine.ts) sind
-  // in src/features/tabletopExercise/hooks/useTabletopExerciseHandlers.ts.
-  // Der 1 gap-Handler ist in src/features/gap/hooks/useGapHandlers.ts.
-  // Hook-Call + Destructuring liegt weiter unten bei den anderen
-  // Feature-Hooks.
+  const systemHandlers = usePlatformSystemHandlers({
+    serverSync,
+    clearAuthenticatedContext,
+    buildServerExportPackagePayload,
+    getExportTypeLabel,
+  });
 
-  const moduleOptions = effectiveModuleCatalog.map((module) => ({
-    id: module.id,
-    name: module.name,
-  }));
+  const controlHandlers = usePlatformControlHandlers();
+  const assessmentHandlers = useAssessmentHandlers();
+  const regulatoryHandlers = useRegulatoryHandlers();
+  const riskCatalogHandlers = useRiskCatalogHandlers();
+  const reportingHandlers = useReportingHandlers();
+  const resiliencePlanHandlers = useResiliencePlanHandlers();
+  const gapHandlers = useGapHandlers();
+  const programRolloutHandlers = useProgramRolloutHandlers();
+  const governanceHandlers = useGovernanceHandlers();
+  const operationsHandlers = useOperationsHandlers();
+  const actionHandlers = useActionHandlers();
+  const evidenceHandlers = useEvidenceHandlers({ serverSync });
+  const tabletopHandlers = useTabletopExerciseHandlers({
+    upsertEvidenceDrafts: evidenceHandlers.upsertEvidenceDrafts,
+  });
+
+  // === Prop-Assembly =========================================================
+  const moduleOptions = useMemo(
+    () => effectiveModuleCatalog.map((module) => ({ id: module.id, name: module.name })),
+    [effectiveModuleCatalog],
+  );
   const canExportJson = hasPermission('reports_export');
+
   const projectTopbarProps = buildProjectTopbarProps({
     users: state.users,
     authSession,
@@ -1174,13 +367,14 @@ export default function App() {
     companyProfile: state.companyProfile,
     selectedModuleId: state.selectedModuleId,
     moduleOptions,
-    onSelectActiveUser: selectActiveUser,
-    onSyncNow: handleSyncNow,
+    onSelectActiveUser: controlHandlers.selectActiveUser,
+    onSyncNow: systemHandlers.handleSyncNow,
     onExportJson: handleExportJson,
     onProfileFieldChange: updateProfileField,
     onSelectModule: selectModule,
     canExportJson,
   });
+
   const activeViewPanelProps = buildActiveViewPanelProps({
     activeView: state.activeView,
     readOnlyHint,
@@ -1283,141 +477,141 @@ export default function App() {
     selectedModuleId: state.selectedModuleId,
     feedback,
     onGoToView: setActiveView,
-    onScoreChange: handleScoreChange,
-    onNoteChange: handleNoteChange,
-    onChangeFilter: updateAssessmentFilter,
-    onCreateActionFromQuestion: handleCreateActionFromQuestion,
-    onCreateEvidenceFromQuestion: handleCreateEvidenceFromQuestion,
-    onCreateEmptyAction: handleCreateEmptyAction,
-    onCreateEmptyEvidence: handleCreateEmptyEvidence,
-    onGenerateRecommendationActions: handleGenerateRecommendationActions,
-    onGenerateRequirementActions: handleGenerateRequirementActions,
-    onGenerateModuleActionTemplates: handleGenerateModuleActionTemplates,
-    onGenerateCriticalQuestionEvidence: handleGenerateCriticalQuestionEvidence,
-    onGenerateRequirementEvidence: handleGenerateRequirementEvidence,
-    onGenerateModuleEvidenceTemplates: handleGenerateModuleEvidenceTemplates,
-    onUpdateAction: handleUpdateAction,
-    onDeleteAction: handleDeleteAction,
-    onUpdateEvidence: handleUpdateEvidence,
-    onDeleteEvidence: handleDeleteEvidence,
-    onAttachEvidenceFile: handleAttachEvidenceFile,
-    onRemoveEvidenceFile: handleRemoveEvidenceFile,
-    onDownloadServerFile: handleDownloadServerFile,
-    onLoadEvidenceVersions: handleLoadEvidenceVersions,
-    onRestoreEvidenceVersion: handleRestoreEvidenceVersion,
-    onCreateStakeholder: handleCreateEmptyStakeholder,
-    onCreateSite: handleCreateEmptySite,
-    onCreateAsset: handleCreateEmptyAsset,
-    onGenerateRoleTemplates: handleGenerateRoleTemplates,
-    onUpdateStakeholder: handleUpdateStakeholder,
-    onDeleteStakeholder: handleDeleteStakeholder,
-    onUpdateSite: handleUpdateSite,
-    onDeleteSite: handleDeleteSite,
-    onUpdateAsset: handleUpdateAsset,
-    onDeleteAsset: handleDeleteAsset,
-    onUpdateReviewPlan: updateReviewPlan,
-    onCreateProcess: handleCreateEmptyBusinessProcess,
-    onUpdateProcess: handleUpdateBusinessProcess,
-    onDeleteProcess: handleDeleteBusinessProcess,
-    onCreateDependency: handleCreateEmptyDependency,
-    onUpdateDependency: handleUpdateDependency,
-    onDeleteDependency: handleDeleteDependency,
-    onCreateScenario: handleCreateEmptyScenario,
-    onUpdateScenario: handleUpdateScenario,
-    onDeleteScenario: handleDeleteScenario,
-    onCreateExercise: handleCreateEmptyExercise,
-    onUpdateExercise: handleUpdateExercise,
-    onDeleteExercise: handleDeleteExercise,
-    onGenerateProcessTemplates: handleGenerateProcessTemplates,
-    onGenerateDependencyTemplates: handleGenerateDependencyTemplates,
-    onGenerateScenarioTemplates: handleGenerateScenarioTemplates,
-    onGenerateExerciseTemplates: handleGenerateExerciseTemplates,
-    onSelectActiveUser: selectActiveUser,
+    onScoreChange: assessmentHandlers.handleScoreChange,
+    onNoteChange: assessmentHandlers.handleNoteChange,
+    onChangeFilter: assessmentHandlers.updateAssessmentFilter,
+    onCreateActionFromQuestion: actionHandlers.handleCreateActionFromQuestion,
+    onCreateEvidenceFromQuestion: evidenceHandlers.handleCreateEvidenceFromQuestion,
+    onCreateEmptyAction: actionHandlers.handleCreateEmptyAction,
+    onCreateEmptyEvidence: evidenceHandlers.handleCreateEmptyEvidence,
+    onGenerateRecommendationActions: actionHandlers.handleGenerateRecommendationActions,
+    onGenerateRequirementActions: actionHandlers.handleGenerateRequirementActions,
+    onGenerateModuleActionTemplates: actionHandlers.handleGenerateModuleActionTemplates,
+    onGenerateCriticalQuestionEvidence: evidenceHandlers.handleGenerateCriticalQuestionEvidence,
+    onGenerateRequirementEvidence: evidenceHandlers.handleGenerateRequirementEvidence,
+    onGenerateModuleEvidenceTemplates: evidenceHandlers.handleGenerateModuleEvidenceTemplates,
+    onUpdateAction: actionHandlers.handleUpdateAction,
+    onDeleteAction: actionHandlers.handleDeleteAction,
+    onUpdateEvidence: evidenceHandlers.handleUpdateEvidence,
+    onDeleteEvidence: evidenceHandlers.handleDeleteEvidence,
+    onAttachEvidenceFile: evidenceHandlers.handleAttachEvidenceFile,
+    onRemoveEvidenceFile: evidenceHandlers.handleRemoveEvidenceFile,
+    onDownloadServerFile: systemHandlers.handleDownloadServerFile,
+    onLoadEvidenceVersions: evidenceHandlers.handleLoadEvidenceVersions,
+    onRestoreEvidenceVersion: evidenceHandlers.handleRestoreEvidenceVersion,
+    onCreateStakeholder: governanceHandlers.handleCreateEmptyStakeholder,
+    onCreateSite: governanceHandlers.handleCreateEmptySite,
+    onCreateAsset: governanceHandlers.handleCreateEmptyAsset,
+    onGenerateRoleTemplates: governanceHandlers.handleGenerateRoleTemplates,
+    onUpdateStakeholder: governanceHandlers.handleUpdateStakeholder,
+    onDeleteStakeholder: governanceHandlers.handleDeleteStakeholder,
+    onUpdateSite: governanceHandlers.handleUpdateSite,
+    onDeleteSite: governanceHandlers.handleDeleteSite,
+    onUpdateAsset: governanceHandlers.handleUpdateAsset,
+    onDeleteAsset: governanceHandlers.handleDeleteAsset,
+    onUpdateReviewPlan: governanceHandlers.updateReviewPlan,
+    onCreateProcess: operationsHandlers.handleCreateEmptyBusinessProcess,
+    onUpdateProcess: operationsHandlers.handleUpdateBusinessProcess,
+    onDeleteProcess: operationsHandlers.handleDeleteBusinessProcess,
+    onCreateDependency: operationsHandlers.handleCreateEmptyDependency,
+    onUpdateDependency: operationsHandlers.handleUpdateDependency,
+    onDeleteDependency: operationsHandlers.handleDeleteDependency,
+    onCreateScenario: operationsHandlers.handleCreateEmptyScenario,
+    onUpdateScenario: operationsHandlers.handleUpdateScenario,
+    onDeleteScenario: operationsHandlers.handleDeleteScenario,
+    onCreateExercise: operationsHandlers.handleCreateEmptyExercise,
+    onUpdateExercise: operationsHandlers.handleUpdateExercise,
+    onDeleteExercise: operationsHandlers.handleDeleteExercise,
+    onGenerateProcessTemplates: operationsHandlers.handleGenerateProcessTemplates,
+    onGenerateDependencyTemplates: operationsHandlers.handleGenerateDependencyTemplates,
+    onGenerateScenarioTemplates: operationsHandlers.handleGenerateScenarioTemplates,
+    onGenerateExerciseTemplates: operationsHandlers.handleGenerateExerciseTemplates,
+    onSelectActiveUser: controlHandlers.selectActiveUser,
     userSelectionLocked: Boolean(authSession),
-    onCreateUser: handleCreateUser,
-    onGenerateUsersFromStakeholders: handleGenerateUsersFromStakeholders,
-    onUpdateUser: handleUpdateUser,
-    onDeleteUser: handleDeleteUser,
-    onUpdateComplianceCalendar: updateComplianceCalendar,
+    onCreateUser: controlHandlers.handleCreateUser,
+    onGenerateUsersFromStakeholders: controlHandlers.handleGenerateUsersFromStakeholders,
+    onUpdateUser: controlHandlers.handleUpdateUser,
+    onDeleteUser: controlHandlers.handleDeleteUser,
+    onUpdateComplianceCalendar: regulatoryHandlers.updateComplianceCalendar,
     onToggleAutoSync: setAutoSyncEnabled,
-    onRefreshServer: handleRefreshServer,
-    onSyncNow: handleSyncNow,
-    onCreateSnapshot: handleCreateSnapshotOnServer,
-    onRestoreSnapshot: handleRestoreSnapshot,
-    onLogin: handleServerLogin,
-    onStartOidcLogin: handleStartOidcLogin,
-    onLogout: handleServerLogout,
-    onCreateTenant: handleCreateTenantOnServer,
-    onCreateAccessAccount: handleUpsertAccessAccount,
-    onResetAccessAccountPassword: handleResetAccessAccountPassword,
-    onUpdateTenantPolicy: handleUpdateTenantPolicy,
-    onReleaseExportPackage: handleReleaseRegisteredExport,
-    onDownloadExportPackage: handleDownloadRegisteredExport,
-    onUpdateSystemSettings: handleUpdateSystemSettings,
-    onCreateApiClient: handleCreateApiClientOnServer,
-    onRotateApiClient: handleRotateApiClient,
-    onRevokeApiClient: handleRevokeApiClient,
-    onRunSystemJob: handleRunSystemJobOnServer,
-    onUpdateTenant: handleUpdateTenantAdminMeta,
-    onDownloadJobArtifact: handleDownloadJobArtifact,
+    onRefreshServer: systemHandlers.handleRefreshServer,
+    onSyncNow: systemHandlers.handleSyncNow,
+    onCreateSnapshot: systemHandlers.handleCreateSnapshotOnServer,
+    onRestoreSnapshot: systemHandlers.handleRestoreSnapshot,
+    onLogin: authHandlers.handleServerLogin,
+    onStartOidcLogin: authHandlers.handleStartOidcLogin,
+    onLogout: authHandlers.handleServerLogout,
+    onCreateTenant: authHandlers.handleCreateTenantOnServer,
+    onCreateAccessAccount: authHandlers.handleUpsertAccessAccount,
+    onResetAccessAccountPassword: authHandlers.handleResetAccessAccountPassword,
+    onUpdateTenantPolicy: authHandlers.handleUpdateTenantPolicy,
+    onReleaseExportPackage: systemHandlers.handleReleaseRegisteredExport,
+    onDownloadExportPackage: systemHandlers.handleDownloadRegisteredExport,
+    onUpdateSystemSettings: systemHandlers.handleUpdateSystemSettings,
+    onCreateApiClient: systemHandlers.handleCreateApiClientOnServer,
+    onRotateApiClient: systemHandlers.handleRotateApiClient,
+    onRevokeApiClient: systemHandlers.handleRevokeApiClient,
+    onRunSystemJob: systemHandlers.handleRunSystemJobOnServer,
+    onUpdateTenant: systemHandlers.handleUpdateTenantAdminMeta,
+    onDownloadJobArtifact: systemHandlers.handleDownloadJobArtifact,
     onClearIssuedSecret: () => setIssuedClientSecret(null),
-    onUpdateRolloutPlan: updateRolloutPlan,
-    onCreateEmptyHardeningCheck: handleCreateEmptyHardeningCheck,
-    onGenerateHardeningBaseline: handleGenerateHardeningBaseline,
-    onUpdateHardeningCheck: handleUpdateHardeningCheck,
-    onDeleteHardeningCheck: handleDeleteHardeningCheck,
-    onCreateEmptyRunbook: handleCreateEmptyRunbook,
-    onGenerateRunbookTemplates: handleGenerateRunbookTemplates,
-    onUpdateRunbook: handleUpdateRunbook,
-    onDeleteRunbook: handleDeleteRunbook,
-    onCreateEmptyReleaseGate: handleCreateEmptyReleaseGate,
-    onGenerateReleaseGateBaseline: handleGenerateReleaseGateBaseline,
-    onUpdateReleaseGate: handleUpdateReleaseGate,
-    onDeleteReleaseGate: handleDeleteReleaseGate,
-    onRefreshIntegritySummary: handleRefreshIntegritySummary,
-    onCreateHandoverBundle: handleCreateHandoverBundle,
+    onUpdateRolloutPlan: programRolloutHandlers.updateRolloutPlan,
+    onCreateEmptyHardeningCheck: programRolloutHandlers.handleCreateEmptyHardeningCheck,
+    onGenerateHardeningBaseline: programRolloutHandlers.handleGenerateHardeningBaseline,
+    onUpdateHardeningCheck: programRolloutHandlers.handleUpdateHardeningCheck,
+    onDeleteHardeningCheck: programRolloutHandlers.handleDeleteHardeningCheck,
+    onCreateEmptyRunbook: programRolloutHandlers.handleCreateEmptyRunbook,
+    onGenerateRunbookTemplates: programRolloutHandlers.handleGenerateRunbookTemplates,
+    onUpdateRunbook: programRolloutHandlers.handleUpdateRunbook,
+    onDeleteRunbook: programRolloutHandlers.handleDeleteRunbook,
+    onCreateEmptyReleaseGate: programRolloutHandlers.handleCreateEmptyReleaseGate,
+    onGenerateReleaseGateBaseline: programRolloutHandlers.handleGenerateReleaseGateBaseline,
+    onUpdateReleaseGate: programRolloutHandlers.handleUpdateReleaseGate,
+    onDeleteReleaseGate: programRolloutHandlers.handleDeleteReleaseGate,
+    onRefreshIntegritySummary: systemHandlers.handleRefreshIntegritySummary,
+    onCreateHandoverBundle: systemHandlers.handleCreateHandoverBundle,
     onSelectModule: selectModule,
-    onImportFiles: handleImportFiles,
-    onActivatePack: handleActivateModulePack,
-    onRetirePack: handleRetireModulePack,
+    onImportFiles: systemHandlers.handleImportFiles,
+    onActivatePack: systemHandlers.handleActivateModulePack,
+    onRetirePack: systemHandlers.handleRetireModulePack,
     canManageRegistry: hasPermission('modules_manage') && serverMode === 'connected',
-    onUpdateJurisdiction: updateJurisdiction,
-    onUpdateRegulatoryProfileField: updateRegulatoryProfileField,
-    onUpdateRegimeScope: updateRegimeScope,
+    onUpdateJurisdiction: regulatoryHandlers.updateJurisdiction,
+    onUpdateRegulatoryProfileField: regulatoryHandlers.updateRegulatoryProfileField,
+    onUpdateRegimeScope: regulatoryHandlers.updateRegimeScope,
     onChangeRequirementStatus: handleRequirementChange,
-    onCreateActionFromRequirement: handleCreateActionFromRequirement,
-    onCreateEvidenceFromRequirement: handleCreateEvidenceFromRequirement,
-    onUpdateCertificationField: updateCertificationField,
-    onUpdateCertificationStage: updateCertificationStage,
-    onUpdateChecklistState: updateChecklistState,
-    onCreateFinding: handleCreateFinding,
-    onGenerateFindingsFromChecklist: handleGenerateFindingsFromChecklist,
-    onUpdateFinding: handleUpdateFinding,
-    onDeleteFinding: handleDeleteFinding,
-    onCreateCertificationDossier: handleCreateServerExportPackage,
-    onExportMarkdown: handleExportMarkdown,
-    onExportManagementPdf: handleExportManagementPdf,
-    onExportAuditPdf: handleExportAuditPdf,
-    onExportFormalHtml: handleExportFormalHtml,
-    onExportGapAnalysisDocx: handleExportGapAnalysisDocx,
-    onSaveRiskEntry: handleSaveRiskEntry,
-    onDeleteRiskEntry: handleDeleteRiskEntry,
-    onExportRiskEntriesJson: handleExportRiskEntriesJson,
-    onExportRiskAnalysisDocx: handleExportRiskAnalysisDocx,
+    onCreateActionFromRequirement: actionHandlers.handleCreateActionFromRequirement,
+    onCreateEvidenceFromRequirement: evidenceHandlers.handleCreateEvidenceFromRequirement,
+    onUpdateCertificationField: regulatoryHandlers.updateCertificationField,
+    onUpdateCertificationStage: regulatoryHandlers.updateCertificationStage,
+    onUpdateChecklistState: regulatoryHandlers.updateChecklistState,
+    onCreateFinding: regulatoryHandlers.handleCreateFinding,
+    onGenerateFindingsFromChecklist: regulatoryHandlers.handleGenerateFindingsFromChecklist,
+    onUpdateFinding: regulatoryHandlers.handleUpdateFinding,
+    onDeleteFinding: regulatoryHandlers.handleDeleteFinding,
+    onCreateCertificationDossier: systemHandlers.handleCreateServerExportPackage,
+    onExportMarkdown: reportingHandlers.handleExportMarkdown,
+    onExportManagementPdf: reportingHandlers.handleExportManagementPdf,
+    onExportAuditPdf: reportingHandlers.handleExportAuditPdf,
+    onExportFormalHtml: reportingHandlers.handleExportFormalHtml,
+    onExportGapAnalysisDocx: gapHandlers.handleExportGapAnalysisDocx,
+    onSaveRiskEntry: riskCatalogHandlers.handleSaveRiskEntry,
+    onDeleteRiskEntry: riskCatalogHandlers.handleDeleteRiskEntry,
+    onExportRiskEntriesJson: riskCatalogHandlers.handleExportRiskEntriesJson,
+    onExportRiskAnalysisDocx: riskCatalogHandlers.handleExportRiskAnalysisDocx,
     riskEntries: state.riskEntries,
     resiliencePlan: state.resiliencePlan,
     archivedResiliencePlans: state.archivedResiliencePlans,
     canEditResiliencePlan: hasPermission('kritis_edit'),
     canExportResiliencePlan: hasPermission('reports_export'),
-    onGenerateResiliencePlanDraft: handleGenerateResiliencePlanDraft,
-    onSaveResiliencePlan: handleSaveResiliencePlan,
-    onSubmitResiliencePlanForReview: handleSubmitResiliencePlanForReview,
-    onApproveResiliencePlan: handleApproveResiliencePlan,
-    onReturnResiliencePlanToDraft: handleReturnResiliencePlanToDraft,
-    onArchiveResiliencePlan: handleArchiveResiliencePlan,
-    onExportResiliencePlanJson: handleExportResiliencePlanJson,
-    onExportResiliencePlanDocx: handleExportResiliencePlanDocx,
-    onExportResiliencePlanPdf: handleExportResiliencePlanPdf,
+    onGenerateResiliencePlanDraft: resiliencePlanHandlers.handleGenerateResiliencePlanDraft,
+    onSaveResiliencePlan: resiliencePlanHandlers.handleSaveResiliencePlan,
+    onSubmitResiliencePlanForReview: resiliencePlanHandlers.handleSubmitResiliencePlanForReview,
+    onApproveResiliencePlan: resiliencePlanHandlers.handleApproveResiliencePlan,
+    onReturnResiliencePlanToDraft: resiliencePlanHandlers.handleReturnResiliencePlanToDraft,
+    onArchiveResiliencePlan: resiliencePlanHandlers.handleArchiveResiliencePlan,
+    onExportResiliencePlanJson: resiliencePlanHandlers.handleExportResiliencePlanJson,
+    onExportResiliencePlanDocx: resiliencePlanHandlers.handleExportResiliencePlanDocx,
+    onExportResiliencePlanPdf: resiliencePlanHandlers.handleExportResiliencePlanPdf,
     tabletopBuiltInScenarios,
     tabletopImportedScenarios: state.importedTabletopScenarios,
     currentTabletopSession: state.currentTabletopSession,
@@ -1431,35 +625,28 @@ export default function App() {
     canExportTabletopExercise: hasPermission('reports_export'),
     tabletopActiveTab,
     onSelectTabletopTab: setTabletopActiveTab,
-    onStartTabletopExercise: handleStartTabletopExercise,
-    onImportTabletopScenario: handleImportTabletopScenario,
-    onRemoveImportedTabletopScenario: handleRemoveImportedTabletopScenario,
-    onBeginTabletopSession: handleBeginTabletopSession,
-    onAcknowledgeTabletopInject: handleAcknowledgeTabletopInject,
-    onRecordTabletopDecision: handleRecordTabletopDecision,
-    onAdvanceTabletopStep: handleAdvanceTabletopStep,
-    onCompleteTabletopSession: handleCompleteTabletopSession,
-    onAbandonTabletopSession: handleAbandonTabletopSession,
-    onUpdateTabletopNotes: handleUpdateTabletopNotes,
-    onCreateTabletopEvidenceFromResult: handleCreateTabletopEvidenceFromResult,
-    onExportTabletopResultJson: handleExportTabletopResultJson,
-    onCreateServerPackage: handleCreateServerExportPackage,
+    onStartTabletopExercise: tabletopHandlers.handleStartTabletopExercise,
+    onImportTabletopScenario: tabletopHandlers.handleImportTabletopScenario,
+    onRemoveImportedTabletopScenario: tabletopHandlers.handleRemoveImportedTabletopScenario,
+    onBeginTabletopSession: tabletopHandlers.handleBeginTabletopSession,
+    onAcknowledgeTabletopInject: tabletopHandlers.handleAcknowledgeTabletopInject,
+    onRecordTabletopDecision: tabletopHandlers.handleRecordTabletopDecision,
+    onAdvanceTabletopStep: tabletopHandlers.handleAdvanceTabletopStep,
+    onCompleteTabletopSession: tabletopHandlers.handleCompleteTabletopSession,
+    onAbandonTabletopSession: tabletopHandlers.handleAbandonTabletopSession,
+    onUpdateTabletopNotes: tabletopHandlers.handleUpdateTabletopNotes,
+    onCreateTabletopEvidenceFromResult: tabletopHandlers.handleCreateTabletopEvidenceFromResult,
+    onExportTabletopResultJson: tabletopHandlers.handleExportTabletopResultJson,
+    onCreateServerPackage: systemHandlers.handleCreateServerExportPackage,
   });
 
-  // App-Shell-Effects (Bootstrap, Notice-Dismiss-Timer, LocalStorage-
-  // Persistenz). Bootstrap feuert NACH dem ref-wiring-useEffect oben,
-  // sodass clearAuthenticatedContextRef.current gesetzt ist, falls
-  // der erste loadStateFromServer-Call direkt eine 401-Antwort
-  // bekommt (Invariante 3).
+  // === App-Shell-Effects (Bootstrap, Notice-Timer, Persistenz) ===============
   useAppShellEffects({
-    loadStateFromServer,
+    loadStateFromServer: serverSync.loadStateFromServer,
     notice,
     setNotice,
     state,
   });
-
-  // Module-Selection-Guard (fachlich modules-nah, siehe JSDoc in
-  // src/app/effects/useModuleSelectionGuard.ts).
   useModuleSelectionGuard(state.selectedModuleId, effectiveModuleCatalog, setState);
 
   return (

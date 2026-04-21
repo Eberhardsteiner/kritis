@@ -1,20 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import type { AnswerEntry, AssessmentFilters } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
-
-/**
- * Abhaengigkeiten des Assessment-Hooks.
- *
- * Aktuell nur die Basis-Felder von FeatureHandlerDependencies; keine
- * Fach-Kontext-Felder noetig, weil handleScoreChange / handleNoteChange
- * ausschliesslich auf state.answers arbeiten und updateAssessmentFilter
- * ausschliesslich auf state.assessmentFilters. Der leere Extension-Point
- * bleibt bewusst stehen, damit kuenftige assessment-spezifische
- * Abhaengigkeiten (z. B. Question-Templates fuer Batch-Operations) hier
- * additiv ergaenzt werden koennen, ohne Import-Pfade bei Konsumenten
- * zu aendern.
- */
-export interface AssessmentHandlerDependencies extends FeatureHandlerDependencies {}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
 
 export interface AssessmentHandlers {
   updateAssessmentFilter: (patch: Partial<AssessmentFilters>) => void;
@@ -27,14 +13,15 @@ export interface AssessmentHandlers {
  *
  * - updateAssessmentFilter ist reiner UI-State (Filter-Toggle) und
  *   laeuft bewusst OHNE runWithPermission, damit anonyme Leser
- *   filtern koennen. Das Verhalten ist 1:1 aus App.tsx uebernommen.
+ *   filtern koennen.
  * - handleScoreChange und handleNoteChange sind permission-gegated
  *   ('assessment_edit').
+ *
+ * C2.11d: Kein Dep-Interface mehr — setState und runWithPermission
+ * kommen aus useWorkspaceState().
  */
-export function useAssessmentHandlers(
-  deps: AssessmentHandlerDependencies,
-): AssessmentHandlers {
-  const { setState, runWithPermission } = deps;
+export function useAssessmentHandlers(): AssessmentHandlers {
+  const { setState, runWithPermission } = useWorkspaceState();
 
   const updateAssessmentFilter = useCallback(
     (patch: Partial<AssessmentFilters>) => {

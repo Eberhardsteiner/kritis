@@ -19,8 +19,9 @@
  * │        lastSyncedPayloadRef.current === serializeServerPayload(newState)│
  * │      Die Zeile MUSS vor setState laufen, damit der nächste Effect-Tick  │
  * │      den Push nicht erneut ausführt.                                    │
- * │  (3) Bei HTTP 401 wird clearAuthenticatedContext() SOFORT aufgerufen,   │
- * │      nicht asynchron via Ref-Indirection.                                │
+ * │  (3) Bei HTTP 401 wird clearAuthenticatedContext() SOFORT aufgerufen —   │
+ * │      direkt, nicht über Ref-Indirection (C2.11d, Pure-Helper in          │
+ * │      features/platform/clearAuthenticatedContext.ts).                    │
  * │  (4) Bei HTTP 409 (Conflict) darf KEIN setState ausgelöst werden; nur   │
  * │      setSyncError, setServerMode('error'), updateServerStateMarkers.    │
  * │  (5) useEffect-Dep-Array bleibt [state, autoSyncEnabled, serverMode] —  │
@@ -29,29 +30,16 @@
  * └─────────────────────────────────────────────────────────────────────────┘
  */
 import { useCallback, useEffect, useMemo } from 'react';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type {
   ApiClientScope,
-  ApiClientSummary,
   AppState,
-  AuthSession,
   ExportPackageEntry,
   ExportPackageType,
-  HostingReadinessSummary,
-  IntegritySummary,
   JobRunSummary,
   JobRunType,
-  ModulePackRegistryEntry,
-  ObservabilitySummary,
-  PermissionKey,
-  RestoreDrillSummary,
-  SecurityGateSummary,
-  ServerMode,
   SectorModuleDefinition,
-  SnapshotInfo,
   SystemSettings,
   TenantSummary,
-  UserItem,
 } from '../../../types';
 import {
   activateModulePack,
@@ -73,75 +61,23 @@ import {
   type ExportPackageCreatePayload,
 } from '../../../lib/serverApi';
 import { builtInModules, parseAndValidateModule } from '../../../lib/moduleRegistry';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   buildServerPayload,
   serializeServerPayload,
 } from '../serverPayload';
 import { isApiStatus } from '../../../shared/httpError';
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { applyRemoteState } from '../../../app/state/buildAppState';
+import type { ServerSyncHandlers } from '../../../app/serverSync/useServerSync';
 
 /**
- * Lokale Kopie der ImportFeedback-Shape aus App.tsx (Zeile 213).
- * App.tsx definiert das Interface nur lokal — wird bei einer späteren
- * C-Iteration gemeinsam nach src/shared/featureHandlerDependencies.ts
- * gezogen, sobald weitere Hooks setFeedback brauchen.
+ * C2.11d: Das frueher 35-Feld-Dep-Interface ist auf die vier nicht-
+ * Context-Quellen reduziert. State, Setter, Refs und App-Shell-Helpers
+ * kommen aus `useWorkspaceState()`.
  */
-interface ImportFeedbackShape {
-  type: 'success' | 'error' | 'info';
-  text: string;
-  details?: string[];
-}
-
-export interface PlatformSystemHandlerDependencies extends FeatureHandlerDependencies {
-  // === Auth-/Session-Read-State ==============================================
-  authToken: string;
-  authSession: AuthSession | null;
-  activeUser: UserItem | null;
-  serverMode: ServerMode;
-  setServerMode: Dispatch<SetStateAction<ServerMode>>;
-  serverAuthRequired: boolean;
-  autoSyncEnabled: boolean;
-  hasPermission: (permission: PermissionKey) => boolean;
-  serverStateVersion: number | null;
-  serverStateUpdatedAt: string;
-
-  // === Sync-/Status-Setter ====================================================
-  setSyncError: Dispatch<SetStateAction<string>>;
-  setLastServerSyncAt: Dispatch<SetStateAction<string>>;
-  updateServerStateMarkers: (
-    version?: number | null,
-    updatedAt?: string | null,
-  ) => void;
-
-  // === Domain-State-Setter (System/Export/Modul) ==============================
-  setSnapshots: Dispatch<SetStateAction<SnapshotInfo[]>>;
-  setExportPackages: Dispatch<SetStateAction<ExportPackageEntry[]>>;
-  setApiClients: Dispatch<SetStateAction<ApiClientSummary[]>>;
-  setSystemJobs: Dispatch<SetStateAction<JobRunSummary[]>>;
-  setSystemSettings: Dispatch<SetStateAction<SystemSettings>>;
-  setIntegritySummary: Dispatch<SetStateAction<IntegritySummary | null>>;
-  setModuleRegistryEntries: Dispatch<SetStateAction<ModulePackRegistryEntry[]>>;
-  setIssuedClientSecret: Dispatch<
-    SetStateAction<{ label: string; secret: string; mode: 'created' | 'rotated' } | null>
-  >;
-  setAvailableTenants: Dispatch<SetStateAction<TenantSummary[]>>;
-  setFeedback: Dispatch<SetStateAction<ImportFeedbackShape | null>>;
-
-  // === Refs + Callbacks =======================================================
-  serverInitializedRef: MutableRefObject<boolean>;
-  suppressNextServerSyncRef: MutableRefObject<boolean>;
-  lastSyncedPayloadRef: MutableRefObject<string>;
+export interface PlatformSystemHandlerDependencies {
+  serverSync: ServerSyncHandlers;
   clearAuthenticatedContext: (message?: string) => void;
-  loadStateFromServer: () => Promise<boolean>;
-  refreshServerSideData: (
-    token?: string,
-    session?: AuthSession | null,
-  ) => Promise<void>;
-  applyRemoteState: (
-    remoteState: Partial<AppState>,
-    currentState: AppState,
-    session?: AuthSession | null,
-  ) => AppState;
   buildServerExportPackagePayload: (
     type: ExportPackageType,
     options: {
@@ -152,9 +88,6 @@ export interface PlatformSystemHandlerDependencies extends FeatureHandlerDepende
     },
   ) => ExportPackageCreatePayload;
   getExportTypeLabel: (type: ExportPackageType) => string;
-  extractErrorDetails: (error: unknown) => string[] | undefined;
-  // isApiStatus-Dep in C2.11b entfernt — Hook importiert jetzt
-  // direkt aus src/shared/httpError.ts.
 }
 
 export interface PlatformSystemHandlers {
@@ -223,6 +156,14 @@ export function usePlatformSystemHandlers(
   deps: PlatformSystemHandlerDependencies,
 ): PlatformSystemHandlers {
   const {
+    serverSync,
+    clearAuthenticatedContext,
+    buildServerExportPackagePayload,
+    getExportTypeLabel,
+  } = deps;
+  const { loadStateFromServer, refreshServerSideData, updateServerStateMarkers } = serverSync;
+  const ws = useWorkspaceState();
+  const {
     state,
     setState,
     showNotice,
@@ -238,7 +179,6 @@ export function usePlatformSystemHandlers(
     serverStateUpdatedAt,
     setSyncError,
     setLastServerSyncAt,
-    updateServerStateMarkers,
     setSnapshots,
     setExportPackages,
     setApiClients,
@@ -252,14 +192,8 @@ export function usePlatformSystemHandlers(
     serverInitializedRef,
     suppressNextServerSyncRef,
     lastSyncedPayloadRef,
-    clearAuthenticatedContext,
-    loadStateFromServer,
-    refreshServerSideData,
-    applyRemoteState,
-    buildServerExportPackagePayload,
-    getExportTypeLabel,
     extractErrorDetails,
-  } = deps;
+  } = ws;
 
   // =========================================================================
   // pushStateToServer: Core-Sync (siehe Invariants (2), (3), (4) oben)

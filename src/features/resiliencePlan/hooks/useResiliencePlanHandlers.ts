@@ -19,14 +19,6 @@
  * Download-Utility kommt aus `src/shared/download.ts`.
  */
 import { useCallback, useMemo } from 'react';
-import type {
-  AuthSession,
-  CompanyProfile,
-  PermissionKey,
-  SectorModuleDefinition,
-  TenantSummary,
-} from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { triggerFileDownload } from '../../../shared/download';
 import { generateDraft as generateResiliencePlanDraft } from '../generator';
 import {
@@ -42,30 +34,8 @@ import {
   renderResiliencePlanPdfBlob,
 } from '../renderers/pdfRenderer';
 import type { ResiliencePlan } from '../types';
-
-export interface ResiliencePlanHandlerDependencies extends FeatureHandlerDependencies {
-  // === Permission-Gate =======================================================
-  // Drei Export-Handler nutzen zusaetzlich hasPermission('reports_export'),
-  // weil sie kein setState machen — sie erzeugen Blobs und triggern
-  // Downloads. Die sechs state-write-Handler nutzen runWithPermission
-  // mit 'kritis_edit'.
-  hasPermission: (permission: PermissionKey) => boolean;
-
-  // === Fach-Kontext =========================================================
-  currentModule: SectorModuleDefinition;
-  companyProfile: CompanyProfile;
-
-  // === Tenant-Kontext (fuer Generator-Tenant-ID) =============================
-  // handleGenerateResiliencePlanDraft schreibt eine tenantId in den Plan.
-  // Ableitung: authSession.tenantId > publicTenant.id > 'local'.
-  authSession: AuthSession | null;
-  publicTenant: TenantSummary | null;
-
-  // === Fach-Kontext (nur Generator, aus useAppDerivedState) ==================
-  // regulatoryProfile wird nur von handleGenerateResiliencePlanDraft
-  // als Generator-Input genutzt.
-  regulatoryProfile: import('../../../types').RegulatoryProfile;
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface ResiliencePlanHandlers {
   handleGenerateResiliencePlanDraft: () => void;
@@ -79,21 +49,22 @@ export interface ResiliencePlanHandlers {
   handleExportResiliencePlanPdf: () => void;
 }
 
-export function useResiliencePlanHandlers(
-  deps: ResiliencePlanHandlerDependencies,
-): ResiliencePlanHandlers {
+/**
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
+ */
+export function useResiliencePlanHandlers(): ResiliencePlanHandlers {
   const {
     state,
     setState,
     runWithPermission,
     showNotice,
     hasPermission,
-    currentModule,
-    companyProfile,
     authSession,
     publicTenant,
-    regulatoryProfile,
-  } = deps;
+  } = useWorkspaceState();
+  const { currentModule, regulatoryProfile } = useAppDerivedState();
+  const companyProfile = state.companyProfile;
 
   // =========================================================================
   // Generator + Persistenz

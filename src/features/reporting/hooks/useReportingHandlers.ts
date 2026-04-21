@@ -18,75 +18,14 @@
  * `features/reporting/index.ts`.
  */
 import { useCallback, useMemo } from 'react';
-import type {
-  ActionItem,
-  AuditFindingItem,
-  AuditFindingSummary,
-  BenchmarkSnapshot,
-  CertificationProgress,
-  ChecklistProgress,
-  DeadlineSummary,
-  DocumentLibrarySummary,
-  EvidenceItem,
-  EvidenceSummary,
-  GovernanceSummary,
-  KritisApplicability,
-  PermissionKey,
-  RegulatoryProfile,
-  RegulatoryRegimeSummary,
-  RequirementDefinition,
-  ScoreSnapshot,
-  SectorModuleDefinition,
-  SiteItem,
-  StakeholderItem,
-} from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   exportAuditPackAsPdf,
   exportFormalAuditReportAsHtml,
   exportManagementReportAsMarkdown,
   exportManagementReportAsPdf,
 } from '../../../lib/exporters';
-
-export interface ReportingHandlerDependencies extends FeatureHandlerDependencies {
-  // === Permission-Gate =======================================================
-  // Alle 4 Export-Handler nutzen `hasPermission('reports_export')` mit
-  // Notice bei Fehlschlag — sie brechen dann ab, ohne setState zu
-  // triggern. Deshalb sind `setState` und `runWithPermission` aus
-  // FeatureHandlerDependencies in diesem Hook bewusst ungenutzt:
-  // reporting ist **read-only** und gate't ueber hasPermission statt
-  // ueber runWithPermission. Das ist ein bewusster Unterschied zum
-  // Muster aller anderen bisherigen Feature-Hooks und wird als
-  // Datenpunkt fuer die C2-Meta-Review (BLOCK-C.md Abschnitt 9)
-  // vermerkt.
-  hasPermission: (permission: PermissionKey) => boolean;
-
-  // === Fach-Kontext (aus useAppDerivedState) ================================
-  currentModule: SectorModuleDefinition;
-  regulatoryProfile: RegulatoryProfile;
-  regimeSummaries: RegulatoryRegimeSummary[];
-  kritisApplicability: KritisApplicability;
-  activeRequirements: RequirementDefinition[];
-
-  // === Scope-gefilterte Listen (Modul-Filter aus useAppDerivedState) =========
-  currentActionItems: ActionItem[];
-  currentEvidenceItems: EvidenceItem[];
-  currentStakeholders: StakeholderItem[];
-  currentSites: SiteItem[];
-  currentFindings: AuditFindingItem[];
-
-  // === Abgeleitete Summaries (aus useAppDerivedState) ========================
-  scoreSnapshot: ScoreSnapshot;
-  benchmarkSnapshot: BenchmarkSnapshot;
-  requirementProgress: { score: number; openCount: number; readyCount: number };
-  evidenceSummary: EvidenceSummary;
-  governanceSummary: GovernanceSummary;
-  checklistProgress: ChecklistProgress;
-  findingSummary: AuditFindingSummary;
-  certificationProgress: CertificationProgress;
-  documentLibrarySummary: DocumentLibrarySummary;
-  deadlineSummary: DeadlineSummary;
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface ReportingHandlers {
   handleExportMarkdown: () => void;
@@ -95,13 +34,14 @@ export interface ReportingHandlers {
   handleExportAuditPdf: () => void;
 }
 
-export function useReportingHandlers(
-  deps: ReportingHandlerDependencies,
-): ReportingHandlers {
+/**
+ * C2.11d: Dep-Interface entfernt. reporting bleibt das read-only-
+ * Feature — `setState` und `runWithPermission` werden nicht genutzt;
+ * Gate laeuft ueber `hasPermission('reports_export')`.
+ */
+export function useReportingHandlers(): ReportingHandlers {
+  const { state, showNotice, hasPermission } = useWorkspaceState();
   const {
-    state,
-    showNotice,
-    hasPermission,
     currentModule,
     regulatoryProfile,
     regimeSummaries,
@@ -122,7 +62,7 @@ export function useReportingHandlers(
     certificationProgress,
     documentLibrarySummary,
     deadlineSummary,
-  } = deps;
+  } = useAppDerivedState();
 
   // =========================================================================
   // Management-Report · Markdown

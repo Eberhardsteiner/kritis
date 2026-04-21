@@ -1,33 +1,14 @@
 import { useCallback, useMemo } from 'react';
 import type {
   BusinessProcessItem,
-  BusinessProcessTemplateDefinition,
   DependencyItem,
-  DependencyTemplateDefinition,
   ExerciseItem,
-  ExerciseTemplateDefinition,
   ScenarioItem,
-  ScenarioTemplateDefinition,
-  SectorModuleDefinition,
 } from '../../../types';
 import { createId } from '../../../shared/ids';
 import { getDateOffset } from '../../../shared/dates';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
-
-/**
- * Abhaengigkeiten fuer den Operations-Hook. Umfasst die Template-
- * Pools aller vier Sub-Domaenen (BIA-Prozesse, Abhaengigkeiten,
- * Krisenszenarien, Uebungen), damit die Generate-Handler die
- * Modulvorlagen in gefuellte Items uebersetzen koennen.
- */
-export interface OperationsHandlerDependencies extends FeatureHandlerDependencies {
-  // Fach-Kontext
-  currentModule: SectorModuleDefinition;
-  processTemplates: BusinessProcessTemplateDefinition[];
-  dependencyTemplates: DependencyTemplateDefinition[];
-  scenarioTemplates: ScenarioTemplateDefinition[];
-  exerciseTemplates: ExerciseTemplateDefinition[];
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface OperationsHandlers {
   handleCreateEmptyBusinessProcess: () => void;
@@ -80,18 +61,15 @@ export interface OperationsHandlers {
  *  - handleGenerateExerciseTemplates analog mit scenarioMap aus
  *    current.scenarios.
  */
-export function useOperationsHandlers(
-  deps: OperationsHandlerDependencies,
-): OperationsHandlers {
+export function useOperationsHandlers(): OperationsHandlers {
+  const { setState, runWithPermission } = useWorkspaceState();
   const {
-    setState,
-    runWithPermission,
     currentModule,
     processTemplates,
     dependencyTemplates,
     scenarioTemplates,
     exerciseTemplates,
-  } = deps;
+  } = useAppDerivedState();
 
   // === BIA-Prozesse =========================================================
 

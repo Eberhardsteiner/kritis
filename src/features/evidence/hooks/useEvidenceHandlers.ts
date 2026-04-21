@@ -1,21 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type {
-  AppState,
-  AuthSession,
-  DocumentVersionEntry,
   EvidenceAttachment,
   EvidenceItem,
-  EvidenceTemplateDefinition,
-  PermissionKey,
   QuestionDefinition,
-  RecommendationItem,
-  RequirementDefinition,
-  SectorModuleDefinition,
-  ServerMode,
-  TenantPolicy,
 } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   fetchEvidenceVersions,
   removeEvidenceAttachment,
@@ -37,51 +25,20 @@ import {
 import { guessEvidenceType } from '../normalizers';
 import { readFileAsDataUrl } from '../utils';
 import { clearEvidenceRefsFromFindings } from '../../regulatory';
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
+import { serializeServerPayload } from '../../platform/serverPayload';
+import type { ServerSyncHandlers } from '../../../app/serverSync/useServerSync';
 
 /**
- * Abhaengigkeiten fuer den Evidence-Hook.
- *
- * Gruppiert nach Zustaendigkeit -- die Gruppen sind bewusst
- * ausgewiesen, damit bei der geplanten Basis-Interface-Extraktion
- * (FeatureHandlerDependencies, C2.4 Phase 2) die Kern-Gruppe sauber
- * abgezogen werden kann. Die Server-Sync-Gruppe wandert bei C2.7
- * platform voraussichtlich in eine eigene Abstraktion -- bis dahin
- * bleiben die Refs und Setter direkt durchgereicht.
+ * C2.11d: Das 23-Feld-Dep-Interface ist auf die cross-Hook-Quelle
+ * (ServerSyncHandlers) reduziert. State, Setter, Refs und Fach-Kontext
+ * (currentModule, Lookups, activeRequirements, evidenceTemplates,
+ * documentFolders, scoreSnapshot.recommendations) kommen aus
+ * useWorkspaceState() bzw. useAppDerivedState().
  */
-export interface EvidenceHandlerDependencies extends FeatureHandlerDependencies {
-  // === Fach-Kontext (Drafts, Lookups) =======================================
-  currentModule: SectorModuleDefinition;
-  tenantPolicy: TenantPolicy;
-  documentFolders: string[];
-  questionLookup: Map<string, QuestionDefinition>;
-  requirementLookup: Map<string, RequirementDefinition>;
-  activeRequirements: RequirementDefinition[];
-  recommendations: RecommendationItem[];
-  evidenceTemplates: EvidenceTemplateDefinition[];
-
-  // === Server-Sync-Pipeline (Upload / Versions) ==============================
-  hasPermission: (permission: PermissionKey) => boolean;
-  serverMode: ServerMode;
-  authToken: string;
-  authSession: AuthSession | null;
-  setEvidenceVersionMap: Dispatch<
-    SetStateAction<Record<string, DocumentVersionEntry[]>>
-  >;
-  setLastServerSyncAt: Dispatch<SetStateAction<string>>;
-  setSyncError: Dispatch<SetStateAction<string>>;
-  setServerMode: Dispatch<SetStateAction<ServerMode>>;
-  updateServerStateMarkers: (
-    version?: number | null,
-    updatedAt?: string | null,
-  ) => void;
-  refreshServerSideData: (
-    token?: string,
-    session?: AuthSession | null,
-  ) => Promise<void>;
-  serializeServerPayload: (state: AppState) => string;
-  lastSyncedPayloadRef: MutableRefObject<string>;
-  suppressNextServerSyncRef: MutableRefObject<boolean>;
-  extractErrorDetails: (error: unknown) => string[] | undefined;
+export interface EvidenceHandlerDependencies {
+  serverSync: ServerSyncHandlers;
 }
 
 export interface EvidenceHandlers {
@@ -131,19 +88,15 @@ export interface EvidenceHandlers {
 export function useEvidenceHandlers(
   deps: EvidenceHandlerDependencies,
 ): EvidenceHandlers {
+  const { serverSync } = deps;
+  const { refreshServerSideData, updateServerStateMarkers } = serverSync;
+  const ws = useWorkspaceState();
   const {
     state,
     setState,
     runWithPermission,
     showNotice,
-    currentModule,
     tenantPolicy,
-    documentFolders,
-    questionLookup,
-    requirementLookup,
-    activeRequirements,
-    recommendations,
-    evidenceTemplates,
     hasPermission,
     serverMode,
     authToken,
@@ -152,13 +105,21 @@ export function useEvidenceHandlers(
     setLastServerSyncAt,
     setSyncError,
     setServerMode,
-    updateServerStateMarkers,
-    refreshServerSideData,
-    serializeServerPayload,
     lastSyncedPayloadRef,
     suppressNextServerSyncRef,
     extractErrorDetails,
-  } = deps;
+  } = ws;
+  const derived = useAppDerivedState();
+  const {
+    currentModule,
+    documentFolders,
+    questionLookup,
+    requirementLookup,
+    activeRequirements,
+    evidenceTemplates,
+    scoreSnapshot,
+  } = derived;
+  const recommendations = scoreSnapshot.recommendations;
 
   const draftContext: EvidenceDraftContext = useMemo(
     () => ({

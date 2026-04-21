@@ -26,6 +26,5 @@ export { QuestionCard } from './components/QuestionCard';
 
 export {
   useAssessmentHandlers,
-  type AssessmentHandlerDependencies,
   type AssessmentHandlers,
 } from './hooks/useAssessmentHandlers';

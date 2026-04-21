@@ -25,7 +25,6 @@ export { ResilienceView } from './views/ResilienceView';
 
 export {
   useOperationsHandlers,
-  type OperationsHandlerDependencies,
   type OperationsHandlers,
 } from './hooks/useOperationsHandlers';
 

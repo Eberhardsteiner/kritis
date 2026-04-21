@@ -24,7 +24,6 @@ export { RolloutView } from './views/RolloutView';
 
 export {
   useProgramRolloutHandlers,
-  type ProgramRolloutHandlerDependencies,
   type ProgramRolloutHandlers,
 } from './hooks/useProgramRolloutHandlers';
 

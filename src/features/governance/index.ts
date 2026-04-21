@@ -20,7 +20,6 @@ export { GovernanceView } from './views/GovernanceView';
 
 export {
   useGovernanceHandlers,
-  type GovernanceHandlerDependencies,
   type GovernanceHandlers,
 } from './hooks/useGovernanceHandlers';
 

@@ -1,43 +1,14 @@
 import { useCallback, useMemo } from 'react';
-import type {
-  ActionItem,
-  ActionTemplateDefinition,
-  QuestionDefinition,
-  RecommendationItem,
-  RequirementDefinition,
-  SectorModuleDefinition,
-} from '../../../types';
+import type { ActionItem, QuestionDefinition } from '../../../types';
 import { createId } from '../../../shared/ids';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import {
   createActionFromQuestionDefinition,
   createActionFromRequirementDefinition,
   createActionFromTemplate,
   createEmptyActionDraft,
 } from '../drafts';
-
-/**
- * Abhaengigkeiten, die `useActionHandlers` fuer seine neun Maßnahmen-Handler
- * benoetigt. Als benannter Typ exportiert, damit spaetere Feature-Extraktionen
- * (governance C2.3, evidence C2.4 usw.) denselben Vertrag durch
- * `Pick<ActionHandlerDependencies, 'state' | 'setState' | 'runWithPermission'>`
- * o. aehnlich wiederverwenden und die Context-Frage spaeter mit Datenbasis
- * entschieden werden kann.
- *
- * `showNotice` wird nicht von den neun Action-Handlern direkt gerufen, bleibt
- * aber Teil des Vertrags, weil `runWithPermission` sie intern verwendet und
- * spaetere Features (z. B. Upload-Fehler in evidence) direkten Zugriff
- * brauchen werden.
- */
-export interface ActionHandlerDependencies extends FeatureHandlerDependencies {
-  // Fach-Kontext fuer Draft-Creation
-  currentModule: SectorModuleDefinition;
-  questionLookup: Map<string, QuestionDefinition>;
-  requirementLookup: Map<string, RequirementDefinition>;
-  activeRequirements: RequirementDefinition[];
-  recommendations: RecommendationItem[];
-  actionTemplates: ActionTemplateDefinition[];
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface ActionHandlers {
   upsertActionDrafts: (
@@ -55,26 +26,21 @@ export interface ActionHandlers {
 
 /**
  * Bindet die Action-seitigen Handler aus App.tsx in einen Custom-Hook.
- * App.tsx uebergibt seinen setState + das aktuelle Derived-State-Bundle
- * und erhaelt typisierte Handler zurueck, die 1:1 in
- * `buildActiveViewPanelProps` eingehaengt werden.
  *
- * Hook-Invariante: weder State-Container noch Permissions werden hier
- * erzeugt; Zentralisierung bleibt in App.tsx bis zur spaeteren
- * Context-Entscheidung (s. BLOCK-C.md Abschnitt zu State-Management).
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
  */
-export function useActionHandlers(deps: ActionHandlerDependencies): ActionHandlers {
+export function useActionHandlers(): ActionHandlers {
+  const { state, setState, runWithPermission } = useWorkspaceState();
   const {
-    state,
-    setState,
-    runWithPermission,
     currentModule,
     questionLookup,
     requirementLookup,
     activeRequirements,
-    recommendations,
     actionTemplates,
-  } = deps;
+    scoreSnapshot,
+  } = useAppDerivedState();
+  const recommendations = scoreSnapshot.recommendations;
 
   const upsertActionDrafts = useCallback(
     (drafts: Array<Omit<ActionItem, 'id' | 'createdAt'>>) => {

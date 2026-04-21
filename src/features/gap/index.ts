@@ -23,6 +23,5 @@ export type { GapAnalysisDocxInput } from './export/gapAnalysisDocx';
 
 export {
   useGapHandlers,
-  type GapHandlerDependencies,
   type GapHandlers,
 } from './hooks/useGapHandlers';

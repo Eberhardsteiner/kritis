@@ -19,7 +19,6 @@ export { ActionCard } from './components/ActionCard';
 
 export {
   useActionHandlers,
-  type ActionHandlerDependencies,
   type ActionHandlers,
 } from './hooks/useActionHandlers';
 

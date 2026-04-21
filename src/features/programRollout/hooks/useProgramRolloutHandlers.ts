@@ -23,27 +23,13 @@ import { useCallback, useMemo } from 'react';
 import type {
   HardeningCheckItem,
   ReleaseGateItem,
-  ReviewPlan,
   RolloutPlan,
   RunbookItem,
-  SectorModuleDefinition,
-  UserItem,
 } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { createId } from '../../../shared/ids';
 import { getDateOffset } from '../../../shared/dates';
-
-export interface ProgramRolloutHandlerDependencies extends FeatureHandlerDependencies {
-  // === Fach-Kontext =========================================================
-  currentModule: SectorModuleDefinition;
-  activeUser: UserItem | null;
-
-  // === Cross-Feature-Read (nur fuer Baseline-Defaults) ======================
-  // reviewPlan wird von useGovernanceHandlers (C2.3) geschrieben. Wir
-  // lesen ausschliesslich reviewPlan.approver als String-Default in den
-  // drei handleGenerate*-Handlern.
-  reviewPlan: ReviewPlan;
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface ProgramRolloutHandlers {
   updateRolloutPlan: (field: keyof RolloutPlan, value: string) => void;
@@ -61,17 +47,14 @@ export interface ProgramRolloutHandlers {
   handleDeleteReleaseGate: (gateId: string) => void;
 }
 
-export function useProgramRolloutHandlers(
-  deps: ProgramRolloutHandlerDependencies,
-): ProgramRolloutHandlers {
-  const {
-    state,
-    setState,
-    runWithPermission,
-    currentModule,
-    activeUser,
-    reviewPlan,
-  } = deps;
+/**
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
+ */
+export function useProgramRolloutHandlers(): ProgramRolloutHandlers {
+  const { state, setState, runWithPermission, activeUser } = useWorkspaceState();
+  const { currentModule } = useAppDerivedState();
+  const reviewPlan = state.reviewPlan;
 
   // =========================================================================
   // Go-Live-Plan

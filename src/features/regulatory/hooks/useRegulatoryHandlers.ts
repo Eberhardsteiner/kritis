@@ -34,24 +34,11 @@ import type {
   RegulatoryProfile,
   SectorModuleDefinition,
 } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { createId } from '../../../shared/ids';
 import { getDateOffset } from '../../../shared/dates';
 import { normalizeRegulatoryProfile } from '../../../lib/regulatory';
-
-export interface RegulatoryHandlerDependencies extends FeatureHandlerDependencies {
-  // === Fach-Kontext =========================================================
-  currentModule: SectorModuleDefinition;
-
-  // === Audit-Kontext ========================================================
-  // Unfilterte Checklist (alle Regime) aus useAppDerivedState; wird
-  // ausschliesslich von handleGenerateFindingsFromChecklist gelesen, um
-  // aus offenen High-Severity-Items Findings abzuleiten. 1:1-Original-
-  // Pfad aus App.tsx — bewusst NICHT activeAuditChecklist (scope-gefiltert),
-  // damit Findings auch fuer out-of-scope-Regime ableitbar bleiben, wenn
-  // der Scope spaeter kippt.
-  auditChecklist: AuditChecklistItemDefinition[];
-}
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
 export interface RegulatoryHandlers {
   // Regulatorik-Profil
@@ -80,10 +67,13 @@ export interface RegulatoryHandlers {
   updateComplianceCalendar: (field: keyof ComplianceCalendar, value: string) => void;
 }
 
-export function useRegulatoryHandlers(
-  deps: RegulatoryHandlerDependencies,
-): RegulatoryHandlers {
-  const { setState, runWithPermission, currentModule, auditChecklist } = deps;
+/**
+ * C2.11d: Dep-Interface entfernt; Context-Lesung via
+ * useWorkspaceState() + useAppDerivedState().
+ */
+export function useRegulatoryHandlers(): RegulatoryHandlers {
+  const { setState, runWithPermission } = useWorkspaceState();
+  const { currentModule, auditChecklist } = useAppDerivedState();
 
   // =========================================================================
   // Regulatorik-Profil

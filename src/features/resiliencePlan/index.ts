@@ -19,7 +19,6 @@
 
 export {
   useResiliencePlanHandlers,
-  type ResiliencePlanHandlerDependencies,
   type ResiliencePlanHandlers,
 } from './hooks/useResiliencePlanHandlers';
 

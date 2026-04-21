@@ -22,6 +22,5 @@
 
 export {
   useRiskCatalogHandlers,
-  type RiskCatalogHandlerDependencies,
   type RiskCatalogHandlers,
 } from './hooks/useRiskCatalogHandlers';

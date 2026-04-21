@@ -25,17 +25,9 @@
  * `upsertEvidenceDrafts` (handleCreateTabletopEvidenceFromResult).
  */
 import { useCallback, useMemo } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import type {
-  AuthSession,
-  CompanyProfile,
   EvidenceItem,
-  PermissionKey,
-  SectorModuleDefinition,
-  TenantPolicy,
-  TenantSummary,
 } from '../../../types';
-import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { triggerFileDownload } from '../../../shared/download';
 import { createEvidenceDraft } from '../../evidence/drafts';
 import {
@@ -55,32 +47,13 @@ import type {
   ExerciseSession as TabletopExerciseSession,
   Scenario as TabletopScenarioDef,
 } from '../types';
+import { useWorkspaceState } from '../../../app/context/WorkspaceStateContext';
+import { useAppDerivedState } from '../../../app/context/AppDerivedStateContext';
 
-export interface TabletopExerciseHandlerDependencies extends FeatureHandlerDependencies {
-  // === Permission-Gate (fuer Export-Handler) =================================
-  hasPermission: (permission: PermissionKey) => boolean;
-
-  // === Fach-Kontext =========================================================
-  currentModule: SectorModuleDefinition;
-  companyProfile: CompanyProfile;
-  tenantPolicy: TenantPolicy;
-  documentFolders: string[];
-
-  // === Tenant-Kontext (fuer Session-Tenant-ID-Ableitung) =====================
-  authSession: AuthSession | null;
-  publicTenant: TenantSummary | null;
-
-  // === UI-State-Setter (bleibt in App.tsx useState, Setter-Durchgriff) =======
-  // `tabletopActiveTab` lebt weiter als useState in App.tsx; der Setter
-  // wird hier als Dep durchgereicht. C2.11d wird den State per Context
-  // konsolidieren.
-  setTabletopActiveTab: Dispatch<SetStateAction<'library' | 'session' | 'review'>>;
-
-  // === Cross-Feature-Kopplung zu evidence-Hook ==============================
+export interface TabletopExerciseHandlerDependencies {
+  // Cross-Feature-Kopplung zu evidence-Hook:
   // handleCreateTabletopEvidenceFromResult ruft den Evidence-Hook-Return
-  // auf. Das ist die erste hook-zu-hook-Kopplung in C2 — erfordert im
-  // App.tsx-Hook-Call-Ordering: evidence-Hook destructuren VOR
-  // tabletop-Hook, damit upsertEvidenceDrafts verfuegbar ist.
+  // auf. Hook-Call-Ordering in AppShell: evidence-Hook VOR tabletop-Hook.
   upsertEvidenceDrafts: (
     drafts: Array<Omit<EvidenceItem, 'id' | 'createdAt'>>,
   ) => void;
@@ -101,24 +74,27 @@ export interface TabletopExerciseHandlers {
   handleExportTabletopResultJson: () => void;
 }
 
+/**
+ * C2.11d: 15-Feld-Dep-Interface reduziert auf die Cross-Hook-
+ * Kopplung `upsertEvidenceDrafts`. Alles andere kommt aus Context.
+ */
 export function useTabletopExerciseHandlers(
   deps: TabletopExerciseHandlerDependencies,
 ): TabletopExerciseHandlers {
+  const { upsertEvidenceDrafts } = deps;
   const {
     state,
     setState,
     runWithPermission,
     showNotice,
     hasPermission,
-    currentModule,
-    companyProfile,
     tenantPolicy,
-    documentFolders,
     authSession,
     publicTenant,
     setTabletopActiveTab,
-    upsertEvidenceDrafts,
-  } = deps;
+  } = useWorkspaceState();
+  const { currentModule, documentFolders } = useAppDerivedState();
+  const companyProfile = state.companyProfile;
 
   // =========================================================================
   // Interner Pure-Helper-Wrapper: Scenario-Resolution

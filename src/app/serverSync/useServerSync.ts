@@ -10,6 +10,12 @@
  *   - updateServerStateMarkers
  *
  * Extrahiert in C2.11c als dritte Sub-Iteration der App-Shell-Zerlegung.
+ * In C2.11d auf den WorkspaceStateContext umgestellt — das frueher
+ * 37-Feld-Dep-Interface ist verschwunden, der Hook liest State und
+ * Setter direkt aus dem Context. Das Cycle-Breaker-Ref-Pattern ist
+ * durch den Pure-Helper `clearAuthenticatedContext` ersetzt (siehe
+ * Invariante (3)).
+ *
  * Die Funktionen bleiben byte-identisch zur App.tsx-Version — die
  * fuenf Server-Sync-Push-Loop-Invarianten aus C2.7c (siehe
  * `features/platform/hooks/usePlatformSystemHandlers.ts`) werden
@@ -34,23 +40,10 @@
  *       laufen, und `lastSyncedPayloadRef.current` unmittelbar danach
  *       gesetzt werden.
  *
- *   (3) Bei HTTP 401 wird `clearAuthenticatedContext()` SOFORT aufgerufen
- *       (nicht asynchron via ref-Indirection). In diesem Hook passiert
- *       das an zwei Stellen: einmal im 401-Branch von
- *       `refreshServerSideData` (wenn bootstrap.authenticationRequired
- *       true ist), einmal im 401-Branch von `loadStateFromServer` (wenn
- *       bootstrapRequired && !bootstrapAllowsAnonymous).
- *
- *       **Hinweis zum Ref-Pattern**: clearAuthenticatedContext wird aus
- *       usePlatformAuthHandlers zurueckgegeben, das NACH diesem Hook
- *       aufgerufen wird. Um die zirkulaere Abhaengigkeit (loadStateFromServer
- *       braucht clearAuthenticatedContext, clearAuthenticatedContext braucht
- *       loadStateFromServer) aufzuloesen, wird clearAuthenticatedContext
- *       als `MutableRefObject` uebergeben. App.tsx verdrahtet den Ref via
- *       useEffect nach der Hook-Invocation. Der Ref ist zum Zeitpunkt
- *       der ersten 401-Behandlung immer populiert, weil das Bootstrap-
- *       useEffect erst nach dem Wiring-useEffect feuert (Effects laufen
- *       in Registrations-Reihenfolge).
+ *   (3) Bei HTTP 401 ruft useServerSync `clearAuthenticatedContext`
+ *       direkt auf, nicht ueber Ref-Indirection. (Das Cycle-Breaker-
+ *       Ref-Pattern aus C2.11c ist in C2.11d durch den Pure-Helper
+ *       `features/platform/clearAuthenticatedContext.ts` abgeloest.)
  *
  *   (4) Bei HTTP 409 darf KEIN setState(hydrated) ausgeloest werden; nur
  *       setSyncError, setServerMode('error'), updateServerStateMarkers.
@@ -68,33 +61,7 @@
  * ===========================================================================
  */
 import { useCallback, useMemo } from 'react';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
-import type {
-  AccessAccountSummary,
-  ApiClientSummary,
-  AppState,
-  AuditLogEntry,
-  AuthMode,
-  AuthProviderSummary,
-  AuthSession,
-  DocumentLedgerSummaryServer,
-  EvidenceRetentionSummary,
-  ExportPackageEntry,
-  HostingReadinessSummary,
-  IntegritySummary,
-  JobRunSummary,
-  ModulePackRegistryEntry,
-  ObservabilitySummary,
-  RestoreDrillSummary,
-  SecurityGateSummary,
-  ServerHealth,
-  ServerMode,
-  SnapshotInfo,
-  SystemSettings,
-  TenantPolicy,
-  TenantSummary,
-} from '../../types';
-import type { NoticeTone } from '../../shared/featureHandlerDependencies';
+import type { AuthSession, ModulePackRegistryEntry, TenantSummary } from '../../types';
 import { isApiStatus } from '../../shared/httpError';
 import {
   completeOidcLogin,
@@ -127,65 +94,11 @@ import {
   readAuthCallbackSearch,
 } from '../../features/platform/authCallback';
 import { serializeServerPayload } from '../../features/platform/serverPayload';
+import { clearAuthenticatedContext as clearAuthenticatedContextHelper } from '../../features/platform/clearAuthenticatedContext';
 import { applyRemoteState } from '../state/buildAppState';
 import { defaultSystemSettings, defaultTenantPolicy } from '../state/defaults';
-
-export interface ServerSyncDependencies {
-  // === Core-State (fuer applyRemoteState + Hydration) =======================
-  state: AppState;
-  setState: Dispatch<SetStateAction<AppState>>;
-
-  // === Auth-State (Read + Setter) ==========================================
-  authToken: string;
-  setAuthToken: Dispatch<SetStateAction<string>>;
-  authSession: AuthSession | null;
-  setAuthSession: Dispatch<SetStateAction<AuthSession | null>>;
-  setServerAuthRequired: Dispatch<SetStateAction<boolean>>;
-  setAuthMode: Dispatch<SetStateAction<AuthMode>>;
-  setAuthProviders: Dispatch<SetStateAction<AuthProviderSummary[]>>;
-  setPublicTenant: Dispatch<SetStateAction<TenantSummary | null>>;
-  setAvailableTenants: Dispatch<SetStateAction<TenantSummary[]>>;
-  setAccessAccounts: Dispatch<SetStateAction<AccessAccountSummary[]>>;
-
-  // === Server-Connection-State =============================================
-  setServerMode: Dispatch<SetStateAction<ServerMode>>;
-  setServerHealth: Dispatch<SetStateAction<ServerHealth | null>>;
-  setLastServerLoadAt: Dispatch<SetStateAction<string>>;
-  setSyncError: Dispatch<SetStateAction<string>>;
-  setServerStateVersion: Dispatch<SetStateAction<number | null>>;
-  setServerStateUpdatedAt: Dispatch<SetStateAction<string>>;
-
-  // === Server-Side-Data-Setter (refreshServerSideData cascade) =============
-  setAuditLogEntries: Dispatch<SetStateAction<AuditLogEntry[]>>;
-  setSnapshots: Dispatch<SetStateAction<SnapshotInfo[]>>;
-  setExportPackages: Dispatch<SetStateAction<ExportPackageEntry[]>>;
-  setDocumentLedger: Dispatch<SetStateAction<DocumentLedgerSummaryServer | null>>;
-  setEvidenceRetentionSummary: Dispatch<SetStateAction<EvidenceRetentionSummary | null>>;
-  setTenantPolicy: Dispatch<SetStateAction<TenantPolicy>>;
-  setApiClients: Dispatch<SetStateAction<ApiClientSummary[]>>;
-  setSystemJobs: Dispatch<SetStateAction<JobRunSummary[]>>;
-  setModuleRegistryEntries: Dispatch<SetStateAction<ModulePackRegistryEntry[]>>;
-
-  // === Admin-Details-Setter (fetchAdminServerDetails cascade) ==============
-  setSystemSettings: Dispatch<SetStateAction<SystemSettings>>;
-  setHostingReadiness: Dispatch<SetStateAction<HostingReadinessSummary | null>>;
-  setIntegritySummary: Dispatch<SetStateAction<IntegritySummary | null>>;
-  setSecurityGateSummary: Dispatch<SetStateAction<SecurityGateSummary | null>>;
-  setObservabilitySummary: Dispatch<SetStateAction<ObservabilitySummary | null>>;
-  setRestoreDrills: Dispatch<SetStateAction<RestoreDrillSummary[]>>;
-
-  // === Server-Sync-Refs (fuer Invarianten-Erhaltung) =======================
-  serverInitializedRef: MutableRefObject<boolean>;
-  suppressNextServerSyncRef: MutableRefObject<boolean>;
-  lastSyncedPayloadRef: MutableRefObject<string>;
-
-  // === Cycle-Breaker + Notice-Pipeline =====================================
-  // clearAuthenticatedContext kommt aus usePlatformAuthHandlers, das
-  // NACH diesem Hook aufgerufen wird. Der Ref wird in App.tsx per
-  // useEffect verdrahtet — siehe Top-of-File-Kommentar, Invariante (3).
-  clearAuthenticatedContextRef: MutableRefObject<(message?: string) => void>;
-  showNotice: (tone: NoticeTone, message: string, details?: string[]) => void;
-}
+import { useWorkspaceState } from '../context/WorkspaceStateContext';
+import type { AccessAccountSummary, EvidenceRetentionSummary } from '../../types';
 
 export interface ServerSyncHandlers {
   loadStateFromServer: () => Promise<boolean>;
@@ -194,7 +107,8 @@ export interface ServerSyncHandlers {
   updateServerStateMarkers: (version?: number | null, updatedAt?: string | null) => void;
 }
 
-export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers {
+export function useServerSync(): ServerSyncHandlers {
+  const ws = useWorkspaceState();
   const {
     state,
     setState,
@@ -229,12 +143,15 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
     setSecurityGateSummary,
     setObservabilitySummary,
     setRestoreDrills,
+    setIssuedClientSecret,
+    setLastServerSyncAt,
+    setEvidenceVersionMap,
+    serverAuthRequired,
     serverInitializedRef,
     suppressNextServerSyncRef,
     lastSyncedPayloadRef,
-    clearAuthenticatedContextRef,
     showNotice,
-  } = deps;
+  } = ws;
 
   const updateServerStateMarkers = useCallback(
     (version?: number | null, updatedAt?: string | null) => {
@@ -244,6 +161,68 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
       setServerStateUpdatedAt(updatedAt ? String(updatedAt) : '');
     },
     [setServerStateUpdatedAt, setServerStateVersion],
+  );
+
+  // Invariante (3): Pure-Helper-Aufruf. Der Helper entscheidet intern
+  // serverAuthRequired-abhaengig, ob ein Rehydrate noetig ist. Im
+  // 401-Branch dieses Hooks ist serverAuthRequired=true die einzige
+  // Aufrufbedingung — Early-Return-Pfad im Helper.
+  const clearAuth = useCallback(
+    (message?: string, onAnonymousRehydrate?: () => void) => {
+      clearAuthenticatedContextHelper(
+        {
+          setAuthToken,
+          setAuthSession,
+          setAccessAccounts,
+          setApiClients,
+          setSystemJobs,
+          setModuleRegistryEntries,
+          setIntegritySummary,
+          setSecurityGateSummary,
+          setObservabilitySummary,
+          setRestoreDrills,
+          setIssuedClientSecret,
+          setLastServerSyncAt,
+          setSyncError,
+          setServerMode,
+          updateServerStateMarkers,
+          setAuditLogEntries,
+          setSnapshots,
+          setExportPackages,
+          setDocumentLedger,
+          setTenantPolicy,
+          setEvidenceVersionMap,
+          serverAuthRequired,
+          defaultTenantPolicy,
+        },
+        message,
+        onAnonymousRehydrate,
+      );
+    },
+    [
+      setAuthToken,
+      setAuthSession,
+      setAccessAccounts,
+      setApiClients,
+      setSystemJobs,
+      setModuleRegistryEntries,
+      setIntegritySummary,
+      setSecurityGateSummary,
+      setObservabilitySummary,
+      setRestoreDrills,
+      setIssuedClientSecret,
+      setLastServerSyncAt,
+      setSyncError,
+      setServerMode,
+      updateServerStateMarkers,
+      setAuditLogEntries,
+      setSnapshots,
+      setExportPackages,
+      setDocumentLedger,
+      setTenantPolicy,
+      setEvidenceVersionMap,
+      serverAuthRequired,
+    ],
   );
 
   const fetchAdminServerDetails = useCallback(
@@ -301,9 +280,6 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
         const response = await fetchModuleRegistry(token || '');
         setModuleRegistryEntries(response.entries);
       } catch (error) {
-        // Wenn kein Token und serverMode offline: registry leeren.
-        // serverMode-Check ueber state ist unnoetig — wenn fetch fehlschlaegt
-        // und wir keinen Token haben, ist der Fallback eine leere Liste.
         if (!token) {
           setModuleRegistryEntries([]);
           return;
@@ -382,14 +358,14 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
             token && session?.isSystemAdmin
               ? fetchApiClients(token).catch(() => ({
                   ok: true,
-                  clients: [] as ApiClientSummary[],
+                  clients: [] as import('../../types').ApiClientSummary[],
                 }))
-              : Promise.resolve({ ok: true, clients: [] as ApiClientSummary[] });
+              : Promise.resolve({ ok: true, clients: [] as import('../../types').ApiClientSummary[] });
 
           const systemJobRequest =
             token && session?.isSystemAdmin
-              ? fetchSystemJobs(token).catch(() => ({ ok: true, jobs: [] as JobRunSummary[] }))
-              : Promise.resolve({ ok: true, jobs: [] as JobRunSummary[] });
+              ? fetchSystemJobs(token).catch(() => ({ ok: true, jobs: [] as import('../../types').JobRunSummary[] }))
+              : Promise.resolve({ ok: true, jobs: [] as import('../../types').JobRunSummary[] });
 
           const [
             audit,
@@ -447,8 +423,9 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
         } catch (error) {
           if (isApiStatus(error, 401)) {
             if (bootstrap.authenticationRequired) {
-              // Invariante (3): 401 -> SOFORT clearAuthenticatedContext.
-              clearAuthenticatedContextRef.current();
+              // Invariante (3): 401 -> SOFORT clearAuthenticatedContext
+              // via Pure-Helper (keine Ref-Indirection mehr, C2.11d).
+              clearAuth();
             } else {
               // Anonymous-Fallback — kein setState(hydrated), Invariante (4).
               clearAuthToken();
@@ -487,7 +464,7 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
     [
       authSession,
       authToken,
-      clearAuthenticatedContextRef,
+      clearAuth,
       fetchAdminServerDetails,
       setAccessAccounts,
       setApiClients,
@@ -684,8 +661,9 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
       serverInitializedRef.current = true;
       if (isApiStatus(error, 401)) {
         if (bootstrapRequired && !bootstrapAllowsAnonymous) {
-          // Invariante (3): 401 -> SOFORT clearAuthenticatedContext.
-          clearAuthenticatedContextRef.current();
+          // Invariante (3): 401 -> SOFORT clearAuthenticatedContext
+          // via Pure-Helper (keine Ref-Indirection mehr, C2.11d).
+          clearAuth();
           return false;
         }
         // Fallback in Anonymous-Modus — kein setState(hydrated), Invariante (4).
@@ -718,7 +696,7 @@ export function useServerSync(deps: ServerSyncDependencies): ServerSyncHandlers 
   }, [
     authSession,
     authToken,
-    clearAuthenticatedContextRef,
+    clearAuth,
     fetchAdminServerDetails,
     lastSyncedPayloadRef,
     refreshServerSideData,

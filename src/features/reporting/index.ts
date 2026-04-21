@@ -39,6 +39,5 @@
 
 export {
   useReportingHandlers,
-  type ReportingHandlerDependencies,
   type ReportingHandlers,
 } from './hooks/useReportingHandlers';
