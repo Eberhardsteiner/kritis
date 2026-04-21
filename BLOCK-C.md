@@ -207,8 +207,7 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
    - ✅ C2.7c: OperationsView (1:1 Umzug, C4b-Kandidat für 6-Panel-Split) + `pushStateToServer` + useEffect #4 (Server-Sync-Push-Loop) + 20 System-Ops-Handler. Fünf Push-Loop-Invarianten als Top-of-File-Kommentar in `usePlatformSystemHandlers.ts`. App.tsx -465 Z.
    - ✅ C2.7d: ControlView + UserCard + 5 User-Handler + `updateComplianceCalendar` (Transient, regulatory-nah) + `inferRoleProfileFromStakeholder`-Pure-Helper. C4b-Kandidat für 2-Panel-Split (UserManagementPanel + ComplianceOverviewPanel). E2E 16 ergänzt. App.tsx -119 Z.
 8. ✅ `programRollout/` – ProgramView (171 Z.) + RolloutView (790 Z.) + 13 Handler + 4 Normalizer + `defaultRolloutPlan` als `features/programRollout`-Slice extrahiert. Cross-Feature-Read-Befund: regulatory/KritisView liest **keinen** programRollout-State direkt, C2.9 bleibt entkoppelt. App.tsx -428 Z. Commit C2.8.
-9. `regulatory/` (komplex) – das verflechtetste Feature mit Regime-/Jurisdiktions-Zuständen, die fast jedes andere Feature liest. Erst extrahierbar, wenn die anderen Features ihren Zustand sauber konsumieren.
-   - **Arbeitsnotiz aus C2.7d** (Compliance-Kalender-Migration): `updateComplianceCalendar` lebt seit C2.7d transient in `usePlatformControlHandlers` (ControlView-Bundle). In C2.9 entscheiden, ob die Compliance-Sektion aus ControlView (Compliance-Kalender-Formular + Fristen-Cockpit + Dokumentenbibliothek) als `ComplianceOverviewPanel` ins regulatory-Feature migriert – **Option A**: Panel + Handler ziehen gemeinsam um, dann reicht ControlView nur noch User-Management – oder ob die Panels bei platform bleiben und **Option B**: nur der Handler wandert in einen neuen regulatory-Hook und wird als Prop zurück nach ControlView gereicht. Die Transient-Markierung steht in der JSDoc von `PlatformControlHandlers.updateComplianceCalendar` und als Gruppenkommentar im Hook.
+9. ✅ `regulatory/` – 11 Handler (3 Profil + 3 Certification/Checklist + 4 Findings + 1 Compliance-Kalender) sowie ein Pure-Helper fuer die Evidence-Delete-Kaskade als `features/regulatory`-Slice extrahiert (C2.9). Begleitet von der Extraktion von 4 Risk-Handlern nach `features/riskCatalog/hooks/useRiskCatalogHandlers.ts` im selben Commit. `updateComplianceCalendar`-Transient aus C2.7d ist **Option B** umgesetzt: Handler regulatory-intern, Panel bleibt visuell in ControlView. KritisView verbleibt in `src/views/` bis C4b — bewusste Ausnahme, in features/regulatory/index.ts und im Meta-Review-Eintrag dokumentiert. App.tsx -200 Z.
 10. `reporting/` (Querschnitt) – Management-Report zieht Daten aus Regulatorik, Gap-Analyse, Risiken und Evidenzen zusammen. Extraktion macht erst Sinn, wenn alle Quell-Features sauber strukturiert sind.
 11. App-Shell `src/app/`: Provider, Router, Layout – die Reste aus `App.tsx` landen im App-Shell-Ordner, `App.tsx` selbst wird auf < 500 Zeilen reduziert.
 
@@ -475,11 +474,12 @@ Gelten aus `CLAUDE.md` Abschnitt 5 unverändert weiter. Ergänzungen für C:
 
 ### Meta-Review nach C2.11
 
-Nach Abschluss von **C2.11** (App-Shell) ein kleines Polish-Paket einschieben: Meta-Review über die zehn Feature-Slices unter `src/features/` (gap, measures, governance, evidence, operations, assessment, platform, programRollout, regulatory, reporting). Fokus auf:
+Nach Abschluss von **C2.11** (App-Shell) ein kleines Polish-Paket einschieben: Meta-Review über die zehn Feature-Slices unter `src/features/` (gap, measures, governance, evidence, operations, assessment, platform, programRollout, regulatory, riskCatalog, reporting). Fokus auf:
 
 - **Naming-Konsistenz**: Handler-Namen, Dep-Interface-Namen, Hook-Namen einheitlich (`use<Feature>Handlers`, `<Feature>HandlerDependencies`, `<Feature>Handlers`).
 - **Kommentar-Qualität**: Group-Comments in allen Dependencies-Interfaces, JSDoc auf Public-API-Exports, Transient-Markierungen einheitlich.
 - **Public-API-Homogenität**: `index.ts` je Feature mit gleichem Aufbau (Views → Hooks → Pure-Helper), einheitliche Re-Export-Reihenfolge.
+- **Views-Standort**: `regulatory/` hat als einziges Feature keine Views im Ordner — KritisView liegt (Stand C2.9) weiter in `src/views/`. Prüfen, ob das bis Pilot akzeptabel bleibt oder ob ein Mini-Umzug (nur File-Move, keine Panel-Splits) vor der Pilotfreigabe sinnvoller ist als das Aufschieben nach C4b. Entscheidungskriterium: Wie oft müssen Auditoren die Feature-Slice-Struktur erklaeren, wenn regulatory als Sonderfall auffaellt?
 
 Zeitbudget: 30–60 Minuten. Ergebnis ist ein einzelner Polish-Commit, keine funktionale Änderung. Vor C3 (server/index.js-Zerlegung) sinnvoll, weil die Feature-Slice-Muster dort als Vorbild dienen.
 

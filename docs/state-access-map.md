@@ -44,9 +44,14 @@ Hook-Deps weitergereicht bleiben.
 | `hostingReadiness`, `securityGateSummary`, `observabilitySummary`, `restoreDrills` | App-Shell `refreshServerSideData` | OperationsView (Read-Only-Panels) | nein — nur Leser, kein Schreiber ausserhalb App-Shell |
 | `moduleRegistryEntries` | platform-auth-Hook (Login-Reset), Module-Handler | ModulesView, PlatformView | nein |
 | `users`, `activeUserId` | platform-control-Hook (C2.7d), platform-auth-Hook (Login-User-Sync) | ControlView (UserCard-Liste), `useAppDerivedState.activeUser` (fast jede View) | **ja** — `activeUser` ist der stärkste Cross-Feature-Read |
-| `complianceCalendar` | platform-control-Hook (C2.7d Transient) | ControlView (Compliance-Kalender-Formular), `useAppDerivedState.deadlineSummary` | **evtl.** — Entscheidung in C2.9 (regulatory): Panel + Handler gemeinsam migrieren oder Handler getrennt |
+| `complianceCalendar` | regulatory-Hook (C2.9, Option B) | ControlView (Compliance-Kalender-Formular, Panel bleibt visuell im platform-Slice), `useAppDerivedState.deadlineSummary` | nein — Schreiber und Leser sind jetzt sauber getrennt |
 | `rolloutPlan` | programRollout-Hook (C2.8) | RolloutView (Plan-Formular), platform-system-Hook (handleCreateHandoverBundle liest `releaseVersion`/`decisionNote`), App.tsx `buildServerExportPackagePayload` (handover_bundle), serverPayload.ts | nein — nur drei Leser, Props reichen |
 | `hardeningChecks`, `runbooks`, `releaseGates` | programRollout-Hook (C2.8) | RolloutView (Cluster-Listen), App.tsx `buildServerExportPackagePayload` (handover_bundle-Sections) | nein — feature-intern zu programRollout |
+| `regulatoryProfile` | regulatory-Hook (C2.9) | KritisView (Kern-Render), useAppDerivedState (9 Derivate: regimeDefinitions, regimeSummaries, activeRequirements, effectiveRequirementStates, kritisApplicability, kritisMilestones, kritisPenaltyEstimate, authorityAssignmentsByRegime, violations), ReportView, features/resiliencePlan/generator.ts, features/riskCatalog/export/riskAnalysisDocx.ts, components/ManagementLiabilityCard.tsx, lib/scoring.ts, lib/penaltyCalculator.ts, lib/workspace.ts, features/platform/serverPayload.ts | **ja (Top-Context)** — 20+ Leser, größter Cross-Feature-Blast-Radius. C2.11 Top-Priorität zusammen mit `authToken`/`authSession`/`serverMode`. |
+| `certificationState` | regulatory-Hook (C2.9) | KritisView (Stages + Decision), useAppDerivedState (certificationProgress), App.tsx buildServerExportPackagePayload (certification_dossier), serverPayload.ts | nein — drei Leser, Props reichen |
+| `auditFindings` | regulatory-Hook (C2.9, primary writer), evidence-Hook (C2.9 Cross-Feature-Cleanup via Pure-Helper `clearEvidenceRefsFromFindings`) | KritisView (FindingCard-Liste), useAppDerivedState (currentFindings, findingSummary), serverPayload.ts | nein — Cross-Feature-Kopplung durch Pure-Helper aufgeloest, Atomaritaet gewahrt |
+| `auditChecklistStates` | regulatory-Hook (C2.9) | KritisView (Checklist-Status), useAppDerivedState (checklistProgress) | nein — feature-intern |
+| `riskEntries` | riskCatalog-Hook (C2.9) | KritisView (via RiskMatrixView/RiskEntryForm/RiskRegisterView), features/riskCatalog/export/riskAnalysisDocx.ts | nein — feature-intern zu riskCatalog |
 
 ## Noch offene Feature-Inventare
 
@@ -57,7 +62,7 @@ Ergänzt mit den jeweiligen Extraktionen:
 | ~~C2.7c · Platform-System (OperationsView)~~ | ✅ erledigt — `pushStateToServer`, useEffect #4, 20 System-Handler, OperationsView im `features/platform`-Slice. App.tsx -465 Z. |
 | ~~C2.7d · User-Management (ControlView)~~ | ✅ erledigt — 5 User-Handler + `updateComplianceCalendar` (Transient) + `inferRoleProfileFromStakeholder` + ControlView + UserCard im `features/platform`-Slice. E2E 16 ergänzt. App.tsx -119 Z. |
 | ~~C2.8 · programRollout~~ | ✅ erledigt — ProgramView + RolloutView + 13 Handler + 4 Normalizer + `defaultRolloutPlan` im `features/programRollout`-Slice. Cross-Feature-Read-Befund: KritisView und ReportView lesen **keinen** programRollout-State direkt, sodass C2.9 durch C2.8 entkoppelt bleibt. App.tsx -428 Z. |
-| C2.9 · regulatory | KritisView-Zugriffe auf `tenantPolicy`, `authToken`, `authSession`, Bußgeldrechner-Datenflüsse |
+| ~~C2.9 · regulatory + riskCatalog~~ | ✅ erledigt — 11 regulatory-Handler (inkl. `updateComplianceCalendar`-Migration) + 4 riskCatalog-Handler + Pure-Helper `clearEvidenceRefsFromFindings` fuer atomare Cross-Feature-Evidence-Delete-Kaskade. `regulatoryProfile` als Top-Context-Kandidat markiert (20+ Leser). KritisView bleibt in `src/views/` bis C4b — dokumentiert in features/regulatory/index.ts und BLOCK-C.md-Meta-Review. App.tsx -200 Z. |
 | C2.10 · reporting | ReportView-Querschnitts-Reads |
 
 ## Verbundene Entscheidungen

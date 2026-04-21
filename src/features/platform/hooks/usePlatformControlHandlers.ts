@@ -1,18 +1,21 @@
 /**
- * usePlatformControlHandlers · User-Management + Compliance-Kalender-Write
+ * usePlatformControlHandlers · User-Management
  *
- * Kapselt die sechs Handler rund um ControlView:
+ * Kapselt die fuenf User-Lifecycle-Handler rund um ControlView:
  *   - selectActiveUser (Session-aware Sperre)
  *   - handleCreateUser
  *   - handleGenerateUsersFromStakeholders (nutzt inferRoleProfileFromStakeholder)
  *   - handleUpdateUser (normalizeUserRoleProfile / normalizeUserStatus via Dep)
  *   - handleDeleteUser (mit normalizeLoadedUsers-Fallback bei Last-User)
- *   - updateComplianceCalendar (Transient-Regulator, siehe unten)
  *
- * Extrahiert in C2.7d als vierte und letzte Platform-Sub-Iteration.
+ * Extrahiert in C2.7d als vierte Platform-Sub-Iteration. In C2.9 ist
+ * der Transient-Handler `updateComplianceCalendar` nach
+ * useRegulatoryHandlers migriert (Option B aus der C2.9-Analyse);
+ * das Compliance-Kalender-Panel rendert ControlView weiterhin — die
+ * Prop-Quelle wechselt nur.
  */
 import { useCallback, useMemo } from 'react';
-import type { AuthSession, ComplianceCalendar, SectorModuleDefinition, UserItem, UserRoleProfile, UserStatus } from '../../../types';
+import type { AuthSession, SectorModuleDefinition, UserItem, UserRoleProfile, UserStatus } from '../../../types';
 import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { createId } from '../../../shared/ids';
 import { inferRoleProfileFromStakeholder } from '../userNormalization';
@@ -36,24 +39,6 @@ export interface PlatformControlHandlers {
   handleGenerateUsersFromStakeholders: () => void;
   handleUpdateUser: (userId: string, patch: Partial<UserItem>) => void;
   handleDeleteUser: (userId: string) => void;
-  /**
-   * Transient: regulatory-nah, Migration in C2.9 evaluieren.
-   *
-   * `updateComplianceCalendar` beschreibt `state.complianceCalendar`,
-   * das fachlich zur regulatory-Domain (KRITIS-Basisdaten, BSIG/NIS2-
-   * Fristen) gehoert. Der Handler lebt in C2.7d vorlaeufig hier, weil
-   * ControlView komplett ins platform-Feature wandert (1:1-Regel).
-   *
-   * Aktionen in C2.9 regulatory-Extraktion (Option A/B entscheiden):
-   *   A) ComplianceOverviewPanel komplett in regulatory verschieben,
-   *      Handler zieht dann mit.
-   *   B) Panel bleibt in ControlView, nur der Handler wandert — dann
-   *      kommt er aus einem regulatory-Hook als Prop rein.
-   *
-   * Entscheidungsvorlage liegt in BLOCK-C.md unter C2.9 als
-   * Arbeitsnotiz aus C2.7d.
-   */
-  updateComplianceCalendar: (field: keyof ComplianceCalendar, value: string) => void;
 }
 
 export function usePlatformControlHandlers(
@@ -237,30 +222,10 @@ export function usePlatformControlHandlers(
     [normalizeLoadedUsers, runWithPermission, setState],
   );
 
-  // =========================================================================
-  // Compliance-Kalender-Write
-  // Transient: regulatory-nah, Migration in C2.9 evaluieren
-  // (siehe PlatformControlHandlers.updateComplianceCalendar-JSDoc und
-  //  BLOCK-C.md Abschnitt C2.9 regulatory/Arbeitsnotiz).
-  // =========================================================================
-  const updateComplianceCalendar = useCallback(
-    (field: keyof ComplianceCalendar, value: string) => {
-      runWithPermission(
-        'workspace_edit',
-        'Für Änderungen am Compliance-Kalender fehlt das Recht workspace_edit.',
-        () => {
-          setState((current) => ({
-            ...current,
-            complianceCalendar: {
-              ...current.complianceCalendar,
-              [field]: value,
-            },
-          }));
-        },
-      );
-    },
-    [runWithPermission, setState],
-  );
+  // updateComplianceCalendar ist in C2.9 nach useRegulatoryHandlers
+  // migriert (Option B aus der C2.9-Analyse). ControlView rendert das
+  // Compliance-Kalender-Panel weiter — die Handler-Prop kommt in
+  // buildActiveViewPanelProps aus der regulatory-Hook-Destructuring.
 
   return useMemo(
     () => ({
@@ -269,7 +234,6 @@ export function usePlatformControlHandlers(
       handleGenerateUsersFromStakeholders,
       handleUpdateUser,
       handleDeleteUser,
-      updateComplianceCalendar,
     }),
     [
       selectActiveUser,
@@ -277,7 +241,6 @@ export function usePlatformControlHandlers(
       handleGenerateUsersFromStakeholders,
       handleUpdateUser,
       handleDeleteUser,
-      updateComplianceCalendar,
     ],
   );
 }

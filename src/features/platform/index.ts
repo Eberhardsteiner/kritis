@@ -41,10 +41,11 @@
  *     UserCard-Liste, handleCreate/Update/Delete/GenerateFromStakeholders,
  *     selectActiveUser
  *   - ComplianceOverviewPanel (~40 %): Compliance-Kalender,
- *     Dokumentenbibliothek, Fristen-Cockpit, updateComplianceCalendar.
- *     HINWEIS: Dieser Panel ist zusaetzlich Kandidat fuer einen Umzug
- *     ins regulatory-Feature in C2.9 (siehe BLOCK-C.md C2.9
- *     Arbeitsnotiz).
+ *     Dokumentenbibliothek, Fristen-Cockpit. Seit C2.9 ist der
+ *     zugehoerige Write-Handler `updateComplianceCalendar` regulatory-
+ *     intern (Option B aus der C2.9-Analyse); nur der Read-Pfad
+ *     (complianceCalendar + deadlineSummary + documentLibrarySummary)
+ *     und das Rendering selbst liegen weiter im platform-Slice.
  *
  * Die Splits werden erst in C4b umgesetzt; hier nur als Planungs-Notiz.
  */

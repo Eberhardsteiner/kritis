@@ -36,6 +36,7 @@ import {
 } from '../drafts';
 import { guessEvidenceType } from '../normalizers';
 import { readFileAsDataUrl } from '../utils';
+import { clearEvidenceRefsFromFindings } from '../../regulatory';
 
 /**
  * Abhaengigkeiten fuer den Evidence-Hook.
@@ -120,7 +121,10 @@ export interface EvidenceHandlers {
  *  - upsertEvidenceDrafts setzt activeView='measures'
  *  - handleDeleteEvidence nullt auditFindings.relatedEvidenceIds
  *    atomar in derselben setState-Transaktion wie die Evidence-
- *    Loeschung (analog handleDeleteSite in C2.3)
+ *    Loeschung (analog handleDeleteSite in C2.3). Die Finding-Bereinigungs-
+ *    Logik selbst wohnt seit C2.9 in features/regulatory/findings.ts
+ *    (clearEvidenceRefsFromFindings, Pure-Helper-Import) — fachlich
+ *    korrekter Ort, ohne die setState-Atomaritaet zu opfern.
  *  - handleAttachEvidenceFile behaelt alle drei Pfade
  *    (Server-Upload / Server-Fehler / Local-DataURL)
  */
@@ -312,6 +316,12 @@ export function useEvidenceHandlers(
    * relatedEvidenceIds aller auditFindings -- beides in einer einzigen
    * setState-Transaktion. setEvidenceVersionMap-Aufraeumen laeuft als
    * separater Setter (React batcht beide Updates im gleichen Render).
+   *
+   * Die Finding-Bereinigungs-Logik liegt als Pure-Helper in
+   * features/regulatory/findings.ts (fachliche Heimat: regulatory).
+   * Wir rufen sie hier inline auf, damit der setState-Update atomar
+   * bleibt. Siehe JSDoc von clearEvidenceRefsFromFindings fuer die
+   * vollstaendige Begruendung der Cross-Feature-Kopplung.
    */
   const handleDeleteEvidence = useCallback(
     (evidenceId: string) => {
@@ -329,12 +339,10 @@ export function useEvidenceHandlers(
             evidenceItems: current.evidenceItems.filter(
               (item) => item.id !== evidenceId,
             ),
-            auditFindings: current.auditFindings.map((finding) => ({
-              ...finding,
-              relatedEvidenceIds: finding.relatedEvidenceIds.filter(
-                (id) => id !== evidenceId,
-              ),
-            })),
+            auditFindings: clearEvidenceRefsFromFindings(
+              current.auditFindings,
+              evidenceId,
+            ),
           }));
         },
       );

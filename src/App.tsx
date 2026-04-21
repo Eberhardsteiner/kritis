@@ -51,6 +51,8 @@ import {
   normalizeRolloutPlan,
   useProgramRolloutHandlers,
 } from './features/programRollout';
+import { useRegulatoryHandlers } from './features/regulatory';
+import { useRiskCatalogHandlers } from './features/riskCatalog';
 import { useAssessmentHandlers } from './features/assessment';
 import {
   buildServerPayload,
@@ -68,11 +70,6 @@ import {
   usePlatformSystemHandlers,
 } from './features/platform';
 import { createId } from './shared/ids';
-import { getDateOffset } from './shared/dates';
-import {
-  buildRiskAnalysisBlob,
-  buildRiskAnalysisFileName,
-} from './features/riskCatalog/export/riskAnalysisDocx';
 import { generateDraft as generateResiliencePlanDraft } from './features/resiliencePlan/generator';
 import {
   buildResiliencePlanJsonFileName,
@@ -149,7 +146,6 @@ import type {
   AssessmentFilters,
   AssetItem,
   BusinessProcessItem,
-  AuditChecklistState,
   ApiClientSummary,
   AuditFindingItem,
   CertificationStageState,
@@ -175,8 +171,6 @@ import type {
   IntegritySummary,
   ObservabilitySummary,
   RegulatoryProfile,
-  GermanyRegimeId,
-  RegimeScopeStatus,
   RiskEntry,
   JobRunSummary,
   ModulePackRegistryEntry,
@@ -1122,7 +1116,6 @@ export default function App() {
     handleGenerateUsersFromStakeholders,
     handleUpdateUser,
     handleDeleteUser,
-    updateComplianceCalendar,
   } = usePlatformControlHandlers({
     // Kern (FeatureHandlerDependencies)
     state,
@@ -1166,44 +1159,55 @@ export default function App() {
     reviewPlan: state.reviewPlan,
   });
 
-  function updateRegulatoryProfileField(field: Exclude<keyof RegulatoryProfile, 'scopeByRegime' | 'jurisdiction'>, value: string) {
-    runWithPermission('kritis_edit', 'Für Änderungen am Regelwerks-Cockpit fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        regulatoryProfile: {
-          ...normalizeRegulatoryProfile(current.regulatoryProfile),
-          [field]: value,
-        },
-      }));
-    });
-  }
+  const {
+    updateRegulatoryProfileField,
+    updateJurisdiction,
+    updateRegimeScope,
+    updateCertificationField,
+    updateCertificationStage,
+    updateChecklistState,
+    handleCreateFinding,
+    handleGenerateFindingsFromChecklist,
+    handleUpdateFinding,
+    handleDeleteFinding,
+    updateComplianceCalendar,
+  } = useRegulatoryHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Fach-Kontext
+    currentModule,
+    // Audit-Kontext (unfilterte Checklist, wie im Original-Pfad vor C2.9)
+    auditChecklist,
+  });
 
-  function updateJurisdiction(value: RegulatoryProfile['jurisdiction']) {
-    runWithPermission('kritis_edit', 'Für Änderungen an der Jurisdiktion fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        regulatoryProfile: {
-          ...normalizeRegulatoryProfile(current.regulatoryProfile),
-          jurisdiction: value,
-        },
-      }));
-    });
-  }
+  const {
+    handleSaveRiskEntry,
+    handleDeleteRiskEntry,
+    handleExportRiskEntriesJson,
+    handleExportRiskAnalysisDocx,
+  } = useRiskCatalogHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Fach-Kontext
+    companyProfile: state.companyProfile,
+    hasPermission,
+  });
 
-  function updateRegimeScope(regimeId: GermanyRegimeId, value: RegimeScopeStatus) {
-    runWithPermission('kritis_edit', 'Für Änderungen am Regelwerks-Scope fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        regulatoryProfile: {
-          ...normalizeRegulatoryProfile(current.regulatoryProfile),
-          scopeByRegime: {
-            ...normalizeRegulatoryProfile(current.regulatoryProfile).scopeByRegime,
-            [regimeId]: value,
-          },
-        },
-      }));
-    });
-  }
+  // Die 3 Regulatorik-Profil-Handler (updateRegulatoryProfileField,
+  // updateJurisdiction, updateRegimeScope), die 3 Certification/
+  // Checklist-Handler (updateCertificationField, updateCertificationStage,
+  // updateChecklistState), die 4 Findings-Handler (handleCreateFinding,
+  // handleGenerateFindingsFromChecklist, handleUpdateFinding,
+  // handleDeleteFinding) und updateComplianceCalendar wurden in C2.9
+  // nach src/features/regulatory/hooks/useRegulatoryHandlers.ts
+  // ausgelagert. Hook-Call + Destructuring liegt weiter unten bei den
+  // anderen Feature-Hooks.
 
   // Die 13 programRollout-Handler (updateRolloutPlan + je 4 CRUD-
   // Handler fuer Haertungschecks, Runbooks, Release-Gates) wurden in
@@ -1212,59 +1216,10 @@ export default function App() {
   // anderen Feature-Hooks.
 
   // selectActiveUser, handleCreateUser, handleGenerateUsersFromStakeholders,
-  // handleUpdateUser, handleDeleteUser und updateComplianceCalendar wurden
-  // in C2.7d nach src/features/platform/hooks/usePlatformControlHandlers.ts
-  // ausgelagert. updateComplianceCalendar ist dort als Transient markiert
-  // und wird in C2.9 (regulatory) neu bewertet.
-
-  function updateCertificationField(
-    field: 'auditLead' | 'targetDate' | 'decisionNote',
-    value: string,
-  ) {
-    runWithPermission('kritis_edit', 'Für Änderungen an der Readiness-Steuerung fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        certificationState: {
-          ...current.certificationState,
-          [field]: value,
-        },
-      }));
-    });
-  }
-
-  function updateCertificationStage(stageId: string, patch: Partial<CertificationStageState>) {
-    runWithPermission('kritis_edit', 'Für Änderungen an Readiness-Stufen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        certificationState: {
-          ...current.certificationState,
-          stageStates: {
-            ...current.certificationState.stageStates,
-            [stageId]: {
-              ...current.certificationState.stageStates[stageId],
-              ...patch,
-            },
-          },
-        },
-      }));
-    });
-  }
-
-  function updateChecklistState(itemId: string, patch: Partial<AuditChecklistState>) {
-    runWithPermission('kritis_edit', 'Für Änderungen an der Audit-Checklist fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        auditChecklistStates: {
-          ...current.auditChecklistStates,
-          [itemId]: {
-            status: current.auditChecklistStates[itemId]?.status ?? 'not_started',
-            notes: current.auditChecklistStates[itemId]?.notes ?? '',
-            ...patch,
-          },
-        },
-      }));
-    });
-  }
+  // handleUpdateUser, handleDeleteUser wurden in C2.7d nach
+  // src/features/platform/hooks/usePlatformControlHandlers.ts ausgelagert.
+  // updateComplianceCalendar (fruehere C2.7d-Transient) ist in C2.9
+  // nach useRegulatoryHandlers migriert — Option B aus der C2.9-Analyse.
 
   function selectModule(moduleId: string) {
     const selected = getModuleByIdFromCatalog(moduleId, effectiveModuleCatalog) ?? effectiveModuleCatalog[0] ?? builtInModules[0];
@@ -1390,97 +1345,6 @@ export default function App() {
     currentModule,
     roleTemplates,
   });
-
-  function handleCreateFinding() {
-    runWithPermission('kritis_edit', 'Für Feststellungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        auditFindings: [
-          {
-            id: createId('fnd'),
-            moduleId: currentModule.id,
-            title: '',
-            area: '',
-            severity: 'medium',
-            status: 'open',
-            owner: '',
-            dueDate: getDateOffset(21),
-            relatedRequirementIds: [],
-            relatedEvidenceIds: [],
-            notes: '',
-            createdAt: new Date().toISOString(),
-          },
-          ...current.auditFindings,
-        ],
-        activeView: 'kritis',
-      }));
-    });
-  }
-
-  function handleGenerateFindingsFromChecklist() {
-    runWithPermission('kritis_edit', 'Für die automatische Ableitung von Feststellungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        const auditFindings = [...current.auditFindings];
-
-        auditChecklist.forEach((item) => {
-          const stateForItem = current.auditChecklistStates[item.id]?.status ?? 'not_started';
-          const needsFinding = item.severity === 'high' && !['evidenced', 'closed', 'not_applicable'].includes(stateForItem);
-
-          if (!needsFinding) {
-            return;
-          }
-
-          const exists = auditFindings.some(
-            (finding) => finding.moduleId === currentModule.id && finding.title === item.title,
-          );
-
-          if (!exists) {
-            auditFindings.unshift({
-              id: createId('fnd'),
-              moduleId: currentModule.id,
-              title: item.title,
-              area: item.area,
-              severity: item.severity === 'high' ? 'high' : 'medium',
-              status: 'open',
-              owner: '',
-              dueDate: getDateOffset(21),
-              relatedRequirementIds: item.relatedRequirementIds ?? [],
-              relatedEvidenceIds: [],
-              notes: item.guidance,
-              createdAt: new Date().toISOString(),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          auditFindings,
-          activeView: 'kritis',
-        };
-      });
-    });
-  }
-
-  function handleUpdateFinding(findingId: string, patch: Partial<AuditFindingItem>) {
-    runWithPermission('kritis_edit', 'Für Änderungen an Feststellungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        auditFindings: current.auditFindings.map((item) => (
-          item.id === findingId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteFinding(findingId: string) {
-    runWithPermission('kritis_edit', 'Für das Löschen von Feststellungen fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        auditFindings: current.auditFindings.filter((item) => item.id !== findingId),
-      }));
-    });
-  }
-
 
   const {
     handleCreateEmptyBusinessProcess,
@@ -1855,50 +1719,10 @@ export default function App() {
     });
   }
 
-  function handleSaveRiskEntry(entry: RiskEntry) {
-    runWithPermission('kritis_edit', 'Für Risiko-Erfassung fehlt das Recht kritis_edit.', () => {
-      setState((current) => {
-        const existing = current.riskEntries.findIndex((item) => item.id === entry.id);
-        const next = [...current.riskEntries];
-        if (existing >= 0) {
-          next[existing] = entry;
-        } else {
-          next.push(entry);
-        }
-        return { ...current, riskEntries: next };
-      });
-    });
-  }
-
-  function handleDeleteRiskEntry(entry: RiskEntry) {
-    runWithPermission('kritis_edit', 'Für das Löschen von Risiken fehlt das Recht kritis_edit.', () => {
-      setState((current) => ({
-        ...current,
-        riskEntries: current.riskEntries.filter((item) => item.id !== entry.id),
-      }));
-    });
-  }
-
-  function handleExportRiskEntriesJson() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für Risiko-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    const payload = JSON.stringify(
-      { version: 1, generatedAt: new Date().toISOString(), entries: state.riskEntries },
-      null,
-      2,
-    );
-    const blob = new Blob([payload], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Risikokatalog-${state.companyProfile.companyName || 'mandant'}-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+  // handleSaveRiskEntry, handleDeleteRiskEntry,
+  // handleExportRiskEntriesJson, handleExportRiskAnalysisDocx wurden in
+  // C2.9 nach src/features/riskCatalog/hooks/useRiskCatalogHandlers.ts
+  // ausgelagert. Hook-Call + Destructuring liegt weiter unten.
 
   function triggerFileDownload(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);
@@ -2299,30 +2123,6 @@ export default function App() {
       );
     } catch (error) {
       showNotice('error', `JSON-Export fehlgeschlagen: ${String(error)}`);
-    }
-  }
-
-  async function handleExportRiskAnalysisDocx() {
-    if (!hasPermission('reports_export')) {
-      showNotice('error', 'Für DOCX-Exporte fehlt das Recht reports_export.');
-      return;
-    }
-    try {
-      const blob = await buildRiskAnalysisBlob({
-        companyProfile: state.companyProfile,
-        riskEntries: state.riskEntries,
-      });
-      const fileName = buildRiskAnalysisFileName(state.companyProfile);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      showNotice('error', `Betreiber-Risikoanalyse konnte nicht erzeugt werden: ${String(error)}`);
     }
   }
 
