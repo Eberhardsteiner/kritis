@@ -12,7 +12,9 @@ import {
   runAntivirusScan,
   validateUploadCandidate,
 } from './security.js';
-import { parseImportedModulePack } from './module-packs.js';
+// parseImportedModulePack lebte bis C3.1 hier (für upsertImportedModulePack);
+// der Import ist mit der Funktions-Extraktion nach
+// services/module-pack-registry.js umgezogen.
 import {
   buildPublicAuthProviders,
   createAuthCallbackTicket,
@@ -35,6 +37,7 @@ import { registerAdminRoutes } from './routes/admin.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerFileRoutes } from './routes/files.js';
 import { registerIntegrationRoutes } from './routes/integration.js';
+import { registerModuleRoutes } from './routes/modules.js';
 import { registerSystemRoutes } from './routes/system.js';
 // C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
 import {
@@ -272,160 +275,11 @@ async function buildStateEnvelope(tenantId, state) {
 // sanitizeModulePackRegistryEntries leben seit C3.0a in
 // ./services/sanitizers.js.
 
-function presentModulePackEntry(entry) {
-  return sanitizeModulePackEntry(entry);
-}
-
-function buildRegistryScopedContextLabel(authContext) {
-  if (authContext.anonymous) {
-    return 'anonym';
-  }
-  return authContext.account.name || authContext.account.email || 'unbekannt';
-}
-
-async function upsertImportedModulePack(tenantId, authContext, payload) {
-  const fileName = String(payload?.fileName || 'module-pack.json').trim() || 'module-pack.json';
-  const jsonText = String(payload?.jsonText || '').trim();
-  const changeNote = String(payload?.changeNote || '').trim();
-  if (!jsonText) {
-    throw httpError(400, 'Bitte JSON-Inhalt für das Paket übergeben.');
-  }
-
-  const parsed = parseImportedModulePack(jsonText);
-  if (!parsed.valid || !parsed.module) {
-    throw httpError(400, 'Das Paket konnte nicht validiert werden.', parsed.errors);
-  }
-
-  const entries = await readModulePackRegistry(tenantId);
-  const duplicate = entries.find((entry) => entry.packKey === parsed.packKey && entry.version === parsed.module.version);
-  if (duplicate) {
-    if (duplicate.checksumSha256 === parsed.checksumSha256) {
-      return presentModulePackEntry(duplicate);
-    }
-    throw httpError(409, 'Für diesen Paket-Schlüssel existiert bereits dieselbe Versionsnummer mit anderem Inhalt. Bitte Version erhöhen.');
-  }
-
-  const nextEntry = sanitizeModulePackEntry({
-    id: createId('pkg'),
-    packKey: parsed.packKey,
-    packType: parsed.packType,
-    targetModuleId: parsed.targetModuleId,
-    moduleId: String(parsed.packType === 'overlay' ? parsed.module.id : parsed.module.id || '').trim(),
-    moduleName: String(parsed.packType === 'overlay' ? (parsed.module.name || parsed.module.id) : (parsed.module.name || parsed.module.id) || '').trim(),
-    version: String(parsed.module.version || '').trim(),
-    status: 'draft',
-    fileName,
-    checksumSha256: parsed.checksumSha256,
-    uploadedAt: nowIso(),
-    uploadedBy: buildRegistryScopedContextLabel(authContext),
-    changeNote,
-    releaseNote: '',
-    sourceScope: 'tenant',
-    format: parsed.format || 'legacy',
-    containerVersion: parsed.containerVersion,
-    manifest: parsed.manifest,
-    module: parsed.module,
-  });
-
-  await writeModulePackRegistry(tenantId, [nextEntry, ...entries]);
-  await appendAuditLog(tenantId, {
-    id: createId('audit'),
-    at: nowIso(),
-    actor: buildRegistryScopedContextLabel(authContext),
-    action: 'module_pack_imported',
-    resource: 'module-pack-registry',
-    summary: `Paket ${nextEntry.packKey}@${nextEntry.version} importiert`,
-    details: changeNote || `Datei: ${fileName}`,
-  });
-
-  return presentModulePackEntry(nextEntry);
-}
-
-async function activateModulePackVersion(tenantId, authContext, entryId, releaseNote = '') {
-  const entries = await readModulePackRegistry(tenantId);
-  const entryIndex = entries.findIndex((entry) => entry.id === entryId);
-  if (entryIndex < 0) {
-    throw httpError(404, 'Das Modulpaket wurde nicht gefunden.');
-  }
-
-  const target = entries[entryIndex];
-  if (target.status === 'retired') {
-    throw httpError(409, 'Ein stillgelegtes Paket kann nicht aktiviert werden.');
-  }
-
-  const now = nowIso();
-  const nextEntries = entries.map((entry) => {
-    if (entry.packKey !== target.packKey) {
-      return entry;
-    }
-
-    if (entry.id === target.id) {
-      return presentModulePackEntry({
-        ...entry,
-        status: 'released',
-        releasedAt: now,
-        releasedBy: buildRegistryScopedContextLabel(authContext),
-        releaseNote: releaseNote || entry.releaseNote,
-        supersededById: '',
-      });
-    }
-
-    if (entry.status === 'released' || entry.status === 'superseded' || entry.status === 'draft') {
-      return presentModulePackEntry({
-        ...entry,
-        status: 'superseded',
-        supersededById: target.id,
-      });
-    }
-
-    return entry;
-  });
-
-  await writeModulePackRegistry(tenantId, nextEntries);
-  await appendAuditLog(tenantId, {
-    id: createId('audit'),
-    at: now,
-    actor: buildRegistryScopedContextLabel(authContext),
-    action: 'module_pack_released',
-    resource: 'module-pack-registry',
-    summary: `Paket ${target.packKey}@${target.version} freigegeben`,
-    details: releaseNote || '',
-  });
-
-  return presentModulePackEntry(nextEntries.find((entry) => entry.id === target.id));
-}
-
-async function retireModulePackVersion(tenantId, authContext, entryId, note = '') {
-  const entries = await readModulePackRegistry(tenantId);
-  const entryIndex = entries.findIndex((entry) => entry.id === entryId);
-  if (entryIndex < 0) {
-    throw httpError(404, 'Das Modulpaket wurde nicht gefunden.');
-  }
-
-  const now = nowIso();
-  const nextEntries = entries.map((entry) => entry.id === entryId
-    ? presentModulePackEntry({
-        ...entry,
-        status: 'retired',
-        retiredAt: now,
-        retiredBy: buildRegistryScopedContextLabel(authContext),
-        releaseNote: note || entry.releaseNote,
-      })
-    : entry);
-
-  await writeModulePackRegistry(tenantId, nextEntries);
-  await appendAuditLog(tenantId, {
-    id: createId('audit'),
-    at: now,
-    actor: buildRegistryScopedContextLabel(authContext),
-    action: 'module_pack_retired',
-    resource: 'module-pack-registry',
-    summary: `Paket ${entries[entryIndex].packKey}@${entries[entryIndex].version} stillgelegt`,
-    details: note || '',
-  });
-
-  return presentModulePackEntry(nextEntries.find((entry) => entry.id === entryId));
-}
+// presentModulePackEntry, buildRegistryScopedContextLabel,
+// upsertImportedModulePack, activateModulePackVersion,
+// retireModulePackVersion leben seit C3.1 in
+// ./services/module-pack-registry.js. Die zugehörigen vier
+// Route-Handler sind nach ./routes/modules.js umgezogen.
 
 // readExportLog, writeExportLog leben seit C3.0b in
 // ./services/persistence-wrappers.js (Import oben).
@@ -2338,57 +2192,9 @@ app.put('/api/tenant-settings', async (req, res, next) => {
   }
 });
 
-app.get('/api/modules/registry', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    res.json({ ok: true, entries: (await readModulePackRegistry(authContext.membership.tenantId)).map((entry) => presentModulePackEntry(entry)) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/modules/registry/import', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['modules_manage'], authContext);
-    const entry = await upsertImportedModulePack(authContext.membership.tenantId, authContext, req.body || {});
-    res.status(201).json({ ok: true, entry, entries: await readModulePackRegistry(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/modules/registry/:entryId/activate', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['modules_manage'], authContext);
-    const entry = await activateModulePackVersion(
-      authContext.membership.tenantId,
-      authContext,
-      req.params.entryId,
-      String(req.body?.releaseNote || '').trim(),
-    );
-    res.json({ ok: true, entry, entries: await readModulePackRegistry(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/modules/registry/:entryId/retire', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['modules_manage'], authContext);
-    const entry = await retireModulePackVersion(
-      authContext.membership.tenantId,
-      authContext,
-      req.params.entryId,
-      String(req.body?.note || '').trim(),
-    );
-    res.json({ ok: true, entry, entries: await readModulePackRegistry(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
+// Die vier /api/modules/registry-Endpoints leben seit C3.1 in
+// ./routes/modules.js — registriert über registerModuleRoutes(app)
+// weiter unten (Null-Deps-Muster).
 
 app.get('/api/exports', async (req, res, next) => {
   try {
@@ -2507,6 +2313,10 @@ registerFileRoutes(app, {
   sanitizeArray,
   getObjectStorage,
 });
+
+// C3.1: Null-Deps-Muster für neue Route-Module — keine Deps-Object-
+// Durchreichung, alle Services per Direkt-Import in routes/modules.js.
+registerModuleRoutes(app);
 
 app.use((error, req, res, _next) => {
   const status = Number(error?.status || 500);
