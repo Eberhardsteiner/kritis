@@ -89,6 +89,16 @@ Damit reduziert sich die Dep-Liste **jeder** bisherigen Feature-Hook drastisch:
 
 **C2.11 Implementierungs-Leitbild**: `<AppDerivedStateProvider>` umschließt die Feature-Hooks; `useAppDerivedState()` wird zum Hook, den jeder Feature-Hook intern aufruft statt 20 Felder via Props zu bekommen. Die App.tsx-Bulk-Last kommt dann von State-Hydration (buildAppStateFromLoaded), useEffect-Bootstrap-Kette und den verbliebenen workspace-globalen Utilities (handleExportJson, selectModule, updateProfileField), nicht mehr von Handler-Hook-Dep-Verdrahtung.
 
+## Praxis-Erkenntnisse aus C2.11c: Motivation für Context
+
+Nach der Extraktion des Server-Sync-Layers (C2.11c, useServerSync mit 37-Feld-Dep-Interface) sind drei Praxis-Befunde aus dem realen Umgang mit langen Dep-Listen festgehalten — sie unterstützen und präzisieren das C2.10-Leitbild:
+
+- **Gruppen-Kommentare tragen in der Praxis mehr als Dep-Listen-Länge.** Ein 37-Feld-Interface liest sich gut, wenn die Gruppen-Header (Core-State, Auth-State, Server-Connection, Admin-Details-Setter, Refs, Cycle-Breaker) klar sind. Die einzelne Setter-Zeile ist selten der Leser-Anker — die Gruppe ist es.
+
+- **Cycle-Breaker-Refs sind ein Symptom, das Context strukturell löst.** `clearAuthenticatedContextRef` + wire-up-useEffect in App.tsx sind pragmatischer, aber nicht sauberer Code. Sie sind Workaround für die zirkuläre Abhängigkeit zwischen useServerSync und usePlatformAuthHandlers. Mit `<WorkspaceStateContext>` wird die Mutual-Recursion zu zwei normalen `useContext`-Reads — der Ref verschwindet.
+
+- **Context ist die richtige nächste Stufe, nicht weil 37 Felder kein Problem wären, sondern weil sie ein Symptom eines strukturellen Defizits sind.** Die pure Dep-Reduktion ist Nebeneffekt; der Haupteffekt ist die Auflösung der Cycle-Breaker-Semantik und die saubere Trennung zwischen App-Shell-Orchestrierung und Feature-Hook-Logik.
+
 ## Verbundene Entscheidungen
 
 - **`docs/open-decisions.md`**: Das Demo-Mode-Sync-Verhalten steht in enger
