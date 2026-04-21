@@ -1,5 +1,5 @@
-import { scoreOptions } from '../data/kritisBase';
-import type { AnswerScore } from '../types';
+import { scoreOptions } from '../../../data/kritisBase';
+import type { AnswerScore } from '../../../types';
 
 interface ScoreSelectorProps {
   value: AnswerScore;

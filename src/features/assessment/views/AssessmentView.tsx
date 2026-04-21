@@ -1,12 +1,12 @@
 import { Search } from 'lucide-react';
-import { baseDomains } from '../data/baseDomains';
+import { baseDomains } from '../../../data/baseDomains';
 import { QuestionCard } from '../components/QuestionCard';
 import type {
   AnswerEntry,
   AssessmentFilters,
   DomainScore,
   QuestionDefinition,
-} from '../types';
+} from '../../../types';
 
 interface AssessmentViewProps {
   questions: QuestionDefinition[];

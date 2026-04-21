@@ -1,0 +1,471 @@
+# BLOCK-C.md – Wartbarkeit, Tests und Pilotfreigabe
+
+> **Hinweis für Claude Code**: Diese Datei ist die Fortsetzung von `CLAUDE.md` und `BLOCK-B.md`. Die Stilvorgaben aus `CLAUDE.md` Abschnitt 5 und 6 gelten unverändert. Diese Datei ersetzt Abschnitt 3 für die Block-C-Phase.
+> **Voraussetzung**: Block B ist vollständig abgeschlossen und auf `origin/main`. Die drei Feature-Module `src/features/resiliencePlan/`, `src/features/riskCatalog/` und `src/features/tabletopExercise/` existieren. Runtime-Dependencies: `docx ^9.6.1`, `zod ^4.3.6` sind installiert.
+
+---
+
+## 1 · Ziel von Block C
+
+Aus dem fachlich vollständigen Prototyp wird eine **wartbare, testgestützte und pilotfähige Codebasis**. C entspricht dem im Übergabeprotokoll vorgesehenen **Produktpaket P4**.
+
+**Was C nicht ist**: Keine neuen Fachinhalte. Keine neuen Regime. Keine neuen Features. Kein neues UI. Wer während C neue Funktionalität einbauen möchte, hat das Paket nicht verstanden – das kommt in einer späteren Produktrunde.
+
+**Ist-Stand zu Beginn von C**:
+- `src/App.tsx`: 5.227 Zeilen
+- `server/index.js`: 3.906 Zeilen
+- Backend-Tests: 38 (37 pass + 1 Windows-EBUSY-Flake in `security.test.js`)
+- Frontend-Tests: 352/352 pass in 37 Dateien
+- `src/features/`: `resiliencePlan`, `riskCatalog`, `tabletopExercise`
+- `server/routes/`: `admin.js`, `auth.js`, `files.js`, `integration.js`, `system.js`, `utils.js`
+
+**Ziel-Stand nach C**:
+- `src/App.tsx`: unter 500 Zeilen, nur noch App-Shell (Provider, Router, Top-Level-Layout)
+- `server/index.js`: unter 400 Zeilen, nur noch Bootstrap, Middleware-Bindung, Routen-Registrierung
+- Backend-Tests: mindestens 60
+- Frontend-Tests: mindestens 450
+- E2E-Tests mit Playwright: mindestens 12 stabile Szenarien
+- GitHub Actions CI: vollständig, mit Lint + Typecheck + Unit + E2E + Build als Pflicht-Gates vor Merge
+- Express 5 und Vite 7 im Einsatz, React 18 bleibt
+- Alle bestehenden JSON-Container-Formate (Branchen, Overlays, Szenarien, Resilienzplan) mit Zod validiert
+
+## 2 · Reihenfolge und Begründung
+
+Die sieben Pakete laufen in dieser Reihenfolge:
+
+1. **C1 · Dependency-Update (moderat)** – Basis stabilisieren, bevor refactored wird
+2. **C4a · E2E-Grundgerüst mit Playwright und CI-Pipeline** – Safety Net, bevor Zerlegung beginnt
+3. **C2 · Zerlegung `App.tsx` (Feature-Slicing)** – parallel zu C3 möglich, ein Entwickler pro Datei
+4. **C3 · Zerlegung `server/index.js`** – nutzt bestehende `server/routes/`-Struktur
+5. **C4b · Component-Tests für Feature-Module** – nach der Zerlegung, weil jetzt die Einheiten sauber isoliert sind
+6. **C5 · Schema-Validierung flächendeckend** – Zod auf alle JSON-Formate ausrollen
+7. **C6 · Supabase-Produktionspfad scharfstellen** – RLS, Migrations-Prüfpfad, Backup-Restore-Drill
+8. **C7 · Pilotfreigabe-Dokumentation** – UAT, Release-Notes, Betriebshandbuch, Härtungs-Checkliste
+
+**Wichtige Regel**: C4a (E2E-Grundgerüst) muss vor C2/C3 stehen. Ohne E2E-Safety-Net ist die Zerlegung von 9.000+ Zeilen in neue Struktur ein Blindflug. Das ist die aus der Erfahrung teuerste Abkürzung, deshalb hier gar nicht erst zur Wahl gestellt.
+
+## 3 · Akzeptanzkriterien Block C (Gesamt)
+
+- `src/App.tsx` < 500 Zeilen, ausschließlich App-Shell
+- `server/index.js` < 400 Zeilen, ausschließlich Bootstrap
+- Alle 352+ Frontend-Tests bleiben grün während jeder einzelnen Paket-Fertigstellung
+- Alle bis zu dem Zeitpunkt existierenden Backend-Tests bleiben grün
+- E2E-Suite mit mindestens 12 Szenarien läuft reproduzierbar auf CI
+- GitHub Actions durchläuft grün bei jedem PR (verbindliches Gate)
+- Express 5, Vite 7 in Betrieb – Build und Dev-Server starten ohne Warnung
+- Pilot-Durchlauf-Szenario (neuer Mandant → Scope → Risikoanalyse → Resilienzplan → Tabletop → Report-Export) läuft durchgängig und ist als E2E-Test abgebildet
+- UVM hat ein UAT-Paket, eine Pilot-Einführungs-Checkliste und ein minimales Betriebshandbuch als Markdown im Repo
+
+---
+
+## C1 · Dependency-Update (moderat)
+
+**Ziel**: Express und Vite auf aktuelle Major-Version. React bleibt auf 18. Zusätzlich: Bekannte npm-audit-Warnungen auflösen, wo im Kernpfad relevant.
+
+**Scope**:
+- `express 4.21.2 → 5.x` (aktuelle stable)
+- `vite 5.4.21 → 7.x` (aktuelle stable)
+- `@vitejs/plugin-react` und `@types/express` entsprechend mitziehen
+- `concurrently`, `multer`, `helmet` auf aktuellste Patch-Versionen
+- `jspdf` bleibt zunächst (PDF-Renderer-Wechsel ist eigenes Paket)
+- **React und react-dom bleiben auf 18.3.1**
+- npm-audit-Meldungen im Produktionspfad: beheben. Dev-Only-Meldungen: dokumentieren und ignorieren, wenn kein Remote-Risiko
+
+**Konkrete Migrationsrisiken** (Claude Code muss damit rechnen):
+
+Express 4 → 5:
+- Error-Handling-Middleware: die Signatur bleibt, aber async-Handler werfen Fehler jetzt korrekt an das Error-Middleware weiter, ohne dass man `try/catch` um jeden Handler braucht. **Das ändert implizit das Verhalten** – alle bestehenden `try/catch`-Blöcke bleiben funktional, aber redundant. Prüfen, ob es Stellen gibt, die auf das alte Verhalten bauen (z. B. stille Fehler in Handlern).
+- `req.body`-Parsing: bei Express 5 muss `express.json()` und `express.urlencoded()` explizit eingebunden sein. In `server/index.js` prüfen.
+- Einige Middleware-Pakete haben Express-5-kompatible Versionen – `multer 2.x` ist kompatibel, `helmet 8.x` auch. Sollte laufen.
+
+Vite 5 → 7:
+- Node-Version-Anforderung steigt (mindestens Node 20.19 oder 22+). Prüfen, ob CI-Node-Version aktuell genug ist.
+- Einige Plugin-APIs haben sich geändert – `@vitejs/plugin-react` auf passende Version mitziehen.
+- Build-Output-Pfade bleiben, aber die Dev-Server-Performance verbessert sich deutlich.
+
+**Vorgehen**:
+1. Eigener Branch `chore/c1-dependency-update`
+2. `npm outdated` als Referenz ausführen und dokumentieren
+3. Express 5 zuerst, isoliert. `npm test` grün, `npm run dev` funktioniert, manueller Smoke-Test auf allen bestehenden API-Endpunkten
+4. Vite 7 danach, isoliert. `npm run build` erfolgreich, `npm run dev` startet, die App lädt im Browser ohne Konsolenfehler
+5. Rest (devDependencies) danach als ein Commit
+6. Nach jedem Schritt `npm test` und `npm run build`
+
+**Akzeptanzkriterien C1**:
+- `npm test`: Backend 37 + Windows-Flake, Frontend 352/352
+- `npm run build`: erfolgreich
+- `npm run dev`: startet ohne Warnung, App im Browser lauffähig
+- Alle 57 API-Endpunkte per manuellem Smoke-Test (oder einfachem Skript) reagieren wie vorher
+
+**Aufwandsschätzung**: 0,5–1 Sprint. Express 5 ist schnell gemacht, Vite 7 kann im Config-Detail fummeln.
+
+---
+
+## C4a · E2E-Grundgerüst mit Playwright und CI-Pipeline
+
+**Ziel**: Vor der Zerlegung ein belastbares End-to-End-Safety-Net schaffen. Zwölf Szenarien decken die kritischen Nutzerflüsse ab. GitHub Actions läuft als verbindliches Gate.
+
+**Werkzeug**: Playwright (Standard für React+Vite, gute Integration, belastbare Flake-Kontrolle).
+
+**Setup**:
+- `@playwright/test` als devDependency installieren
+- `playwright.config.ts` im Repo-Root mit sensiblen Defaults: Chrome + Firefox, Screenshot-on-failure, Trace-on-retry, HTML-Report
+- Neuer Ordner `e2e/` mit Testfiles
+- Neuer npm-Script `test:e2e` in `package.json`
+- Fixture-Daten: ein Test-Mandant mit präparierten Seed-Daten, die vor jedem Test geladen werden (über die bestehende Container-Import-Logik)
+
+**Die zwölf Pflicht-Szenarien**:
+
+1. **Anonymer Scope-Flow**: App-Start → KRITIS-Dachgesetz-Scoping ausfüllen → Ergebnis korrekt angezeigt
+2. **Mandanten-Login**: Einloggen mit lokalem Konto → Dashboard erscheint → mandantenspezifische Daten sichtbar
+3. **Regime-Wechsel DE/AT/CH**: Jurisdiktion umstellen → Anforderungen und Checklisten wechseln korrekt
+4. **Requirement-Bearbeitung**: Requirement öffnen → Status ändern → speichern → persistent nach Reload
+5. **Evidenz-Upload**: Datei hochladen → erscheint im Register → Download funktioniert → Retention-Status wird angezeigt
+6. **Risikoanalyse erstellen (B3)**: Risiko erfassen → in Matrix sichtbar → DOCX-Export erzeugt valide Datei
+7. **Resilienzplan generieren (B4)**: Aus Risiken und Maßnahmen Plan erzeugen → DOCX/PDF/JSON-Exporte → Freigabe-Workflow draft → review → approved
+8. **Tabletop-Exercise durchspielen (B5)**: Szenario starten → Entscheidungen treffen → Auswertung anzeigen → Evidenz angelegt
+9. **Gap-Analyse anzeigen (B6)**: Dashboard öffnen → Restaufwand plausibel → Angebotsgrundlage-Export erzeugt DOCX
+10. **Management-Report exportieren**: Report-View → PDF-Export → Datei enthält Regime-Summary, Bußgeldrahmen, Haftungshinweis
+11. **Compliance-Kalender**: Registrierungsdatum eintragen → 9- und 10-Monats-Fristen erscheinen korrekt im Kalender
+12. **Mandantenisolation**: Mit Mandant A einloggen → abmelden → mit Mandant B einloggen → keine Daten aus A sichtbar
+
+**GitHub Actions CI** (`.github/workflows/ci.yml`, neu):
+
+Jobs:
+- `lint`: ESLint, Prettier-Check
+- `typecheck`: `tsc -b`
+- `unit-backend`: `npm run test:server`
+- `unit-frontend`: `npm run test:ui`
+- `build`: `npm run build` muss erfolgreich sein
+- `e2e`: `npm run test:e2e` gegen den gebauten Build
+
+Trigger: auf `pull_request` gegen `main`, alle Jobs müssen grün sein vor Merge. Branch-Protection-Rule in GitHub aktivieren.
+
+**Umgang mit dem Windows-EBUSY-Flake**:
+- Test-Suite in CI läuft auf Ubuntu → Flake tritt dort nicht auf
+- Lokal auf Windows bleibt das Verhalten wie dokumentiert in `CLAUDE.md` Abschnitt 8
+- Zusätzlich: Retry-Logik in `server/security.test.js` für den Cleanup (drei Versuche mit 200ms Pause) als C1-Begleitfix
+
+**Akzeptanzkriterien C4a**:
+- Alle zwölf E2E-Szenarien laufen reproduzierbar grün in drei aufeinanderfolgenden Läufen
+- CI-Pipeline durchläuft in unter 10 Minuten
+- Ein fehlerhafter PR (z. B. gebrochener Test) wird durch CI geblockt
+- README enthält Abschnitt „Tests ausführen" mit den drei Befehlen (`test:server`, `test:ui`, `test:e2e`)
+
+**Aufwandsschätzung**: 1,5 Sprints. Die zwölf Szenarien sind der Zeitfresser, CI-Setup ist in 1–2 Tagen fertig.
+
+---
+
+## C2 · Zerlegung `src/App.tsx` (Feature-Slicing)
+
+**Ziel**: `App.tsx` von 5.227 Zeilen auf unter 500 Zeilen reduzieren. Feature-Slicing-Architektur: jedes Fach-Feature bekommt einen eigenen Ordner unter `src/features/` mit Views, Hooks, Services, Typen und Tests.
+
+**Die Ziel-Struktur** für `src/features/`:
+
+| Feature-Ordner | Inhalt |
+|---|---|
+| `regulatory/` | Regime-Management (KritisView, Jurisdiktionswechsel, RegimeSummary, Bußgeldrechner, ManagementLiability) |
+| `assessment/` | AssessmentView, QuestionCard, ScoreSelector, Scoring-Anbindung – **ohne** ControlView (die zu platform/ gehört) |
+| `governance/` | GovernanceView, Stakeholder, Sites, Assets, Roles |
+| `evidence/` | Evidence-Management, Retention-Ansicht, EvidenceCard, Upload-Flow |
+| `measures/` | MeasuresView, ActionCard, Maßnahmenzuordnung zu Requirements |
+| `operations/` | ResilienceView (BIA, Prozesse, Abhängigkeiten, Krisenszenarien, Übungen) – **nicht zu verwechseln mit OperationsView**, die zu platform/ gehört |
+| `reporting/` | ReportView, Exporter-Anbindung, Management-Report |
+| `programRollout/` | ProgramView, RolloutView, Sprints, Zertifizierungsdossier |
+| `platform/` | PlatformView, OperationsView (Hosting/API-Clients/System-Jobs) und ControlView-User-Teile inkl. der 5 User-Handler und UserCard, Tenant-/User-Management, System-Operations |
+| `resiliencePlan/` | bleibt unverändert (B4) |
+| `riskCatalog/` | bleibt unverändert (B3) |
+| `tabletopExercise/` | bleibt unverändert (B5) |
+| `gap/` | GapAnalysisDashboard + Logik (B6) |
+
+Plus zwei Nicht-Feature-Ordner:
+- `src/shared/` – Komponenten, die von mehreren Features genutzt werden (AppNotice, ProjectTopbar, Sidebar, StatCard)
+- `src/app/` – App-Shell, Provider-Bäume, Routing, Top-Level-Layout
+
+**Zerlegungsstrategie (iterativ, nicht Big-Bang)**:
+
+Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, mit folgendem Muster:
+
+1. Feature-Ordner anlegen mit `index.ts` als Public Entry Point
+2. Relevante Komponenten, Hooks, Typen aus `App.tsx` und aus `src/views/`, `src/components/`, `src/hooks/` herausziehen
+3. Öffentliche API des Features definieren (nur das wird von außen importiert)
+4. `App.tsx` importiert nur noch das Feature-Bündel über `import { KritisFeature } from '@/features/regulatory'`
+5. **Alle bestehenden Tests müssen grün bleiben** nach der Iteration
+6. Ein Commit pro Feature-Extraktion
+
+**Tatsächliche Reihenfolge** (überarbeitet nach Inspektion der Größenverhältnisse bei C2.1; kleine und klar abgegrenzte Features zuerst, damit das Muster sitzt, die großen Querschnitts-Features am Ende):
+
+1. ✅ `gap/` – kleinster möglicher Echt-Refactor, bereits in B6 modular angelegt. Commit `f22d7bfc` (C2.1). Bestätigt, dass Ordnerstruktur, Public-Entry-Point-Muster und Import-Swap funktionieren.
+2. ✅ `measures/` (klein-mittel) – Commit `7edc2668` (C2.2).
+3. ✅ `governance/` (mittel) – Commit `b98aa08b` (C2.3).
+4. ✅ `evidence/` (mittel) – Commit `a2704ae6` (C2.4).
+5. ✅ `operations/` (mittel-groß) – Commit `80c8dbf2` (C2.5).
+6. ✅ `assessment/` (klein) – C2.6.
+7. `platform/` (groß, ~2.000 LoC in App.tsx, 24 useState, 15 Handler) – bewusst nach hinten verschoben, damit das Muster zum Extraktionszeitpunkt fest sitzt und der hohe Blast Radius abgefedert ist.
+8. `programRollout/` (mittel) – ProgramView, RolloutView, Sprints, Zertifizierungsdossier.
+9. `regulatory/` (komplex) – das verflechtetste Feature mit Regime-/Jurisdiktions-Zuständen, die fast jedes andere Feature liest. Erst extrahierbar, wenn die anderen Features ihren Zustand sauber konsumieren.
+10. `reporting/` (Querschnitt) – Management-Report zieht Daten aus Regulatorik, Gap-Analyse, Risiken und Evidenzen zusammen. Extraktion macht erst Sinn, wenn alle Quell-Features sauber strukturiert sind.
+11. App-Shell `src/app/`: Provider, Router, Layout – die Reste aus `App.tsx` landen im App-Shell-Ordner, `App.tsx` selbst wird auf < 500 Zeilen reduziert.
+
+> **Hinweis zur ursprünglichen Plan-Reihenfolge**: `BLOCK-C.md` hat ursprünglich `platform/` als erste Extraktion empfohlen – auf Basis einer zu optimistischen Größenannahme. Tatsächliche Inspektion durch Claude Code bei C2.1 ergab: Platform ist mit 1.082 Zeilen in `PlatformView.tsx` plus 24 useState-Hooks und 15 Handlern in `App.tsx` eines der großen Features. Die Reihenfolge wurde entsprechend korrigiert.
+
+**Routing**: Ab der dritten bis vierten Iteration wird ein echter Router (React Router v6 mit Data-API) eingeführt. Vorher reicht die bestehende State-basierte View-Umschaltung.
+
+**State-Management**: Der bestehende Workspace-Context wird in `src/app/contexts/` gezogen und bleibt erhalten. Kein Umstieg auf Redux, Zustand o. ä. – das ist nicht Teil von C.
+
+**Rollback-Strategie**: Jede Iteration ist ein eigener Commit und damit einzeln revertierbar. Wenn eine Extraktion in größere Probleme läuft, wird sie revertet und neu geplant.
+
+**Akzeptanzkriterien C2**:
+- `src/App.tsx` unter 500 Zeilen
+- Keine Feature-Datei importiert direkt aus einem anderen Feature (nur über `shared/` oder Feature-Public-API)
+- Alle 352+ Frontend-Tests grün
+- Alle 12 E2E-Szenarien grün
+- Build-Output-Größe nicht größer als vor C2 (±10 % Toleranz)
+
+**Aufwandsschätzung**: 3 Sprints. Das ist das größte Paket in C. Planung: eine Feature-Extraktion pro 2–3 Arbeitstage.
+
+---
+
+## C3 · Zerlegung `server/index.js`
+
+**Ziel**: `server/index.js` von 3.906 Zeilen auf unter 400 Zeilen. Die Ziel-Struktur nutzt die bestehende `server/routes/`-Organisation und ergänzt sie.
+
+**Bestehende Route-Module** (werden erweitert und aktiv eingebunden):
+- `admin.js`, `auth.js`, `files.js`, `integration.js`, `system.js`, `utils.js`
+
+**Zu ergänzende Route-Module**:
+- `tenants.js` – Mandanten-Verwaltung
+- `evidence.js` – Evidenzen, Retention, Upload/Download
+- `regulatory.js` – Regime-spezifische Endpunkte (KRITIS-Dachgesetz, BSIG, AT, CH)
+- `reporting.js` – Report-Exports, Management-Report
+- `assessments.js` – Assessment-Flows, Requirement-State
+- `modules.js` – Container-Pack-Registry, Overlay-Management
+
+**Zerlegungsstrategie**:
+
+Analog zu C2 iterativ, eine Domäne pro Iteration. Jede Iteration:
+1. Endpunkt-Gruppe identifizieren (z. B. alle Routen, die `/api/tenants/*` behandeln)
+2. Route-Handler und zugehörige Service-Logik in neues Route-Modul extrahieren
+3. In `server/index.js` durch `app.use('/api/tenants', tenantsRouter)` ersetzen
+4. Bestehende Tests grün halten, ggf. neue Tests für das Route-Modul
+
+**Service-Layer**: Wenn pro Domäne mehr als reine Routen-Logik extrahiert wird (DB-Zugriff, Business-Logik), entsteht ein paralleler `server/services/`-Ordner. Faustregel: wenn eine Route-Handler-Funktion mehr als 50 Zeilen hat, wird die Business-Logik in einen Service ausgelagert.
+
+**Express-5-Vorteile nutzen**:
+- Async-Handler direkt, ohne manuelle `next(err)`-Weiterleitung
+- Zentrale Error-Middleware am Ende von `server/index.js`
+- Konsistente Fehlerantworten über ein `errorResponse`-Helper
+
+**Akzeptanzkriterien C3**:
+- `server/index.js` unter 400 Zeilen
+- Jedes Route-Modul hat eine eigene Testdatei
+- Alle 37+ Backend-Tests grün
+- Backend-Tests erweitert auf mindestens 60 durch die Route-Modul-Tests
+- Alle 12 E2E-Szenarien grün
+
+**Aufwandsschätzung**: 2,5 Sprints. Kann parallel zu C2 laufen, ist weniger verzahnt.
+
+---
+
+## C4b · Component-Tests für Feature-Module
+
+**Ziel**: Nach der Zerlegung bekommen die neuen Feature-Module dedizierte Component-Tests. Fokus auf die komplexeren, in B entstandenen Bausteine.
+
+**Werkzeug**: Vitest + React Testing Library (ist bereits im Projekt).
+
+**Priorisierte Component-Tests**:
+
+1. **Gap-Analyse-Dashboard** (`features/gap/components/GapAnalysisDashboard.test.tsx`):
+   - Restaufwand-Berechnung bei verschiedenen Reifegrad-Zuständen
+   - Mapping-Einfluss (ISO 27001 reduziert Aufwand)
+   - Reaktion auf Status-Änderung eines einzelnen Requirements
+
+2. **Resilienzplan-Editor** (`features/resiliencePlan/views/ResiliencePlanEditor.test.tsx`):
+   - Abschnitts-Navigation
+   - Validierung gegen § 13-Pflichtabschnitte
+   - Freigabe-Workflow-Übergänge
+
+3. **Risikomatrix** (`features/riskCatalog/views/RiskMatrixView.test.tsx`):
+   - Korrekte Einordnung eines Risikos in 5×5-Matrix
+   - Restrisiko-Berechnung nach Maßnahmen-Zuordnung
+   - Drill-down-Verhalten
+
+4. **Tabletop-Session** (`features/tabletopExercise/views/ExerciseSession.test.tsx`):
+   - Timer-Logik
+   - Entscheidungs-Konsequenzen in späteren Injects
+   - Auswertung gegen `evaluationCriteria`
+
+5. **Bußgeldrechner** (`features/regulatory/components/PenaltyExposureCard.test.tsx`):
+   - Korrekte Obergrenze bei verschiedenen Kombinationen offener Pflichten
+   - Update bei Änderung des Requirement-Status
+
+6. **Behörden-Auflösung** (`features/regulatory/lib/authorities.test.ts`):
+   - Für alle 10 Sektoren × 2 DE-Regime mindestens eine Behörde
+   - Korrekte Sonderbehandlung Finanzsektor (BaFin + DORA-Hinweis)
+   - Länderbehörden bei Landesaufsicht
+
+**C4b-Kandidaten aus dem Extraktionsfluss**:
+- **ResilienceView → 4 Panels splitten** (BusinessProcessPanel, DependencyPanel, ScenarioPanel, ExercisePanel) mit Tests pro Panel (aus C2.5).
+- **handleDeleteEvidence-Seiteneffekt auf `auditFindings.relatedEvidenceIds`** auf Unit-Ebene (aus C2.4 Phase 3, nicht E2E-sichtbar).
+
+**Akzeptanzkriterien C4b**:
+- Mindestens 100 zusätzliche Frontend-Tests
+- Gesamtstand Frontend-Tests ≥ 450
+- Alle neuen Tests laufen in unter 15 Sekunden
+
+**Aufwandsschätzung**: 1,5 Sprints.
+
+---
+
+## C5 · Schema-Validierung flächendeckend
+
+**Ziel**: Alle JSON-Container-Formate (Branchenmodule, Overlays, Szenarien, Resilienzpläne, Risikoanalyse-Exports) werden mit Zod validiert. Das verhindert, dass fehlerhafte JSON-Dateien die App in einen inkonsistenten Zustand bringen.
+
+**C5.1 · Bestehende Container-Formate**:
+- Branchenmodule (`src/data/builtInModulePacks.ts` + dynamisch importierte)
+- Overlay-Templates (`docs/custom-overlay-template*.json`)
+- Module-Payload-Schema (`docs/module-schema.json`)
+
+Zu jedem Format:
+- Zod-Schema in `src/schemas/` definieren
+- JSON-Schema-Datei in `docs/schemas/` für externe Nutzer generieren (aus Zod)
+- Validierung beim Import/Upload hart (fehlgeschlagene Validierung = Abweisung mit sprechender Fehlermeldung)
+- Backend-Validierung in `server/services/moduleValidation.js`
+
+**C5.2 · Mini-Migration `EvidenceItem.sourceType`**:
+
+Wie im Ist-Stand von Block B notiert, nutzen Tabletop-Exercise-Evidenzen aktuell `sourceType: 'manual'`. In C5.2:
+- Typ `EvidenceSourceType` erweitern um `'tabletop_exercise'`
+- Migration: bestehende Evidenzen mit `sourceLabel` beginnend mit „Tabletop-Übung" werden beim Laden auf den neuen sourceType aktualisiert
+- Dedup-Logik und Filter in Evidence-Register darauf vorbereiten
+- Tests für Migration und Filter
+
+**Akzeptanzkriterien C5**:
+- Ein fehlerhafter Modul-Import wird mit sprechender Fehlermeldung abgewiesen, App bleibt stabil
+- Alle drei Tabletop-Pflicht-Szenarien validieren gegen ihr Zod-Schema
+- Evidence-Filter „Nur Tabletop-Übungen" funktioniert
+- Dokumentation in `docs/schemas/README.md` zu Versionierung und Erweiterung der Schemas
+
+**Aufwandsschätzung**: 1 Sprint.
+
+---
+
+## C6 · Supabase-Produktionspfad scharfstellen
+
+**Ziel**: Supabase als echte Produktionspersistenz verdrahten, nicht nur vorbereitet. Mandantenisolation hart gegen böse Wille absichern.
+
+**Scope**:
+- **RLS-Policies** (Row Level Security) für alle Tabellen aus `docs/supabase-schema.sql`: kein Zugriff auf fremde Mandanten-Daten, auch nicht bei kompromittierten Service-Keys
+- **Storage-RLS** analog für Evidenz-Objekte
+- **Migrations-Prüfpfad**: `server-storage/system/` → Supabase-Migration dokumentiert und reproduzierbar
+- **Backup-Restore-Drill**: ein Skript, das einen Mandanten exportiert, löscht und wiederherstellt – als Test im CI
+- **Umgebungsprofile**: klare Trennung `development`, `staging`, `production` mit je eigenen Supabase-Projekten
+- **Secret-Management**: Keys nicht im Repo, sondern über `.env.local` lokal und GitHub Secrets in CI
+
+**Offene Eingabe aus dem Extraktionsfluss** (siehe `docs/open-decisions.md`):
+- Demo-Mode-Sync-Verhalten schreibt ohne Auth-Gate — Reload überschreibt lokalen State mit Server-Leerstand (Beobachtungen aus C2.3 Phase 3 und C2.5 Fixture-Fix). In C6 auf Read-Only-Anonym umstellen, E2E-State per Staging-Projekt isolieren.
+
+**Akzeptanzkriterien C6**:
+- Staging-Umgebung läuft gegen eigenes Supabase-Projekt
+- E2E-Tests laufen gegen Staging-Supabase (statt lokaler SQLite)
+- RLS verhindert Mandanten-Datenzugriff nachweisbar in einem dedizierten Test
+- Backup-Restore-Drill läuft automatisiert
+
+**Aufwandsschätzung**: 1,5–2 Sprints. Abhängig davon, wie viel Policy-Arbeit vorher schon gemacht wurde.
+
+---
+
+## C7 · Pilotfreigabe-Dokumentation
+
+**Ziel**: Ohne diese Dokumente gibt es keinen Pilotbetrieb. C7 ist reines Schreiben, aber notwendig.
+
+**Artefakte**:
+
+1. **`docs/PILOT-CHECKLISTE.md`** – von UVM auszufüllen vor Pilotstart (technische Vorbereitungen, Datenimport, Schulung, Go-Live-Kriterien)
+2. **`docs/UAT-PAKET.md`** – Testszenarien, die der Pilotkunde zur Abnahme durchläuft (12 Szenarien analog zu den E2E-Tests, in Geschäftssprache)
+3. **`docs/BETRIEBSHANDBUCH.md`** – Minimalversion: Installation, Konfiguration, Backup/Restore, Incident-Response (KRITIS-DachG-Kontext: die App muss selbst nicht 24/7 verfügbar sein, aber die Daten dürfen nicht verloren gehen)
+4. **`docs/HAERTUNGS-CHECKLISTE.md`** – Sicherheitshärtung für Pilotkunden: HTTPS, Secret-Rotation, Logging-Aufbewahrung, RLS-Verifikation
+5. **`docs/RELEASE-NOTES-v3.0.md`** – Release Notes für die Pilot-Version, klar getrennt nach „Neu in C", „Aus B übernommen", „Aus A übernommen"
+6. **`README.md`** – Aktualisierung der Haupt-README auf Pilot-Stand, mit klaren Hinweisen für UVM-Berater und Pilotkunden
+
+**Akzeptanzkriterien C7**:
+- Alle sechs Artefakte im Repo
+- UVM kann mit den Dokumenten eigenständig einen Pilotkunden einführen
+- Die Release-Notes enthalten alle Paragraphen-Referenzen und Fristen korrekt (Querprüfung gegen `CLAUDE.md` Abschnitt 2)
+
+**Aufwandsschätzung**: 1 Sprint.
+
+---
+
+## 4 · Prüfpfad nach jedem Paket
+
+```bash
+npm test
+npm run test:e2e
+npm run build
+node --check server/index.js
+```
+
+Zusätzlich pro Paket:
+
+| Paket | Spezifischer Check |
+|---|---|
+| C1 | Alle 57 API-Endpunkte per Smoke-Test reagieren wie vor Update |
+| C4a | Alle 12 E2E-Szenarien 3× grün in Folge |
+| C2 | Build-Output-Größe ±10 % gegenüber Vor-C2-Stand |
+| C3 | `server/index.js` < 400 Zeilen, jede Route in eigenem Modul |
+| C4b | Frontend-Tests ≥ 450 |
+| C5 | Ein absichtlich kaputtes JSON-Modul wird abgewiesen |
+| C6 | Mandanten-Isolationstest in Staging-Supabase grün |
+| C7 | Alle sechs Dokumentations-Artefakte im Repo |
+
+## 5 · Stil- und Qualitätsvorgaben
+
+Gelten aus `CLAUDE.md` Abschnitt 5 unverändert weiter. Ergänzungen für C:
+
+- **Kein neues Feature**: wenn Claude Code beim Refactoring merkt, dass etwas „man ja auch schöner machen könnte" – nein, das ist Produktinhalt, nicht C.
+- **Ein Commit pro Zerlegungsschritt**: Commit-Message im Format `C2.3: Extract evidence feature from App.tsx` – damit Rollbacks einzeln möglich sind.
+- **Test-Safety-Net vor jeder Zerlegung**: wenn ein Feature extrahiert wird, vorher prüfen, dass alle Tests grün sind. Nach Extraktion: prüfen, dass sie immer noch grün sind. Wenn nicht: rollback, Problem verstehen, neu planen.
+- **Keine Parallel-Änderungen an `App.tsx` und `server/index.js`**: C2 und C3 laufen getrennt (ein Entwickler pro Datei), damit Merge-Konflikte minimal bleiben.
+
+## 6 · Reihenfolge für die erste Session auf Block C
+
+1. Lies `CLAUDE.md`, `BLOCK-B.md` und `BLOCK-C.md` vollständig.
+2. Führe `npm test`, `npm run build`, `npm run dev` – Baseline muss bestätigt sein (37 Backend + 352 Frontend grün, App startet, Build läuft).
+3. Starte mit **C1 · Dependency-Update**. Express 5 zuerst, isoliert, mit Zwischen-Tests. Dann Vite 7.
+4. Zeige Dr. Steiner nach C1 einen kurzen Status: was wurde upgedatet, was hat Arbeit gekostet, was ist offen.
+5. Danach **C4a · E2E-Grundgerüst**. Erst ein Szenario als Muster, dann die übrigen elf.
+6. **C2 und C3 dürfen erst starten, wenn C4a mit 12 grünen E2E-Szenarien abgeschlossen ist.**
+
+## 7 · Sprint-Aufteilung (Größenordnung)
+
+| Sprint | Paket | Ergebnis |
+|---|---|---|
+| S1 | C1 | Express 5 und Vite 7 in Betrieb, alle Tests grün, manueller Smoke-Test bestanden |
+| S2 | C4a Teil 1 | Playwright-Setup, CI-Pipeline, 6 von 12 E2E-Szenarien grün |
+| S3 | C4a Teil 2 | Restliche 6 E2E-Szenarien, CI als verbindliches Gate aktiv |
+| S4 + S5 | C2 Teil 1 | Feature-Extraktion: gap (C2.1, erledigt), measures, governance, evidence, operations, assessment |
+| S6 | C2 Teil 2 | Feature-Extraktion: platform, programRollout, regulatory, reporting, App-Shell |
+| S7 | C3 | `server/index.js`-Zerlegung in alle Route-Module + Service-Layer |
+| S8 | C4b | Component-Tests für sechs priorisierte Feature-Bausteine |
+| S9 | C5 | Zod-Validierung flächendeckend, `sourceType`-Migration |
+| S10 + S11 | C6 | Supabase-Produktionspfad, RLS, Backup-Restore-Drill |
+| S12 | C7 | Pilotfreigabe-Dokumentation |
+
+**Realistische Gesamt-Timeline**: 12 Sprints. Bei Parallelisierung von C2 und C3 (zwei Entwickler) einsparbar auf 10. Mit den von Dir in den Sprint-Dokumentationen gezeigten Iterationsgeschwindigkeiten ist das ambitioniert, aber machbar.
+
+## 8 · Kontextpunkte für Claude Code
+
+- **Wenn ein Test unter Refactoring plötzlich rot wird**: nicht den Test anpassen, sondern verstehen warum. Meist ist es die richtige Stelle zur Korrektur.
+- **Wenn `App.tsx` nach drei Iterationen immer noch über 3.000 Zeilen**: Extraktions-Schnitt ist zu klein gewählt, bitte Rückmeldung an Dr. Steiner.
+- **Wenn E2E-Test flaky wird**: erst drei Wiederholungen prüfen, dann Trace analysieren. Wenn wirklich flaky: Test isolieren, Grund identifizieren, nicht pauschal Retry erhöhen.
+- **Wenn eine Express-5-Migration an einem nicht trivialen Verhalten hängt**: zurück zum Plan, nicht die App umbauen, sondern den Pfad über Express 4 diskutieren (Rollback auf C1 möglich).
+- **Bei Supabase-Arbeiten** (C6): RLS-Regeln immer in eigenem File verwalten, nie direkt im Dashboard klicken – sonst sind sie nicht versioniert.
+
+## 9 · Nach Abschluss von C
+
+- Pilotkunde auswählbar und einführbar
+- Grundlage für **Produktpaket P5** (Produktionsplattform) ist gelegt
+- **Produktpaket P6** (Pilotbetrieb und Rollout) ist der nächste Schritt nach C7 – dort wird die App beim ersten echten Kunden eingeführt
+
+Viel Erfolg.

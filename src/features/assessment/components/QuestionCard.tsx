@@ -1,6 +1,6 @@
 import { FileText, PlusCircle, ShieldAlert } from 'lucide-react';
 import { ScoreSelector } from './ScoreSelector';
-import type { AnswerEntry, QuestionDefinition } from '../types';
+import type { AnswerEntry, QuestionDefinition } from '../../../types';
 
 interface QuestionCardProps {
   question: QuestionDefinition;

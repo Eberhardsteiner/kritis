@@ -44,6 +44,7 @@ import {
   normalizeLoadedScenarios,
   useOperationsHandlers,
 } from './features/operations';
+import { useAssessmentHandlers } from './features/assessment';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -1554,15 +1555,16 @@ export default function App() {
     });
   }
 
-  function updateAssessmentFilter(patch: Partial<AssessmentFilters>) {
-    setState((current) => ({
-      ...current,
-      assessmentFilters: {
-        ...current.assessmentFilters,
-        ...patch,
-      },
-    }));
-  }
+  const {
+    updateAssessmentFilter,
+    handleScoreChange,
+    handleNoteChange,
+  } = useAssessmentHandlers({
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+  });
 
   function updateComplianceCalendar(field: keyof ComplianceCalendar, value: string) {
     runWithPermission('workspace_edit', 'Für Änderungen am Compliance-Kalender fehlt das Recht workspace_edit.', () => {
@@ -2192,36 +2194,6 @@ export default function App() {
             }
           : current.companyProfile,
       };
-    });
-  }
-
-  function handleScoreChange(questionId: string, score: number | null) {
-    runWithPermission('assessment_edit', 'Für Bewertungsänderungen fehlt das Recht assessment_edit.', () => {
-      setState((current) => ({
-        ...current,
-        answers: {
-          ...current.answers,
-          [questionId]: {
-            score: score as 0 | 1 | 2 | 3 | 4 | null,
-            note: current.answers[questionId]?.note ?? '',
-          },
-        },
-      }));
-    });
-  }
-
-  function handleNoteChange(questionId: string, note: string) {
-    runWithPermission('assessment_edit', 'Für Notizen in der Analyse fehlt das Recht assessment_edit.', () => {
-      setState((current) => ({
-        ...current,
-        answers: {
-          ...current.answers,
-          [questionId]: {
-            score: current.answers[questionId]?.score ?? null,
-            note,
-          },
-        },
-      }));
     });
   }
 
