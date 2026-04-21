@@ -45,6 +45,16 @@ import {
   useOperationsHandlers,
 } from './features/operations';
 import { useAssessmentHandlers } from './features/assessment';
+import {
+  buildServerPayload,
+  buildSessionBackedUser,
+  mergeServerUserIntoState,
+  serializeServerPayload,
+} from './features/platform/serverPayload';
+import {
+  clearAuthCallbackSearch,
+  readAuthCallbackSearch,
+} from './features/platform/authCallback';
 import { createId } from './shared/ids';
 import { getDateOffset } from './shared/dates';
 import {
@@ -557,92 +567,9 @@ function createInitialState(): AppState {
   return buildAppStateFromLoaded(loadState());
 }
 
-function buildServerPayload(state: AppState): Partial<AppState> {
-  return {
-    uploadedModules: state.uploadedModules,
-    answers: state.answers,
-    requirementStates: state.requirementStates,
-    companyProfile: state.companyProfile,
-    regulatoryProfile: state.regulatoryProfile,
-    actionItems: state.actionItems,
-    evidenceItems: state.evidenceItems,
-    stakeholders: state.stakeholders,
-    sites: state.sites,
-    assets: state.assets,
-    businessProcesses: state.businessProcesses,
-    dependencies: state.dependencies,
-    scenarios: state.scenarios,
-    exercises: state.exercises,
-    rolloutPlan: state.rolloutPlan,
-    hardeningChecks: state.hardeningChecks,
-    runbooks: state.runbooks,
-    releaseGates: state.releaseGates,
-    reviewPlan: state.reviewPlan,
-    users: state.users,
-    complianceCalendar: state.complianceCalendar,
-    auditChecklistStates: state.auditChecklistStates,
-    auditFindings: state.auditFindings,
-    certificationState: state.certificationState,
-    riskEntries: state.riskEntries,
-    resiliencePlan: state.resiliencePlan,
-    archivedResiliencePlans: state.archivedResiliencePlans,
-    currentTabletopSession: state.currentTabletopSession,
-    archivedTabletopSessions: state.archivedTabletopSessions,
-    importedTabletopScenarios: state.importedTabletopScenarios,
-  };
-}
-
-function serializeServerPayload(state: AppState): string {
-  return JSON.stringify(buildServerPayload(state));
-}
-
-function buildSessionBackedUser(session: AuthSession | null, userSeed?: UserItem | null): UserItem | null {
-  if (!session) {
-    return userSeed ?? null;
-  }
-
-  return {
-    id: userSeed?.id || session.userId,
-    name: userSeed?.name || session.name,
-    email: userSeed?.email || session.email,
-    department: userSeed?.department || '',
-    roleProfile: session.roleProfile,
-    status: session.status,
-    scope: userSeed?.scope || session.tenantName,
-    notes: userSeed?.notes || 'Serverseitig authentifizierter Zugriff',
-    linkedStakeholderId: userSeed?.linkedStakeholderId,
-  };
-}
-
-function mergeServerUserIntoState(
-  nextState: AppState,
-  session: AuthSession | null,
-  userSeed?: UserItem | null,
-): AppState {
-  const serverUser = buildSessionBackedUser(session, userSeed);
-  if (!serverUser) {
-    return nextState;
-  }
-
-  const users = [...nextState.users];
-  const existingIndex = users.findIndex((entry) => entry.id === serverUser.id || (entry.email && serverUser.email && entry.email === serverUser.email));
-  if (existingIndex >= 0) {
-    users[existingIndex] = {
-      ...users[existingIndex],
-      ...serverUser,
-      id: serverUser.id,
-    };
-  } else {
-    users.unshift(serverUser);
-  }
-
-  return {
-    ...nextState,
-    users,
-    activeUserId: serverUser.id,
-  };
-}
-
+// Hinweis: applyRemoteState bleibt vorerst hier, weil es auf das
+// App-interne buildAppStateFromLoaded zugreift. Wandert mit dessen
+// Zerlegung in C2.11 app-shell oder einer dedizierten state-hydration.
 function applyRemoteState(
   remoteState: Partial<AppState>,
   currentState: AppState,
@@ -694,29 +621,6 @@ function inferRoleProfileFromStakeholder(stakeholder: StakeholderItem): UserRole
     return 'reviewer';
   }
   return 'editor';
-}
-
-function readAuthCallbackSearch() {
-  if (typeof window === 'undefined') {
-    return { ticket: '', error: '', provider: '' };
-  }
-
-  const url = new URL(window.location.href);
-  return {
-    ticket: url.searchParams.get('auth_ticket') || '',
-    error: url.searchParams.get('auth_error') || '',
-    provider: url.searchParams.get('auth_provider') || '',
-  };
-}
-
-function clearAuthCallbackSearch() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const url = new URL(window.location.href);
-  ['auth_ticket', 'auth_error', 'auth_provider'].forEach((key) => url.searchParams.delete(key));
-  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
 }
 
 export default function App() {
