@@ -45,6 +45,8 @@ Hook-Deps weitergereicht bleiben.
 | `moduleRegistryEntries` | platform-auth-Hook (Login-Reset), Module-Handler | ModulesView, PlatformView | nein |
 | `users`, `activeUserId` | platform-control-Hook (C2.7d), platform-auth-Hook (Login-User-Sync) | ControlView (UserCard-Liste), `useAppDerivedState.activeUser` (fast jede View) | **ja** — `activeUser` ist der stärkste Cross-Feature-Read |
 | `complianceCalendar` | platform-control-Hook (C2.7d Transient) | ControlView (Compliance-Kalender-Formular), `useAppDerivedState.deadlineSummary` | **evtl.** — Entscheidung in C2.9 (regulatory): Panel + Handler gemeinsam migrieren oder Handler getrennt |
+| `rolloutPlan` | programRollout-Hook (C2.8) | RolloutView (Plan-Formular), platform-system-Hook (handleCreateHandoverBundle liest `releaseVersion`/`decisionNote`), App.tsx `buildServerExportPackagePayload` (handover_bundle), serverPayload.ts | nein — nur drei Leser, Props reichen |
+| `hardeningChecks`, `runbooks`, `releaseGates` | programRollout-Hook (C2.8) | RolloutView (Cluster-Listen), App.tsx `buildServerExportPackagePayload` (handover_bundle-Sections) | nein — feature-intern zu programRollout |
 
 ## Noch offene Feature-Inventare
 
@@ -54,7 +56,7 @@ Ergänzt mit den jeweiligen Extraktionen:
 |---|---|
 | ~~C2.7c · Platform-System (OperationsView)~~ | ✅ erledigt — `pushStateToServer`, useEffect #4, 20 System-Handler, OperationsView im `features/platform`-Slice. App.tsx -465 Z. |
 | ~~C2.7d · User-Management (ControlView)~~ | ✅ erledigt — 5 User-Handler + `updateComplianceCalendar` (Transient) + `inferRoleProfileFromStakeholder` + ControlView + UserCard im `features/platform`-Slice. E2E 16 ergänzt. App.tsx -119 Z. |
-| C2.8 · programRollout | ProgramView/RolloutView-Zugriffe auf `exportPackages`, `tenantPolicy`, `serverMode` |
+| ~~C2.8 · programRollout~~ | ✅ erledigt — ProgramView + RolloutView + 13 Handler + 4 Normalizer + `defaultRolloutPlan` im `features/programRollout`-Slice. Cross-Feature-Read-Befund: KritisView und ReportView lesen **keinen** programRollout-State direkt, sodass C2.9 durch C2.8 entkoppelt bleibt. App.tsx -428 Z. |
 | C2.9 · regulatory | KritisView-Zugriffe auf `tenantPolicy`, `authToken`, `authSession`, Bußgeldrechner-Datenflüsse |
 | C2.10 · reporting | ReportView-Querschnitts-Reads |
 

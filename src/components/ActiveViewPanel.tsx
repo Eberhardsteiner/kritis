@@ -9,11 +9,11 @@ import type * as MeasuresViewModule from '../features/measures/views/MeasuresVie
 import type * as ModulesViewModule from '../views/ModulesView';
 import type * as OperationsViewModule from '../features/platform/views/OperationsView';
 import type * as PlatformViewModule from '../features/platform/views/PlatformView';
-import type * as ProgramViewModule from '../views/ProgramView';
+import type * as ProgramViewModule from '../features/programRollout/views/ProgramView';
 import type * as ReportViewModule from '../views/ReportView';
 import type * as ResilienceViewModule from '../features/operations/views/ResilienceView';
 import type * as ResiliencePlanViewModule from '../views/ResiliencePlanView';
-import type * as RolloutViewModule from '../views/RolloutView';
+import type * as RolloutViewModule from '../features/programRollout/views/RolloutView';
 import type * as TabletopExerciseViewModule from '../views/TabletopExerciseView';
 
 const AssessmentView = lazy(async () => ({ default: (await import('../features/assessment')).AssessmentView }));
@@ -25,11 +25,11 @@ const MeasuresView = lazy(async () => ({ default: (await import('../features/mea
 const ModulesView = lazy(async () => ({ default: (await import('../views/ModulesView')).ModulesView }));
 const OperationsView = lazy(async () => ({ default: (await import('../features/platform')).OperationsView }));
 const PlatformView = lazy(async () => ({ default: (await import('../features/platform')).PlatformView }));
-const ProgramView = lazy(async () => ({ default: (await import('../views/ProgramView')).ProgramView }));
+const ProgramView = lazy(async () => ({ default: (await import('../features/programRollout')).ProgramView }));
 const ReportView = lazy(async () => ({ default: (await import('../views/ReportView')).ReportView }));
 const ResilienceView = lazy(async () => ({ default: (await import('../features/operations')).ResilienceView }));
 const ResiliencePlanView = lazy(async () => ({ default: (await import('../views/ResiliencePlanView')).ResiliencePlanView }));
-const RolloutView = lazy(async () => ({ default: (await import('../views/RolloutView')).RolloutView }));
+const RolloutView = lazy(async () => ({ default: (await import('../features/programRollout')).RolloutView }));
 const TabletopExerciseView = lazy(async () => ({ default: (await import('../views/TabletopExerciseView')).TabletopExerciseView }));
 
 export type AssessmentViewProps = ComponentProps<typeof AssessmentViewModule.AssessmentView>;

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ActiveViewPanel, type ActiveViewPanelProps } from './ActiveViewPanel';
 
-vi.mock('../views/ProgramView', () => ({
+vi.mock('../features/programRollout', () => ({
   ProgramView: () => <div>Programm-Ansicht Mock</div>,
 }));
 

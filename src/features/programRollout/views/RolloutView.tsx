@@ -10,7 +10,7 @@ import {
   ScrollText,
   ShieldCheck,
 } from 'lucide-react';
-import { StatCard } from '../components/StatCard';
+import { StatCard } from '../../../components/StatCard';
 import type {
   ExportPackageEntry,
   HardeningCheckItem,
@@ -18,7 +18,7 @@ import type {
   ReleaseGateItem,
   RolloutPlan,
   RunbookItem,
-} from '../types';
+} from '../../../types';
 
 interface RolloutViewProps {
   companyName: string;

@@ -43,6 +43,14 @@ import {
   normalizeLoadedScenarios,
   useOperationsHandlers,
 } from './features/operations';
+import {
+  defaultRolloutPlan,
+  normalizeLoadedHardeningChecks,
+  normalizeLoadedReleaseGates,
+  normalizeLoadedRunbooks,
+  normalizeRolloutPlan,
+  useProgramRolloutHandlers,
+} from './features/programRollout';
 import { useAssessmentHandlers } from './features/assessment';
 import {
   buildServerPayload,
@@ -163,7 +171,6 @@ import type {
   EvidenceClassification,
   EvidenceItem,
   EvidenceType,
-  HardeningCheckItem,
   HostingReadinessSummary,
   IntegritySummary,
   ObservabilitySummary,
@@ -177,15 +184,12 @@ import type {
   QuestionDefinition,
   RequirementDefinition,
   RequirementStatus,
-  ReleaseGateItem,
   RestoreDrillSummary,
   ReviewPlan,
   ServerHealth,
   ServerMode,
   SnapshotInfo,
   ScenarioItem,
-  RolloutPlan,
-  RunbookItem,
   SiteItem,
   SecurityGateSummary,
   SystemSettings,
@@ -228,18 +232,9 @@ const defaultReviewPlan: ReviewPlan = {
   nextEvidenceReviewDate: '',
 };
 
-const defaultRolloutPlan: RolloutPlan = {
-  releaseVersion: '1.0.0',
-  targetGoLiveDate: '',
-  freezeDate: '',
-  deploymentWindow: '',
-  hypercareDays: '14',
-  rollbackOwner: '',
-  supportLead: '',
-  communicationPlan: '',
-  decisionStatus: 'draft',
-  decisionNote: '',
-};
+// defaultRolloutPlan wurde in C2.8 nach
+// src/features/programRollout/normalization.ts ausgelagert und wird
+// dort als Public-API-Export vom programRollout-Feature bereitgestellt.
 
 const defaultTenantPolicy: TenantPolicy = {
   retentionDays: 365,
@@ -307,91 +302,10 @@ function normalizeCertificationState(input?: Partial<CertificationState>): Certi
   };
 }
 
-function normalizeRolloutPlan(input?: Partial<RolloutPlan>): RolloutPlan {
-  return {
-    releaseVersion: input?.releaseVersion ?? defaultRolloutPlan.releaseVersion,
-    targetGoLiveDate: input?.targetGoLiveDate ?? '',
-    freezeDate: input?.freezeDate ?? '',
-    deploymentWindow: input?.deploymentWindow ?? '',
-    hypercareDays: input?.hypercareDays ?? defaultRolloutPlan.hypercareDays,
-    rollbackOwner: input?.rollbackOwner ?? '',
-    supportLead: input?.supportLead ?? '',
-    communicationPlan: input?.communicationPlan ?? '',
-    decisionStatus: input?.decisionStatus === 'ready_for_go_live'
-      || input?.decisionStatus === 'released'
-      || input?.decisionStatus === 'postponed'
-      ? input.decisionStatus
-      : 'draft',
-    decisionNote: input?.decisionNote ?? '',
-  };
-}
-
-function normalizeLoadedHardeningChecks(items: unknown, fallbackModuleId: string): HardeningCheckItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<HardeningCheckItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('hard'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      area: item.area ?? '',
-      title: item.title ?? '',
-      owner: item.owner ?? '',
-      dueDate: item.dueDate ?? '',
-      status: item.status === 'planned' || item.status === 'done' || item.status === 'blocked' || item.status === 'not_applicable'
-        ? item.status
-        : 'open',
-      evidenceRef: item.evidenceRef ?? '',
-      notes: item.notes ?? '',
-      critical: item.critical ?? false,
-    }));
-}
-
-function normalizeLoadedRunbooks(items: unknown, fallbackModuleId: string): RunbookItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<RunbookItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('rbk'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      category: item.category ?? '',
-      owner: item.owner ?? '',
-      version: item.version ?? '1.0',
-      reviewDate: item.reviewDate ?? '',
-      status: item.status === 'review' || item.status === 'approved' || item.status === 'retired'
-        ? item.status
-        : 'draft',
-      location: item.location ?? '',
-      notes: item.notes ?? '',
-    }));
-}
-
-function normalizeLoadedReleaseGates(items: unknown, fallbackModuleId: string): ReleaseGateItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<ReleaseGateItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('gate'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      owner: item.owner ?? '',
-      status: item.status === 'ready' || item.status === 'blocked' || item.status === 'waived'
-        ? item.status
-        : 'open',
-      required: item.required === undefined ? true : Boolean(item.required),
-      evidenceRef: item.evidenceRef ?? '',
-      notes: item.notes ?? '',
-    }));
-}
+// normalizeRolloutPlan, normalizeLoadedHardeningChecks,
+// normalizeLoadedRunbooks, normalizeLoadedReleaseGates wurden in C2.8
+// nach src/features/programRollout/normalization.ts ausgelagert und
+// werden unten als Feature-Import konsumiert.
 
 function normalizeUserRoleProfile(value: string | undefined): UserRoleProfile {
   if (
@@ -1225,6 +1139,33 @@ export default function App() {
     normalizeUserStatus,
   });
 
+  const {
+    updateRolloutPlan,
+    handleCreateEmptyHardeningCheck,
+    handleGenerateHardeningBaseline,
+    handleUpdateHardeningCheck,
+    handleDeleteHardeningCheck,
+    handleCreateEmptyRunbook,
+    handleGenerateRunbookTemplates,
+    handleUpdateRunbook,
+    handleDeleteRunbook,
+    handleCreateEmptyReleaseGate,
+    handleGenerateReleaseGateBaseline,
+    handleUpdateReleaseGate,
+    handleDeleteReleaseGate,
+  } = useProgramRolloutHandlers({
+    // Kern (FeatureHandlerDependencies)
+    state,
+    setState,
+    runWithPermission,
+    showNotice,
+    // Fach-Kontext
+    currentModule,
+    activeUser,
+    // Cross-Feature-Read (nur fuer Baseline-Defaults)
+    reviewPlan: state.reviewPlan,
+  });
+
   function updateRegulatoryProfileField(field: Exclude<keyof RegulatoryProfile, 'scopeByRegime' | 'jurisdiction'>, value: string) {
     runWithPermission('kritis_edit', 'Für Änderungen am Regelwerks-Cockpit fehlt das Recht kritis_edit.', () => {
       setState((current) => ({
@@ -1264,380 +1205,11 @@ export default function App() {
     });
   }
 
-  function updateRolloutPlan(field: keyof RolloutPlan, value: string) {
-    runWithPermission('workspace_edit', 'Für Änderungen am Go-Live-Plan fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        rolloutPlan: {
-          ...current.rolloutPlan,
-          [field]: value,
-        },
-      }));
-    });
-  }
-
-  function handleCreateEmptyHardeningCheck() {
-    runWithPermission('workspace_edit', 'Für Härtungschecks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        hardeningChecks: [
-          {
-            id: createId('hard'),
-            moduleId: currentModule.id,
-            area: 'Allgemein',
-            title: '',
-            owner: activeUser?.name ?? '',
-            dueDate: '',
-            status: 'open',
-            evidenceRef: '',
-            notes: '',
-            critical: false,
-          },
-          ...current.hardeningChecks,
-        ],
-        activeView: 'rollout',
-      }));
-    });
-  }
-
-  function handleGenerateHardeningBaseline() {
-    runWithPermission('workspace_edit', 'Für Härtungschecks fehlt das Recht workspace_edit.', () => {
-      const templates: Array<Omit<HardeningCheckItem, 'id'>> = [
-        {
-          moduleId: currentModule.id,
-          area: 'Plattform',
-          title: 'Basis-URL, Reverse Proxy und TLS-Endpunkte bestätigt',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          dueDate: state.rolloutPlan.freezeDate || getDateOffset(5),
-          status: 'planned',
-          evidenceRef: '',
-          notes: '',
-          critical: true,
-        },
-        {
-          moduleId: currentModule.id,
-          area: 'Sicherheit',
-          title: 'Backup- und Restore-Probelauf erfolgreich dokumentiert',
-          owner: state.rolloutPlan.rollbackOwner || activeUser?.name || '',
-          dueDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(7),
-          status: 'planned',
-          evidenceRef: 'Restore-Protokoll',
-          notes: '',
-          critical: true,
-        },
-        {
-          moduleId: currentModule.id,
-          area: 'Integration',
-          title: 'API-Clients, Secrets und Webhook-Signaturen geprüft',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          dueDate: state.rolloutPlan.freezeDate || getDateOffset(4),
-          status: 'planned',
-          evidenceRef: '',
-          notes: '',
-          critical: true,
-        },
-        {
-          moduleId: currentModule.id,
-          area: 'Betrieb',
-          title: 'Monitoring, Incident-Kontakte und Hypercare-Besetzung freigegeben',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          dueDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(7),
-          status: 'planned',
-          evidenceRef: '',
-          notes: '',
-          critical: true,
-        },
-        {
-          moduleId: currentModule.id,
-          area: 'Übergabe',
-          title: 'Übergabebündel, Exporte und Auditspur vollständig',
-          owner: state.reviewPlan.approver || activeUser?.name || '',
-          dueDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(7),
-          status: 'planned',
-          evidenceRef: '',
-          notes: '',
-          critical: false,
-        },
-      ];
-
-      setState((current) => {
-        const hardeningChecks = [...current.hardeningChecks];
-        templates.forEach((template) => {
-          const exists = hardeningChecks.some((item) => item.moduleId === template.moduleId && item.title === template.title);
-          if (!exists) {
-            hardeningChecks.unshift({
-              ...template,
-              id: createId('hard'),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          hardeningChecks,
-          activeView: 'rollout',
-        };
-      });
-    });
-  }
-
-  function handleUpdateHardeningCheck(checkId: string, patch: Partial<HardeningCheckItem>) {
-    runWithPermission('workspace_edit', 'Für Härtungschecks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        hardeningChecks: current.hardeningChecks.map((item) => (
-          item.id === checkId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteHardeningCheck(checkId: string) {
-    runWithPermission('workspace_edit', 'Für Härtungschecks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        hardeningChecks: current.hardeningChecks.filter((item) => item.id !== checkId),
-      }));
-    });
-  }
-
-  function handleCreateEmptyRunbook() {
-    runWithPermission('workspace_edit', 'Für Runbooks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        runbooks: [
-          {
-            id: createId('rbk'),
-            moduleId: currentModule.id,
-            title: '',
-            category: 'Betrieb',
-            owner: activeUser?.name ?? '',
-            version: '1.0',
-            reviewDate: '',
-            status: 'draft',
-            location: '',
-            notes: '',
-          },
-          ...current.runbooks,
-        ],
-        activeView: 'rollout',
-      }));
-    });
-  }
-
-  function handleGenerateRunbookTemplates() {
-    runWithPermission('workspace_edit', 'Für Runbooks fehlt das Recht workspace_edit.', () => {
-      const templates: Array<Omit<RunbookItem, 'id'>> = [
-        {
-          moduleId: currentModule.id,
-          title: 'Betriebsstart und Tagesbetrieb',
-          category: 'Betrieb',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          version: '1.0',
-          reviewDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(14),
-          status: 'review',
-          location: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Incident- und Eskalationshandbuch',
-          category: 'Notfall',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          version: '1.0',
-          reviewDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(14),
-          status: 'review',
-          location: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Backup, Restore und Fallback',
-          category: 'Wiederherstellung',
-          owner: state.rolloutPlan.rollbackOwner || activeUser?.name || '',
-          version: '1.0',
-          reviewDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(14),
-          status: 'draft',
-          location: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Release, Cutover und Rollback',
-          category: 'Deployment',
-          owner: state.rolloutPlan.rollbackOwner || activeUser?.name || '',
-          version: '1.0',
-          reviewDate: state.rolloutPlan.freezeDate || getDateOffset(10),
-          status: 'draft',
-          location: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Audit- und Nachweisführung',
-          category: 'Compliance',
-          owner: state.reviewPlan.approver || activeUser?.name || '',
-          version: '1.0',
-          reviewDate: state.rolloutPlan.targetGoLiveDate || getDateOffset(14),
-          status: 'draft',
-          location: '',
-          notes: '',
-        },
-      ];
-
-      setState((current) => {
-        const runbooks = [...current.runbooks];
-        templates.forEach((template) => {
-          const exists = runbooks.some((item) => item.moduleId === template.moduleId && item.title === template.title);
-          if (!exists) {
-            runbooks.unshift({
-              ...template,
-              id: createId('rbk'),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          runbooks,
-          activeView: 'rollout',
-        };
-      });
-    });
-  }
-
-  function handleUpdateRunbook(runbookId: string, patch: Partial<RunbookItem>) {
-    runWithPermission('workspace_edit', 'Für Runbooks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        runbooks: current.runbooks.map((item) => (
-          item.id === runbookId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteRunbook(runbookId: string) {
-    runWithPermission('workspace_edit', 'Für Runbooks fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        runbooks: current.runbooks.filter((item) => item.id !== runbookId),
-      }));
-    });
-  }
-
-  function handleCreateEmptyReleaseGate() {
-    runWithPermission('workspace_edit', 'Für Freigabegates fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        releaseGates: [
-          {
-            id: createId('gate'),
-            moduleId: currentModule.id,
-            title: '',
-            owner: activeUser?.name ?? '',
-            status: 'open',
-            required: true,
-            evidenceRef: '',
-            notes: '',
-          },
-          ...current.releaseGates,
-        ],
-        activeView: 'rollout',
-      }));
-    });
-  }
-
-  function handleGenerateReleaseGateBaseline() {
-    runWithPermission('workspace_edit', 'Für Freigabegates fehlt das Recht workspace_edit.', () => {
-      const templates: Array<Omit<ReleaseGateItem, 'id'>> = [
-        {
-          moduleId: currentModule.id,
-          title: 'Managementfreigabe dokumentiert',
-          owner: state.reviewPlan.approver || activeUser?.name || '',
-          status: 'open',
-          required: true,
-          evidenceRef: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Technische Betriebsfreigabe erteilt',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          status: 'open',
-          required: true,
-          evidenceRef: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Restore-Nachweis und Fallback freigegeben',
-          owner: state.rolloutPlan.rollbackOwner || activeUser?.name || '',
-          status: 'open',
-          required: true,
-          evidenceRef: 'Restore-Protokoll',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Support, Hypercare und Eskalationswege besetzt',
-          owner: state.rolloutPlan.supportLead || activeUser?.name || '',
-          status: 'open',
-          required: true,
-          evidenceRef: '',
-          notes: '',
-        },
-        {
-          moduleId: currentModule.id,
-          title: 'Übergabebündel und revisionssichere Exporte freigegeben',
-          owner: state.reviewPlan.approver || activeUser?.name || '',
-          status: 'open',
-          required: true,
-          evidenceRef: '',
-          notes: '',
-        },
-      ];
-
-      setState((current) => {
-        const releaseGates = [...current.releaseGates];
-        templates.forEach((template) => {
-          const exists = releaseGates.some((item) => item.moduleId === template.moduleId && item.title === template.title);
-          if (!exists) {
-            releaseGates.unshift({
-              ...template,
-              id: createId('gate'),
-            });
-          }
-        });
-
-        return {
-          ...current,
-          releaseGates,
-          activeView: 'rollout',
-        };
-      });
-    });
-  }
-
-  function handleUpdateReleaseGate(gateId: string, patch: Partial<ReleaseGateItem>) {
-    runWithPermission('workspace_edit', 'Für Freigabegates fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        releaseGates: current.releaseGates.map((item) => (
-          item.id === gateId ? { ...item, ...patch } : item
-        )),
-      }));
-    });
-  }
-
-  function handleDeleteReleaseGate(gateId: string) {
-    runWithPermission('workspace_edit', 'Für Freigabegates fehlt das Recht workspace_edit.', () => {
-      setState((current) => ({
-        ...current,
-        releaseGates: current.releaseGates.filter((item) => item.id !== gateId),
-      }));
-    });
-  }
+  // Die 13 programRollout-Handler (updateRolloutPlan + je 4 CRUD-
+  // Handler fuer Haertungschecks, Runbooks, Release-Gates) wurden in
+  // C2.8 nach src/features/programRollout/hooks/useProgramRolloutHandlers.ts
+  // ausgelagert. Hook-Call + Destructuring liegt weiter unten bei den
+  // anderen Feature-Hooks.
 
   // selectActiveUser, handleCreateUser, handleGenerateUsersFromStakeholders,
   // handleUpdateUser, handleDeleteUser und updateComplianceCalendar wurden

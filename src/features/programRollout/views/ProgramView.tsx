@@ -1,6 +1,6 @@
 import { CheckCircle2, Clock3, FolderKanban, ShieldCheck } from 'lucide-react';
-import { programPhases, sprintDefinitions, type RoadmapStatus } from '../data/programRoadmap';
-import { releaseStatus } from '../data/releaseStatus';
+import { programPhases, sprintDefinitions, type RoadmapStatus } from '../../../data/programRoadmap';
+import { releaseStatus } from '../../../data/releaseStatus';
 
 interface ProgramViewProps {
   companyName: string;
