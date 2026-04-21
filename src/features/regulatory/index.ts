@@ -37,6 +37,13 @@
  *    RegulatoryHandlers (von App.tsx)
  *  - clearEvidenceRefsFromFindings (von useEvidenceHandlers fuer die
  *    atomare Evidence-Delete-Kaskade, siehe JSDoc dort)
+ *  - normalizeLoadedFindings, normalizeCertificationState,
+ *    normalizeComplianceCalendar (von der App-Shell-Hydration in
+ *    src/app/state/buildAppState.ts, seit C2.11b)
+ *
+ * Note: Drei getrennte Pure-Helper-Files (findings.ts, certification.ts,
+ * complianceCalendar.ts) statt einer gemeinsamen normalization.ts —
+ * siehe Design-Note in findings.ts.
  */
 
 export {
@@ -45,4 +52,11 @@ export {
   type RegulatoryHandlers,
 } from './hooks/useRegulatoryHandlers';
 
-export { clearEvidenceRefsFromFindings } from './findings';
+export {
+  clearEvidenceRefsFromFindings,
+  normalizeLoadedFindings,
+} from './findings';
+
+export { normalizeCertificationState } from './certification';
+
+export { normalizeComplianceCalendar } from './complianceCalendar';

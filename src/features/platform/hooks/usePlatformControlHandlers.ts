@@ -5,8 +5,10 @@
  *   - selectActiveUser (Session-aware Sperre)
  *   - handleCreateUser
  *   - handleGenerateUsersFromStakeholders (nutzt inferRoleProfileFromStakeholder)
- *   - handleUpdateUser (normalizeUserRoleProfile / normalizeUserStatus via Dep)
- *   - handleDeleteUser (mit normalizeLoadedUsers-Fallback bei Last-User)
+ *   - handleUpdateUser (normalizeUserRoleProfile / normalizeUserStatus
+ *     als Direkt-Import aus ../userNormalization, seit C2.11b)
+ *   - handleDeleteUser (Last-User-Fallback via normalizeLoadedUsers
+ *     als Direkt-Import aus ../userNormalization, seit C2.11b)
  *
  * Extrahiert in C2.7d als vierte Platform-Sub-Iteration. In C2.9 ist
  * der Transient-Handler `updateComplianceCalendar` nach
@@ -15,10 +17,15 @@
  * Prop-Quelle wechselt nur.
  */
 import { useCallback, useMemo } from 'react';
-import type { AuthSession, SectorModuleDefinition, UserItem, UserRoleProfile, UserStatus } from '../../../types';
+import type { AuthSession, SectorModuleDefinition, UserItem } from '../../../types';
 import type { FeatureHandlerDependencies } from '../../../shared/featureHandlerDependencies';
 import { createId } from '../../../shared/ids';
-import { inferRoleProfileFromStakeholder } from '../userNormalization';
+import {
+  inferRoleProfileFromStakeholder,
+  normalizeLoadedUsers,
+  normalizeUserRoleProfile,
+  normalizeUserStatus,
+} from '../userNormalization';
 
 export interface PlatformControlHandlerDependencies extends FeatureHandlerDependencies {
   // === Auth-/Session-Read-State =============================================
@@ -27,10 +34,10 @@ export interface PlatformControlHandlerDependencies extends FeatureHandlerDepend
   // === Fach-Kontext =========================================================
   currentModule: SectorModuleDefinition;
 
-  // === Pure-Helper-Deps (aus App.tsx, bleiben dort wegen Mehrfachnutzung) ===
-  normalizeLoadedUsers: (items: unknown) => UserItem[];
-  normalizeUserRoleProfile: (value: string | undefined) => UserRoleProfile;
-  normalizeUserStatus: (value: string | undefined) => UserStatus;
+  // Pure-Helper (normalizeLoadedUsers/normalizeUserRoleProfile/
+  //  normalizeUserStatus) wurden in C2.11b aus dem Dep-Durchgriff
+  //  entfernt — der Hook importiert jetzt direkt aus
+  //  ../userNormalization.
 }
 
 export interface PlatformControlHandlers {
@@ -50,9 +57,6 @@ export function usePlatformControlHandlers(
     showNotice,
     authSession,
     currentModule,
-    normalizeLoadedUsers,
-    normalizeUserRoleProfile,
-    normalizeUserStatus,
   } = deps;
 
   // =========================================================================
@@ -184,7 +188,7 @@ export function usePlatformControlHandlers(
         },
       );
     },
-    [normalizeUserRoleProfile, normalizeUserStatus, runWithPermission, setState],
+    [runWithPermission, setState],
   );
 
   // =========================================================================
@@ -219,7 +223,7 @@ export function usePlatformControlHandlers(
         },
       );
     },
-    [normalizeLoadedUsers, runWithPermission, setState],
+    [runWithPermission, setState],
   );
 
   // updateComplianceCalendar ist in C2.9 nach useRegulatoryHandlers

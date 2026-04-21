@@ -1,4 +1,5 @@
-import type { StakeholderItem, UserRoleProfile } from '../../types';
+import type { StakeholderItem, UserItem, UserRoleProfile, UserStatus } from '../../types';
+import { createId } from '../../shared/ids';
 
 /**
  * Leitet aus den Freitext-Feldern eines Stakeholders das passende
@@ -45,4 +46,94 @@ export function inferRoleProfileFromStakeholder(
     return 'reviewer';
   }
   return 'editor';
+}
+
+/**
+ * Typ-Guard fuer das `roleProfile`-Feld geladener Nutzer-Daten.
+ * Akzeptiert alle sechs gueltigen Werte; unbekannte Werte werden auf
+ * 'lead' normalisiert (konservative Default-Strategie, die in der
+ * ursprunglichen App.tsx-Implementierung gewaehlt wurde).
+ *
+ * Seit C2.11b: aus App.tsx in die platform-Feature-Heimat gezogen.
+ * Konsumenten:
+ *  - `normalizeLoadedUsers` (unten)
+ *  - `handleUpdateUser` im usePlatformControlHandlers-Hook (direkter
+ *    Import statt Dep-Durchgriff)
+ */
+export function normalizeUserRoleProfile(value: string | undefined): UserRoleProfile {
+  if (
+    value === 'admin'
+    || value === 'lead'
+    || value === 'editor'
+    || value === 'reviewer'
+    || value === 'auditor'
+    || value === 'viewer'
+  ) {
+    return value;
+  }
+  return 'lead';
+}
+
+/**
+ * Typ-Guard fuer das `status`-Feld geladener Nutzer-Daten. Unbekannte
+ * Werte werden auf 'active' normalisiert.
+ *
+ * Seit C2.11b: aus App.tsx in die platform-Feature-Heimat gezogen.
+ */
+export function normalizeUserStatus(value: string | undefined): UserStatus {
+  if (value === 'active' || value === 'invited' || value === 'inactive') {
+    return value;
+  }
+  return 'active';
+}
+
+/**
+ * Normalisiert die `users`-Liste eines geladenen Workspace-State.
+ *
+ * Besondere Regel: **Leere oder fehlende Listen** werden auf einen
+ * Seed-User "Programmadmin" (roleProfile=admin) abgebildet. Das ist
+ * der Last-User-Fallback aus dem usePlatformControlHandlers-Hook
+ * (`handleDeleteUser`, C2.7d) — auch hier noetig, damit
+ * `buildAppStateFromLoaded` nie mit einer leeren `users`-Liste
+ * zurueckkommt. Der erste geladene Nutzer bekommt einen Default-
+ * Namen "Programmadmin", falls er keinen hat; weitere Nutzer ohne
+ * Namen bleiben leer.
+ *
+ * Seit C2.11b: aus App.tsx in die platform-Feature-Heimat gezogen.
+ * Konsumenten:
+ *  - `buildAppStateFromLoaded` in `src/app/state/buildAppState.ts`
+ *  - `handleDeleteUser` im usePlatformControlHandlers-Hook (Last-
+ *    User-Fallback, direkter Import statt Dep-Durchgriff)
+ *  - `clearAuthenticatedContext` im usePlatformAuthHandlers-Hook
+ *    (direkter Import statt Dep-Durchgriff)
+ */
+export function normalizeLoadedUsers(items: unknown): UserItem[] {
+  if (!Array.isArray(items) || !items.length) {
+    return [
+      {
+        id: createId('usr'),
+        name: 'Programmadmin',
+        email: '',
+        department: '',
+        roleProfile: 'admin',
+        status: 'active',
+        scope: 'Gesamtprogramm',
+        notes: '',
+      },
+    ];
+  }
+
+  return items
+    .filter((item): item is Partial<UserItem> => typeof item === 'object' && item !== null)
+    .map((item, index) => ({
+      id: item.id ?? createId('usr'),
+      name: item.name ?? (index === 0 ? 'Programmadmin' : ''),
+      email: item.email ?? '',
+      department: item.department ?? '',
+      roleProfile: normalizeUserRoleProfile(item.roleProfile),
+      status: normalizeUserStatus(item.status),
+      scope: item.scope ?? 'Gesamtprogramm',
+      notes: item.notes ?? '',
+      linkedStakeholderId: item.linkedStakeholderId,
+    }));
 }

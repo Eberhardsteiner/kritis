@@ -39,6 +39,7 @@ import {
   mergeServerUserIntoState,
   serializeServerPayload,
 } from '../serverPayload';
+import { normalizeLoadedUsers } from '../userNormalization';
 
 /**
  * Abhaengigkeiten des Platform-Auth-Hooks.
@@ -110,7 +111,8 @@ export interface PlatformAuthHandlerDependencies extends FeatureHandlerDependenc
     session?: AuthSession | null,
     userSeed?: UserItem | null,
   ) => AppState;
-  normalizeLoadedUsers: (items: unknown) => UserItem[];
+  // normalizeLoadedUsers-Dep in C2.11b entfernt — Hook importiert
+  // jetzt direkt aus ../userNormalization.
   extractErrorDetails: (error: unknown) => string[] | undefined;
 }
 
@@ -205,7 +207,6 @@ export function usePlatformAuthHandlers(
     loadStateFromServer,
     refreshServerSideData,
     applyRemoteState,
-    normalizeLoadedUsers,
     extractErrorDetails,
   } = deps;
 
@@ -553,7 +554,6 @@ export function usePlatformAuthHandlers(
     state.users,
     state.activeUserId,
     authSession,
-    normalizeLoadedUsers,
     setState,
   ]);
 

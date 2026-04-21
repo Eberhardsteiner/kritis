@@ -78,6 +78,7 @@ import {
   buildServerPayload,
   serializeServerPayload,
 } from '../serverPayload';
+import { isApiStatus } from '../../../shared/httpError';
 
 /**
  * Lokale Kopie der ImportFeedback-Shape aus App.tsx (Zeile 213).
@@ -152,7 +153,8 @@ export interface PlatformSystemHandlerDependencies extends FeatureHandlerDepende
   ) => ExportPackageCreatePayload;
   getExportTypeLabel: (type: ExportPackageType) => string;
   extractErrorDetails: (error: unknown) => string[] | undefined;
-  isApiStatus: (error: unknown, status: number) => boolean;
+  // isApiStatus-Dep in C2.11b entfernt — Hook importiert jetzt
+  // direkt aus src/shared/httpError.ts.
 }
 
 export interface PlatformSystemHandlers {
@@ -257,7 +259,6 @@ export function usePlatformSystemHandlers(
     buildServerExportPackagePayload,
     getExportTypeLabel,
     extractErrorDetails,
-    isApiStatus,
   } = deps;
 
   // =========================================================================
@@ -338,7 +339,6 @@ export function usePlatformSystemHandlers(
       authToken,
       clearAuthenticatedContext,
       extractErrorDetails,
-      isApiStatus,
       lastSyncedPayloadRef,
       refreshServerSideData,
       serverAuthRequired,

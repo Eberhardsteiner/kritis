@@ -84,4 +84,9 @@ export {
   clearAuthCallbackSearch,
 } from './authCallback';
 
-export { inferRoleProfileFromStakeholder } from './userNormalization';
+export {
+  inferRoleProfileFromStakeholder,
+  normalizeLoadedUsers,
+  normalizeUserRoleProfile,
+  normalizeUserStatus,
+} from './userNormalization';

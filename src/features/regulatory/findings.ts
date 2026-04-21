@@ -1,4 +1,33 @@
 import type { AuditFindingItem } from '../../types';
+import { createId } from '../../shared/ids';
+
+/**
+ * Finding-bezogene Pure-Helper und Normalizer fuer das regulatory-
+ * Feature.
+ *
+ * === Design-Note: drei Regulatory-Pure-Helper-Files ========================
+ * Das regulatory-Feature weicht bewusst vom Normalizer-Muster der
+ * anderen Features ab (measures, governance, evidence, operations,
+ * programRollout nutzen jeweils eine gemeinsame `normalization.ts`).
+ * Hier sind drei getrennte Dateien angelegt:
+ *   - findings.ts               (Findings + Evidence-Cross-Helper)
+ *   - certification.ts          (KRITIS-Readiness-Stages)
+ *   - complianceCalendar.ts     (KRITIS-Basisdaten / BSIG-Fristen)
+ *
+ * Begruendung: regulatory ist eine **Domaene mit fachlich getrennten
+ * Sub-Domaenen**, die je eigene Datenmodelle und Konsumenten haben:
+ * Findings gehoeren zum Audit-Workflow, Certification zum Readiness-
+ * Cockpit, Compliance-Kalender zur BSIG/NIS2-Stichtag-Steuerung. Eine
+ * gemeinsame `normalization.ts` waere eine lose Sammlung ohne inneren
+ * Zusammenhang und wuerde den Cross-Feature-Konsum
+ * (clearEvidenceRefsFromFindings ist z. B. evidence-Kopplung, das darf
+ * nicht mit KRITIS-Certification-Code kollidieren) unsauber machen.
+ *
+ * Das ist eine bewusste Ausnahme, keine Inkonsistenz — in der
+ * Post-C2.11-Meta-Review ist dieser Gedanke in BLOCK-C.md
+ * festzuhalten.
+ * ===========================================================================
+ */
 
 /**
  * Entfernt `deletedEvidenceId` aus `finding.relatedEvidenceIds` aller
@@ -39,4 +68,41 @@ export function clearEvidenceRefsFromFindings(
       (id) => id !== deletedEvidenceId,
     ),
   }));
+}
+
+/**
+ * Normalisiert eine (moeglicherweise teilweise oder fehlerhafte)
+ * Finding-Liste, die aus localStorage oder vom Server kommt. Fehlende
+ * Felder bekommen sinnvolle Defaults; unbekannte Severity-/Status-Werte
+ * werden NICHT gehaertet (das ist Aufgabe der Type-Guards) — wir
+ * uebernehmen den Wert und vertrauen der TypeScript-Typdefinition.
+ *
+ * Seit C2.11b: aus App.tsx in die regulatory-Feature-Heimat gezogen.
+ * Einziger Konsument: `buildAppStateFromLoaded` aus
+ * `src/app/state/buildAppState.ts`.
+ */
+export function normalizeLoadedFindings(
+  items: unknown,
+  fallbackModuleId: string,
+): AuditFindingItem[] {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items
+    .filter((item): item is Partial<AuditFindingItem> => typeof item === 'object' && item !== null)
+    .map((item) => ({
+      id: item.id ?? createId('fnd'),
+      moduleId: item.moduleId ?? fallbackModuleId,
+      title: item.title ?? '',
+      area: item.area ?? '',
+      severity: item.severity ?? 'medium',
+      status: item.status ?? 'open',
+      owner: item.owner ?? '',
+      dueDate: item.dueDate ?? '',
+      relatedRequirementIds: item.relatedRequirementIds ?? [],
+      relatedEvidenceIds: item.relatedEvidenceIds ?? [],
+      notes: item.notes ?? '',
+      createdAt: item.createdAt ?? new Date().toISOString(),
+    }));
 }

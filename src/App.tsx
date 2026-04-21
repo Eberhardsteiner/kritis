@@ -16,36 +16,11 @@ import {
 } from './lib/moduleRegistry';
 import { getAccessProfile } from './data/workspaceBase';
 import { useGapHandlers } from './features/gap';
-import {
-  normalizeLoadedActions,
-  useActionHandlers,
-} from './features/measures';
-import {
-  normalizeLoadedAssets,
-  normalizeLoadedSites,
-  normalizeLoadedStakeholders,
-  normalizeReviewPlan,
-  useGovernanceHandlers,
-} from './features/governance';
-import {
-  normalizeLoadedEvidence,
-  useEvidenceHandlers,
-} from './features/evidence';
-import {
-  normalizeLoadedBusinessProcesses,
-  normalizeLoadedDependencies,
-  normalizeLoadedExercises,
-  normalizeLoadedScenarios,
-  useOperationsHandlers,
-} from './features/operations';
-import {
-  defaultRolloutPlan,
-  normalizeLoadedHardeningChecks,
-  normalizeLoadedReleaseGates,
-  normalizeLoadedRunbooks,
-  normalizeRolloutPlan,
-  useProgramRolloutHandlers,
-} from './features/programRollout';
+import { useActionHandlers } from './features/measures';
+import { useGovernanceHandlers } from './features/governance';
+import { useEvidenceHandlers } from './features/evidence';
+import { useOperationsHandlers } from './features/operations';
+import { useProgramRolloutHandlers } from './features/programRollout';
 import { useRegulatoryHandlers } from './features/regulatory';
 import { useReportingHandlers } from './features/reporting';
 import { useRiskCatalogHandlers } from './features/riskCatalog';
@@ -65,7 +40,15 @@ import {
   usePlatformControlHandlers,
   usePlatformSystemHandlers,
 } from './features/platform';
-import { createId } from './shared/ids';
+import {
+  applyRemoteState,
+  createInitialState,
+} from './app/state/buildAppState';
+import {
+  defaultSystemSettings,
+  defaultTenantPolicy,
+} from './app/state/defaults';
+import { isApiStatus } from './shared/httpError';
 import { useResiliencePlanHandlers } from './features/resiliencePlan';
 import type { ResiliencePlan } from './features/resiliencePlan';
 import {
@@ -77,8 +60,7 @@ import type {
   ExerciseSession as TabletopExerciseSession,
   Scenario as TabletopScenarioDef,
 } from './features/tabletopExercise';
-import { normalizeRegulatoryProfile } from './lib/regulatory';
-import { clearAuthToken, loadAuthToken, loadState, saveAuthToken, saveState } from './lib/storage';
+import { clearAuthToken, loadAuthToken, saveAuthToken, saveState } from './lib/storage';
 import {
   createTenant,
   completeOidcLogin,
@@ -116,59 +98,34 @@ import {
 } from './lib/serverApi';
 import { kritisCertificationStages } from './data/kritisBase';
 import type {
-  ActionItem,
-  ActionPriority,
   AppState,
   AuditLogEntry,
-  AssessmentFilters,
-  AssetItem,
-  BusinessProcessItem,
   ApiClientSummary,
-  AuditFindingItem,
-  CertificationStageState,
-  CertificationState,
   AccessAccountSummary,
   AuthMode,
   AuthProviderSummary,
   AuthSession,
   CompanyProfile,
-  ComplianceCalendar,
-  DependencyItem,
   DocumentLedgerSummaryServer,
   EvidenceRetentionSummary,
   DocumentVersionEntry,
-  ExerciseItem,
   ExportPackageEntry,
   ExportPackageType,
-  EvidenceAttachment,
-  EvidenceClassification,
-  EvidenceItem,
-  EvidenceType,
   HostingReadinessSummary,
   IntegritySummary,
   ObservabilitySummary,
-  RegulatoryProfile,
-  RiskEntry,
   JobRunSummary,
   ModulePackRegistryEntry,
   PermissionKey,
-  QuestionDefinition,
-  RequirementDefinition,
   RequirementStatus,
   RestoreDrillSummary,
-  ReviewPlan,
   ServerHealth,
   ServerMode,
   SnapshotInfo,
-  ScenarioItem,
-  SiteItem,
   SecurityGateSummary,
   SystemSettings,
   TenantPolicy,
   TenantSummary,
-  UserItem,
-  UserRoleProfile,
-  UserStatus,
 } from './types';
 
 interface ImportFeedback {
@@ -177,296 +134,22 @@ interface ImportFeedback {
   details?: string[];
 }
 
-const defaultCompanyProfile: CompanyProfile = {
-  companyName: '',
-  industryLabel: '',
-  locations: '',
-  employees: '',
-  criticalService: '',
-  personsServed: '',
-};
-
-const defaultAssessmentFilters: AssessmentFilters = {
-  search: '',
-  domainId: 'all',
-  showOnlyCritical: false,
-  showOnlyUnanswered: false,
-  showOnlyGaps: false,
-};
-
-const defaultReviewPlan: ReviewPlan = {
-  executiveSponsor: '',
-  approver: '',
-  nextInternalAuditDate: '',
-  nextManagementReviewDate: '',
-  nextExerciseDate: '',
-  nextEvidenceReviewDate: '',
-};
-
-// defaultRolloutPlan wurde in C2.8 nach
-// src/features/programRollout/normalization.ts ausgelagert und wird
-// dort als Public-API-Export vom programRollout-Feature bereitgestellt.
-
-const defaultTenantPolicy: TenantPolicy = {
-  retentionDays: 365,
-  evidenceReviewCadenceDays: 180,
-  exportApprovalRequired: true,
-  requireReleaseForCertification: true,
-  defaultClassification: 'intern',
-  certificationAuthorityLabel: 'Interne KRITIS-Readiness-Prüfstelle',
-  incidentMailbox: '',
-};
-
-const defaultSystemSettings: SystemSettings = {
-  environmentLabel: 'Bolt / Local',
-  deploymentStage: 'pilot',
-  appBaseUrl: 'http://localhost:5173',
-  allowedOrigins: ['*'],
-  persistenceDriver: 'sqlite-document-store',
-  persistenceTarget: 'server-storage/system/krisenfest.sqlite',
-  backupCadenceHours: 24,
-  maintenanceMode: false,
-  publicApiEnabled: true,
-  requireSignedWebhooks: true,
-  wafLiteEnabled: true,
-  observabilityMode: 'basic',
-  logRetentionDays: 30,
-  restoreDrillCadenceDays: 30,
-  securityReviewCadenceDays: 90,
-  notes: '',
-};
-
-
-function createDefaultCertificationState(): CertificationState {
-  return {
-    auditLead: '',
-    targetDate: '',
-    decisionNote: '',
-    stageStates: Object.fromEntries(
-      kritisCertificationStages.map((stage) => [
-        stage.id,
-        { status: 'not_started', notes: '' } as CertificationStageState,
-      ]),
-    ),
-  };
-}
-
-function normalizeCertificationState(input?: Partial<CertificationState>): CertificationState {
-  const stageStates = Object.fromEntries(
-    kritisCertificationStages.map((stage) => {
-      const current = input?.stageStates?.[stage.id];
-      return [
-        stage.id,
-        {
-          status: current?.status ?? 'not_started',
-          notes: current?.notes ?? '',
-        } satisfies CertificationStageState,
-      ];
-    }),
-  ) as CertificationState['stageStates'];
-
-  return {
-    auditLead: input?.auditLead ?? '',
-    targetDate: input?.targetDate ?? '',
-    decisionNote: input?.decisionNote ?? '',
-    stageStates,
-  };
-}
-
-// normalizeRolloutPlan, normalizeLoadedHardeningChecks,
-// normalizeLoadedRunbooks, normalizeLoadedReleaseGates wurden in C2.8
-// nach src/features/programRollout/normalization.ts ausgelagert und
-// werden unten als Feature-Import konsumiert.
-
-function normalizeUserRoleProfile(value: string | undefined): UserRoleProfile {
-  if (
-    value === 'admin'
-    || value === 'lead'
-    || value === 'editor'
-    || value === 'reviewer'
-    || value === 'auditor'
-    || value === 'viewer'
-  ) {
-    return value;
-  }
-  return 'lead';
-}
-
-function normalizeUserStatus(value: string | undefined): UserStatus {
-  if (value === 'active' || value === 'invited' || value === 'inactive') {
-    return value;
-  }
-  return 'active';
-}
-
-function normalizeLoadedUsers(items: unknown): UserItem[] {
-  if (!Array.isArray(items) || !items.length) {
-    return [
-      {
-        id: createId('usr'),
-        name: 'Programmadmin',
-        email: '',
-        department: '',
-        roleProfile: 'admin',
-        status: 'active',
-        scope: 'Gesamtprogramm',
-        notes: '',
-      },
-    ];
-  }
-
-  return items
-    .filter((item): item is Partial<UserItem> => typeof item === 'object' && item !== null)
-    .map((item, index) => ({
-      id: item.id ?? createId('usr'),
-      name: item.name ?? (index === 0 ? 'Programmadmin' : ''),
-      email: item.email ?? '',
-      department: item.department ?? '',
-      roleProfile: normalizeUserRoleProfile(item.roleProfile),
-      status: normalizeUserStatus(item.status),
-      scope: item.scope ?? 'Gesamtprogramm',
-      notes: item.notes ?? '',
-      linkedStakeholderId: item.linkedStakeholderId,
-    }));
-}
-
-function normalizeComplianceCalendar(input?: Partial<ComplianceCalendar>): ComplianceCalendar {
-  return {
-    registrationDate: input?.registrationDate ?? '',
-    lastRiskAssessmentDate: input?.lastRiskAssessmentDate ?? '',
-    lastResiliencePlanUpdate: input?.lastResiliencePlanUpdate ?? '',
-    lastBsiEvidenceAuditDate: input?.lastBsiEvidenceAuditDate ?? '',
-    incidentContact: input?.incidentContact ?? '',
-    incidentBackupContact: input?.incidentBackupContact ?? '',
-    bsigRegistrationDate: input?.bsigRegistrationDate ?? '',
-    lastCyberRiskAssessmentDate: input?.lastCyberRiskAssessmentDate ?? '',
-    lastIncidentExerciseDate: input?.lastIncidentExerciseDate ?? '',
-  };
-}
-
-function normalizeLoadedRegulatoryProfile(input?: Partial<RegulatoryProfile>): RegulatoryProfile {
-  return normalizeRegulatoryProfile(input);
-}
-
-function normalizeLoadedFindings(items: unknown, fallbackModuleId: string): AuditFindingItem[] {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items
-    .filter((item): item is Partial<AuditFindingItem> => typeof item === 'object' && item !== null)
-    .map((item) => ({
-      id: item.id ?? createId('fnd'),
-      moduleId: item.moduleId ?? fallbackModuleId,
-      title: item.title ?? '',
-      area: item.area ?? '',
-      severity: item.severity ?? 'medium',
-      status: item.status ?? 'open',
-      owner: item.owner ?? '',
-      dueDate: item.dueDate ?? '',
-      relatedRequirementIds: item.relatedRequirementIds ?? [],
-      relatedEvidenceIds: item.relatedEvidenceIds ?? [],
-      notes: item.notes ?? '',
-      createdAt: item.createdAt ?? new Date().toISOString(),
-    }));
-}
-
-function buildAppStateFromLoaded(
-  loaded?: Partial<AppState> | null,
-  uiState?: Partial<Pick<AppState, 'activeView' | 'selectedModuleId' | 'activeUserId' | 'assessmentFilters'>>,
-): AppState {
-  const availableModules = [...builtInModules, ...(loaded?.uploadedModules ?? [])];
-  const requestedModuleId = uiState?.selectedModuleId ?? loaded?.selectedModuleId ?? builtInModules[0].id;
-  const fallbackModuleId = availableModules.some((module) => module.id === requestedModuleId)
-    ? requestedModuleId
-    : builtInModules[0].id;
-  const users = normalizeLoadedUsers(loaded?.users);
-
-  return {
-    activeView: uiState?.activeView ?? loaded?.activeView ?? 'dashboard',
-    selectedModuleId: fallbackModuleId,
-    uploadedModules: loaded?.uploadedModules ?? [],
-    answers: loaded?.answers ?? {},
-    requirementStates: loaded?.requirementStates ?? {},
-    companyProfile: {
-      ...defaultCompanyProfile,
-      ...(loaded?.companyProfile ?? {}),
-    },
-    regulatoryProfile: normalizeLoadedRegulatoryProfile(loaded?.regulatoryProfile),
-    actionItems: normalizeLoadedActions(loaded?.actionItems, fallbackModuleId),
-    evidenceItems: normalizeLoadedEvidence(loaded?.evidenceItems, fallbackModuleId),
-    stakeholders: normalizeLoadedStakeholders(loaded?.stakeholders, fallbackModuleId),
-    sites: normalizeLoadedSites(loaded?.sites, fallbackModuleId),
-    assets: normalizeLoadedAssets(loaded?.assets, fallbackModuleId),
-    businessProcesses: normalizeLoadedBusinessProcesses(loaded?.businessProcesses, fallbackModuleId),
-    dependencies: normalizeLoadedDependencies(loaded?.dependencies, fallbackModuleId),
-    scenarios: normalizeLoadedScenarios(loaded?.scenarios, fallbackModuleId),
-    exercises: normalizeLoadedExercises(loaded?.exercises, fallbackModuleId),
-    rolloutPlan: normalizeRolloutPlan(loaded?.rolloutPlan),
-    hardeningChecks: normalizeLoadedHardeningChecks(loaded?.hardeningChecks, fallbackModuleId),
-    runbooks: normalizeLoadedRunbooks(loaded?.runbooks, fallbackModuleId),
-    releaseGates: normalizeLoadedReleaseGates(loaded?.releaseGates, fallbackModuleId),
-    reviewPlan: normalizeReviewPlan(loaded?.reviewPlan),
-    users,
-    activeUserId: users.some((item) => item.id === (uiState?.activeUserId ?? loaded?.activeUserId))
-      ? ((uiState?.activeUserId ?? loaded?.activeUserId) as string)
-      : users[0]?.id ?? '',
-    complianceCalendar: normalizeComplianceCalendar(loaded?.complianceCalendar),
-    auditChecklistStates: loaded?.auditChecklistStates ?? {},
-    auditFindings: normalizeLoadedFindings(loaded?.auditFindings, fallbackModuleId),
-    certificationState: normalizeCertificationState(loaded?.certificationState),
-    assessmentFilters: {
-      ...defaultAssessmentFilters,
-      ...(loaded?.assessmentFilters ?? {}),
-      ...(uiState?.assessmentFilters ?? {}),
-    },
-    riskEntries: Array.isArray(loaded?.riskEntries) ? (loaded?.riskEntries as RiskEntry[]) : [],
-    resiliencePlan: (loaded?.resiliencePlan ?? null) as ResiliencePlan | null,
-    archivedResiliencePlans: Array.isArray(loaded?.archivedResiliencePlans)
-      ? (loaded?.archivedResiliencePlans as ResiliencePlan[])
-      : [],
-    currentTabletopSession: (loaded?.currentTabletopSession ?? null) as TabletopExerciseSession | null,
-    archivedTabletopSessions: Array.isArray(loaded?.archivedTabletopSessions)
-      ? (loaded?.archivedTabletopSessions as TabletopExerciseSession[])
-      : [],
-    importedTabletopScenarios: Array.isArray(loaded?.importedTabletopScenarios)
-      ? (loaded?.importedTabletopScenarios as TabletopScenarioDef[])
-      : [],
-  };
-}
-
-function createInitialState(): AppState {
-  return buildAppStateFromLoaded(loadState());
-}
-
-// Hinweis: applyRemoteState bleibt vorerst hier, weil es auf das
-// App-interne buildAppStateFromLoaded zugreift. Wandert mit dessen
-// Zerlegung in C2.11 app-shell oder einer dedizierten state-hydration.
-function applyRemoteState(
-  remoteState: Partial<AppState>,
-  currentState: AppState,
-  session: AuthSession | null = null,
-  userSeed?: UserItem | null,
-): AppState {
-  const hydrated = buildAppStateFromLoaded(remoteState, {
-    activeView: currentState.activeView,
-    selectedModuleId: currentState.selectedModuleId,
-    activeUserId: session?.userId ?? currentState.activeUserId,
-    assessmentFilters: currentState.assessmentFilters,
-  });
-
-  return mergeServerUserIntoState(hydrated, session, userSeed);
-}
-
-
-function isApiStatus(error: unknown, status: number): boolean {
-  return Boolean(error && typeof error === 'object' && 'status' in error && (error as { status?: number }).status === status);
-}
-
-// inferRoleProfileFromStakeholder wurde in C2.7d nach
-// src/features/platform/userNormalization.ts ausgelagert (einziger
-// Konsument ist handleGenerateUsersFromStakeholders im
-// usePlatformControlHandlers-Hook).
+// Module-Level-Defaults + Normalizer + State-Hydration-Funktionen wurden
+// in C2.11b ausgelagert:
+//  - Defaults (defaultCompanyProfile, defaultAssessmentFilters,
+//    defaultTenantPolicy, defaultSystemSettings) -> src/app/state/defaults.ts
+//  - buildAppStateFromLoaded, createInitialState, applyRemoteState ->
+//    src/app/state/buildAppState.ts
+//  - normalizeCertificationState -> features/regulatory/certification.ts
+//  - normalizeComplianceCalendar -> features/regulatory/complianceCalendar.ts
+//  - normalizeLoadedFindings -> features/regulatory/findings.ts
+//  - normalizeUserRoleProfile, normalizeUserStatus, normalizeLoadedUsers
+//    -> features/platform/userNormalization.ts
+//  - isApiStatus -> src/shared/httpError.ts
+//
+// Dead Code in C2.11b geloescht (repository-wide grep bestaetigt 0 ext.
+// references): defaultReviewPlan, createDefaultCertificationState,
+// Dead-Indirection-Wrapper normalizeLoadedRegulatoryProfile.
 
 export default function App() {
   const [state, setState] = useState<AppState>(createInitialState);
@@ -1015,7 +698,6 @@ export default function App() {
     loadStateFromServer,
     refreshServerSideData,
     applyRemoteState,
-    normalizeLoadedUsers,
     extractErrorDetails,
   });
 
@@ -1084,7 +766,6 @@ export default function App() {
     buildServerExportPackagePayload,
     getExportTypeLabel,
     extractErrorDetails,
-    isApiStatus,
   });
 
   const {
@@ -1103,10 +784,10 @@ export default function App() {
     authSession,
     // Fach-Kontext
     currentModule,
-    // Pure-Helper-Deps (bleiben in App.tsx wegen Mehrfachnutzung)
-    normalizeLoadedUsers,
-    normalizeUserRoleProfile,
-    normalizeUserStatus,
+    // Die frueheren Pure-Helper-Deps (normalizeLoadedUsers,
+    // normalizeUserRoleProfile, normalizeUserStatus) wurden in C2.11b
+    // aus dem Dep-Durchgriff entfernt — usePlatformControlHandlers
+    // importiert sie jetzt direkt aus ../userNormalization.
   });
 
   const {
