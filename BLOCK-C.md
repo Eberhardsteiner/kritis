@@ -232,6 +232,26 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
 
 **Aufwandsschätzung**: 3 Sprints. Das ist das größte Paket in C. Planung: eine Feature-Extraktion pro 2–3 Arbeitstage.
 
+### C2 · Abschluss-Vermerk
+
+**Status**: ✅ abgeschlossen. **Messdatum**: 2026-04-21 (C2.11d-Commit `43ed4a4c`).
+
+| Kennzahl | Vor C2 | Nach C2 | Delta |
+|---|---:|---:|---:|
+| `src/App.tsx` | 5.227 | 665 | −4.562 (−87,3 %) |
+| Feature-Slices unter `src/features/` | 0 neu extrahiert | **elf** extrahiert (gap, measures, governance, evidence, operations, assessment, platform, programRollout, regulatory, riskCatalog, reporting) + zwei aus B fortgeführt und mit Handler-Hook vervollständigt (resiliencePlan, tabletopExercise) | — |
+| Contexts | 0 | **zwei** (`WorkspaceStateContext`, `AppDerivedStateContext`) | +2 |
+| Cycle-Breaker | Ref + wire-up-useEffect (C2.11c-Pragma) | strukturell aufgelöst über Pure-Helper `clearAuthenticatedContext` | — |
+| Frontend-Tests | 352 grün | 359 grün | +7 |
+| E2E-Szenarien | 12 Pflicht-Szenarien vorgesehen | 16 implementiert, 16/16 grün (Chromium 2× in Folge) | +4 |
+
+**Strukturelle Ergebnisse über C2.1–C2.11d**:
+- `src/app/`-Ebene: `state/` (Hydration-Layer), `serverSync/` (useServerSync), `effects/` (useAppShellEffects + useModuleSelectionGuard), `context/` (WorkspaceStateContext + AppDerivedStateContext), `AppProvider.tsx`.
+- `src/features/`-Ebene: 13 Feature-Slices mit Public-API-Grenzen (`index.ts`), keine Feature-zu-Feature-Direkt-Imports (die einzige dokumentierte Ausnahme `measures` → `evidence/EvidenceCard` läuft über Public-API).
+- Fünf Server-Sync-Push-Loop-Invarianten dokumentiert und konsistent in `useServerSync.ts` + `usePlatformSystemHandlers.ts`.
+
+**Offene Punkte für die Meta-Review**: siehe Abschnitt „Meta-Review nach C2 · Arbeitsvorlage" am Ende dieses Dokuments. Die Meta-Review wird **nicht sofort** durchgeführt, sondern bewusst auf den Beginn von **C7** (Pilotfreigabe-Dokumentation) verschoben — für einen frischen Blick nach einer Distanz-Phase und zur Kopplung mit der Release-Notes-Durchsicht.
+
 ---
 
 ## C3 · Zerlegung `server/index.js`
@@ -476,25 +496,79 @@ Gelten aus `CLAUDE.md` Abschnitt 5 unverändert weiter. Ergänzungen für C:
 - Grundlage für **Produktpaket P5** (Produktionsplattform) ist gelegt
 - **Produktpaket P6** (Pilotbetrieb und Rollout) ist der nächste Schritt nach C7 – dort wird die App beim ersten echten Kunden eingeführt
 
-### Meta-Review nach C2.11
+### Meta-Review nach C2 · Arbeitsvorlage
 
-Nach Abschluss von **C2.11** (App-Shell) ein kleines Polish-Paket einschieben: Meta-Review über die zehn Feature-Slices unter `src/features/` (gap, measures, governance, evidence, operations, assessment, platform, programRollout, regulatory, riskCatalog, reporting). Fokus auf:
+> **Zeitpunkt**: voraussichtlich zu Beginn von **C7** (Pilotfreigabe-Dokumentation), nicht unmittelbar nach C2. Die Entscheidung wurde bei C2-Abschluss (Dr. Steiner / UVM, 2026-04-21) getroffen: Nach intensivem C2 ist ein Perspektivwechsel wertvoller als sofortige Weiterarbeit am selben Material; Meta-Review-Qualität lebt von frischem Blick und Distanz. C7 koppelt die Meta-Review natürlich an die Release-Notes-Durchsicht.
+>
+> **Ergebnis**: ein einzelner Polish-Commit (keine funktionale Änderung), plus ggf. eigenständige Fix-Commits für die als „ja" beantworteten Punkte. Zeitbudget: 30–90 Minuten plus die in den einzelnen Punkten genannten Zusatzaufwände.
+>
+> **Erinnerungs-Anker**: Jeder der neun Punkte unten enthält eine präzise Entscheidungsfrage, die ohne C2-Kontext-Reaktivierung beantwortbar sein soll. Die Beschreibung gibt den Hintergrund, die Frage ist der Gate-Punkt.
 
-- **Naming-Konsistenz**: Handler-Namen, Dep-Interface-Namen, Hook-Namen einheitlich (`use<Feature>Handlers`, `<Feature>HandlerDependencies`, `<Feature>Handlers`).
-- **Kommentar-Qualität**: Group-Comments in allen Dependencies-Interfaces, JSDoc auf Public-API-Exports, Transient-Markierungen einheitlich.
-- **Public-API-Homogenität**: `index.ts` je Feature mit gleichem Aufbau (Views → Hooks → Pure-Helper), einheitliche Re-Export-Reihenfolge.
-- **Views-Standort**: `regulatory/` und `reporting/` haben als einzige Features keine Views im Ordner — KritisView (C2.9) und ReportView (C2.10) liegen weiter in `src/views/`. Prüfen, ob das bis Pilot akzeptabel bleibt oder ob ein Mini-Umzug (nur File-Move, keine Panel-Splits) vor der Pilotfreigabe sinnvoller ist als das Aufschieben nach C4b. Entscheidungskriterium: Wie oft müssen Auditoren die Feature-Slice-Struktur erklaeren, wenn zwei Features als Sonderfälle auffallen?
-- **CSV-Permission-Gap aus C2.10**: In `src/lib/buildActiveViewPanelProps.ts` (Zeilen 911–914) sind vier Export-Callbacks als Inline-Lambdas verdrahtet:
-  ```ts
-  onExportActionCsv: () => exportActionPlanAsCsv(currentActionItems),
-  onExportEvidenceCsv: () => exportEvidenceRegisterAsCsv(currentEvidenceItems),
-  onExportStakeholderCsv: () => exportStakeholderRegisterAsCsv(currentStakeholders),
-  onExportFindingCsv: () => exportFindingRegisterAsCsv(currentFindings),
-  ```
-  Diese vier Callbacks haben **keinen** `hasPermission('reports_export')`-Gate, während die vier anderen Report-Exporter (`handleExportMarkdown`, `handleExportFormalHtml`, `handleExportManagementPdf`, `handleExportAuditPdf`) in `useReportingHandlers` den Gate konsistent anwenden. **Vorschlags-Bugfix**: Die vier CSV-Callbacks in `useReportingHandlers` als vollwertige Handler ergänzen — jeweils mit `hasPermission('reports_export')`-Check und Error-Notice bei Fehlschlag, analog zum Muster der Haupt-Exporter. Danach in `buildActiveViewPanelProps.ts` durch die Hook-Returns ersetzen. Aufwand: ~30 Minuten. Datenschutz-relevant bei Stakeholder- und Finding-CSV-Exporten.
-- **Read-only-Feature-Muster aus C2.10**: `reporting` ist das erste Feature, das `setState` und `runWithPermission` aus `FeatureHandlerDependencies` gar nicht nutzt und stattdessen über `hasPermission` gate'd. Für die Meta-Review prüfen, ob `FeatureHandlerDependencies` für read-only-Features ein eigenes Basis-Interface `ReadOnlyFeatureHandlerDependencies` (nur `state`, `showNotice`, `hasPermission`) bekommen sollte, oder ob die aktuelle Lösung (ungenutzte Felder laut Gruppenkommentar akzeptieren) praktisch genug bleibt.
-- **App.tsx-Endgröße beurteilen** (aus C2.11-Freigabe): Den in C2.11d erreichten Zeilenumfang messen und entscheiden, ob weitere Kompaktierung durch Kompositions-Hooks (z. B. `useFeatureHandlers()`, `useAppProps()`) sinnvoll ist oder ob die Transparenz der expliziten Feature-Hook-Aufrufe den höheren Wert hat. Die C2.11-Freigabe hat sich bewusst gegen Kompositions-Hooks während der Extraktion entschieden — Kompositions-Hooks verschleiern Feature-Abhängigkeiten, statt sie zu verwalten. Die Meta-Review entscheidet mit Blick auf das fertige Ergebnis neu. Falls beibehalten: die 450–650-Zeilen-Bandbreite als akzeptierten Zielkorridor dokumentieren. Falls Kompaktierung: einen zusätzlichen Polish-Commit einplanen (~30–60 Minuten).
+#### a) Naming-Konsistenz über die elf Feature-Slices
 
-Zeitbudget: 30–60 Minuten. Ergebnis ist ein einzelner Polish-Commit, keine funktionale Änderung. Vor C3 (server/index.js-Zerlegung) sinnvoll, weil die Feature-Slice-Muster dort als Vorbild dienen.
+**Beschreibung**: Die elf C2-extrahierten Feature-Slices plus zwei B-fortgeführte haben einheitliche Hook-Namen (`use<Feature>Handlers`), Handler-Return-Typen (`<Feature>Handlers`) und — soweit noch vorhanden — Dep-Interface-Namen (`<Feature>HandlerDependencies`). Nach der Context-Migration in C2.11d existieren Dep-Interfaces nur noch in den vier Hooks mit echten Cross-Hook-Kopplungen (Evidence, PlatformAuth, PlatformSystem, TabletopExercise).
 
-Viel Erfolg.
+**Entscheidungsfrage**: Sind alle Hook-, Handler-Return- und noch vorhandenen Dep-Interface-Namen konsistent dem Muster `use<Feature>Handlers` / `<Feature>Handlers` / `<Feature>HandlerDependencies` gefolgt? **Falls ja**: kein Änderungsbedarf. **Falls nein**: Liste der Abweichungen und Entscheidung pro Abweichung (angleichen vs. begründet stehen lassen).
+
+#### b) Kommentar-Qualität (Gruppenkommentare, JSDoc, Top-of-File-Blöcke)
+
+**Beschreibung**: Nach C2.11d sind die meisten Dep-Interfaces verschwunden oder auf 1–4 Felder geschrumpft. Dagegen sind einige Top-of-File-JSDoc-Blöcke der Hooks (z. B. in `useServerSync.ts`, `usePlatformSystemHandlers.ts`) sehr ausführlich und tragen die Invarianten-Dokumentation. Andere Hooks haben knappere JSDoc-Blöcke.
+
+**Entscheidungsfrage**: Haben alle 13 Feature-Hooks (inkl. resiliencePlan, tabletopExercise) einen einheitlich strukturierten Top-of-File-JSDoc-Block (Zweck, Extraktions-Iteration, Besonderheiten)? **Falls ja**: akzeptieren. **Falls nein**: angleichen (ja/nein), und — falls ja — was ist die Zielstruktur?
+
+#### c) Public-API-Homogenität der Feature-index.ts-Dateien
+
+**Beschreibung**: Jede Feature-`index.ts` folgt grob dem Schema „Views → Hooks → Pure-Helper → Types". Die Reihenfolge und die JSDoc-Einleitungen sind nicht perfekt homogen — manche Features haben ausführliche Breadcrumb-Kommentare (regulatory, reporting, platform), andere sind minimaler (riskCatalog, gap).
+
+**Entscheidungsfrage**: Folgen alle 13 Feature-`index.ts`-Dateien dem gleichen Aufbau (Re-Export-Reihenfolge, JSDoc-Kopfstruktur)? **Falls ja**: akzeptieren. **Falls nein**: angleichen (ja/nein)?
+
+#### d) regulatory-Feature hat keine Views im Ordner
+
+**Beschreibung**: `KritisView` (1.077 Zeilen) lebt weiter in `src/views/`, obwohl das zugehörige Feature `src/features/regulatory/` existiert. Begründung aus C2.9: Die View ist groß und Querschnitt zu mehreren Features (Risk, Standards-Mappings, Authorities, PenaltyExposure); ein 1:1-Umzug würde Panel-Splits vorwegnehmen, die in C4b geplant sind.
+
+**Entscheidungsfrage**: Wird `KritisView` vor Pilotstart nach `features/regulatory/views/` verschoben? **ja**: nur File-Move in dieser Meta-Review (~15 min, keine Panel-Splits), **nein**: bleibt bis C4b in `src/views/` und wird dort aufgeteilt.
+
+#### e) reporting-Feature hat keine Views im Ordner
+
+**Beschreibung**: Analog zu (d) — `ReportView` (614 Zeilen) lebt weiter in `src/views/`. Begründung aus C2.10: 18 von 22 Read-Props kommen aus `useAppDerivedState`; ReportView ist strukturell ein **Konsument** der Feature-Slices, nicht selbst eine neue Fach-Domain. 1:1-Umzug wäre rein mechanisch möglich.
+
+**Entscheidungsfrage**: Wird `ReportView` vor Pilotstart nach `features/reporting/views/` verschoben? **ja**: File-Move (~10 min), **nein**: bleibt bis C4b. Idealerweise symmetrisch zur (d)-Entscheidung beantworten, damit keine der beiden Slices als Sonderfall übrig bleibt.
+
+#### f) CSV-Permission-Gap aus C2.10
+
+**Beschreibung**: In `src/lib/buildActiveViewPanelProps.ts` (aktuell Zeilen ~911–914) sind vier CSV-Export-Callbacks als Inline-Lambdas verdrahtet:
+```ts
+onExportActionCsv: () => exportActionPlanAsCsv(currentActionItems),
+onExportEvidenceCsv: () => exportEvidenceRegisterAsCsv(currentEvidenceItems),
+onExportStakeholderCsv: () => exportStakeholderRegisterAsCsv(currentStakeholders),
+onExportFindingCsv: () => exportFindingRegisterAsCsv(currentFindings),
+```
+Diese vier Callbacks haben **keinen** `hasPermission('reports_export')`-Gate, während die vier Haupt-Exporter (`handleExportMarkdown`, `handleExportFormalHtml`, `handleExportManagementPdf`, `handleExportAuditPdf`) in `useReportingHandlers` den Gate konsistent anwenden. Datenschutz-relevant bei Stakeholder- und Finding-CSV-Exporten.
+
+**Entscheidungsfrage**: Werden die vier CSV-Exporter mit einem `hasPermission('reports_export')`-Gate + Error-Notice analog zum Muster der Haupt-Exporter ergänzt — d. h. als vollwertige Handler in `useReportingHandlers` implementiert und in `buildActiveViewPanelProps.ts` durch die Hook-Returns ersetzt? **ja** (~30 min Aufwand, datenschutz-relevant) / **nein** (bewusste Entscheidung, mit Begründung dokumentieren).
+
+#### g) App.tsx-Endgröße: 665 Zeilen – Struktur oder Kompaktierung?
+
+**Beschreibung**: App.tsx liegt nach C2.11d bei **665 Zeilen** — zwischen der ursprünglichen Wunschmarke (500) und der vom Auftraggeber erweiterten Pragmatik-Obergrenze (860). Die 665 Zeilen enthalten die explizite 15-Feature-Hook-Aufruf-Struktur (transparent, aber lang) und die ~260 Zeilen Prop-Assembly für `buildActiveViewPanelProps` (ebenfalls transparent, aber lang).
+
+Die C2.11-Freigabe hat sich bewusst gegen Kompositions-Hooks während der Extraktion entschieden — Kompositions-Hooks verschleiern Feature-Abhängigkeiten, statt sie zu verwalten. Die Meta-Review entscheidet mit Blick auf das fertige Ergebnis neu, ohne Implementierungs-Risiko.
+
+**Entscheidungsfrage**: Bleibt die aktuelle explizite 15-Feature-Hook-Struktur in AppShell so stehen (**„Struktur hat Vorrang"**, akzeptiere 665 Zeilen dauerhaft und dokumentiere 450–860 als finalen Zielkorridor)? Oder wird sie in ein oder mehrere Kompositions-Hooks (`useFeatureHandlers()`, `useAppProps()`) zusammengefasst, um Richtung 500 zu kommen (**„Kompaktierung hat Vorrang"**, Aufwand ~30–60 min Polish-Commit)?
+
+#### h) handleExportJson-Extraktion aus AppShell nach features/reporting/
+
+**Beschreibung**: In C2.11d wurde `buildServerExportPackagePayload` + `getExportTypeLabel` nach `src/features/platform/serverExportPayload.ts` extrahiert. Eine analoge Extraktion von `handleExportJson` (aktuell 34 Zeilen inline in AppShell) nach `features/reporting/handlers/exportJson.ts` wurde als optional eingestuft und im Umbau-Fluss nicht durchgeführt, weil sie keinen strukturellen Zwang hatte.
+
+**Entscheidungsfrage**: Wird `handleExportJson` aus AppShell nach `features/reporting/handlers/exportJson.ts` (oder als Handler in `useReportingHandlers`) extrahiert? **ja** (−30 Zeilen in App.tsx, konsistentere Feature-Grenzen, ~15 min) / **nein** (bleibt als AppShell-UI-Glue wie `selectModule`, `setActiveView` etc.).
+
+#### i) Performance-Selector-Pattern als Future-Work-Anker
+
+**Beschreibung**: Die beiden in C2.11d eingeführten Contexts nutzen React-Standard-Bail-Out (keine Selector-Pattern-Optimierung). AppShell re-rendert heute schon auf jede State-Änderung; die Feature-Hooks laufen ohnehin in AppShell. Performance-Hotspots wurden empirisch nicht beobachtet. Mögliche zukünftige Optimierungen: `use-context-selector`-Library oder Split in `WorkspaceStateContext` + separaten `AppHandlersContext`.
+
+**Entscheidungsfrage**: Wird für die Pilotfreigabe eine Context-Optimierung (use-context-selector oder Context-Split) umgesetzt? **ja**: nur wenn Profiling einen konkreten Bottleneck zeigt, den ein Selector-Pattern nachweislich entschärft (Aufwand mindestens 1–2 Tage). **nein (erwartet)**: Future-Work-Anker in `docs/state-access-map.md` behalten, aktuelle Implementierung unverändert lassen.
+
+---
+
+**Abschluss**: Die Meta-Review liefert entweder einen einzigen Polish-Commit (für die „ja"-Antworten auf a/b/c plus eventuell d/e/f/g/h) oder mehrere kleine Fix-Commits (wenn einzelne Punkte strukturell unterschiedlich sind, z. B. View-Move vs. CSV-Handler vs. Naming-Rename). Punkt (i) erzeugt keinen Code-Commit — nur die Doc-Notiz, dass Future-Work-Anker gesetzt ist.
+
+Viel Erfolg bei der Meta-Review.

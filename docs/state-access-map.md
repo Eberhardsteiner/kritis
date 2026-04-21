@@ -116,3 +116,87 @@ Nach der Extraktion des Server-Sync-Layers (C2.11c, useServerSync mit 37-Feld-De
   `src/features/platform/hooks/usePlatformSystemHandlers.ts`.
   Bei einem späteren Context-Umbau für `authToken`/`serverMode` muss
   dieser Block zuerst erneut geprüft werden.
+
+## Abschluss C2.11d
+
+**C2.11d durchgeführt, Context-Architektur wie projiziert realisiert.**
+
+Konkret realisiert (Commit `43ed4a4c`, 2026-04-21):
+- `WorkspaceStateContext` + `AppDerivedStateContext` in `src/app/context/`
+  mit `AppProvider` als Orchestrierungspunkt.
+- Dep-Matrix-Auflösung: Alle 13 Feature-Hooks lesen State, Setter,
+  Helpers und Derivations aus Context; Dep-Interfaces auf 0–4
+  Cross-Hook-Felder reduziert.
+- Cycle-Breaker strukturell aufgelöst: Der frühere
+  `clearAuthenticatedContextRef` + wire-up-useEffect aus C2.11c ist
+  durch den Pure-Helper
+  `src/features/platform/clearAuthenticatedContext.ts` ersetzt —
+  sowohl `useServerSync` (401-Branch) als auch
+  `usePlatformAuthHandlers` (handleServerLogout) rufen den Helper
+  direkt auf.
+- `src/App.tsx` bei 665 Zeilen (von 1.478 nach C2.11c), innerhalb
+  des erweiterten Zielkorridors 450–860.
+
+Die C2.10-Projektion („Context über `useAppDerivedState`-Return") hat
+sich in der Praxis als zutreffend herausgestellt, mit einer wichtigen
+Ergänzung: Nicht nur die Derivationen wollen in Context — die rohen
+Setter, Refs und Helpers ebenfalls, damit die Dep-Matrix nicht
+partiell stehenbleibt. Deshalb die Zwei-Context-Teilung statt eines
+einzigen `AppDerivedStateContext`.
+
+## Architektur-Notizen für künftige Entscheidungen
+
+Drei bleibende Referenzpunkte aus den Iterationen C2.10 bis C2.11d.
+Sie sind **keine Meta-Review-Punkte** (die sind in BLOCK-C.md in der
+eigenen Arbeitsvorlage dokumentiert), sondern strukturelle
+Beobachtungen für künftige Architektur-Entscheidungen — unabhängig
+davon, ob weitere Features entstehen oder bestehende umgebaut werden.
+
+### Context reduziert nicht primär Dep-Länge, sondern löst Ordering-Zwang
+
+Die reine Anzahl an Feldern in einem Dep-Interface ist das sichtbarste
+Symptom, aber nicht das strukturelle Problem. Der eigentliche Gewinn
+eines Context-Einsatzes zeigt sich dort, wo zwei Hooks voneinander
+abhängen und der Caller (App.tsx) dadurch in eine bestimmte
+Aufruf-Reihenfolge gezwungen wird. Im C2.11c-Zustand war das Ref-
+Muster der pragmatische Workaround für genau diesen Ordering-Zwang —
+C2.11d hat gezeigt, dass Context ihn strukturell auflöst, weil beide
+Hooks unabhängig voneinander dieselbe Quelle lesen.
+
+**Merksatz**: Wenn zwei oder mehr Hooks einen Ref oder eine
+wire-up-useEffect brauchen, um sich gegenseitig zu erreichen, ist
+Context die richtige nächste Stufe — nicht weil die Dep-Liste zu lang
+wäre, sondern weil die Ordering-Abhängigkeit strukturell unsauber ist.
+
+### Gruppen-Kommentare im Dep-Interface tragen in der Praxis mehr als Dep-Listen-Länge
+
+Beim Umgang mit dem 37-Feld-Interface in useServerSync (C2.11c) und
+dem 35-Feld-Interface in usePlatformSystemHandlers (C2.7c) war nicht
+die Zahl der Felder das Lesbarkeits-Problem, sondern das Fehlen
+klarer Gruppen. Sobald die Felder mit Gruppen-Header wie
+`// === Auth-State ===`, `// === Server-Sync-Refs ===`,
+`// === Cycle-Breaker + Notice ===` versehen waren, lief die Leser-
+Orientierung auf Gruppenebene — die einzelne Setter-Zeile wurde nie
+zum Leser-Anker.
+
+**Merksatz**: Bevor ein Dep-Interface aus Zeilen-Längen-Gründen
+refactored wird, prüfen, ob die fehlende Gruppen-Struktur das eigentliche
+Lesbarkeits-Problem ist. Gruppen-Header sind billiger als Abstraktion.
+
+### Pure-Helper-Factory ist das strukturelle Muster, wenn ein Ref-Pattern zur Cycle-Vermeidung ausreichen würde
+
+Wenn zwei Hooks eine gemeinsame Funktion brauchen (hier:
+`clearAuthenticatedContext`), und die naheliegende Lösung ein Ref oder
+eine wire-up-useEffect ist, um eine zirkuläre Abhängigkeit zu brechen,
+dann ist das ein klarer Indikator für eine **Pure-Helper-Factory**.
+Der Helper nimmt alle benötigten Setter als Parameter an, kapselt die
+gesamte Reset-Semantik und wird von beiden Hooks direkt aufgerufen —
+ohne dass einer der beiden Hooks den anderen kennt oder über eine
+Callback-Referenz ruft.
+
+**Merksatz**: Ref + wire-up-useEffect + useEffect-Aufrufordering ist
+ein „code smell" für eine fehlende Pure-Helper-Factory. Das Helper-
+Muster ist in C2.11d validiert (`createClearAuthenticatedContext`-
+Analogon: `clearAuthenticatedContext`-Helper in
+`src/features/platform/clearAuthenticatedContext.ts`) und sollte in
+ähnlichen Cycle-Situationen der erste Lösungsansatz sein.
