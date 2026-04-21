@@ -20,7 +20,7 @@ Aus dem fachlich vollständigen Prototyp wird eine **wartbare, testgestützte un
 - `server/routes/`: `admin.js`, `auth.js`, `files.js`, `integration.js`, `system.js`, `utils.js`
 
 **Ziel-Stand nach C**:
-- `src/App.tsx`: unter 500 Zeilen, nur noch App-Shell (Provider, Router, Top-Level-Layout)
+- `src/App.tsx`: **450–650 Zeilen** nach C2.11d (pragmatischer Zielkorridor, in C2.11-Freigabe nach C2.10 festgelegt); tatsächlicher Endwert wird nach C2.11d dokumentiert. Die ursprüngliche 500-Zeilen-Grenze bleibt die Messlatte, wird aber nicht unter Inkaufnahme versteckter Kompositions-Hooks erzwungen — explizite Feature-Hook-Aufrufe in App.tsx haben Vorrang vor rein numerischer Kompaktierung. Enthält nur noch App-Shell (Provider, Top-Level-Layout, Hook-Kompositionszeile pro Feature).
 - `server/index.js`: unter 400 Zeilen, nur noch Bootstrap, Middleware-Bindung, Routen-Registrierung
 - Backend-Tests: mindestens 60
 - Frontend-Tests: mindestens 450
@@ -220,7 +220,7 @@ Jede Iteration extrahiert **ein Feature** aus `App.tsx` in sein eigenes Modul, m
 **Rollback-Strategie**: Jede Iteration ist ein eigener Commit und damit einzeln revertierbar. Wenn eine Extraktion in größere Probleme läuft, wird sie revertet und neu geplant.
 
 **Akzeptanzkriterien C2**:
-- `src/App.tsx` unter 500 Zeilen
+- `src/App.tsx` im **Zielkorridor 450–650 Zeilen** nach C2.11d (s. Abschnitt „Ziel-Stand nach C"); Endwert dokumentiert
 - Keine Feature-Datei importiert direkt aus einem anderen Feature (nur über `shared/` oder Feature-Public-API)
 - Alle 352+ Frontend-Tests grün
 - Alle 12 E2E-Szenarien grün
@@ -489,6 +489,7 @@ Nach Abschluss von **C2.11** (App-Shell) ein kleines Polish-Paket einschieben: M
   ```
   Diese vier Callbacks haben **keinen** `hasPermission('reports_export')`-Gate, während die vier anderen Report-Exporter (`handleExportMarkdown`, `handleExportFormalHtml`, `handleExportManagementPdf`, `handleExportAuditPdf`) in `useReportingHandlers` den Gate konsistent anwenden. **Vorschlags-Bugfix**: Die vier CSV-Callbacks in `useReportingHandlers` als vollwertige Handler ergänzen — jeweils mit `hasPermission('reports_export')`-Check und Error-Notice bei Fehlschlag, analog zum Muster der Haupt-Exporter. Danach in `buildActiveViewPanelProps.ts` durch die Hook-Returns ersetzen. Aufwand: ~30 Minuten. Datenschutz-relevant bei Stakeholder- und Finding-CSV-Exporten.
 - **Read-only-Feature-Muster aus C2.10**: `reporting` ist das erste Feature, das `setState` und `runWithPermission` aus `FeatureHandlerDependencies` gar nicht nutzt und stattdessen über `hasPermission` gate'd. Für die Meta-Review prüfen, ob `FeatureHandlerDependencies` für read-only-Features ein eigenes Basis-Interface `ReadOnlyFeatureHandlerDependencies` (nur `state`, `showNotice`, `hasPermission`) bekommen sollte, oder ob die aktuelle Lösung (ungenutzte Felder laut Gruppenkommentar akzeptieren) praktisch genug bleibt.
+- **App.tsx-Endgröße beurteilen** (aus C2.11-Freigabe): Den in C2.11d erreichten Zeilenumfang messen und entscheiden, ob weitere Kompaktierung durch Kompositions-Hooks (z. B. `useFeatureHandlers()`, `useAppProps()`) sinnvoll ist oder ob die Transparenz der expliziten Feature-Hook-Aufrufe den höheren Wert hat. Die C2.11-Freigabe hat sich bewusst gegen Kompositions-Hooks während der Extraktion entschieden — Kompositions-Hooks verschleiern Feature-Abhängigkeiten, statt sie zu verwalten. Die Meta-Review entscheidet mit Blick auf das fertige Ergebnis neu. Falls beibehalten: die 450–650-Zeilen-Bandbreite als akzeptierten Zielkorridor dokumentieren. Falls Kompaktierung: einen zusätzlichen Polish-Commit einplanen (~30–60 Minuten).
 
 Zeitbudget: 30–60 Minuten. Ergebnis ist ein einzelner Polish-Commit, keine funktionale Änderung. Vor C3 (server/index.js-Zerlegung) sinnvoll, weil die Feature-Slice-Muster dort als Vorbild dienen.
 
