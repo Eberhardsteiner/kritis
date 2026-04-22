@@ -13,7 +13,10 @@
     "test:ui": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "demo:reset:fresh": "node scripts/demo-reset.mjs --fresh",
+    "demo:reset:ready": "node scripts/demo-reset.mjs --demo-ready",
+    "demo:capture-baseline": "node scripts/demo-reset.mjs --capture-baseline"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
