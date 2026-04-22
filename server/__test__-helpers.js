@@ -37,7 +37,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { legacyUploadsDir } from './config/paths.js';
+import { jobsArtifactsDir, legacyUploadsDir } from './config/paths.js';
 import {
   hashPassword,
 } from './services/auth-session.js';
@@ -45,12 +45,15 @@ import { createId, nowIso } from './services/ids.js';
 import {
   ensureTenantStorage,
   readAccounts,
+  readJobRuns,
   readSessions,
   readState,
   readTenants,
   readVersions,
   tenantPaths,
   writeAccounts,
+  writeJobRuns,
+  writeJsonFile,
   writeSessions,
   writeState,
   writeTenantSettings,
@@ -96,27 +99,33 @@ async function seedTenantRecord(tenantId) {
   ]);
 }
 
-async function seedAdminAccount(tenantId, password) {
+async function seedAdminAccount(tenantId, password, { isSystemAdmin = false, additionalTenantIds = [] } = {}) {
   const { salt, hash } = hashPassword(password);
-  const workspaceUserId = createId('usr');
   const email = `admin-${tenantId}@test.local`;
+  const memberships = [
+    {
+      tenantId,
+      roleProfile: 'admin',
+      workspaceUserId: createId('usr'),
+      scope: 'Testumgebung',
+    },
+    ...additionalTenantIds.map((extraTenantId) => ({
+      tenantId: extraTenantId,
+      roleProfile: 'admin',
+      workspaceUserId: createId('usr'),
+      scope: 'Testumgebung',
+    })),
+  ];
   const account = {
     id: createId('acct'),
     name: 'Test Admin',
     email,
     status: 'active',
-    isSystemAdmin: false,
+    isSystemAdmin: Boolean(isSystemAdmin),
     authSource: 'local',
     passwordSalt: salt,
     passwordHash: hash,
-    memberships: [
-      {
-        tenantId,
-        roleProfile: 'admin',
-        workspaceUserId,
-        scope: 'Testumgebung',
-      },
-    ],
+    memberships,
     identities: [],
   };
   const accounts = await readAccounts();
@@ -178,11 +187,11 @@ function seedVersionEntry({ evidenceId, versionId, storedFileName, fileName, cur
   };
 }
 
-export async function seedTestTenant({ variant = 'empty', tenantId, password = TEST_ADMIN_PASSWORD } = {}) {
+export async function seedTestTenant({ variant = 'empty', tenantId, password = TEST_ADMIN_PASSWORD, isSystemAdmin = false } = {}) {
   const finalTenantId = tenantId || generateTestTenantId();
   await ensureTenantStorage(finalTenantId);
   await seedTenantRecord(finalTenantId);
-  const { account, email } = await seedAdminAccount(finalTenantId, password);
+  const { account, email } = await seedAdminAccount(finalTenantId, password, { isSystemAdmin });
 
   const paths = tenantPaths(finalTenantId);
   // Der Attachments-Ordner wird pro Test (beforeEach) komplett zurückgesetzt,
@@ -312,6 +321,129 @@ export async function seedTestTenant({ variant = 'empty', tenantId, password = T
     };
   }
 
+  if (variant === 'with-orphan-upload') {
+    // Für C3.6 Test 1 (integrity_scan + export_inventory):
+    // 1 Evidence mit serverAttachment auf fileX (im Versions-Ledger).
+    // Zusätzlich 1 Datei fileY als Orphan direkt in uploads/,
+    // ohne State- oder Ledger-Referenz. buildIntegrityPayload muss
+    // fileY als orphanUploads-Eintrag erkennen.
+    const fileXName = 'stored-job-integrity-x.pdf';
+    const fileYName = 'stored-job-integrity-y-orphan.pdf';
+    await fs.writeFile(path.join(legacyUploadsDir, fileXName), makeTestPdfBuffer('integrity-x'));
+    await fs.writeFile(path.join(legacyUploadsDir, fileYName), makeTestPdfBuffer('integrity-y-orphan'));
+    const evidence = seedEvidenceItem({ id: 'ev-integrity', title: 'Evidence im Integrity-Scan', storedFileName: fileXName });
+    await writeState(finalTenantId, { evidenceItems: [evidence] });
+    await writeVersions(finalTenantId, [
+      seedVersionEntry({
+        evidenceId: 'ev-integrity',
+        versionId: evidence.serverAttachment.versionId,
+        storedFileName: fileXName,
+        fileName: 'ev-integrity.pdf',
+        current: true,
+        uploadedAt: evidence.serverAttachment.uploadedAt,
+      }),
+    ]);
+    await writeTenantSettings(finalTenantId, { retentionDays: 365, evidenceReviewCadenceDays: 180 });
+    return { tenantId: finalTenantId, email, password, account, fileXName, fileYName };
+  }
+
+  if (variant === 'with-backup-and-snapshot') {
+    // Für C3.6 Test 3 (restore_drill): backup-log-Eintrag mit
+    // vorhandener Backup-Datei + 1 Snapshot. Das frische Backup
+    // (heute) und der Snapshot (heute) sollten buildRestoreDrillPayload
+    // status='passed' liefern lassen.
+    await writeState(finalTenantId, {
+      companyProfile: { companyName: 'Restore-Drill GmbH' },
+      evidenceItems: [],
+    });
+    await writeVersions(finalTenantId, []);
+    await writeTenantSettings(finalTenantId, { retentionDays: 365, evidenceReviewCadenceDays: 180 });
+
+    const paths = tenantPaths(finalTenantId);
+    const backupId = `bak-${crypto.randomBytes(3).toString('hex')}`;
+    const backupCreatedAt = nowIso();
+
+    // Backup-Artefakt als Roh-Datei: liegt im backupsDir/<id>.json,
+    // wird nicht via persistence-Layer versioniert, nur per fsSync.existsSync
+    // von buildRestoreDrillPayload geprüft.
+    await fs.writeFile(
+      path.join(paths.backupsDir, `${backupId}.json`),
+      JSON.stringify({ meta: { id: backupId, tenantId: finalTenantId, createdAt: backupCreatedAt } }, null, 2),
+    );
+
+    // Backup-Log via writeJsonFile, damit der SQLite-Mirror konsistent
+    // ist — buildRestoreDrillPayload liest über readJsonFile, das
+    // zuerst die persistence-Schicht befragt.
+    await writeJsonFile(paths.backupLogFile, [{
+      id: backupId,
+      label: 'Seed-Backup',
+      createdAt: backupCreatedAt,
+      createdBy: account.id,
+      userName: 'Test Admin',
+      fileName: `${backupId}.json`,
+      sizeKb: 1.0,
+      checksumSha256: crypto.createHash('sha256').update(backupId).digest('hex'),
+    }], { updatedAt: backupCreatedAt });
+
+    // Snapshot-Datei als Roh-JSON: snapshotsDir-Files werden
+    // ausschließlich via fs.readdir + readJsonFile ohne Persistence-
+    // Reference gelesen (snapshotPath ist kein Persistence-Reference).
+    const snapshotId = `${new Date().toISOString().slice(0, 10)}-drill-${crypto.randomBytes(2).toString('hex')}`;
+    await fs.writeFile(
+      path.join(paths.snapshotsDir, `${snapshotId}.json`),
+      JSON.stringify({
+        meta: {
+          id: snapshotId,
+          name: 'Restore-Drill-Snapshot',
+          createdAt: nowIso(),
+          createdBy: account.id,
+          userName: 'Test Admin',
+        },
+        state: { evidenceItems: [] },
+      }, null, 2),
+    );
+    return { tenantId: finalTenantId, email, password, account, backupId, snapshotId };
+  }
+
+  if (variant === 'with-two-tenants') {
+    // Für C3.6 Test 5 (listTenantSummaries): zusätzlich einen
+    // zweiten Test-Tenant anlegen und den Admin-Account auf
+    // isSystemAdmin=true heben, damit er alle Tenants sieht.
+    // Der Caller bekommt beide Tenant-IDs zurück, damit cleanup
+    // beide abdecken kann.
+    const secondTenantId = generateTestTenantId(TEST_TENANT_PREFIX_STATE);
+    await ensureTenantStorage(secondTenantId);
+    await seedTenantRecord(secondTenantId);
+
+    await writeState(finalTenantId, {
+      companyProfile: { companyName: 'Alpha AG' },
+      evidenceItems: [],
+    });
+    await writeState(secondTenantId, {
+      companyProfile: { companyName: 'Beta GmbH' },
+      evidenceItems: [],
+    });
+
+    // Admin um SystemAdmin-Flag + Membership im zweiten Tenant ergänzen.
+    const accounts = await readAccounts();
+    const updatedAccount = {
+      ...account,
+      isSystemAdmin: true,
+      memberships: [
+        ...account.memberships,
+        {
+          tenantId: secondTenantId,
+          roleProfile: 'admin',
+          workspaceUserId: createId('usr'),
+          scope: 'Testumgebung 2',
+        },
+      ],
+    };
+    await writeAccounts(accounts.map((entry) => (entry.id === account.id ? updatedAccount : entry)));
+
+    return { tenantId: finalTenantId, secondTenantId, email, password, account: updatedAccount };
+  }
+
   throw new Error(`seedTestTenant: unbekannte Variante „${variant}“.`);
 }
 
@@ -358,12 +490,16 @@ export async function signInAsAdmin(request, tenantId, password = TEST_ADMIN_PAS
   return response.body.session.token;
 }
 
-export async function cleanupTestTenant(tenantId) {
+export async function cleanupTestTenant(tenantId, extraTenantIds = []) {
+  const allTargetIds = [tenantId, ...extraTenantIds].filter(Boolean);
+
   // Sicherheits-Guard: Nur Tenants mit anerkanntem Test-Prefix (`__test__-`)
   // werden gelöscht. Damit ist kategorisch ausgeschlossen, dass ein
   // versehentlicher Cleanup-Aufruf Produktions-Tenants löscht.
-  if (!tenantId || !tenantId.startsWith('__test__-')) {
-    throw new Error(`cleanupTestTenant: tenantId „${tenantId}“ trägt nicht den Test-Prefix — Abbruch zur Sicherheit.`);
+  for (const targetId of allTargetIds) {
+    if (!targetId.startsWith('__test__-')) {
+      throw new Error(`cleanupTestTenant: tenantId „${targetId}“ trägt nicht den Test-Prefix — Abbruch zur Sicherheit.`);
+    }
   }
 
   // Zentrale uploads/-Ablage (server-storage/uploads/*): die filesystem-
@@ -372,32 +508,73 @@ export async function cleanupTestTenant(tenantId) {
   // storedFileNames und räumen sie zentral weg — sonst leakt jeder
   // Happy-Path-Upload einen File-Stub.
   const storedNames = new Set();
-  try {
-    const versions = await readVersions(tenantId);
-    for (const entry of versions || []) {
-      if (entry?.storedFileName) storedNames.add(entry.storedFileName);
+  for (const targetId of allTargetIds) {
+    try {
+      const versions = await readVersions(targetId);
+      for (const entry of versions || []) {
+        if (entry?.storedFileName) storedNames.add(entry.storedFileName);
+      }
+      const state = await readState(targetId);
+      for (const item of state.evidenceItems || []) {
+        if (item?.serverAttachment?.storedFileName) storedNames.add(item.serverAttachment.storedFileName);
+      }
+    } catch {
+      // best-effort: wenn tenant-scoped-reads schon vorher failen,
+      // ignorieren wir das — der recursive rm unten räumt den Tenant weg.
     }
-    const state = await readState(tenantId);
-    for (const item of state.evidenceItems || []) {
-      if (item?.serverAttachment?.storedFileName) storedNames.add(item.serverAttachment.storedFileName);
-    }
-  } catch {
-    // best-effort: wenn tenant-scoped-reads schon vorher failen,
-    // ignorieren wir das — der recursive rm unten räumt den Tenant weg.
   }
+  // C3.6-Erweiterung: Test-1-Seed-Variante 'with-orphan-upload' legt
+  // einen fileY direkt ins uploads/-Verzeichnis, der NICHT im Versions-
+  // Ledger steht. Wir räumen alle Dateien mit Prefix `stored-job-*` weg,
+  // weil sie als Test-Artefakte markiert sind (Konvention seit C3.6).
+  try {
+    const uploadsEntries = await fs.readdir(legacyUploadsDir).catch(() => []);
+    for (const entry of uploadsEntries) {
+      if (entry.startsWith('stored-job-') || entry.startsWith('stored-state-orphan-')) {
+        storedNames.add(entry);
+      }
+    }
+  } catch { /* best-effort */ }
+
   for (const name of storedNames) {
     await fs.unlink(path.join(legacyUploadsDir, name)).catch(() => undefined);
   }
 
-  const paths = tenantPaths(tenantId);
-  await fs.rm(paths.dir, { recursive: true, force: true });
+  // Tenant-Dirs löschen.
+  for (const targetId of allTargetIds) {
+    const paths = tenantPaths(targetId);
+    await fs.rm(paths.dir, { recursive: true, force: true });
+  }
 
   const tenants = await readTenants();
-  await writeTenants(tenants.filter((entry) => entry.id !== tenantId));
+  await writeTenants(tenants.filter((entry) => !allTargetIds.includes(entry.id)));
 
   const accounts = await readAccounts();
-  await writeAccounts(accounts.filter((entry) => !(entry.memberships || []).some((m) => m.tenantId === tenantId)));
+  await writeAccounts(accounts.filter((entry) => !(entry.memberships || []).some((m) => allTargetIds.includes(m.tenantId))));
 
   const sessions = await readSessions();
-  await writeSessions(sessions.filter((entry) => entry.tenantId !== tenantId));
+  await writeSessions(sessions.filter((entry) => !allTargetIds.includes(entry.tenantId)));
+
+  // C3.6: Job-Artefakte im zentralen job-artifacts/-Ordner räumen.
+  // runSystemJob schreibt <type>-<jobId>.json, und Job-Runs werden in
+  // job-runs.json tracked. Wir filtern job-runs nach dem Admin-Account
+  // des Test-Tenants und löschen die zugehörigen Artefakt-Dateien.
+  try {
+    const jobRuns = await readJobRuns();
+    const testTenantSet = new Set(allTargetIds);
+    const keptJobs = [];
+    for (const job of jobRuns) {
+      const belongsToTest = testTenantSet.has(job.tenantId) || job.tenantName === 'Systemweit'
+        && job.triggeredBy === 'Test Admin';
+      if (belongsToTest && job.artifactFileName) {
+        await fs.unlink(path.join(jobsArtifactsDir, job.artifactFileName)).catch(() => undefined);
+      }
+      if (!belongsToTest) {
+        keptJobs.push(job);
+      }
+    }
+    if (keptJobs.length !== jobRuns.length) {
+      await writeJobRuns(keptJobs);
+    }
+  } catch { /* best-effort */ }
 }
