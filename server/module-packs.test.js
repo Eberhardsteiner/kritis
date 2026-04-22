@@ -591,9 +591,15 @@ test('symmetry self-check · MEASURE_STATUSES matches src/features/resiliencePla
     'MEASURE_STATUSES in module-packs.js must match the TypeScript union MeasureStatus');
 });
 
-// --- T13: Abwärtskompatibilität · bestehendes healthcare-core.container.json
+// --- T13: healthcare-core.container.json · Parseable + C5.3-Template-Präsenz
 
-test('parseImportedModulePack keeps legacy healthcare-core.container.json byte-compatible', () => {
+test('parseImportedModulePack accepts the healthcare-core.container.json shipping pack', () => {
+  // Nach C5.3 trägt das healthcare-Pack Template-Inhalte in allen drei
+  // C5.1-Feldern. Dieser Test prüft: (a) das Pack bleibt parseable,
+  // (b) die Templates sind präsent, (c) kein strukturelles Regressions-
+  // Risiko. Abwärtskompatibilität für Packs OHNE die neuen Felder ist
+  // durch T1 ('parseImportedModulePack validates container module payload')
+  // abgedeckt — dessen Fixture trägt keine Template-Felder.
   const source = fs.readFileSync(
     path.join(repoRoot, 'src', 'module-packs', 'healthcare-core.container.json'),
     'utf8',
@@ -604,9 +610,14 @@ test('parseImportedModulePack keeps legacy healthcare-core.container.json byte-c
   assert.equal(result.format, 'container');
   assert.equal(result.manifest.packId, 'sector-healthcare-core');
   assert.equal(result.module.id, 'healthcare');
-  // Die drei neuen C5.1-Felder sind im Legacy-Pack nicht vorhanden —
-  // Parser akzeptiert das als gültig und lässt die Felder undefined.
-  assert.equal(result.module.riskCatalogTemplates, undefined);
-  assert.equal(result.module.resiliencePlanTemplate, undefined);
-  assert.equal(result.module.tabletopScenarios, undefined);
+  // C5.3 · Risiko-Templates sind präsent (11 Einträge, alle sechs
+  // Kategorien abgedeckt).
+  assert.ok(Array.isArray(result.module.riskCatalogTemplates));
+  assert.ok(result.module.riskCatalogTemplates.length >= 8,
+    `Erwartete mindestens 8 Risiko-Templates, fand ${result.module.riskCatalogTemplates.length}.`);
+  const categoriesCovered = new Set(result.module.riskCatalogTemplates.map((r) => r.categoryId));
+  for (const expected of ['nature', 'technical', 'human_intentional', 'human_unintentional', 'interdependency', 'cyber_physical']) {
+    assert.ok(categoriesCovered.has(expected),
+      `Kategorie ${expected} fehlt — Pack muss alle sechs RiskCategoryId-Enums abdecken.`);
+  }
 });

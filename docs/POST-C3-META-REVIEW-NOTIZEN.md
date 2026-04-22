@@ -34,6 +34,7 @@
 | 14 | Obsolete Imports skalieren mit Cross-Module-Integrations-Tiefe | Methode |
 | 15 | Dokumentations-Overhead aus Iterations-Historie | Methode |
 | 16 | Kalibrierungs-Faktor für schema-lastige Erweiterungen (Entwurf · landet in C5.4) | Methode |
+| 17 | E2E-Tests fangen Integrations-Bugs, die Unit-Tests nicht sehen (Entwurf · landet in C5.4) | Methode |
 
 ## Beobachtungen
 
@@ -696,6 +697,83 @@ Block-Abschluss (vermutlich C5.4).
   der tatsächlichen Zahl vergleichen. Wenn die Zahl passt,
   steht ein belastbares zweites Kalibrierungs-Fenster für
   UI-lastige Arbeit.
+
+## Siebzehnte Beobachtung (Entwurfs-Stand)
+
+**E2E-Tests im Scope einer Feature-Extraktion fangen
+Integrations-Bugs, die Unit-Tests nicht sehen.** Landet im
+nächsten größeren Block-Abschluss (vermutlich C5.4).
+
+- **Fundstelle:** C5.2-Implementierung, Debug-Runde 4 von 5.
+  Der E2E-Test 17 (pack-adoption) zeigte reproduzierbar, dass
+  der Master-Adopt-Button zwar enabled wurde und der Klick
+  durchlief, der Server-State aber **null** blieb
+  (`resiliencePlan: null, riskEntries: [], importedTabletopScenarios: []`).
+- **Befund:** Die Helper-Funktion `resolveAdoptableModule` im
+  Hook `usePlatformSystemHandlers.ts` suchte das Adopt-Ziel
+  nur in **zwei** von **drei** relevanten Daten-Quellen:
+  - ✓ `state.uploadedModules` (lokal importierte Pakete)
+  - ✗ `ws.moduleRegistryEntries` (serverseitig freigegebene
+    Packs — **genau der Pfad, den der Demo-Flow nimmt**)
+  - ✓ `builtInModules` (Kerncontainer)
+  Das freigegebene Test-Pack landete nach dem
+  Release-Klick in der Registry, nicht in den `uploadedModules`
+  — `resolveAdoptableModule` returnte `null`, der Handler brach
+  still mit einer Info-Notice ab, keine Exception, kein roter
+  Log-Eintrag. Der Button wirkte.
+- **Warum Unit-Tests das nicht gefangen hätten:** Die Pure
+  Functions in `adoptModuleTemplates.ts` (vier Copy-Operatoren
+  + `countAdoptableTemplates`) sind isoliert **korrekt** — sie
+  bekommen ein Modul-Objekt als Parameter und operieren darauf.
+  Der Bug sitzt in der **Vorverarbeitung** (Modul-Lookup), die
+  zwischen UI-Klick und Pure-Function-Aufruf liegt. Ein
+  Unit-Test der Pure Function hätte das Modul direkt
+  hingereicht und wäre grün geblieben. Der Integrations-Pfad
+  (Klick → resolveAdoptableModule → adopt*Operator → setState
+  → pushStateToServer → Server-State) hat den Fehler
+  offengelegt.
+- **Warum kein Server-Integrations-Test das gefangen hätte:**
+  Die Server-State-Endpoints (83 Tests) prüfen die Server-
+  Persistenz und die Sanitizer-Schicht. Der Lookup-Fehler
+  sitzt **vor** dem Server-Call — der Server bekam kein
+  fehlerhaftes Payload, er bekam **gar kein Payload**, weil der
+  Client den Handler früh abbrach. Der Server-Test-Harness
+  kann den "Client-hat-gar-nicht-gerufen"-Fall systematisch
+  nicht erreichen.
+- **Konsequenz für künftige Abschnitts-Implementierungen:**
+  - **E2E-Tests für Feature-Flows gehören in denselben Commit
+    wie die Feature-Implementierung**, nicht in einen
+    separaten Test-Nachzieh-Commit. Die
+    Debug-Iteration passiert dann innerhalb der Feature-
+    Verifikations-Phase, nicht beim späteren Test-Ausbau —
+    das spart einen zweiten Debug-Einstieg ins gleiche Feature.
+  - **Ein E2E pro Feature-Flow reicht** (Dr. Steiners
+    Formulierung aus der C5.2-Freigaberunde: „ein Test, keine
+    breite Matrix"). Der eine Test deckt mehrere
+    Integrations-Punkte ab — Permission-Gates, Modul-Lookup,
+    Copy-Operator, Server-Sync, Reload-Persistenz — das ist
+    genug Coverage-Breite, um Lookup-artige Bugs zu fangen.
+  - **Unit-Tests auf Pure Functions bleiben wertvoll, sind
+    aber keine Substitution für End-to-End-Flow-Tests.**
+    Beide Test-Ebenen haben unterschiedliche Fang-Profile:
+    Unit-Tests fangen Logik-Bugs *innerhalb* einer Funktion,
+    E2E-Tests fangen Integrations-Bugs *zwischen* Funktionen.
+- **Kosten-Analyse für den C5.2-Datenpunkt:**
+  - E2E-Test-Entwicklung: ~2,5 Stunden (inkl. 5 Debug-
+    Iterationen).
+  - Davon Bug-Fang: Iteration 4 (~30 Minuten), die den
+    `resolveAdoptableModule`-Fix erzwungen hat.
+  - Bug-Finde-Kosten ohne E2E-Test: wahrscheinlich erst in der
+    UVM-Demo sichtbar geworden. Peinlich, weil der Demo-Gast
+    den stillen No-Op nicht als Bug erkennen könnte — er hätte
+    nur gesehen „Klick passiert nichts". Reputations-Kosten:
+    **hoch**. Reparatur-Kosten nach Demo: mindestens dieselben
+    2,5 Stunden plus Erklärungs-Aufwand.
+- **Verallgemeinerbare Regel:** Bei Features, die **mehrere
+  Daten-Quellen zusammenführen** (z. B. Lookup-Resolver,
+  Merge-Funktionen, Derived-State-Berechnungen), ist der
+  E2E-Test überproportional wertvoll — er prüft genau die
+  Quellen-Kombination, die Unit-Tests nicht sehen.
 
 ## Verweis
 
