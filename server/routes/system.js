@@ -1,37 +1,61 @@
+/**
+ * system.js · Route-Modul für Health-, Platform-, Readiness-,
+ * Integrity-, API-Client- und System-Job-Endpoints.
+ *
+ * Null-Deps seit C3.6-Polish (retroaktiver Nachzug). Observability-
+ * Instanz kommt aus services/observability.js (ESM-Singleton),
+ * Job-Executor + System-Summaries aus den in C3.6 extrahierten
+ * Service-Modulen.
+ */
+import fsSync from 'node:fs';
+import path from 'node:path';
+
 import { asyncRoute } from './utils.js';
+import { jobsArtifactsDir } from '../config/paths.js';
+import { defaultPlatformSettings } from '../config/runtime.js';
+import {
+  ensureSystemAdmin,
+  getAuthContext,
+  hashPassword,
+} from '../services/auth-session.js';
+import {
+  createApiClientSecret,
+  createId,
+  httpError,
+  maskSecret,
+  nowIso,
+} from '../services/ids.js';
+import { runSystemJob } from '../services/jobs.js';
+import { observability } from '../services/observability.js';
+import {
+  getPersistenceLayer,
+  readApiClients,
+  readJobRuns,
+  readPlatformSettings as readPlatformSettingsRaw,
+  readTenants,
+  writeApiClients,
+  writePlatformSettings as writePlatformSettingsRaw,
+} from '../services/persistence-wrappers.js';
+import {
+  sanitizeApiClientRecord,
+  sanitizeApiClientScopes,
+  sanitizeObject,
+} from '../services/sanitizers.js';
+import {
+  buildHealthResponse,
+  buildHostingReadinessSummary,
+  buildIntegritySummaryForTenant,
+  buildSecurityGateSummary,
+  listRestoreDrillSummaries,
+} from '../services/system-summaries.js';
 
-export function registerSystemRoutes(app, deps) {
-  const {
-    buildHealthResponse,
-    nowIso,
-    getPersistenceLayer,
-    getAuthContext,
-    ensureSystemAdmin,
-    readPlatformSettings,
-    writePlatformSettings,
-    sanitizeObject,
-    buildHostingReadinessSummary,
-    buildIntegritySummaryForTenant,
-    buildSecurityGateSummary,
-    observability,
-    listRestoreDrillSummaries,
-    readApiClients,
-    readTenants,
-    sanitizeApiClientScopes,
-    httpError,
-    createApiClientSecret,
-    hashPassword,
-    sanitizeApiClientRecord,
-    createId,
-    maskSecret,
-    writeApiClients,
-    readJobRuns,
-    runSystemJob,
-    jobsArtifactsDir,
-    fsSync,
-    path,
-  } = deps;
+// Lokale Bindungen der runtime-abhängigen platform-settings-Defaults
+// (gleiches Muster wie in services/jobs.js, services/system-summaries.js,
+// server/index.js).
+const readPlatformSettings = () => readPlatformSettingsRaw(defaultPlatformSettings);
+const writePlatformSettings = (value) => writePlatformSettingsRaw(value, defaultPlatformSettings);
 
+export function registerSystemRoutes(app) {
   app.get('/api/health', asyncRoute(async (_req, res) => {
     res.json(await buildHealthResponse());
   }));

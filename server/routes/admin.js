@@ -1,35 +1,45 @@
+/**
+ * admin.js · Route-Modul für Tenant- und Account-Administration.
+ *
+ * Null-Deps seit C3.6-Polish (retroaktiver Nachzug).
+ * `sanitizeAccountForResponse` wurde im gleichen Commit von
+ * `server/index.js` nach `services/sanitizers.js` verschoben (Option B,
+ * weil die Funktion eine reine Presentation-Sanitize-Funktion ohne
+ * Closure-Deps ist und sich natürlich in die sanitizers-Sammlung
+ * einfügt).
+ */
 import { asyncRoute } from './utils.js';
+import { DEFAULT_DEMO_PASSWORD } from '../config/runtime.js';
+import {
+  ensureSystemAdmin,
+  ensureWorkspaceUser,
+  assertPermissions,
+  getAuthContext,
+  hashPassword,
+} from '../services/auth-session.js';
+import { createId, httpError, nowIso, slugify } from '../services/ids.js';
+import {
+  ensureTenantStorage,
+  readAccounts,
+  readTenants,
+  writeAccounts,
+  writeState,
+  writeTenants,
+} from '../services/persistence-wrappers.js';
+import {
+  buildSeedState,
+  normalizeAuthSource,
+  sanitizeAccountForResponse,
+  sanitizeAccountRecord,
+  sanitizeArray,
+  sanitizeMembershipRecord,
+  sanitizeObject,
+  sanitizeRoleProfile,
+  sanitizeTenantRecord,
+} from '../services/sanitizers.js';
+import { listTenantSummaries } from '../services/system-summaries.js';
 
-export function registerAdminRoutes(app, deps) {
-  const {
-    getAuthContext,
-    ensureSystemAdmin,
-    assertPermissions,
-    listTenantSummaries,
-    DEFAULT_DEMO_PASSWORD,
-    httpError,
-    readTenants,
-    slugify,
-    createId,
-    buildSeedState,
-    ensureTenantStorage,
-    writeState,
-    nowIso,
-    writeTenants,
-    readAccounts,
-    sanitizeArray,
-    hashPassword,
-    writeAccounts,
-    sanitizeObject,
-    sanitizeTenantRecord,
-    sanitizeAccountForResponse,
-    normalizeAuthSource,
-    sanitizeRoleProfile,
-    sanitizeMembershipRecord,
-    sanitizeAccountRecord,
-    ensureWorkspaceUser,
-  } = deps;
-
+export function registerAdminRoutes(app) {
   app.get('/api/admin/tenants', asyncRoute(async (req, res) => {
     const authContext = await getAuthContext(req);
     const summaries = await listTenantSummaries(

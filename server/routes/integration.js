@@ -1,22 +1,23 @@
+/**
+ * integration.js · Route-Modul für die Integrations-API.
+ *
+ * Null-Deps seit C3.6-Polish (retroaktiver Nachzug).
+ */
 import { asyncRoute } from './utils.js';
-// C3.5: Lokaler Null-Deps-Nachzug nur für buildStateEnvelope. Die
-// restlichen Deps (deps-Object-Pattern aus der Zeit vor der Foundation-
-// Phase) bleiben bis zum retroaktiven Null-Deps-Nachzug in C3.6/C3.7
-// (Meta-Review-Notiz 5).
+import {
+  assertApiClientScopes,
+  getApiClientContext,
+} from '../services/auth-session.js';
+import { listExportEntries } from '../services/exports.js';
+import { httpError } from '../services/ids.js';
+import { readState, readTenants } from '../services/persistence-wrappers.js';
 import { buildStateEnvelope } from '../services/state.js';
+import {
+  buildIntegrationManifest,
+  listTenantSummaries,
+} from '../services/system-summaries.js';
 
-export function registerIntegrationRoutes(app, deps) {
-  const {
-    getApiClientContext,
-    assertApiClientScopes,
-    buildIntegrationManifest,
-    listTenantSummaries,
-    readTenants,
-    listExportEntries,
-    httpError,
-    readState,
-  } = deps;
-
+export function registerIntegrationRoutes(app) {
   app.get('/api/integration/manifest', asyncRoute(async (req, res) => {
     const apiContext = await getApiClientContext(req);
     assertApiClientScopes(['readiness:read'], apiContext);

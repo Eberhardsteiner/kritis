@@ -1,45 +1,65 @@
+/**
+ * auth.js · Route-Modul für Login-, OIDC- und Session-Endpoints.
+ *
+ * Null-Deps seit C3.6-Polish (retroaktiver Nachzug). Alle Auth-Primitiven
+ * direkt aus services/auth-session.js (16 Symbole), die OIDC-Primitive
+ * aus ../auth-provider.js (6 Symbole).
+ */
 import { asyncRoute } from './utils.js';
+import {
+  buildOidcAuthorizationUrl,
+  buildPublicAuthProviders,
+  createAuthCallbackTicket,
+  createOidcTransaction,
+  exchangeOidcCode,
+  extractOidcProfile,
+  fetchOidcDiscovery,
+  fetchOidcUserProfile,
+} from '../auth-provider.js';
+import { OIDC_PROVIDER_ID } from '../config/defaults.js';
+import {
+  ANONYMOUS_ACCESS_ENABLED,
+  AUTHENTICATION_REQUIRED,
+  authStrategy,
+  defaultPlatformSettings,
+  runtimeConfig,
+} from '../config/runtime.js';
+import {
+  buildSuccessfulAuthResponse,
+  buildWorkspaceUserSeedFromContext,
+  cleanupExpiredAuthFlows,
+  consumeAuthCallbackTicket,
+  ensureWorkspaceUser,
+  extractAuthToken,
+  getAuthContext,
+  resolveMembershipForAccount,
+  resolveOidcLoginContext,
+  verifyPassword,
+} from '../services/auth-session.js';
+import { httpError } from '../services/ids.js';
+import {
+  readAccounts,
+  readAuthCallbackTickets,
+  readPendingAuthFlows,
+  readPlatformSettings as readPlatformSettingsRaw,
+  readSessions,
+  readTenants,
+  writeAuthCallbackTickets,
+  writePendingAuthFlows,
+  writeSessions,
+} from '../services/persistence-wrappers.js';
+import {
+  isLocalLoginAllowed,
+  sanitizeArray,
+} from '../services/sanitizers.js';
+import { listTenantSummaries } from '../services/system-summaries.js';
 
-export function registerAuthRoutes(app, deps) {
-  const {
-    runtimeConfig,
-    authStrategy,
-    AUTHENTICATION_REQUIRED,
-    ANONYMOUS_ACCESS_ENABLED,
-    OIDC_PROVIDER_ID,
-    listTenantSummaries,
-    buildPublicAuthProviders,
-    httpError,
-    readAccounts,
-    readTenants,
-    isLocalLoginAllowed,
-    verifyPassword,
-    sanitizeArray,
-    resolveMembershipForAccount,
-    buildSuccessfulAuthResponse,
-    cleanupExpiredAuthFlows,
-    fetchOidcDiscovery,
-    createOidcTransaction,
-    readPendingAuthFlows,
-    writePendingAuthFlows,
-    buildOidcAuthorizationUrl,
-    readPlatformSettings,
-    exchangeOidcCode,
-    fetchOidcUserProfile,
-    extractOidcProfile,
-    resolveOidcLoginContext,
-    createAuthCallbackTicket,
-    readAuthCallbackTickets,
-    writeAuthCallbackTickets,
-    consumeAuthCallbackTicket,
-    getAuthContext,
-    ensureWorkspaceUser,
-    buildWorkspaceUserSeedFromContext,
-    extractAuthToken,
-    readSessions,
-    writeSessions,
-  } = deps;
+// Lokale Bindung der runtime-abhängigen platform-settings-Defaults
+// (gleiches Muster wie in services/jobs.js, services/system-summaries.js,
+// server/index.js). Nur für die /api/auth/oidc/callback-Route.
+const readPlatformSettings = () => readPlatformSettingsRaw(defaultPlatformSettings);
 
+export function registerAuthRoutes(app) {
   app.get('/api/auth/bootstrap', asyncRoute(async (_req, res) => {
     const tenants = await listTenantSummaries();
     const publicTenant = tenants.find((entry) => entry.active !== false) ?? tenants[0] ?? null;

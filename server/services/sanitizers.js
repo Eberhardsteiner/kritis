@@ -272,6 +272,50 @@ export function sanitizeAccountList(value) {
     .filter((entry) => entry.email);
 }
 
+/**
+ * Presentation-Sanitize für Account-Objekte in API-Responses.
+ *
+ * Nimmt ein sanitize-d Account-Record und einen `tenantLookup`-Map
+ * (tenantId → tenant-record) entgegen und liefert die shape, die
+ * `/api/admin/accounts`-GET und verwandte Admin-Endpoints erwarten
+ * (inkl. aufgelöstem tenantName pro Membership).
+ *
+ * In C3.6-Polish (retroaktiver Null-Deps-Nachzug) aus
+ * `server/index.js` hierher gezogen. Keine Closure-Deps —
+ * ausschließlich Pure-Sanitize-Logik, semantisch verwandt mit
+ * `sanitizeAccountRecord`.
+ */
+export function sanitizeAccountForResponse(account, tenantLookup) {
+  return {
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    status: account.status || 'active',
+    isSystemAdmin: Boolean(account.isSystemAdmin),
+    authSource: normalizeAuthSource(account.authSource),
+    lastAuthProvider: account.lastAuthProvider || '',
+    lastLoginAt: account.lastLoginAt || '',
+    identities: sanitizeArray(account.identities).map((identity) => ({
+      providerId: identity.providerId || OIDC_PROVIDER_ID,
+      subject: identity.subject || '',
+      issuer: identity.issuer || '',
+      email: identity.email || '',
+      linkedAt: identity.linkedAt || '',
+      lastLoginAt: identity.lastLoginAt || '',
+      tenantHint: identity.tenantHint || '',
+      roleHint: identity.roleHint || '',
+      scopeHint: identity.scopeHint || '',
+    })),
+    memberships: sanitizeArray(account.memberships).map((membership) => ({
+      tenantId: membership.tenantId,
+      tenantName: tenantLookup.get(membership.tenantId)?.name || membership.tenantId,
+      roleProfile: sanitizeRoleProfile(membership.roleProfile),
+      workspaceUserId: membership.workspaceUserId,
+      scope: membership.scope || '',
+    })),
+  };
+}
+
 export function isLocalLoginAllowed(account) {
   const authSource = normalizeAuthSource(account?.authSource);
   return authSource === 'local' || authSource === 'hybrid';

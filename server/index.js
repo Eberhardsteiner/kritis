@@ -65,6 +65,8 @@ import {
 // buildStateEnvelope und cleanupOrphanUploads werden in index.js NICHT
 // mehr aufgerufen.
 import { listSnapshotFiles, listSnapshots } from './services/state.js';
+// C3.6-Polish: observability-Singleton aus services/observability.js.
+import { observability } from './services/observability.js';
 // C3.6: Job-Executor + System-Summaries aus den beiden neuen Service-
 // Modulen. Die register*Routes-Aufrufe unten reichen diese Symbole
 // per deps-Object weiter — der Polish-Commit nach C3.6 ersetzt die
@@ -252,10 +254,8 @@ const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
 // (alleinige Konsumenten-Route). MAX_UPLOAD_BYTES wird dort direkt aus
 // config/defaults.js gezogen, globalTmpDir aus config/paths.js.
 
-const observability = createObservabilityStore({
-  recentEventLimit: 120,
-  maxLatencySamplesPerRoute: 240,
-});
+// observability wird seit C3.6-Polish als ESM-Singleton aus
+// ./services/observability.js importiert (siehe Import-Block oben).
 
 // Pure Helpers (ids, sanitizers, seeds, state-diff) leben seit C3.0a
 // in ./services/ids.js und ./services/sanitizers.js. Die Signatur von
@@ -350,36 +350,9 @@ const writePlatformSettings = (value) => writePlatformSettingsRaw(value, default
 // listTenantSummaries lebt seit C3.6 in ./services/system-summaries.js
 // (Re-Import weiter unten für die register*Routes-Deps-Entries).
 
-function sanitizeAccountForResponse(account, tenantLookup) {
-  return {
-    id: account.id,
-    name: account.name,
-    email: account.email,
-    status: account.status || 'active',
-    isSystemAdmin: Boolean(account.isSystemAdmin),
-    authSource: normalizeAuthSource(account.authSource),
-    lastAuthProvider: account.lastAuthProvider || '',
-    lastLoginAt: account.lastLoginAt || '',
-    identities: sanitizeArray(account.identities).map((identity) => ({
-      providerId: identity.providerId || OIDC_PROVIDER_ID,
-      subject: identity.subject || '',
-      issuer: identity.issuer || '',
-      email: identity.email || '',
-      linkedAt: identity.linkedAt || '',
-      lastLoginAt: identity.lastLoginAt || '',
-      tenantHint: identity.tenantHint || '',
-      roleHint: identity.roleHint || '',
-      scopeHint: identity.scopeHint || '',
-    })),
-    memberships: sanitizeArray(account.memberships).map((membership) => ({
-      tenantId: membership.tenantId,
-      tenantName: tenantLookup.get(membership.tenantId)?.name || membership.tenantId,
-      roleProfile: sanitizeRoleProfile(membership.roleProfile),
-      workspaceUserId: membership.workspaceUserId,
-      scope: membership.scope || '',
-    })),
-  };
-}
+// sanitizeAccountForResponse lebt seit C3.6-Polish in
+// ./services/sanitizers.js. Konsument (routes/admin.js) importiert
+// direkt.
 
 // ensureWorkspaceUser lebt seit C3.0c in ./services/auth-session.js.
 
@@ -677,93 +650,15 @@ app.use((req, res, next) => {
   next();
 });
 
-registerSystemRoutes(app, {
-  buildHealthResponse,
-  nowIso,
-  getPersistenceLayer,
-  getAuthContext,
-  ensureSystemAdmin,
-  readPlatformSettings,
-  writePlatformSettings,
-  sanitizeObject,
-  buildHostingReadinessSummary,
-  buildIntegritySummaryForTenant,
-  buildSecurityGateSummary,
-  observability,
-  listRestoreDrillSummaries,
-  readApiClients,
-  readTenants,
-  sanitizeApiClientScopes,
-  httpError,
-  createApiClientSecret,
-  hashPassword,
-  sanitizeApiClientRecord,
-  createId,
-  maskSecret,
-  writeApiClients,
-  readJobRuns,
-  runSystemJob,
-  jobsArtifactsDir,
-  fsSync,
-  path,
-});
+// C3.6-Polish: Null-Deps-Nachzug für die fünf Alt-Route-Module.
+// Seit diesem Commit importieren admin, auth, files, integration und
+// system ihre Abhängigkeiten direkt aus den jeweiligen services/*-
+// Modulen. Die früheren deps-Object-Aufrufe (register*Routes(app, {...}))
+// werden zu register*Routes(app) reduziert.
 
-registerIntegrationRoutes(app, {
-  getApiClientContext,
-  assertApiClientScopes,
-  buildIntegrationManifest,
-  listTenantSummaries,
-  readTenants,
-  listExportEntries,
-  httpError,
-  readState,
-});
-
-// C3.5: buildSuccessfulAuthResponse und consumeAuthCallbackTicket leben
-// seit C3.0c in ./services/auth-session.js. Das frühere Parameter-
-// Plumbing für `buildStateEnvelope` ist entfallen — auth-session.js
-// importiert die Funktion direkt aus services/state.js. Die beiden
-// bound-Wrapper (buildSuccessfulAuthResponseBound,
-// consumeAuthCallbackTicketBound) sind ersatzlos entfernt.
-
-registerAuthRoutes(app, {
-  runtimeConfig,
-  authStrategy,
-  AUTHENTICATION_REQUIRED,
-  ANONYMOUS_ACCESS_ENABLED,
-  OIDC_PROVIDER_ID,
-  listTenantSummaries,
-  buildPublicAuthProviders,
-  httpError,
-  readAccounts,
-  readTenants,
-  isLocalLoginAllowed,
-  verifyPassword,
-  sanitizeArray,
-  resolveMembershipForAccount,
-  buildSuccessfulAuthResponse,
-  cleanupExpiredAuthFlows,
-  fetchOidcDiscovery,
-  createOidcTransaction,
-  readPendingAuthFlows,
-  writePendingAuthFlows,
-  buildOidcAuthorizationUrl,
-  readPlatformSettings,
-  exchangeOidcCode,
-  fetchOidcUserProfile,
-  extractOidcProfile,
-  resolveOidcLoginContext,
-  createAuthCallbackTicket,
-  readAuthCallbackTickets,
-  writeAuthCallbackTickets,
-  consumeAuthCallbackTicket,
-  getAuthContext,
-  ensureWorkspaceUser,
-  buildWorkspaceUserSeedFromContext,
-  extractAuthToken,
-  readSessions,
-  writeSessions,
-});
+registerSystemRoutes(app);
+registerIntegrationRoutes(app);
+registerAuthRoutes(app);
 
 // Die sechs State-/Snapshot-/Audit-Endpoints (GET/PUT /api/state,
 // GET /api/audit-log, GET/POST /api/snapshots,
@@ -797,42 +692,8 @@ registerAuthRoutes(app, {
 // ./routes/reporting.js — registriert ueber registerReportingRoutes(app)
 // weiter unten (Null-Deps-Muster).
 
-registerAdminRoutes(app, {
-  getAuthContext,
-  ensureSystemAdmin,
-  assertPermissions,
-  listTenantSummaries,
-  DEFAULT_DEMO_PASSWORD,
-  httpError,
-  readTenants,
-  slugify,
-  createId,
-  buildSeedState,
-  ensureTenantStorage,
-  writeState,
-  nowIso,
-  writeTenants,
-  readAccounts,
-  sanitizeArray,
-  hashPassword,
-  writeAccounts,
-  sanitizeObject,
-  sanitizeTenantRecord,
-  sanitizeAccountForResponse,
-  normalizeAuthSource,
-  sanitizeRoleProfile,
-  sanitizeMembershipRecord,
-  sanitizeAccountRecord,
-  ensureWorkspaceUser,
-});
-
-registerFileRoutes(app, {
-  getAuthContext,
-  path,
-  readVersions,
-  sanitizeArray,
-  getObjectStorage,
-});
+registerAdminRoutes(app);
+registerFileRoutes(app);
 
 // C3.1: Null-Deps-Muster für neue Route-Module — keine Deps-Object-
 // Durchreichung, alle Services per Direkt-Import in routes/modules.js.
