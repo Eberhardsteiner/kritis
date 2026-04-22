@@ -38,7 +38,15 @@ import { registerAuthRoutes } from './routes/auth.js';
 import { registerFileRoutes } from './routes/files.js';
 import { registerIntegrationRoutes } from './routes/integration.js';
 import { registerModuleRoutes } from './routes/modules.js';
+import { registerReportingRoutes } from './routes/reporting.js';
 import { registerSystemRoutes } from './routes/system.js';
+// C3.2: Export-Service-Helfer + computeSha256 aus den neuen
+// services-Modulen. Die Route-Handler sind in routes/reporting.js,
+// aber einige Bootstrap-/Integrity-/Job-Funktionen in index.js rufen
+// listExportEntries und computeSha256 direkt auf — sie ziehen erst
+// in C3.6 (Service-Residuen) um.
+import { listExportEntries } from './services/exports.js';
+import { computeSha256 } from './services/file-utils.js';
 // C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
 import {
   rootDir,
@@ -284,108 +292,10 @@ async function buildStateEnvelope(tenantId, state) {
 // readExportLog, writeExportLog leben seit C3.0b in
 // ./services/persistence-wrappers.js (Import oben).
 
-function buildExportDownloadUrl(exportId, fileName = '') {
-  const requestedName = fileName || `${exportId}.json`;
-  return `/api/exports/${encodeURIComponent(exportId)}/download?download=${encodeURIComponent(requestedName)}`;
-}
-
-function presentExportEntry(entry) {
-  return {
-    ...entry,
-    downloadUrl: buildExportDownloadUrl(entry.id, entry.fileName),
-  };
-}
-
-async function listExportEntries(tenantId) {
-  return sanitizeArray(await readExportLog(tenantId))
-    .sort((left, right) => String(right?.createdAt || '').localeCompare(String(left?.createdAt || '')))
-    .map((entry) => presentExportEntry(entry));
-}
-
-async function persistExportPackage(tenantId, authContext, payload) {
-  const type = sanitizeExportPackageType(String(payload?.type || 'state_snapshot').trim());
-  const title = String(payload?.title || '').trim() || 'Exportpaket';
-  const note = String(payload?.note || '').trim();
-  const signOffName = String(payload?.signOffName || '').trim();
-  const signOffRole = String(payload?.signOffRole || '').trim();
-  const moduleId = String(payload?.moduleId || '').trim();
-  const moduleName = String(payload?.moduleName || '').trim();
-  const companyName = String(payload?.companyName || '').trim();
-  const relatedSnapshotId = String(payload?.relatedSnapshotId || '').trim();
-  const sections = sanitizeArray(payload?.sections).filter((value) => typeof value === 'string' && value.trim()).map((value) => String(value).trim());
-  const createdAt = nowIso();
-  const exportId = createId('exp');
-  const baseName = slugify(title) || type;
-  const fileName = `${baseName}-${createdAt.slice(0, 10)}.json`;
-  const filePayload = {
-    meta: {
-      id: exportId,
-      tenantId,
-      type,
-      title,
-      note,
-      moduleId,
-      moduleName,
-      companyName,
-      signOffName,
-      signOffRole,
-      relatedSnapshotId,
-      createdAt,
-      createdBy: authContext.account.id,
-      userName: authContext.account.name,
-      sections,
-      manifestVersion: 1,
-    },
-    payload: payload?.payload ?? {},
-  };
-
-  const paths = tenantPaths(tenantId);
-  const targetPath = path.join(paths.exportsDir, `${exportId}.json`);
-  await writeJsonFile(targetPath, filePayload);
-  const checksumSha256 = await computeSha256(targetPath);
-  const stat = await fs.stat(targetPath);
-  const entry = {
-    id: exportId,
-    tenantId,
-    type,
-    title,
-    note,
-    moduleId,
-    moduleName,
-    companyName,
-    createdAt,
-    createdBy: authContext.account.id,
-    userName: authContext.account.name,
-    signOffName,
-    signOffRole,
-    releaseStatus: 'draft',
-    releasedAt: '',
-    releasedBy: '',
-    releaseNote: '',
-    checksumSha256,
-    sizeKb: Math.round((stat.size / 1024) * 10) / 10,
-    fileName,
-    downloadUrl: buildExportDownloadUrl(exportId, fileName),
-    relatedSnapshotId: relatedSnapshotId || undefined,
-    sections,
-  };
-
-  const exportLog = await readExportLog(tenantId);
-  exportLog.unshift(entry);
-  await writeExportLog(tenantId, exportLog);
-  await appendAuditLog(tenantId, {
-    id: createId('audit'),
-    at: createdAt,
-    userId: authContext.account.id,
-    userName: authContext.account.name,
-    action: 'Exportpaket erzeugt',
-    resource: 'export',
-    summary: `Exportpaket „${title}“ (${type}) wurde registriert.`,
-    sections: ['exports'],
-  });
-
-  return presentExportEntry(entry);
-}
+// buildExportDownloadUrl, presentExportEntry, listExportEntries,
+// persistExportPackage leben seit C3.2 in ./services/exports.js.
+// Die vier /api/exports-Endpoints sind nach ./routes/reporting.js
+// umgezogen (Null-Deps-Muster, registerReportingRoutes(app) weiter unten).
 
 async function listSnapshotFiles(tenantId) {
   const paths = tenantPaths(tenantId);
@@ -469,10 +379,8 @@ async function cleanupOrphanUploads(previousState, nextState, tenantId) {
   );
 }
 
-async function computeSha256(filePath) {
-  const fileBuffer = await fs.readFile(filePath);
-  return crypto.createHash('sha256').update(fileBuffer).digest('hex');
-}
+// computeSha256 lebt seit C3.2 in ./services/file-utils.js
+// (wird von C3.2 exports + C3.4 evidence gemeinsam konsumiert).
 
 function buildDownloadUrl(storedFileName, originalName = '') {
   const filePart = encodeURIComponent(storedFileName);
@@ -2196,86 +2104,9 @@ app.put('/api/tenant-settings', async (req, res, next) => {
 // ./routes/modules.js — registriert über registerModuleRoutes(app)
 // weiter unten (Null-Deps-Muster).
 
-app.get('/api/exports', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    res.json({ ok: true, packages: await listExportEntries(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/exports/packages', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const type = sanitizeExportPackageType(String(req.body?.type || 'state_snapshot'));
-    const requiredPermissions = type === 'certification_dossier'
-      ? ['reports_export', 'kritis_edit']
-      : ['reports_export'];
-    assertPermissions(requiredPermissions, authContext);
-    const entry = await persistExportPackage(authContext.membership.tenantId, authContext, req.body || {});
-    res.json({ ok: true, entry });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/exports/:exportId/release', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const exportLog = await readExportLog(authContext.membership.tenantId);
-    const exportIndex = exportLog.findIndex((entry) => entry?.id === req.params.exportId);
-    if (exportIndex < 0) {
-      throw httpError(404, 'Exportpaket wurde nicht gefunden.');
-    }
-
-    const currentEntry = exportLog[exportIndex];
-    const requiredPermissions = currentEntry?.type === 'certification_dossier'
-      ? ['reports_export', 'kritis_edit']
-      : ['reports_export'];
-    assertPermissions(requiredPermissions, authContext);
-
-    exportLog[exportIndex] = {
-      ...currentEntry,
-      releaseStatus: 'released',
-      releasedAt: nowIso(),
-      releasedBy: authContext.account.name,
-      releaseNote: String(req.body?.releaseNote || '').trim(),
-    };
-    await writeExportLog(authContext.membership.tenantId, exportLog);
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: exportLog[exportIndex].releasedAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Exportpaket freigegeben',
-      resource: 'export',
-      summary: `Exportpaket „${currentEntry.title || currentEntry.id}“ wurde freigegeben.`,
-      sections: ['exports'],
-    });
-    res.json({ ok: true, entry: presentExportEntry(exportLog[exportIndex]) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/exports/:exportId/download', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const exportId = path.basename(req.params.exportId).replace(/\.json$/i, '');
-    const exportEntry = sanitizeArray(await readExportLog(authContext.membership.tenantId)).find((entry) => entry?.id === exportId);
-    const filePath = path.join(tenantPaths(authContext.membership.tenantId).exportsDir, `${exportId}.json`);
-    const stat = await fs.stat(filePath);
-    if (!stat.isFile()) {
-      throw httpError(404, 'Exportdatei wurde nicht gefunden.');
-    }
-    const requestedName = String(req.query.download || exportEntry?.fileName || `${exportId}.json`);
-    res.setHeader('content-disposition', `attachment; filename*=UTF-8''${encodeURIComponent(requestedName)}`);
-    res.sendFile(filePath);
-  } catch (error) {
-    next(error);
-  }
-});
+// Die vier /api/exports-Endpoints leben seit C3.2 in
+// ./routes/reporting.js — registriert ueber registerReportingRoutes(app)
+// weiter unten (Null-Deps-Muster).
 
 registerAdminRoutes(app, {
   getAuthContext,
@@ -2317,6 +2148,9 @@ registerFileRoutes(app, {
 // C3.1: Null-Deps-Muster für neue Route-Module — keine Deps-Object-
 // Durchreichung, alle Services per Direkt-Import in routes/modules.js.
 registerModuleRoutes(app);
+
+// C3.2: Reporting/Exports-Route-Modul, gleiches Null-Deps-Muster.
+registerReportingRoutes(app);
 
 app.use((error, req, res, _next) => {
   const status = Number(error?.status || 500);
