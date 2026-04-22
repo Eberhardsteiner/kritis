@@ -35,6 +35,7 @@
 | 15 | Dokumentations-Overhead aus Iterations-Historie | Methode |
 | 16 | Kalibrierungs-Faktor für schema-lastige Erweiterungen (Entwurf · landet in C5.4) | Methode |
 | 17 | E2E-Tests fangen Integrations-Bugs, die Unit-Tests nicht sehen (Entwurf · landet in C5.4) | Methode |
+| 18 | Content-Produktion als eigene Kalibrierungs-Kategorie (Entwurf · landet in C5-Abschluss-Commit) | Methode |
 
 ## Beobachtungen
 
@@ -774,6 +775,55 @@ nächsten größeren Block-Abschluss (vermutlich C5.4).
   Merge-Funktionen, Derived-State-Berechnungen), ist der
   E2E-Test überproportional wertvoll — er prüft genau die
   Quellen-Kombination, die Unit-Tests nicht sehen.
+
+## Achtzehnte Beobachtung (Entwurfs-Stand)
+
+**Content-Produktion als eigene Kalibrierungs-Kategorie.**
+Landet im C5-Block-Abschluss-Commit nach Energy-Pack und Drehbuch.
+
+- **Fundstelle:** C5.3-Status-Report, Abschnitt 3 "Kalibrierungs-
+  Befund · Content-Produktion als neue Kategorie". Gemessene Zeit
+  ca. **0,3–0,4** der Punkt-Schätzung (2,5–3 Tage projiziert, ~1
+  Claude-Arbeitstag real).
+- **Befund:** Bei vorgegebenem Struktur-Skelett (Schema aus C5.1,
+  didaktische Muster aus C5.2) skaliert reine Inhalts-Produktion mit
+  **Faktor 0,3–0,7** der ursprünglichen Punkt-Schätzung. Gegenüber
+  schema-lastiger Arbeit (**+124 %** über Obergrenze, Notiz 16) und
+  UI-lastiger Arbeit (**+83 %** über Obergrenze, Notiz 16) ist
+  Content-Produktion der **verlässlichste Schätzungs-Boden** der drei
+  beobachteten Kategorien.
+- **Drei Ursachen der Unterschreitung:**
+  - **Strukturelle Entscheidungen sind abgeschlossen.** Das Schema
+    steht (C5.1), die Copy-Semantik steht (C5.2), die Tests laufen
+    grün. Keine Architektur-Rückfragen bremsen den Durchlauf.
+  - **Review-Runden reduzieren Verzweigungs-Freiheit früh.** Dr.
+    Steiners Review nach 3.1 hat den Stil und die Tiefe kalibriert;
+    3.2 und 3.3 profitierten von dem kalibrierten Stil, ohne dass
+    grundsätzliche Richtungs-Entscheidungen nochmal aufkamen.
+  - **Content-Tests sind deterministisch.** Kein E2E-Flakiness-Debug
+    wie bei C5.2 (5 Debug-Iterationen), keine Test-Flakes (Notiz 4
+    Teil B). Vitest-Content-Gates sind stabil, einmal richtig
+    formuliert = grün.
+- **Regel für künftige Analysen:** Wenn eine Arbeit primär
+  Inhalts-Befüllung einer bestehenden Struktur ist, ist die Punkt-
+  Schätzung mit **~0,5 zu multiplizieren**, nicht zu addieren. Das
+  ist die Umkehrung der Notiz-16-Regel (dort: obere Bandbreite mit
+  1,5–2,5 multiplizieren bei schema-lastiger Arbeit).
+- **Abgrenzung zu Notiz 16 (schema-lastig) und 17 (UI-lastig):**
+  Die drei Kategorien haben deutlich unterschiedliche Risiko-
+  Profile. Bei Task-Zerlegung hilft frühe Kategorien-Zuordnung:
+  - **Schema-lastig**: Schema-Definitionen, Validator-Code,
+    Deep-Validation, JSON-Schema-Auslagerung → Faktor 1,5–2,5×
+  - **UI-lastig**: React-Handler, Prop-Durchreichung, UI-Komponenten,
+    E2E-Tests mit Permission-Gates → Faktor 1,3–1,5×
+  - **Content-lastig**: JSON-Befüllung bestehender Felder, didaktische
+    Entscheidungen innerhalb fixierter Strukturen → Faktor 0,3–0,7×
+- **Datenpunkt zum Verifizieren (Energy-Pack 3b):** Nach Abschluss
+  des zweiten inhaltlichen Pack-Blocks (Energy-Sektor, strukturell
+  parallel zu Healthcare) den Faktor 0,3–0,7 bestätigen oder
+  anpassen. Erwartung: Energy-Pack wird noch näher an 0,3–0,4
+  landen als Healthcare, weil Dr. Steiners Review-Muster jetzt auch
+  dort etabliert ist.
 
 ## Verweis
 
