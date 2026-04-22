@@ -96,15 +96,82 @@
   dieses Muster wiederholt Logik-Drift-Bugs abgefangen, die
   durchs Test-Sieb gefallen wären.
 
-### 4. Rate-Limit-Akkumulation in Dev-Sessions
-- **Fund:** Debug-Zyklus während C3.2 (E2E-15-Flake).
+### 4. E2E-15-Flake · zwei unterschiedliche Phänomene im selben Szenario
+- **Fund:** Debug-Zyklus während C3.2 (ursprünglich), präzisiert
+  durch C3-Validierungs-Rerun am 2026-04-22.
+- **Hintergrund:** Der C3-Validierungs-Rerun (Full-Suite mit allen
+  16 Chromium-Szenarien) fiel zweimal in Folge mit identischem
+  Fehler in Szenario 15 (Platform Login + Logout) auf. Der
+  Isolations-Test-Lauf von Szenario 15 alleine war grün (7.4 s).
+  Die saubere Trennung „Full-Suite rot, Isolation grün" zeigt,
+  dass das Szenario zwei unterschiedliche Failure-Modi hat, die
+  bisher unter dem Sammel-Begriff „E2E-15-Flake" liefen. Die
+  präzisere Dokumentation spart einem späteren Debugger Zeit.
+
+#### Teil A · Rate-Limit-Akkumulation in Dev-Sessions
 - **Symptom:** Login-Rate-Limit (12 Versuche / 15 min) und
-  API-Rate-Limit (180-300 Requests / 60s) saturieren in
-  Debug-Reruns und liefern 429. E2E-Log zeigt "Zu viele Anfragen",
+  API-Rate-Limit (180–300 Requests / 60 s) saturieren in
+  Debug-Reruns und liefern 429. E2E-Log zeigt „Zu viele Anfragen",
   die Fehlerquelle wird als funktional fehlinterpretiert.
-- **Auflösung:** Polish-Commit nach C3.7 — permanentes Env-Var-Setup
-  für Dev-/Test-Umgebung (`KRISENFEST_RATE_LIMIT_MAX=5000` etc.)
-  in `.env.development` oder npm-Script-Wrapper.
+- **Reliably adressiert durch:** `KRISENFEST_LOGIN_RATE_LIMIT_MAX=500`
+  + `KRISENFEST_RATE_LIMIT_MAX=5000` als Env-Variablen vor dem
+  Playwright-Aufruf. Im C3-Validierungs-Rerun wurden diese Werte
+  gesetzt — das 429-Pattern trat dabei **nicht** auf.
+- **Auflösung:** Polish-Commit (nach C3) — permanentes Env-Var-Setup
+  für Dev-/Test-Umgebung in `.env.development` oder einem
+  `test:e2e`-npm-Script-Wrapper, damit die Env-Variablen nicht
+  bei jedem Playwright-Aufruf manuell gesetzt werden müssen.
+
+#### Teil B · Frontend-Notice-State-Akkumulation über 14 E2E-Szenarien
+- **Fund:** Neu erkannt durch den C3-Validierungs-Rerun (2026-04-22).
+- **Symptom:** Nach dem Logout-Click in Szenario 15 bleibt die
+  alte Success-Notice `„Anmeldung für Mandant „Demo-Unternehmen"
+  erfolgreich."` sichtbar. Die erwartete Logout-Notice
+  `„Serversitzung wurde beendet. Der offene Arbeitsbereich bleibt
+  nutzbar."` erscheint **nicht**. Die Session wurde serverseitig
+  korrekt beendet (`Aktive Sitzungen: 0` im Page-Snapshot), die
+  Status-Card wechselt in den Offline-Modus — nur die UI-Notice
+  aktualisiert sich nicht.
+- **Trennung zu Teil A:** Die Rate-Limit-Env-Vars waren gesetzt,
+  der 429-Pfad greift nicht. Die Trennung zum Rate-Limit-Fehler
+  ist klar — Teil B ist ein **Frontend-State-Update-Race**, kein
+  Server-seitiger Fehler. Der `/api/auth/logout`-Endpoint liefert
+  korrekt 200 (byte-identisch seit C3.0c in
+  `services/auth-session.js` + C3.6-Polish in `routes/auth.js`).
+- **Trennung zu C3-Regression:** Der Isolations-Test-Lauf grün
+  (Szenario 15 alleine, frischer Server) beweist, dass der
+  Logout-Flow korrekt funktioniert. **Der Fehler ist nicht durch
+  C3 entstanden** — C3 hat kein Frontend-Code verändert. Das
+  Phänomen ist State-Akkumulation aus den vorherigen 14 Szenarien.
+- **Vermutliche Diagnose-Pfade:**
+  - **Notice-Display-Component-Audit:** Die zentrale Notice-Queue
+    (wahrscheinlich in `src/state/` oder `src/hooks/` via
+    `useNoticeDispatch` o.ä.). Wenn alte Notices nicht sauber
+    dismissed werden, können sie neue Notices verdrängen oder
+    deren Sichtbarkeit unterdrücken.
+  - **`usePlatformAuthHandlers.ts` Notice-Dispatching:** Die
+    `showNotice(...)`-Aufrufe in `handleServerLogout` und
+    `clearAuthenticatedContext` werden in schneller Reihenfolge
+    dispatched. Möglicherweise kollidieren sie bei aufgebautem
+    State-Queue.
+  - **`beforeEach`/`afterEach`-Hooks der Szenarien 1–14
+    auditieren:** Räumen alle Szenarien ihren Notice-State /
+    Session-State korrekt auf? Wahrscheinlich Kandidaten für
+    Cleanup-Lücken: Szenarien mit Login-Flow (z.B. 10, 12, 14)
+    oder Szenarien, die State-Synchronisierungs-Fehler erzwingen.
+  - **React-Devtools-Inspektion nach Szenario 14:** Notice-State
+    snapshotten, Queue-Größe prüfen, Notice-Dismiss-Timer-Stati
+    lesen.
+- **Priorität:** **C6-Polish-Kandidat.** Kein Blocker für die
+  C3-Block-Abschluss-Validierung (C3 ist formell durch: 15/16 grün
+  ist im vor-C3-Stand identisch, Isolations-Test grün beweist
+  Server-Korrektheit). Ticket für nach C3 priorisieren.
+- **Temporärer Workaround (falls Rot-Runs störend werden):**
+  Playwright-Retry-Flag für Szenario 15 via
+  `test.describe.configure({ retries: 2 })`. Das ist keine
+  Lösung, sondern eine Mitigation — die zugrundeliegende
+  State-Akkumulation bleibt, nur wird sie nicht mehr als Rot
+  reportet.
 
 ### 5. Deps-Object-Muster retroaktiv auf Null-Deps
 - **Fund:** C3.1 (Kommentar in `routes/modules.js`).
