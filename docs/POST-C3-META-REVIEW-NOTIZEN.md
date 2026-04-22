@@ -116,6 +116,45 @@
   Primitive. Diese Notiz ist der Hilfe-Anker, wenn jemand später
   in ein ähnliches Problem läuft.
 
+### 8. SQLite-Race bei parallelen Integration-Test-Subprozessen
+- **Fund:** C3.5-Vorspann (zweites Integration-Test-File
+  `state-endpoints.test.js` neben `evidence-endpoints.test.js`).
+- **Symptom:** `node --test` spawnt pro Test-File einen Subprozess
+  (Default-Concurrency = # cores − 1). Beide Integration-Test-Files
+  schreiben parallel auf die zentrale
+  `server-storage/system/krisenfest.sqlite` und die begleitenden
+  JSON-Mirrors (`tenants.json`, `auth.json`). Ergebnis: `"database
+  is locked"`-Fehler aus dem Login-Pfad, `ENOENT` beim atomaren
+  `tenants.json.tmp → tenants.json`-Rename. Kein Ist-Stand-Bug —
+  reine Test-Infrastruktur-Race-Condition.
+- **Aktuelle Mitigation:** `--test-concurrency=1` im
+  `test:server`-npm-Skript. Sequenzielle Ausführung kostet ~1.5s
+  bei 48 Tests (5.3s → 6.4s) — vernachlässigbar.
+- **Skalierungs-Problem:** Jeder weitere Vorspann-Commit (C3.6,
+  C3.7, und darüber hinaus) fügt potentiell ein weiteres
+  Integration-Test-File hinzu. Bei 6–8 Integration-Test-Files
+  wird die sequenzielle Laufzeit spürbar (je Test-File ~2–3s
+  Bootstrap + Tests). Bei 10+ Files ist die Laufzeit im
+  CI-Feedback-Loop relevant.
+- **Auflösung (C6 oder C7):** Zwei Kandidaten, beide adressieren
+  die geteilte SQLite:
+  - **(a) Test-spezifische SQLite-Datei pro Test-File via
+    Env-Variable.** `KRISENFEST_PERSISTENCE_DB_PATH` o.ä. wird
+    vor dem Import von `server/index.js` gesetzt, jeder
+    Test-File bekommt einen eigenen `server-storage-test-<file>`-
+    Baum. Braucht Lifecycle-Management (Setup/Teardown der
+    Test-Verzeichnisse). Paralleler Lauf wieder möglich.
+  - **(b) In-Memory-SQLite für Integration-Tests.**
+    `better-sqlite3` + node:sqlite unterstützen `:memory:`.
+    Keine Platten-I/O → keine Rename-Races. Aber: der Object-
+    Storage-Filesystem-Driver bleibt datei-basiert; Orphan-
+    Cleanup-Test braucht einen Mix aus In-Memory-DB +
+    isoliertem Uploads-Ordner.
+  - **Entscheidung in der Meta-Review.** (a) ist mechanisch
+    einfacher, (b) ist sauberer von I/O-Perspektive.
+- **Kein Blocker für C3.** Die `--test-concurrency=1`-Lösung
+  trägt bis zum Ende des Blocks.
+
 ## Verweis
 
 Die Meta-Review selbst folgt dem Muster des Abschnitts

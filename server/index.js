@@ -41,6 +41,7 @@ import { registerFileRoutes } from './routes/files.js';
 import { registerIntegrationRoutes } from './routes/integration.js';
 import { registerModuleRoutes } from './routes/modules.js';
 import { registerReportingRoutes } from './routes/reporting.js';
+import { registerStateRoutes } from './routes/state.js';
 import { registerSystemRoutes } from './routes/system.js';
 import { registerTenantSettingsRoutes } from './routes/tenant-settings.js';
 // C3.2: Export-Service-Helfer + computeSha256 aus den neuen
@@ -50,13 +51,21 @@ import { registerTenantSettingsRoutes } from './routes/tenant-settings.js';
 // in C3.6 (Service-Residuen) um.
 import { listExportEntries } from './services/exports.js';
 import { computeSha256 } from './services/file-utils.js';
-// C3.4: evidence-Helfer aus services/evidence.js re-importiert für
-// buildStateEnvelope (unten) und cleanupOrphanUploads (bleibt bis C3.5).
+// C3.4/C3.5: evidence-Helfer aus services/evidence.js re-importiert.
+// Konsumenten nach C3.5:
+//   - attachVersionMetadata: buildTenantBackupPayload (C3.6-Scope)
+//   - attachmentFileNamesFromState / versionFileNamesFromLedger:
+//     Integrity-Checks (C3.6-Scope)
 import {
   attachVersionMetadata,
   attachmentFileNamesFromState,
   versionFileNamesFromLedger,
 } from './services/evidence.js';
+// C3.5: state-Service-Helfer für die Residuen in index.js
+// (listTenantSummaries, buildTenantBackupPayload, Bootstrap-Stats,
+// Admin-Summary-Generator — alle C3.6-Scope). buildStateEnvelope und
+// cleanupOrphanUploads werden in index.js NICHT mehr aufgerufen.
+import { listSnapshotFiles, listSnapshots } from './services/state.js';
 // C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
 import {
   rootDir,
@@ -85,7 +94,6 @@ import {
   OIDC_PROVIDER_ID,
   PASSWORD_ITERATIONS,
   SESSION_HOURS,
-  SNAPSHOT_LIMIT,
   apiClientScopeSet,
   buildDefaultPlatformSettings,
   collaborativeStateDefaults,
@@ -105,7 +113,6 @@ import {
 import {
   buildSeedState,
   buildSeedUser,
-  detectChangedSections,
   getRolePermissions,
   isLocalLoginAllowed,
   isPlainObject,
@@ -272,15 +279,9 @@ const observability = createObservabilityStore({
 const readPlatformSettings = () => readPlatformSettingsRaw(defaultPlatformSettings);
 const writePlatformSettings = (value) => writePlatformSettingsRaw(value, defaultPlatformSettings);
 
-async function buildStateEnvelope(tenantId, state) {
-  const versionedState = await attachVersionMetadata(tenantId, state);
-  const meta = await readStateMeta(tenantId);
-  return {
-    state: versionedState,
-    stateVersion: meta.version,
-    stateUpdatedAt: meta.updatedAt,
-  };
-}
+// buildStateEnvelope lebt seit C3.5 in ./services/state.js. Konsumenten
+// (routes/state.js, routes/integration.js, services/auth-session.js)
+// importieren direkt; server/index.js ruft die Funktion nicht mehr auf.
 
 // writeState, readAuditLog, appendAuditLog, readVersions, writeVersions,
 // readTenantSettings, writeTenantSettings, readModulePackRegistry,
@@ -304,36 +305,8 @@ async function buildStateEnvelope(tenantId, state) {
 // Die vier /api/exports-Endpoints sind nach ./routes/reporting.js
 // umgezogen (Null-Deps-Muster, registerReportingRoutes(app) weiter unten).
 
-async function listSnapshotFiles(tenantId) {
-  const paths = tenantPaths(tenantId);
-  const files = await fs.readdir(paths.snapshotsDir).catch(() => []);
-  return files.filter((fileName) => fileName.endsWith('.json')).sort().reverse();
-}
-
-async function listSnapshots(tenantId) {
-  const paths = tenantPaths(tenantId);
-  const files = await listSnapshotFiles(tenantId);
-  const snapshots = [];
-
-  for (const fileName of files) {
-    const payload = await readJsonFile(path.join(paths.snapshotsDir, fileName), null);
-    if (payload?.meta) {
-      snapshots.push(payload.meta);
-    }
-  }
-
-  return snapshots;
-}
-
-async function getSnapshotPayload(tenantId, snapshotId) {
-  const paths = tenantPaths(tenantId);
-  const snapshotPath = path.join(paths.snapshotsDir, `${snapshotId}.json`);
-  const payload = await readJsonFile(snapshotPath, null);
-  if (!payload?.meta || !payload?.state) {
-    throw httpError(404, 'Snapshot wurde nicht gefunden.');
-  }
-  return payload;
-}
+// listSnapshotFiles, listSnapshots, getSnapshotPayload leben seit C3.5
+// in ./services/state.js. Konsumenten in routes/state.js.
 
 // stableEqual, detectChangedSections leben seit C3.0a in
 // ./services/sanitizers.js.
@@ -349,29 +322,10 @@ async function getSnapshotPayload(tenantId, snapshotId) {
 
 
 // attachmentFileNamesFromState, versionFileNamesFromLedger leben seit
-// C3.4 in ./services/evidence.js (Re-Import oben). cleanupOrphanUploads
-// bleibt hier bis C3.5 — Konsumenten sind /api/state PUT und
-// /api/snapshots/:id/restore, die beide mit der state-Route umziehen.
-async function cleanupOrphanUploads(previousState, nextState, tenantId) {
-  const previousNames = attachmentFileNamesFromState(previousState);
-  const nextNames = attachmentFileNamesFromState(nextState);
-  const versions = await readVersions(tenantId);
-  const versionNames = versionFileNamesFromLedger(versions);
-  const storage = await getObjectStorage();
-
-  await Promise.all(
-    [...previousNames]
-      .filter((name) => !nextNames.has(name) && !versionNames.has(name))
-      .map(async (name) => {
-        const matchingVersion = sanitizeArray(versions).find((entry) => entry?.storedFileName === name);
-        await storage.removeObject({
-          tenantId,
-          storedFileName: name,
-          objectKey: matchingVersion?.objectKey,
-        }).catch(() => undefined);
-      }),
-  );
-}
+// C3.4 in ./services/evidence.js (Re-Import oben, genutzt von
+// Integrity-Checks). cleanupOrphanUploads lebt seit C3.5 in
+// ./services/state.js — Konsumenten (PUT /api/state,
+// POST /api/snapshots/:id/restore) sind nach routes/state.js umgezogen.
 
 // computeSha256 lebt seit C3.2 in ./services/file-utils.js
 // (wird von C3.2 exports + C3.4 evidence gemeinsam konsumiert).
@@ -1448,17 +1402,15 @@ registerIntegrationRoutes(app, {
   readTenants,
   listExportEntries,
   httpError,
-  buildStateEnvelope,
   readState,
 });
 
-// buildSuccessfulAuthResponse und consumeAuthCallbackTicket leben seit
-// C3.0c in ./services/auth-session.js. Beide Service-Funktionen nehmen
-// `buildStateEnvelope` als zweiten Parameter (evidence-aware, bleibt
-// bis C3.4 in dieser Datei). Wir reichen die gebundenen Adapter an die
-// registerAuthRoutes-Deps unten weiter.
-const buildSuccessfulAuthResponseBound = (input) => buildSuccessfulAuthResponse(input, buildStateEnvelope);
-const consumeAuthCallbackTicketBound = (ticketId) => consumeAuthCallbackTicket(ticketId, buildStateEnvelope);
+// C3.5: buildSuccessfulAuthResponse und consumeAuthCallbackTicket leben
+// seit C3.0c in ./services/auth-session.js. Das frühere Parameter-
+// Plumbing für `buildStateEnvelope` ist entfallen — auth-session.js
+// importiert die Funktion direkt aus services/state.js. Die beiden
+// bound-Wrapper (buildSuccessfulAuthResponseBound,
+// consumeAuthCallbackTicketBound) sind ersatzlos entfernt.
 
 registerAuthRoutes(app, {
   runtimeConfig,
@@ -1475,7 +1427,7 @@ registerAuthRoutes(app, {
   verifyPassword,
   sanitizeArray,
   resolveMembershipForAccount,
-  buildSuccessfulAuthResponse: buildSuccessfulAuthResponseBound,
+  buildSuccessfulAuthResponse,
   cleanupExpiredAuthFlows,
   fetchOidcDiscovery,
   createOidcTransaction,
@@ -1490,7 +1442,7 @@ registerAuthRoutes(app, {
   createAuthCallbackTicket,
   readAuthCallbackTickets,
   writeAuthCallbackTickets,
-  consumeAuthCallbackTicket: consumeAuthCallbackTicketBound,
+  consumeAuthCallbackTicket,
   getAuthContext,
   ensureWorkspaceUser,
   buildWorkspaceUserSeedFromContext,
@@ -1499,174 +1451,16 @@ registerAuthRoutes(app, {
   writeSessions,
 });
 
-app.get('/api/state', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const stateEnvelope = await buildStateEnvelope(authContext.membership.tenantId, await readState(authContext.membership.tenantId));
-    res.json({
-      ok: true,
-      ...stateEnvelope,
-      tenant: authContext.tenant,
-      session: authContext.sessionPublic,
-      workspaceUserSeed: buildWorkspaceUserSeedFromContext(authContext),
-      accessMode: authContext.anonymous ? 'anonymous' : 'authenticated',
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.put('/api/state', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const incomingState = sanitizeState(req.body?.state);
-    const expectedVersionRaw = Number(req.body?.expectedVersion);
-    const expectedVersion = Number.isFinite(expectedVersionRaw) ? expectedVersionRaw : undefined;
-    const currentState = await readState(authContext.membership.tenantId);
-    const changedSections = detectChangedSections(currentState, incomingState);
-    const requiredPermissions = [...new Set(changedSections.map((section) => sectionPermissionMap[section]).filter(Boolean))];
-    assertPermissions(requiredPermissions, authContext);
-
-    await cleanupOrphanUploads(currentState, incomingState, authContext.membership.tenantId);
-    const savedAt = nowIso();
-    const savedState = await writeState(authContext.membership.tenantId, incomingState, {
-      expectedVersion,
-      updatedAt: savedAt,
-    });
-
-    if (changedSections.length) {
-      await appendAuditLog(authContext.membership.tenantId, {
-        id: createId('audit'),
-        at: savedAt,
-        userId: authContext.account.id,
-        userName: authContext.account.name,
-        action: 'Synchronisierung',
-        resource: 'state',
-        summary: `${changedSections.length} Abschnitt(e) wurden aktualisiert.`,
-        sections: changedSections,
-      });
-    }
-
-    res.json({
-      ok: true,
-      ...(await buildStateEnvelope(authContext.membership.tenantId, savedState)),
-      savedAt,
-      changedSections,
-    });
-  } catch (error) {
-    if (error?.code === 'VERSION_CONFLICT') {
-      const conflict = httpError(409, 'Der Serverstand wurde zwischenzeitlich geändert. Bitte zuerst neu laden.');
-      conflict.currentVersion = Number(error?.currentVersion || 0);
-      conflict.currentUpdatedAt = String(error?.currentUpdatedAt || '');
-      next(conflict);
-      return;
-    }
-    next(error);
-  }
-});
-
-app.get('/api/audit-log', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const entries = await readAuditLog(authContext.membership.tenantId);
-    res.json({ ok: true, entries });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/snapshots', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    res.json({ ok: true, snapshots: await listSnapshots(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/snapshots', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['workspace_edit'], authContext);
-    const currentState = await readState(authContext.membership.tenantId);
-    const name = String(req.body?.name || '').trim();
-    const comment = String(req.body?.comment || '').trim();
-
-    if (!name) {
-      throw httpError(400, 'Bitte einen Snapshot-Namen angeben.');
-    }
-
-    const snapshotId = `${new Date().toISOString().slice(0, 10)}-${slugify(name) || 'snapshot'}-${Math.random().toString(36).slice(2, 6)}`;
-    const snapshot = {
-      id: snapshotId,
-      name,
-      comment,
-      createdAt: nowIso(),
-      createdBy: authContext.account.id,
-      userName: authContext.account.name,
-    };
-
-    const paths = tenantPaths(authContext.membership.tenantId);
-    await writeJsonFile(path.join(paths.snapshotsDir, `${snapshotId}.json`), {
-      meta: snapshot,
-      state: currentState,
-    });
-
-    const files = await listSnapshotFiles(authContext.membership.tenantId);
-    if (files.length > SNAPSHOT_LIMIT) {
-      const obsolete = files.slice(SNAPSHOT_LIMIT);
-      await Promise.all(obsolete.map((fileName) => fs.unlink(path.join(paths.snapshotsDir, fileName)).catch(() => undefined)));
-    }
-
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: snapshot.createdAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Snapshot erstellt',
-      resource: 'snapshot',
-      summary: `Arbeitsstand „${name}“ gespeichert.`,
-      sections: [],
-    });
-
-    res.json({ ok: true, snapshot });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/snapshots/:snapshotId/restore', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['workspace_edit'], authContext);
-    const currentState = await readState(authContext.membership.tenantId);
-    const payload = await getSnapshotPayload(authContext.membership.tenantId, req.params.snapshotId);
-    const restoredState = sanitizeState(payload.state);
-
-    await cleanupOrphanUploads(currentState, restoredState, authContext.membership.tenantId);
-    await writeState(authContext.membership.tenantId, restoredState);
-
-    const restoredAt = nowIso();
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: restoredAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Snapshot wiederhergestellt',
-      resource: 'snapshot',
-      summary: `Arbeitsstand „${payload.meta.name}“ wurde eingespielt.`,
-      sections: ['snapshot-restore'],
-    });
-
-    res.json({
-      ok: true,
-      snapshot: payload.meta,
-      ...(await buildStateEnvelope(authContext.membership.tenantId, restoredState)),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+// Die sechs State-/Snapshot-/Audit-Endpoints (GET/PUT /api/state,
+// GET /api/audit-log, GET/POST /api/snapshots,
+// POST /api/snapshots/:snapshotId/restore) leben seit C3.5 in
+// ./routes/state.js — registriert über registerStateRoutes(app) weiter
+// unten. Audit-Log-Texte byte-identisch: action="Synchronisierung" /
+// "Snapshot erstellt" / "Snapshot wiederhergestellt". Das 409-
+// Conflict-Mapping (VERSION_CONFLICT → HTTP 409 mit currentVersion +
+// currentUpdatedAt) ist dort mit Architektur-Notiz und Test-Assertion
+// abgesichert. Die Reihenfolge cleanupOrphanUploads → writeState ist
+// dort mit Inline-Ankerkommentaren markiert.
 
 // Die sechs Evidence-/Dokumenten-Endpoints (POST/DELETE attachment,
 // GET versions, POST versions/:id/restore, GET document-ledger/summary,
@@ -1739,6 +1533,10 @@ registerTenantSettingsRoutes(app);
 // C3.4: Evidence-/Dokumenten-Route-Modul, gleiches Null-Deps-Muster.
 // multer + uploadPolicy leben innerhalb des Route-Moduls.
 registerEvidenceRoutes(app);
+
+// C3.5: State-/Snapshot-/Audit-Route-Modul. buildStateEnvelope,
+// cleanupOrphanUploads, Snapshot-Helper leben in services/state.js.
+registerStateRoutes(app);
 
 app.use((error, req, res, _next) => {
   const status = Number(error?.status || 500);

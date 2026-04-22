@@ -46,17 +46,18 @@
  *    AUTHENTICATION_REQUIRED, ANONYMOUS_ACCESS_ENABLED, GUEST_*) werden
  *    aus `config/runtime.js` importiert — **null Parameter-Erweiterung**
  *    bei den 8 betroffenen Funktionen.
- *  - `buildStateEnvelope` wird als **expliziter Parameter** an die
- *    zwei Auth-Response-Builder (`buildSuccessfulAuthResponse`,
- *    `consumeAuthCallbackTicket`) gereicht, weil die Funktion
- *    state-scoped ist und bis C3.5 in `server/index.js` bleibt.
- *    **Update nach C3.4:** `attachVersionMetadata` ist seit C3.4 nach
- *    `services/evidence.js` extrahiert und wird von `buildStateEnvelope`
- *    direkt importiert — aber `buildStateEnvelope` selbst wandert erst
- *    mit der state-Route in C3.5 um, weil es state-scoped ist
- *    (nicht evidence-scoped) und mit den state-PUT-Handlern zusammengehört.
- *    Nach C3.5 wird dieser Parameter durch einen direkten Import aus
- *    `services/state.js` rückwärts aufgelöst.
+ *  - `buildStateEnvelope` wird seit C3.5 **direkt aus
+ *    `services/state.js` importiert**. Der Parameter an
+ *    `buildSuccessfulAuthResponse` und `consumeAuthCallbackTicket`
+ *    ist entfallen. Historische Begründung (als Nachweis, warum das
+ *    Plumbing in C3.4 noch stehen blieb): `buildStateEnvelope` ist
+ *    state-scoped, nicht evidence-scoped — es ruft
+ *    `attachVersionMetadata` (evidence-aware), gehört aber semantisch
+ *    zu den state-PUT-Handlern und wanderte deshalb gemeinsam mit der
+ *    state-Route in C3.5 nach `services/state.js`. In C3.4 war
+ *    `attachVersionMetadata` schon dort, `buildStateEnvelope` aber
+ *    noch in `server/index.js` — der Parameter-Pfad überbrückte diese
+ *    eine Iteration.
  *  - `readPlatformSettings` in `getApiClientContext` nutzt den
  *    Raw-Wrapper aus `persistence-wrappers.js` mit expliziten
  *    `defaultPlatformSettings`-Import aus `config/runtime.js`.
@@ -106,6 +107,9 @@ import {
   writeState,
   appendAuditLog,
 } from './persistence-wrappers.js';
+// C3.5: buildStateEnvelope direkt aus services/state.js — löst das
+// Parameter-Plumbing der beiden Auth-Response-Builder auf.
+import { buildStateEnvelope } from './state.js';
 
 // === Password-Crypto (Invarianten 1, 2, 3) =================================
 
@@ -632,16 +636,16 @@ export async function ensureWorkspaceUser(tenantId, membership, account) {
   return nextUser;
 }
 
-// === Auth-Response-Builder (buildStateEnvelope-Parameter bis C3.4) =========
+// === Auth-Response-Builder (seit C3.5 buildStateEnvelope direkt importiert) ==
 //
-// Diese beiden Funktionen brauchen buildStateEnvelope (evidence-aware).
-// Der Parameter wird in C3.4 rückwärts aufgelöst, sobald buildStateEnvelope
-// zu seinem fachlichen Zielort (services/evidence.js oder services/state.js)
-// umzieht.
+// Diese beiden Funktionen konsumieren buildStateEnvelope (state-scoped,
+// evidence-aware Derivation). Seit C3.5 wird die Funktion direkt aus
+// services/state.js importiert (siehe top-of-file). Das frühere
+// Parameter-Plumbing ist entfallen — der historische Hintergrund steht
+// im Doc-Block am Dateianfang (Abschnitt „Abhängigkeits-Auflösung").
 
 export async function buildSuccessfulAuthResponse(
   { account, membership, tenant, providerId = 'local' },
-  buildStateEnvelope,
 ) {
   await ensureWorkspaceUser(membership.tenantId, membership, account);
   const sessionData = await createServerSession(account, membership, tenant, { providerId });
@@ -689,7 +693,7 @@ export async function buildSuccessfulAuthResponse(
   };
 }
 
-export async function consumeAuthCallbackTicket(ticketId, buildStateEnvelope) {
+export async function consumeAuthCallbackTicket(ticketId) {
   await cleanupExpiredAuthCallbackTickets();
   const tickets = await readAuthCallbackTickets();
   const ticket = tickets.find((entry) => entry.id === ticketId);

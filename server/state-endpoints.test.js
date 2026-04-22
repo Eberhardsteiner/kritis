@@ -131,6 +131,15 @@ test('PUT /api/state liefert 409 bei stale expectedVersion ohne State-Write', as
     `response.currentVersion (${putResponse.body.currentVersion}) muss der aktuellen Store-Version (${metaBefore.version}) entsprechen`);
   assert.ok(putResponse.body.currentUpdatedAt, 'response.currentUpdatedAt muss gesetzt sein');
 
+  // Message-Invariante: Das Frontend vergleicht diesen Textsubstring in
+  // der Konfliktauflösungs-Logik (siehe C2.7c-Server-Sync-Push-Loop).
+  // Eine Message-Änderung würde Frontend-Verhalten subtil brechen.
+  assert.match(
+    String(putResponse.body?.message || ''),
+    /zwischenzeitlich geändert/,
+    `Message muss die Frontend-erkennbare Substring enthalten: ${putResponse.body?.message}`,
+  );
+
   // Post-Condition: Kein State-Write erfolgt — Version im Store unverändert.
   const metaAfter = await readStateMeta(tenantId);
   assert.equal(metaAfter.version, metaBefore.version,

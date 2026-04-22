@@ -1,4 +1,9 @@
 import { asyncRoute } from './utils.js';
+// C3.5: Lokaler Null-Deps-Nachzug nur für buildStateEnvelope. Die
+// restlichen Deps (deps-Object-Pattern aus der Zeit vor der Foundation-
+// Phase) bleiben bis zum retroaktiven Null-Deps-Nachzug in C3.6/C3.7
+// (Meta-Review-Notiz 5).
+import { buildStateEnvelope } from '../services/state.js';
 
 export function registerIntegrationRoutes(app, deps) {
   const {
@@ -9,7 +14,6 @@ export function registerIntegrationRoutes(app, deps) {
     readTenants,
     listExportEntries,
     httpError,
-    buildStateEnvelope,
     readState,
   } = deps;
 
