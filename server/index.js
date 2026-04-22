@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   buildUploadPolicy,
   createCorsMiddleware,
@@ -2154,6 +2155,15 @@ app.use((error, req, res, _next) => {
 });
 
 await ensureStorage();
-app.listen(PORT, () => {
-  console.log(`Krisenfest API läuft auf Port ${PORT}`);
-});
+// Main-Module-Check: listen() nur starten, wenn die Datei direkt
+// ausgeführt wurde — nicht beim Import aus Tests. Env-Variablen greifen
+// unter ESM nicht, weil imports vor Statements gehoisted werden.
+const isDirectRun = process.argv[1]
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isDirectRun) {
+  app.listen(PORT, () => {
+    console.log(`Krisenfest API läuft auf Port ${PORT}`);
+  });
+}
+
+export { app };

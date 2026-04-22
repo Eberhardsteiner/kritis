@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "npm run test:server && npm run test:ui",
-    "test:server": "node --test server/security.test.js server/persistence.test.js server/module-packs.test.js server/regulatory-dach.test.js server/hardening.test.js server/auth-provider.test.js server/object-storage.test.js server/evidence-platform.test.js",
+    "test:server": "node --test server/security.test.js server/persistence.test.js server/module-packs.test.js server/regulatory-dach.test.js server/hardening.test.js server/auth-provider.test.js server/object-storage.test.js server/evidence-platform.test.js server/evidence-endpoints.test.js",
     "test:ui": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -37,6 +37,7 @@
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "jsdom": "25.0.1",
+    "supertest": "^7.2.2",
     "typescript": "5.5.4",
     "vite": "^7.3.2",
     "vitest": "2.1.9"
