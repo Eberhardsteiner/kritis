@@ -52,7 +52,7 @@ import {
   makeTestPdfBuffer,
   seedTestTenant,
   signInAsAdmin,
-} from './evidence-endpoints.test-helpers.js';
+} from './__test__-helpers.js';
 
 const request = supertest(app);
 

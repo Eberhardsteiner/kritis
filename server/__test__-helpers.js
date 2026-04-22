@@ -1,20 +1,37 @@
 /**
- * evidence-endpoints.test-helpers.js · Seed- und Cleanup-Utilities für
- * den C3.4-Vorspann-Integrationstest der Evidence-Endpoints.
+ * __test__-helpers.js · Geteilte Seed- und Cleanup-Utilities für alle
+ * Vorspann-Integrations-Tests der C3-Refactoring-Phase.
  *
- * Wird ausschliesslich von server/evidence-endpoints.test.js konsumiert.
- * Liegt bewusst flach neben der Test-Datei (nicht in einem Unterordner),
- * analog zum bestehenden Muster von server/persistence.test.js.
+ * Konvention (eingeführt in C3.5): Diese Datei enthält die gemeinsamen
+ * Bausteine, die alle Backend-Integrations-Tests teilen — Test-Tenant-
+ * Seeding, Login-Flow, Cleanup-Kaskade über zentralen Object-Storage.
+ * Konsumenten heute:
+ *   - server/evidence-endpoints.test.js (C3.4-Vorspann, 5 Szenarien)
+ *   - server/state-endpoints.test.js (C3.5-Vorspann, 5 Szenarien)
+ * Kommende Konsumenten in C3.6/C3.7 nutzen **denselben** Helper statt
+ * zu duplizieren. Neue Test-Domains ergänzen bei Bedarf weitere
+ * Seed-Varianten und domain-spezifische Helper-Funktionen in dieser
+ * Datei — nicht in parallelen test-helpers-Dateien.
+ *
+ * Historie: Die Datei entstand in C3.4 als
+ * `evidence-endpoints.test-helpers.js`. In C3.5 umbenannt und auf
+ * shared-scope erweitert. Die Umbenennung ist git-rename-kompatibel
+ * (Inhalt ~95% identisch), die Blame-Historie bleibt erhalten.
  *
  * Entwurfsprinzipien:
- *   - Shared-Storage, dedizierter Test-Tenant mit `__test__-evidence-`-
- *     Prefix. Der Double-Underscore-Prefix ist Disaster-Recovery-Hygiene:
+ *   - Shared-Storage, dedizierter Test-Tenant mit Prefix
+ *     `__test__-<domain>-` (z.B. `__test__-evidence-`, `__test__-state-`).
+ *     Der Double-Underscore-Prefix ist Disaster-Recovery-Hygiene:
  *     selbst wenn ein after()-Hook unvollständig läuft, sind die
  *     Verbleibsel unmissverständlich als Test-Artefakte markiert.
  *   - Kein Login via /api/auth/login für die Anonymous-Tests. Für
  *     authenticated-Szenarien nutzen wir den Login-Endpoint, um auch den
  *     Session-Lifecycle zu exerzieren.
- *   - Drei Seed-Varianten decken die 5 Szenarien ab.
+ *   - Seed-Varianten wachsen domain-spezifisch — evidence-Varianten
+ *     ('empty', 'with-versions', 'with-retention-states') decken die
+ *     C3.4-Szenarien, state-Varianten ('with-state-sections',
+ *     'with-snapshot-and-attachment') die C3.5-Szenarien. Cross-Domain-
+ *     Tests können Varianten kombinieren.
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -41,11 +58,16 @@ import {
   writeVersions,
 } from './services/persistence-wrappers.js';
 
-export const TEST_TENANT_PREFIX = '__test__-evidence-';
+// Domain-Prefixe für Test-Tenants. Jede Test-Datei nutzt ihren eigenen
+// Prefix, damit Sicherheits-Grep beim Cleanup die Herkunft erkennen kann.
+export const TEST_TENANT_PREFIX_EVIDENCE = '__test__-evidence-';
+export const TEST_TENANT_PREFIX_STATE = '__test__-state-';
+// Kompatibilitäts-Alias — C3.4-Tests importieren noch den generischen Namen.
+export const TEST_TENANT_PREFIX = TEST_TENANT_PREFIX_EVIDENCE;
 export const TEST_ADMIN_PASSWORD = 'TestAdminPw123!';
 
-export function generateTestTenantId() {
-  return `${TEST_TENANT_PREFIX}${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
+export function generateTestTenantId(prefix = TEST_TENANT_PREFIX_EVIDENCE) {
+  return `${prefix}${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
 }
 
 export function makeTestPdfBuffer(content = 'krisenfest-test-file') {
@@ -225,7 +247,104 @@ export async function seedTestTenant({ variant = 'empty', tenantId, password = T
     return { tenantId: finalTenantId, email, password, account };
   }
 
+  if (variant === 'with-state-sections') {
+    // Für C3.5 State-PUT-Tests: zwei Sections aus sectionPermissionMap
+    // vorbefüllt (companyProfile + actionItems). Der Admin-Account hat
+    // alle benötigten Permissions, daher können PUT-Tests beide Sections
+    // gleichzeitig mutieren.
+    await writeState(finalTenantId, {
+      companyProfile: { companyName: 'Original GmbH', industryLabel: 'Energieversorgung' },
+      actionItems: [{ id: 'action-initial', title: 'Initiale Aktion', priority: 'medium', status: 'open' }],
+      evidenceItems: [],
+    });
+    await writeVersions(finalTenantId, []);
+    await writeTenantSettings(finalTenantId, { retentionDays: 365, evidenceReviewCadenceDays: 180 });
+    return { tenantId: finalTenantId, email, password, account };
+  }
+
+  if (variant === 'with-snapshot-and-attachment') {
+    // Für den C3.5 Orphan-Cleanup-Test (#4): ein Evidence-Item mit
+    // aktivem Attachment auf `fileX` wird als Snapshot festgeschrieben.
+    // Der Test mutiert danach den State auf `fileY` (via direktem
+    // Object-Storage-Put, ohne multer-Versions-Ledger — siehe
+    // seedFileInObjectStorage) und ruft restore — fileY sollte als
+    // Orphan erkannt und aus server-storage/uploads/ entfernt werden.
+    const fileXName = 'stored-state-orphan-x.pdf';
+    await fs.writeFile(path.join(legacyUploadsDir, fileXName), makeTestPdfBuffer('x-content'));
+    const evidence = seedEvidenceItem({ id: 'ev-orphan', title: 'Nachweis für Orphan-Test', storedFileName: fileXName });
+    const uploadedAt = evidence.serverAttachment.uploadedAt;
+    await writeState(finalTenantId, { evidenceItems: [evidence] });
+    await writeVersions(finalTenantId, [
+      seedVersionEntry({
+        evidenceId: 'ev-orphan',
+        versionId: evidence.serverAttachment.versionId,
+        storedFileName: fileXName,
+        fileName: 'ev-orphan.pdf',
+        current: true,
+        uploadedAt,
+      }),
+    ]);
+    await writeTenantSettings(finalTenantId, { retentionDays: 365, evidenceReviewCadenceDays: 180 });
+
+    // Snapshot manuell anlegen — fängt den state mit fileX ein, inkl.
+    // versions-Backing. Dem snapshot-Payload-Format folgend: { meta, state }.
+    const snapshotId = `${new Date().toISOString().slice(0, 10)}-orphan-test-${crypto.randomBytes(2).toString('hex')}`;
+    const snapshotMeta = {
+      id: snapshotId,
+      name: 'Orphan-Test-Snapshot',
+      comment: 'Fixture für C3.5 Test #4',
+      createdAt: nowIso(),
+      createdBy: account.id,
+      userName: 'Test Admin',
+    };
+    const paths = tenantPaths(finalTenantId);
+    await fs.writeFile(
+      path.join(paths.snapshotsDir, `${snapshotId}.json`),
+      JSON.stringify({ meta: snapshotMeta, state: { evidenceItems: [evidence] } }, null, 2),
+    );
+    return {
+      tenantId: finalTenantId,
+      email,
+      password,
+      account,
+      fileXName,
+      snapshotId,
+    };
+  }
+
   throw new Error(`seedTestTenant: unbekannte Variante „${variant}“.`);
+}
+
+/**
+ * Schreibt eine Datei direkt in `server-storage/uploads/` (legacyUploadsDir),
+ * ohne den `POST /api/evidence/:id/attachment`-Pfad zu durchlaufen.
+ *
+ * **Warum der Umweg um multer?** Zum Testen von `cleanupOrphanUploads`
+ * braucht es eine Datei, die im zentralen Object-Storage existiert,
+ * aber **nicht** durch den normalen Upload-Pfad geschrieben wurde —
+ * sonst wäre sie bereits beim Upload in die Versions-Historie eingetragen
+ * und gar nicht mehr orphan (der `versionFileNamesFromLedger`-Check in
+ * cleanupOrphanUploads würde sie als referenziert einstufen).
+ *
+ * Einzige Konsumenten bisher: C3.5 Test #4 (Snapshot-Restore mit
+ * Orphan-Cleanup). Andere Tests, die echte Uploads simulieren wollen,
+ * nutzen supertest mit `.attach(...)` gegen den Route-Endpoint.
+ */
+export async function seedFileInObjectStorage(storedFileName, content = 'orphan-content') {
+  await fs.writeFile(path.join(legacyUploadsDir, storedFileName), makeTestPdfBuffer(content));
+}
+
+/**
+ * Prüft, ob eine Datei im zentralen uploads/-Ordner existiert.
+ * Utility für Test-Assertions (z.B. "fileY ist nach Orphan-Cleanup weg").
+ */
+export async function objectStorageFileExists(storedFileName) {
+  try {
+    await fs.access(path.join(legacyUploadsDir, storedFileName));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function signInAsAdmin(request, tenantId, password = TEST_ADMIN_PASSWORD) {
@@ -240,7 +359,10 @@ export async function signInAsAdmin(request, tenantId, password = TEST_ADMIN_PAS
 }
 
 export async function cleanupTestTenant(tenantId) {
-  if (!tenantId || !tenantId.startsWith(TEST_TENANT_PREFIX)) {
+  // Sicherheits-Guard: Nur Tenants mit anerkanntem Test-Prefix (`__test__-`)
+  // werden gelöscht. Damit ist kategorisch ausgeschlossen, dass ein
+  // versehentlicher Cleanup-Aufruf Produktions-Tenants löscht.
+  if (!tenantId || !tenantId.startsWith('__test__-')) {
     throw new Error(`cleanupTestTenant: tenantId „${tenantId}“ trägt nicht den Test-Prefix — Abbruch zur Sicherheit.`);
   }
 
