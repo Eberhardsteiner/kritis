@@ -52,7 +52,42 @@ Die vier Notizen stammen aus `docs/POST-C3-META-REVIEW-NOTIZEN.md` und wurden w�
 
 **Aufwandsschätzung**: 0,5–1 Arbeitstag (schema-/infrastrukturlastig, Faktor 1,5–2,5×).
 
-### Gesamt-Aufwand C6
+### C6.5 · CI-Stabilisierung (Lock-File-Drift durch Bolt)
+
+**Fundstelle**: Unmittelbar nach dem C5-Block-Abschluss-Push (Commits `1d2e7285` + `57846fd1` auf main, 2026-04-22) scheiterte die GitHub-Actions-CI bei den Jobs **Typecheck** und **Build** mit je drei Annotations — Root-Cause: `Cannot find module '@vitejs/plugin-react' or its corresponding type declarations` in `vite.config.ts:2`.
+
+**Symptom**: Lokale Entwicklung mit `npm install`-Semantik (permissiv, löst Caret-Ranges zur neuesten kompatiblen Version auf) funktioniert grün. CI nutzt `npm ci`-Semantik (strikt, installiert exakt nach `package-lock.json`) und scheitert, weil der Lock-File-Stand nicht zur aktuellen `package.json` passt.
+
+**Diagnose**: Bolt hat nach unserem Push automatisch **sechs Folge-Commits** gesetzt, darunter `2fc4e4bb "Updated package-lock.json"`. Dieser Commit ist kein einfacher Lock-File-Resync, sondern ein **Downgrade-Revert** der C1-Dependency-Upgrades:
+
+| Package | `package.json` (unser Stand) | Bolt's Lock-File `2fc4e4bb` |
+|---|---|---|
+| `express` | `^5.2.1` (C1.1-Upgrade) | `4.21.2` (revertiert) |
+| `vite` | `^7.3.2` (C1.2-Upgrade) | `5.4.21` (revertiert) |
+| `@vitejs/plugin-react` | `^5.2.0` | `4.3.1` (revertiert) |
+| `@playwright/test` | `^1.59.1` | **entfernt** |
+| `supertest` | `^7.2.2` | **entfernt** |
+| `concurrently` | `^9.2.1` | `9.0.1` (revertiert) |
+
+Der CI-Lauf auf `2fc4e4bb` ging grün — aber nur, weil Bolt's Lock-File in sich konsistent ist. Der Code-Zustand entspricht einer inkonsistenten Mischform: Quelldateien erwarten Express 5 / Vite 7 / Playwright, die installierten `node_modules` sind eine regredierte Vorstufe.
+
+**Warum jetzt und nicht früher**: Der ursprüngliche Lock-File-Stand (aus `c01f0bfb`, Mai 2025) war bereits mit `package.json` nur partiell konsistent — die C1-Upgrades waren im package.json, aber offenbar ohne sauberen `npm ci`-Reset des Lock-Files committed. Zwischen dem letzten CI-Lauf auf `af04dd9b` und unserem Push auf `57846fd1` lag kein Push, der einen neuen CI-Lauf ausgelöst hätte — die Inkonsistenz blieb latent. Unser Push hat durch die zusätzlichen npm-Scripts (`demo:reset:fresh` etc.) den Lock-File-Drift sichtbar gemacht.
+
+**Behebungs-Optionen** (mit Aufwands-Schätzung):
+
+- **Option A · Frische Lock-File-Regeneration (empfohlen)**: `rm -rf node_modules package-lock.json && npm install` gegen unser `package.json` (Express 5, Vite 7). Verifikation aller vier Build/Test-Pipelines. Commit auf neuem Branch, Review, Merge nach main. Aufwand: ~20 min.
+- **Option B · Downgrade akzeptieren, C1 revertieren**: `package.json`-Dependencies auf Bolt's Versionen angleichen (Express 4.21.2, Vite 5.4.21, Playwright + supertest entfernen). Code auf Express-4-Kompatibilität prüfen. Aufwand: ~1 Stunde plus manuelle Review. **Nicht empfohlen** — wäre formales Reversal der C1-Upgrades.
+- **Option C · Bolt-Config-Anpassung**: Herausfinden, was Bolt dazu bringt, den Lock-File zu überschreiben (Bolt-Registry-Mirror, npm-Pin-Regeln, `.npmrc`). `engines`-Feld in `package.json` setzen (Node 22, npm 10). `.nvmrc` anlegen. Prüfen, ob Bolt einen „Don't modify lock-file"-Modus hat. Aufwand: ~2–4 Stunden, unbestimmtes Ergebnis.
+
+**Empfehlung**: **Option A nach der UVM-Demo**, auf separatem Branch. Falls Bolt erneut einen Counter-Commit pusht, Option C parallel untersuchen.
+
+**Bolt-Verhaltens-Risiko**: Dr. Steiners Annahme ist, dass Bolt nach jedem main-Push seinen eigenen Lock-File-Stand durchsetzt. Falls das beim v0.9-Tag-Push erneut passiert, entsteht eine Regression-Schleife. In dem Fall ist Option C die belastbare Lösung, weil sie Bolt's Überschreibungs-Verhalten strukturell adressiert.
+
+**Demo-Relevanz**: Die Bolt-Laufzeit funktioniert vermutlich trotzdem (Bolt's eigenes Build-System nutzt sein konsistentes Lock-File). Die Demo-Klick-Pfade aus C5.4 sind davon unberührt. Der CI-Fehler ist aktuell **Hygiene-Thema, nicht demo-blockierend**.
+
+**Zeitplan**: C6.5 wird nach der Demo angegangen, zusammen mit C6.4 (SQLite-Race, Notiz 8) und C6.1 (Zwei-Phasen-Commit-Reconciler, Notiz 1), weil alle drei Test-/CI-Infrastruktur betreffen. Reihenfolge: **C6.5 vor C6.4**, weil C6.5 die Grundlage (stabile CI-Runs) für die Verifikation der anderen C6-Teile liefert.
+
+### Gesamt-Aufwand C6 (aktualisiert)
 
 | Teil | Charakter | Aufwand |
 |---|---|---|
@@ -60,7 +95,8 @@ Die vier Notizen stammen aus `docs/POST-C3-META-REVIEW-NOTIZEN.md` und wurden w�
 | C6.2 | Content-lastig | 15 Min |
 | C6.3 | UI-lastig, Debug-Risiko | 1–2 Tage |
 | C6.4 | Infrastruktur | 0,5–1 Tag |
-| **Summe** | — | **2,75–5 Arbeitstage** |
+| C6.5 | CI-/Dependency-Management | 20 Min (Option A) — 4 Std. (Option C, falls nötig) |
+| **Summe** | — | **2,75–5,5 Arbeitstage** |
 
 ## 3 · C6-Ausschluss · Supabase-Produktionspfad pausiert
 
@@ -113,21 +149,24 @@ Bis zu einem solchen Trigger ist der Default: **SQLite-Document-Store, On-Premis
 
 Empfohlene Reihenfolge nach Risiko und Dringlichkeit:
 
-1. **C6.2** (Path-Traversal-Kommentar, 15 Min) — Aufwärm-Commit, risikoarm
-2. **C6.4** (SQLite-Race, 0,5–1 Tag) — Test-Infrastruktur-Verbesserung, hebt die Parallelisierungs-Einschränkung
-3. **C6.1** (Zwei-Phasen-Commit-Reconciler, 1–2 Tage) — Datenintegritäts-Konsolidierung, am besten nach C6.4 wegen Test-Anforderungen
-4. **C6.3** (Frontend-Notice-Akkumulation, 1–2 Tage) — Der komplexeste Teil, Debug-Risiko; besser am Schluss, wenn andere C6-Teile bereits grün sind
+1. **C6.5** (CI-Stabilisierung, 20 Min via Option A) — **muss zuerst**, weil alle anderen C6-Teile eine stabile CI-Pipeline für Verifikation brauchen
+2. **C6.2** (Path-Traversal-Kommentar, 15 Min) — Aufwärm-Commit, risikoarm
+3. **C6.4** (SQLite-Race, 0,5–1 Tag) — Test-Infrastruktur-Verbesserung, hebt die Parallelisierungs-Einschränkung
+4. **C6.1** (Zwei-Phasen-Commit-Reconciler, 1–2 Tage) — Datenintegritäts-Konsolidierung, am besten nach C6.4 wegen Test-Anforderungen
+5. **C6.3** (Frontend-Notice-Akkumulation, 1–2 Tage) — Der komplexeste Teil, Debug-Risiko; besser am Schluss, wenn andere C6-Teile bereits grün sind
 
 Jeder C6-Teil bekommt einen eigenen Commit nach dem C3/C5-Muster (`C6.1: …`, `C6.2: …` etc.), mit Verweis auf die jeweilige Meta-Review-Notiz. Die Kalibrierungs-Regel-Dreiheit aus Notiz 16/17/18 hilft bei der Schätzung pro Teil.
 
 ## 5 · Akzeptanzkriterien C6
 
+- ✅ CI-Pipeline stabilisiert (Typecheck + Build + Tests grün auf main, `npm ci` scheitert nicht mehr an Lock-File-Drift)
 - ✅ Path-Traversal-Kommentar ergänzt
 - ✅ SQLite-Race aufgehoben (`--test-concurrency=1` kann für Integration-Tests entfallen, Laufzeit messbar reduziert)
 - ✅ Zwei-Phasen-Commit-Pattern hat definierte Konsistenz-Garantie (Compensating-Action, Reconciler oder dokumentiertes Monitoring)
 - ✅ Full-E2E-Suite läuft stabil in 2 aufeinanderfolgenden Läufen (16/16 grün), ohne `test.skip` oder `test.retry`
 - ✅ Supabase-Code-Pfad bleibt lauffähig (wird nicht unabsichtlich deaktiviert)
 - ✅ Meta-Review-Notizen 1, 2, 4 Teil B, 8 als „erledigt" markiert; die übrigen Notizen (3, 5–7, 9–15, 16–18) bleiben offen für C7 oder spätere Iterationen
+- ✅ C6.5-Befund zum Bolt-Verhalten dokumentiert (falls Counter-Commits auftreten, wurde Option C evaluiert)
 
 ## 6 · Abgrenzung zu C7
 
