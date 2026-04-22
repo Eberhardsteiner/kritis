@@ -20,13 +20,20 @@
  * `createAuthSessionService(deps)`-Factory.
  *
  * Bewusst NICHT hier:
- *  - `GENERATED_BOOTSTRAP_PASSWORD`, `INITIAL_BOOTSTRAP_PASSWORD`:
- *    seedingspezifisch, nicht runtime-konfigurativ. Bleiben in
- *    `server/index.js` bis C3.6 und ziehen dann mit
- *    `services/storage-init.js` um (seedFreshSystemIfEmpty,
- *    migrateLegacyStorageIfNeeded).
+ *  - `INITIAL_BOOTSTRAP_PASSWORD`: seedspezifisch (Verkettung von
+ *    Env-Variable + GENERATED_BOOTSTRAP_PASSWORD + DEFAULT_DEMO_PASSWORD),
+ *    nur von den Bootstrap-Seed-Funktionen konsumiert, die in C3.7
+ *    mit `services/storage-init.js` umziehen.
  *  - `PORT`, `MAX_JSON_SIZE` etc.: Limits/Statische Konstanten liegen
  *    in `defaults.js` bzw. `index.js`, nicht in runtime.js.
+ *
+ * **In C3.6 hierher gezogen:** `GENERATED_BOOTSTRAP_PASSWORD`.
+ * Ursprünglich als seedspezifisch markiert, aber `buildSecurityGate-
+ * Summary` (C3.6 → services/system-summaries.js) konsumiert den
+ * Boolean-Wert für das Readiness-Dashboard. Weil der Wert runtime-
+ * abhängig ist (`runtimeConfig.appMode === 'production'`) und zwei
+ * Konsumenten hat (Bootstrap-Seed + Security-Gate-Summary), gehört
+ * er konzeptionell hierher.
  *
  * Konsumenten:
  *  - `services/auth-session.js` (direkte Imports für 8 Funktionen)
@@ -36,6 +43,8 @@
  *    die beiden Platform-Settings-Wrappers bekommen `defaultPlatformSettings`
  *    als Parameter von den Adaptern in index.js.
  */
+import crypto from 'node:crypto';
+
 import { buildRuntimeConfig } from '../security.js';
 import { buildAuthStrategyConfig } from '../auth-provider.js';
 import { buildDefaultPlatformSettings } from './defaults.js';
@@ -77,3 +86,20 @@ export const DEFAULT_DEMO_PASSWORD = String(
  * `runtimeConfig.allowedOrigins` abhängen.
  */
 export const defaultPlatformSettings = buildDefaultPlatformSettings(runtimeConfig);
+
+/**
+ * Zufallsgeneriertes Bootstrap-Passwort für Produktion, wenn kein
+ * `KRISENFEST_BOOTSTRAP_PASSWORD` in den Env-Variablen gesetzt ist.
+ * In Demo/Dev-Modus leer. Der Boolean wird von
+ * `buildSecurityGateSummary` als Indikator genutzt, ob ein solches
+ * Passwort automatisch generiert wurde (Security-Gate-Hinweis an
+ * den System-Admin).
+ *
+ * In C3.6 aus `server/index.js` nach hier gezogen. Konsumenten:
+ *  - `services/system-summaries.js` (für das Readiness-Dashboard)
+ *  - `server/index.js` (Bootstrap-Seed-Kette, C3.7-Scope)
+ */
+export const GENERATED_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
+  && !process.env.KRISENFEST_BOOTSTRAP_PASSWORD
+  ? crypto.randomBytes(18).toString('base64url')
+  : '';
