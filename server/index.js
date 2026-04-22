@@ -40,6 +40,7 @@ import { registerIntegrationRoutes } from './routes/integration.js';
 import { registerModuleRoutes } from './routes/modules.js';
 import { registerReportingRoutes } from './routes/reporting.js';
 import { registerSystemRoutes } from './routes/system.js';
+import { registerTenantSettingsRoutes } from './routes/tenant-settings.js';
 // C3.2: Export-Service-Helfer + computeSha256 aus den neuen
 // services-Modulen. Die Route-Handler sind in routes/reporting.js,
 // aber einige Bootstrap-/Integrity-/Job-Funktionen in index.js rufen
@@ -2066,39 +2067,10 @@ app.get('/api/evidence-retention/summary', async (req, res, next) => {
   }
 });
 
-app.get('/api/tenant-settings', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    res.json({ ok: true, settings: await readTenantSettings(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.put('/api/tenant-settings', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['workspace_edit'], authContext);
-    const current = await readTenantSettings(authContext.membership.tenantId);
-    const nextSettings = await writeTenantSettings(authContext.membership.tenantId, {
-      ...current,
-      ...sanitizeObject(req.body?.settings),
-    });
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: nowIso(),
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Mandantenrichtlinien aktualisiert',
-      resource: 'tenant-settings',
-      summary: 'Mandantenrichtlinien für Export, Evidenzen und Readiness-/Auditlogik wurden aktualisiert.',
-      sections: ['tenant-settings'],
-    });
-    res.json({ ok: true, settings: nextSettings });
-  } catch (error) {
-    next(error);
-  }
-});
+// Die zwei /api/tenant-settings-Endpoints leben seit C3.3 in
+// ./routes/tenant-settings.js — registriert über
+// registerTenantSettingsRoutes(app) weiter unten (Null-Deps-Muster).
+// Audit-Log-Text byte-identisch: action="Mandantenrichtlinien aktualisiert".
 
 // Die vier /api/modules/registry-Endpoints leben seit C3.1 in
 // ./routes/modules.js — registriert über registerModuleRoutes(app)
@@ -2151,6 +2123,9 @@ registerModuleRoutes(app);
 
 // C3.2: Reporting/Exports-Route-Modul, gleiches Null-Deps-Muster.
 registerReportingRoutes(app);
+
+// C3.3: Tenant-Settings-Route-Modul, gleiches Null-Deps-Muster.
+registerTenantSettingsRoutes(app);
 
 app.use((error, req, res, _next) => {
   const status = Number(error?.status || 500);
