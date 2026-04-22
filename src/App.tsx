@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { ActiveViewPanel } from './components/ActiveViewPanel';
+import { AppFooter } from './components/AppFooter';
 import { AppNotice } from './components/AppNotice';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
@@ -664,6 +665,8 @@ function AppShell() {
         <AppNotice notice={notice} />
 
         <ActiveViewPanel {...activeViewPanelProps} />
+
+        <AppFooter />
       </div>
     </div>
   );
