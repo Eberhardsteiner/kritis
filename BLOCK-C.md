@@ -413,6 +413,56 @@ Wie im Ist-Stand von Block B notiert, nutzen Tabletop-Exercise-Evidenzen aktuell
 
 ---
 
+### C5-Abschluss · Nachtrag (2026-04-22)
+
+**Scope-Korrektur-Historie**
+
+Der im Ursprungs-Plan oben dokumentierte C5-Scope (flächendeckende Zod-Validierung) wurde in drei Schritten neu ausgerichtet:
+
+1. **Ursprünglich: Zod-Schema-Validierung.** Technischer Ausbau, als Code-Qualitäts-Paket geplant.
+2. **Pilot-Readiness.** Während der C3-Nachbereitung (2026-04) bat Dr. Steiner um eine Inventur der Dokumentation und Feature-Landkarte für einen bevorstehenden Pilotkunden — der Arbeits-Scope verschob sich auf „Was fehlt noch bis zum Pilot?".
+3. **Demo-Readiness.** In der Vertiefung der Pilot-Readiness-Inventur stellte sich heraus: Zunächst geht es nicht um einen Pilot, sondern um eine **interne UVM-KRITIS-Fachpräsentation** mit dem fiktiven Klinikverbund Donau-Ries als Dummy-Kunde.
+4. **Variante B (Format-Erweiterung statt Tenant-Seed).** Zwei Arbeits-Varianten standen zur Wahl: (A) ein inhaltlich tiefer Healthcare-Tenant-Seed, der beim Server-Start geladen wird; (B) eine Format-Erweiterung der Module-Pack-Engine, sodass inhaltlich reiche Packs **zur Laufzeit** importiert und adoptiert werden können. Dr. Steiner wählte B — demonstrationsstärker (Pack-Wechsel im laufenden Betrieb sichtbar) und architektonisch sauberer (Inhalt bleibt von Infrastruktur getrennt).
+
+Die C5-Arbeit entspricht damit nicht mehr dem oben dokumentierten Ursprungs-Scope (Zod-Validierung). Die Zod-Validierungs-Arbeit bleibt als Kandidat für **C6 oder später** vorgemerkt; sie ist nicht Bestandteil der gelandeten C5-Commits. Der oben stehende Abschnitt dokumentiert den historischen Plan und bleibt unverändert als Referenz erhalten.
+
+**Fünf Sub-Abschnitte mit Commits**
+
+| Sub-Abschnitt | Commit | Kennzahlen |
+|---|---|---|
+| C5.1 · Pack-Format-Erweiterung + Backend-State | `dfdb1ad8` | 8 Dateien, +1.360 LoC, 83/83 Server-Tests grün, 11 neue Format-Tests + 7 Backend-State-Tests + 5 Symmetrie-Self-Checks |
+| C5.2 · Frontend-Verdrahtung Adopt-Flow | `bb6872f4` | 9 Dateien, +853 LoC, 1 E2E-Test grün, 4 Copy-Operator-Handler (3 Einzel + 1 Master), Vitest 359/359 |
+| C5.3 · Healthcare-Pack-Inhaltsproduktion | `81b2aca9` | 4 Dateien, +1.073 LoC, 15 Risiken, 2 Tabletops (19 Decisions), 14 Resilienzplan-Maßnahmen, +4 Content-Gate-Tests |
+| C5.3b · Energy-Pack-Inhaltsproduktion | `e4c5c25d` | 3 Dateien, +1.050 LoC, 15 Risiken mit sektor-typischem Kontrast, 2 Tabletops (19 Decisions), 14 Resilienzplan-Maßnahmen, +5 Content-Gate-Tests |
+| C5.4 · Demo-Runtime-Artefakte | `d58ddb7c` | 4 Dateien, +965 LoC, Reset-Skript (Smoke-Test 6 s), 13 Klick-Pfade, 5 Q&A-Kategorien |
+
+**Strukturelle Lieferung C5:**
+- **Module-Pack-Format** erweitert um drei neue Felder (`riskCatalogTemplates`, `resiliencePlanTemplate`, `tabletopScenarios`) byte-symmetrisch zu den Tenant-State-Types
+- **Backend-State-Feld-Erweiterung** (6 neue Keys in `collaborativeStateDefaults` + `sanitizeState`, vorher still gestrippt)
+- **Frontend-Adopt-Flow** mit Master-Button + 3 Einzel-Aktionen, Pure-Function-Separation in `src/features/platform/adoptModuleTemplates.ts`
+- **Zwei Sektor-Packs** mit inhaltlich dichter, KRITIS-fachlich korrekter Substanz (Healthcare: interdependency-schwer; Energy: technical/cyber_physical-schwer)
+- **Vitest-Content-Gates** als Regression-Schutz gegen versehentliche Pack-Verflachung
+- **Symmetrie-Self-Check-Tests** als TS-Type-Drift-Schutz zwischen Frontend-Types und Pack-Engine-Enums
+- **E2E-Test Szenario 17** (pack-adoption-Flow) als Infrastruktur-Nachweis
+- **Reset-Skript** mit drei Modi (`--fresh` / `--demo-ready` / `--capture-baseline`), Smoke-Test erfolgreich
+- **Demo-Dokumentation** (Klick-Pfade, Zeit-Budgets, Q&A) für Dr. Steiners Präsentations-Vorbereitung
+
+**Akzeptanzkriterien C5 (korrigiert gegenüber Ursprungs-Plan):**
+
+Der Ursprungs-Plan (Zod-Validierung + Evidence-Migration) wird in C5 **nicht erfüllt**. Stattdessen sind die neuen, in der Scope-Korrektur vereinbarten Kriterien:
+
+- ✅ Pack-Format kann `riskCatalogTemplates`, `resiliencePlanTemplate`, `tabletopScenarios` tragen, validieren und verarbeiten
+- ✅ Backend-State persistiert die sechs neuen Feature-State-Felder (`riskEntries`, `resiliencePlan`, `archivedResiliencePlans`, `currentTabletopSession`, `archivedTabletopSessions`, `importedTabletopScenarios`)
+- ✅ Frontend-Adopt-Button kopiert Pack-Inhalte ins Tenant-State und persistiert via `pushStateToServer`
+- ✅ Zwei demobare Sektor-Packs mit strukturell paralleler Tiefe, inhaltlichem Kontrast
+- ✅ E2E-Test 17 (pack-adoption) deckt den kompletten Infrastruktur-Pfad ab (Import → Freigabe → Adopt → Sync → Reload → Persistenz)
+- ✅ Reset-Skript funktional getestet (Smoke-Test 6 s, HTTP 200 /api/health/live)
+- ✅ Meta-Review-Notizen 16, 17, 18 dokumentieren die Kalibrierungs-Regel-Dreiheit (schema-lastig × 1,5–2,5, UI-lastig × 1,3–1,5, content-lastig × 0,3–0,7)
+
+**Abschluss-Status:** Demo-ready, zwei Module-Packs im Repo, Reset-Skript validiert, Dokumentation für Dr. Steiners Präsentations-Vorbereitung liegt vor. C5 ist beendet.
+
+---
+
 ## C6 · Supabase-Produktionspfad scharfstellen
 
 **Ziel**: Supabase als echte Produktionspersistenz verdrahten, nicht nur vorbereitet. Mandantenisolation hart gegen böse Wille absichern.

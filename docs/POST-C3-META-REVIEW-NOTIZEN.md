@@ -1,13 +1,18 @@
 # Post-C3-Meta-Review-Notizen
 
-> Stand: 2026-04-22, C3-Block abgeschlossen (Commits `c01f0bfb`
-> bis `96ccb840`, kumulative Reduktion `server/index.js`
-> 3906 → 131 Zeilen, −96.6 %).
+> **Stand: 2026-04-22.** C3-Block + C5-Block abgeschlossen.
 >
-> Diese Datei sammelt 15 Beobachtungen, die während der C3-Phase
-> (Zerlegung `server/index.js`) auftauchten, aber nicht in einzelnen
-> Iterations-Commits gelöst wurden. Die Meta-Review zu Beginn von
-> **C7** (Pilotfreigabe-Dokumentation) arbeitet diese Liste ab.
+> - C3 (Zerlegung `server/index.js`): Commits `c01f0bfb` bis `96ccb840`,
+>   kumulative Reduktion `server/index.js` 3906 → 76 Zeilen (−98 %).
+> - C5 (Demo-Readiness mit Module-Pack-Architektur): Commits `dfdb1ad8`
+>   bis `d58ddb7c`, Format-Erweiterung + Frontend-Verdrahtung + zwei
+>   Sektor-Packs + Demo-Runtime-Artefakte.
+>
+> Die Datei sammelt **18 Beobachtungen** aus den beiden Phasen. Die ersten
+> 15 stammen aus C3, die Notizen 16–18 aus C5 (als finale Kalibrierungs-
+> Regel-Dreiheit: schema-lastig, UI-lastig, content-lastig). Die
+> Meta-Review zu Beginn von **C7** (Pilotfreigabe-Dokumentation) arbeitet
+> diese Liste ab.
 >
 > Format pro Punkt: kurze Benennung, Ort des Fundes, Symptom,
 > geplante Auflösung. Die Liste ist eine Arbeitsvorlage — einzelne
@@ -33,9 +38,9 @@
 | 13 | ESM-Modul-Semantik als Singleton-Pattern | Konvention |
 | 14 | Obsolete Imports skalieren mit Cross-Module-Integrations-Tiefe | Methode |
 | 15 | Dokumentations-Overhead aus Iterations-Historie | Methode |
-| 16 | Kalibrierungs-Faktor für schema-lastige Erweiterungen (Entwurf · landet in C5.4) | Methode |
-| 17 | E2E-Tests fangen Integrations-Bugs, die Unit-Tests nicht sehen (Entwurf · landet in C5.4) | Methode |
-| 18 | Content-Produktion als eigene Kalibrierungs-Kategorie (Entwurf · landet in C5-Abschluss-Commit) | Methode |
+| 16 | Kalibrierungs-Faktor für schema-lastige Erweiterungen (Faktor 1,5×–2,5×) | Methode · aus C5.1 |
+| 17 | E2E-Tests fangen Integrations-Bugs, die Unit-Tests nicht sehen | Methode · aus C5.2 |
+| 18 | Content-Produktion als eigene Kalibrierungs-Kategorie (Faktor 0,3×–0,7×) | Methode · aus C5.3/3b |
 
 ## Beobachtungen
 
@@ -638,11 +643,12 @@
   Commit führt die Kompaktierung für C3 durch. Methoden-Notiz
   für C4/C5/C6.
 
-## Sechzehnte Beobachtung (Entwurfs-Stand)
+## 16. Beobachtung · Kalibrierungs-Faktor schema-lastig (1,5×–2,5×)
 
 **Kalibrierungs-Faktor für schema-lastige Erweiterungen
-mit verschachtelter Validation.** Landet im nächsten größeren
-Block-Abschluss (vermutlich C5.4).
+mit verschachtelter Validation.** Finalisiert im C5-Block-Abschluss
+(2026-04-22). Aus C5.1-Status-Report gewonnen, in Notizen 17 und 18
+weiterentwickelt zur Kalibrierungs-Regel-Dreiheit.
 
 - **Fundstelle:** C5.1 Status-Report, Abschnitt 2 „Heavy-Tail-
   Kalibrierung". Projektion 385–550 LoC (untere / obere
@@ -699,11 +705,11 @@ Block-Abschluss (vermutlich C5.4).
   steht ein belastbares zweites Kalibrierungs-Fenster für
   UI-lastige Arbeit.
 
-## Siebzehnte Beobachtung (Entwurfs-Stand)
+## 17. Beobachtung · E2E-Tests fangen Integrations-Bugs
 
 **E2E-Tests im Scope einer Feature-Extraktion fangen
-Integrations-Bugs, die Unit-Tests nicht sehen.** Landet im
-nächsten größeren Block-Abschluss (vermutlich C5.4).
+Integrations-Bugs, die Unit-Tests nicht sehen.** Finalisiert im
+C5-Block-Abschluss (2026-04-22). Aus C5.2-Implementierung gewonnen.
 
 - **Fundstelle:** C5.2-Implementierung, Debug-Runde 4 von 5.
   Der E2E-Test 17 (pack-adoption) zeigte reproduzierbar, dass
@@ -776,10 +782,11 @@ nächsten größeren Block-Abschluss (vermutlich C5.4).
   E2E-Test überproportional wertvoll — er prüft genau die
   Quellen-Kombination, die Unit-Tests nicht sehen.
 
-## Achtzehnte Beobachtung (Entwurfs-Stand)
+## 18. Beobachtung · Content-Produktion als eigene Kalibrierungs-Kategorie (0,3×–0,7×)
 
 **Content-Produktion als eigene Kalibrierungs-Kategorie.**
-Landet im C5-Block-Abschluss-Commit nach Energy-Pack und Drehbuch.
+Finalisiert im C5-Block-Abschluss (2026-04-22). Aus C5.3-Status-Report
+gewonnen, in C5.3b durch zweiten Pack-Datenpunkt bestätigt.
 
 - **Fundstelle:** C5.3-Status-Report, Abschnitt 3 "Kalibrierungs-
   Befund · Content-Produktion als neue Kategorie". Gemessene Zeit
@@ -818,12 +825,33 @@ Landet im C5-Block-Abschluss-Commit nach Energy-Pack und Drehbuch.
     E2E-Tests mit Permission-Gates → Faktor 1,3–1,5×
   - **Content-lastig**: JSON-Befüllung bestehender Felder, didaktische
     Entscheidungen innerhalb fixierter Strukturen → Faktor 0,3–0,7×
-- **Datenpunkt zum Verifizieren (Energy-Pack 3b):** Nach Abschluss
-  des zweiten inhaltlichen Pack-Blocks (Energy-Sektor, strukturell
-  parallel zu Healthcare) den Faktor 0,3–0,7 bestätigen oder
-  anpassen. Erwartung: Energy-Pack wird noch näher an 0,3–0,4
-  landen als Healthcare, weil Dr. Steiners Review-Muster jetzt auch
-  dort etabliert ist.
+- **Zweiter Pack-Datenpunkt bestätigt den Faktor-Bereich (Energy-Pack
+  C5.3b, 2026-04-22):** Das Energy-Pack wurde strukturell parallel zu
+  Healthcare produziert (15 Risiken, 2 Tabletops, 14 Resilienzplan-
+  Maßnahmen) und landete bei einem Faktor von **~0,4 der Punkt-
+  Schätzung**. Drei Review-Runden durch Dr. Steiner waren durchweg
+  **strukturell-additiv** (Decisions ergänzen, Felder anpassen), nie
+  strukturell-subtraktiv (Einträge streichen, Ansatz verwerfen). Damit
+  ist die Kalibrierungs-Regel **0,3–0,7** mit zwei unabhängigen
+  Pack-Datenpunkten validiert. Die Untergrenze 0,3 wird realistisch ab
+  dem **zweiten Pack** (und weiter mit jedem nachfolgenden), weil der
+  Review-Stil dann etabliert ist und kein grundsätzlicher
+  Richtungs-Dialog mehr nötig ist.
+- **Zusammenfassung der Kalibrierungs-Dreiheit (Notizen 16 + 17 + 18):**
+  Die drei C5-Notizen bilden zusammen die erste **operative
+  Kalibrierungs-Heuristik** für künftige Arbeits-Schätzungen:
+
+  | Kategorie | Faktor auf Obergrenze | Beispiele |
+  |---|---:|---|
+  | schema-lastig | **× 1,5–2,5** | JSON-Schema + Validator + Deep-Validation + Test-Harness |
+  | UI-lastig | **× 1,3–1,5** | React-Handler + Prop-Durchreichung + E2E-Test |
+  | content-lastig | **× 0,3–0,7** | JSON-Befüllung bestehender Felder |
+
+  Die Dreiheit ersetzt nicht die initiale Drei-Punkt-Schätzung (unten /
+  Mittel / oben), sondern ergänzt sie um **kategorie-abhängige
+  Multiplikatoren auf die Obergrenze**. Anwendbarkeit für C6 und später:
+  Bei Task-Zerlegung zuerst die Kategorie identifizieren, dann den
+  Multiplikator setzen, dann erst die Bandbreiten-Schätzung vornehmen.
 
 ## Verweis
 
