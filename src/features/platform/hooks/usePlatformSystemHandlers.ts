@@ -62,6 +62,13 @@ import {
 } from '../../../lib/serverApi';
 import { builtInModules, parseAndValidateModule } from '../../../lib/moduleRegistry';
 import {
+  adoptAllTemplates,
+  adoptResiliencePlanTemplate,
+  adoptRiskCatalogTemplates,
+  adoptTabletopScenarios,
+  type ModuleWithTemplates,
+} from '../adoptModuleTemplates';
+import {
   buildServerPayload,
   serializeServerPayload,
 } from '../serverPayload';
@@ -100,6 +107,10 @@ export interface PlatformSystemHandlers {
   handleImportFiles: (files: FileList | null) => Promise<void>;
   handleActivateModulePack: (entryId: string) => Promise<void>;
   handleRetireModulePack: (entryId: string) => Promise<void>;
+  handleAdoptRiskCatalogTemplates: (moduleId: string) => Promise<void>;
+  handleAdoptResiliencePlanTemplate: (moduleId: string) => Promise<void>;
+  handleAdoptTabletopScenarios: (moduleId: string) => Promise<void>;
+  handleAdoptAllTemplates: (moduleId: string) => Promise<void>;
   handleCreateServerExportPackage: (
     type: ExportPackageType,
     options?: {
@@ -901,6 +912,149 @@ export function usePlatformSystemHandlers(
   );
 
   // =========================================================================
+  // C5.2 · Pack-Template-Adopt-Flow
+  // =========================================================================
+  const resolveAdoptableModule = useCallback(
+    (moduleId: string): ModuleWithTemplates | null => {
+      const uploaded = state.uploadedModules.find((m) => m.id === moduleId);
+      if (uploaded) return uploaded as ModuleWithTemplates;
+      const registryReleased = ws.moduleRegistryEntries.find(
+        (entry) => entry.status === 'released' && entry.packType === 'module' && entry.moduleId === moduleId && entry.module,
+      );
+      if (registryReleased && registryReleased.module) return registryReleased.module as ModuleWithTemplates;
+      const builtIn = builtInModules.find((m) => m.id === moduleId);
+      if (builtIn) return builtIn as ModuleWithTemplates;
+      return null;
+    },
+    [state.uploadedModules, ws.moduleRegistryEntries],
+  );
+
+  const resolveTenantIdForAdopt = useCallback((): string => {
+    return authSession?.tenantId || ws.publicTenant?.id || 'demo';
+  }, [authSession, ws.publicTenant]);
+
+  const handleAdoptRiskCatalogTemplates = useCallback(
+    async (moduleId: string) => {
+      if (!hasPermission('governance_edit')) {
+        showNotice('error', 'Für das Übernehmen des Risikokatalogs fehlt das Recht governance_edit.');
+        return;
+      }
+      const module = resolveAdoptableModule(moduleId);
+      if (!module) {
+        showNotice('error', 'Das ausgewählte Modul wurde nicht gefunden.');
+        return;
+      }
+      const result = adoptRiskCatalogTemplates(module, state);
+      if (result.addedCount === 0) {
+        showNotice('info', 'Dieses Pack enthält keine Risiko-Templates.');
+        return;
+      }
+      const nextState: AppState = { ...state, riskEntries: result.riskEntries };
+      setState(nextState);
+      await pushStateToServer(nextState, `${result.addedCount} Risiko-Einträge aus "${module.name}" übernommen.`);
+    },
+    [hasPermission, pushStateToServer, resolveAdoptableModule, setState, showNotice, state],
+  );
+
+  const handleAdoptResiliencePlanTemplate = useCallback(
+    async (moduleId: string) => {
+      if (!hasPermission('kritis_edit')) {
+        showNotice('error', 'Für das Übernehmen des Resilienzplans fehlt das Recht kritis_edit.');
+        return;
+      }
+      const module = resolveAdoptableModule(moduleId);
+      if (!module) {
+        showNotice('error', 'Das ausgewählte Modul wurde nicht gefunden.');
+        return;
+      }
+      const tenantId = resolveTenantIdForAdopt();
+      const result = adoptResiliencePlanTemplate(module, state, tenantId);
+      if (!result.resiliencePlan || result.resiliencePlan === state.resiliencePlan) {
+        showNotice('info', 'Dieses Pack enthält keinen Resilienzplan.');
+        return;
+      }
+      const nextState: AppState = {
+        ...state,
+        resiliencePlan: result.resiliencePlan,
+        archivedResiliencePlans: result.archivedResiliencePlans,
+      };
+      setState(nextState);
+      const successMessage = result.replaced
+        ? `Resilienzplan aus "${module.name}" übernommen. Der bisherige Plan liegt jetzt im Archiv.`
+        : `Resilienzplan aus "${module.name}" übernommen.`;
+      await pushStateToServer(nextState, successMessage);
+    },
+    [hasPermission, pushStateToServer, resolveAdoptableModule, resolveTenantIdForAdopt, setState, showNotice, state],
+  );
+
+  const handleAdoptTabletopScenarios = useCallback(
+    async (moduleId: string) => {
+      if (!hasPermission('governance_edit')) {
+        showNotice('error', 'Für das Übernehmen der Tabletop-Szenarios fehlt das Recht governance_edit.');
+        return;
+      }
+      const module = resolveAdoptableModule(moduleId);
+      if (!module) {
+        showNotice('error', 'Das ausgewählte Modul wurde nicht gefunden.');
+        return;
+      }
+      const result = adoptTabletopScenarios(module, state);
+      if (result.addedCount === 0 && result.replacedCount === 0) {
+        showNotice('info', 'Dieses Pack enthält keine Tabletop-Szenarios.');
+        return;
+      }
+      const nextState: AppState = {
+        ...state,
+        importedTabletopScenarios: result.importedTabletopScenarios,
+      };
+      setState(nextState);
+      const countLabel = result.replacedCount > 0
+        ? `${result.addedCount} neu, ${result.replacedCount} aktualisiert`
+        : `${result.addedCount} neu`;
+      await pushStateToServer(nextState, `Tabletop-Szenarios aus "${module.name}" übernommen (${countLabel}).`);
+    },
+    [hasPermission, pushStateToServer, resolveAdoptableModule, setState, showNotice, state],
+  );
+
+  const handleAdoptAllTemplates = useCallback(
+    async (moduleId: string) => {
+      if (!hasPermission('governance_edit') || !hasPermission('kritis_edit')) {
+        showNotice('error', 'Für das gemeinsame Übernehmen aller Templates fehlen die Rechte governance_edit und kritis_edit.');
+        return;
+      }
+      const module = resolveAdoptableModule(moduleId);
+      if (!module) {
+        showNotice('error', 'Das ausgewählte Modul wurde nicht gefunden.');
+        return;
+      }
+      const tenantId = resolveTenantIdForAdopt();
+      const result = adoptAllTemplates(module, state, tenantId);
+      const planChanged = result.resiliencePlan !== state.resiliencePlan;
+      const totalImpact = result.counts.riskAdded + result.counts.tabletopAdded + result.counts.tabletopReplaced + (planChanged ? 1 : 0);
+      if (totalImpact === 0) {
+        showNotice('info', 'Dieses Pack enthält keine übernehmbaren Templates.');
+        return;
+      }
+      const nextState: AppState = {
+        ...state,
+        riskEntries: result.riskEntries,
+        resiliencePlan: result.resiliencePlan,
+        archivedResiliencePlans: result.archivedResiliencePlans,
+        importedTabletopScenarios: result.importedTabletopScenarios,
+      };
+      setState(nextState);
+      const details: string[] = [];
+      if (result.counts.riskAdded > 0) details.push(`${result.counts.riskAdded} Risiko-Einträge hinzugefügt`);
+      if (planChanged) details.push(result.counts.planReplaced ? 'Resilienzplan übernommen · vorheriger Plan ins Archiv verschoben' : 'Resilienzplan übernommen');
+      if (result.counts.tabletopAdded > 0 || result.counts.tabletopReplaced > 0) {
+        details.push(result.counts.tabletopReplaced > 0 ? `${result.counts.tabletopAdded} neue / ${result.counts.tabletopReplaced} aktualisierte Tabletop-Szenarios` : `${result.counts.tabletopAdded} Tabletop-Szenarios hinzugefügt`);
+      }
+      await pushStateToServer(nextState, `Alle Templates aus "${module.name}" übernommen. ${details.join(' · ')}`);
+    },
+    [hasPermission, pushStateToServer, resolveAdoptableModule, resolveTenantIdForAdopt, setState, showNotice, state],
+  );
+
+  // =========================================================================
   // Export-Register
   // =========================================================================
   const handleCreateServerExportPackage = useCallback(
@@ -1086,6 +1240,10 @@ export function usePlatformSystemHandlers(
       handleImportFiles,
       handleActivateModulePack,
       handleRetireModulePack,
+      handleAdoptRiskCatalogTemplates,
+      handleAdoptResiliencePlanTemplate,
+      handleAdoptTabletopScenarios,
+      handleAdoptAllTemplates,
       handleCreateServerExportPackage,
       handleCreateHandoverBundle,
       handleReleaseRegisteredExport,
@@ -1109,6 +1267,10 @@ export function usePlatformSystemHandlers(
       handleImportFiles,
       handleActivateModulePack,
       handleRetireModulePack,
+      handleAdoptRiskCatalogTemplates,
+      handleAdoptResiliencePlanTemplate,
+      handleAdoptTabletopScenarios,
+      handleAdoptAllTemplates,
       handleCreateServerExportPackage,
       handleCreateHandoverBundle,
       handleReleaseRegisteredExport,

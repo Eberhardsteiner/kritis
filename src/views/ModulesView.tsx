@@ -1,6 +1,7 @@
-import { CheckCircle2, Layers3, Package, Upload } from 'lucide-react';
+import { CheckCircle2, Layers3, Package, Sparkles, Upload } from 'lucide-react';
 import type { ModulePackContainer, ModulePackManifest, ModulePackRegistryEntry, SectorModuleDefinition } from '../types';
 import { buildSyntheticManifestFromModule } from '../lib/moduleRegistry';
+import { countAdoptableTemplates } from '../features/platform/adoptModuleTemplates';
 
 interface ImportFeedback {
   type: 'success' | 'error' | 'info';
@@ -19,6 +20,11 @@ interface ModulesViewProps {
   onRetirePack: (entryId: string) => void;
   canManageRegistry: boolean;
   feedback: ImportFeedback | null;
+  onAdoptRiskCatalogTemplates: (moduleId: string) => void;
+  onAdoptResiliencePlanTemplate: (moduleId: string) => void;
+  onAdoptTabletopScenarios: (moduleId: string) => void;
+  onAdoptAllTemplates: (moduleId: string) => void;
+  canAdoptTemplates: boolean;
 }
 
 function buildPackStatusLabel(status: ModulePackRegistryEntry['status']): string {
@@ -101,6 +107,11 @@ export function ModulesView({
   onRetirePack,
   canManageRegistry,
   feedback,
+  onAdoptRiskCatalogTemplates,
+  onAdoptResiliencePlanTemplate,
+  onAdoptTabletopScenarios,
+  onAdoptAllTemplates,
+  canAdoptTemplates,
 }: ModulesViewProps) {
   const allModules = availableModules;
   const groupedRegistryEntries = groupRegistryEntries(registryEntries);
@@ -108,6 +119,7 @@ export function ModulesView({
   const selectedModuleDescriptor = selectedModule
     ? describeModuleSource(selectedModule, builtInContainers, registryEntries)
     : null;
+  const adoptCounts = countAdoptableTemplates(selectedModule);
 
   return (
     <div className="view-stack">
@@ -214,6 +226,72 @@ export function ModulesView({
               </p>
             </div>
           </div>
+        </section>
+      ) : null}
+
+      {selectedModule ? (
+        <section className="card" data-testid="adopt-panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Branchen-Inhalte übernehmen</p>
+              <h3>Templates aus „{selectedModule.name}" in den Arbeitsstand kopieren</h3>
+              <p className="muted small">
+                Das Pack enthält {adoptCounts.riskCatalog} Risiko-Templates, {adoptCounts.resiliencePlan ? 'einen Resilienzplan' : 'keinen Resilienzplan'} und{' '}
+                {adoptCounts.tabletop} Tabletop-Szenarios. Beim Übernehmen werden die Inhalte als
+                Arbeits-Einträge in Ihren Mandanten kopiert. Cross-Referenzen verknüpfen Sie danach manuell.
+              </p>
+            </div>
+          </div>
+          <div className="inline-actions top-gap">
+            <button
+              type="button"
+              className="button primary"
+              data-testid="adopt-all-button"
+              onClick={() => onAdoptAllTemplates(selectedModule.id)}
+              disabled={!canAdoptTemplates || adoptCounts.total === 0}
+              title="Übernimmt Risiken, Resilienzplan und Tabletop-Szenarios auf einen Klick."
+            >
+              <Sparkles size={16} />
+              Alle Templates übernehmen
+            </button>
+          </div>
+          <div className="inline-actions top-gap" data-testid="adopt-single-row">
+            <button
+              type="button"
+              className="button secondary"
+              data-testid="adopt-risk-button"
+              onClick={() => onAdoptRiskCatalogTemplates(selectedModule.id)}
+              disabled={!canAdoptTemplates || adoptCounts.riskCatalog === 0}
+              title={adoptCounts.riskCatalog === 0 ? 'Pack enthält keine Risiko-Templates.' : 'Hängt Risiko-Einträge an den bestehenden Katalog an.'}
+            >
+              Nur Risikokatalog ({adoptCounts.riskCatalog})
+            </button>
+            <button
+              type="button"
+              className="button secondary"
+              data-testid="adopt-resilience-button"
+              onClick={() => onAdoptResiliencePlanTemplate(selectedModule.id)}
+              disabled={!canAdoptTemplates || adoptCounts.resiliencePlan === 0}
+              title={adoptCounts.resiliencePlan === 0 ? 'Pack enthält keinen Resilienzplan.' : 'Überschreibt aktiven Plan, bewahrt alte Version im Archiv.'}
+            >
+              Nur Resilienzplan
+            </button>
+            <button
+              type="button"
+              className="button secondary"
+              data-testid="adopt-tabletop-button"
+              onClick={() => onAdoptTabletopScenarios(selectedModule.id)}
+              disabled={!canAdoptTemplates || adoptCounts.tabletop === 0}
+              title={adoptCounts.tabletop === 0 ? 'Pack enthält keine Tabletop-Szenarios.' : 'Merget Szenarios per ID in die Szenario-Bibliothek.'}
+            >
+              Nur Tabletop-Szenarios ({adoptCounts.tabletop})
+            </button>
+          </div>
+          {!canAdoptTemplates ? (
+            <p className="muted small top-gap">
+              Für das Übernehmen fehlen die Rechte governance_edit und kritis_edit. Wechseln Sie in ein Admin- oder Lead-Profil.
+            </p>
+          ) : null}
         </section>
       ) : null}
 

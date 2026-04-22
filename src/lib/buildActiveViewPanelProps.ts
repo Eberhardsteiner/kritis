@@ -222,6 +222,11 @@ interface BuildActiveViewPanelPropsArgs {
   onActivatePack: ModulesViewProps['onActivatePack'];
   onRetirePack: ModulesViewProps['onRetirePack'];
   canManageRegistry: ModulesViewProps['canManageRegistry'];
+  onAdoptRiskCatalogTemplates: ModulesViewProps['onAdoptRiskCatalogTemplates'];
+  onAdoptResiliencePlanTemplate: ModulesViewProps['onAdoptResiliencePlanTemplate'];
+  onAdoptTabletopScenarios: ModulesViewProps['onAdoptTabletopScenarios'];
+  onAdoptAllTemplates: ModulesViewProps['onAdoptAllTemplates'];
+  canAdoptTemplates: ModulesViewProps['canAdoptTemplates'];
   onUpdateJurisdiction: KritisViewProps['onUpdateJurisdiction'];
   onUpdateRegulatoryProfileField: KritisViewProps['onUpdateRegulatoryProfileField'];
   onUpdateRegimeScope: KritisViewProps['onUpdateRegimeScope'];
@@ -483,6 +488,11 @@ export function buildActiveViewPanelProps({
   onActivatePack,
   onRetirePack,
   canManageRegistry,
+  onAdoptRiskCatalogTemplates,
+  onAdoptResiliencePlanTemplate,
+  onAdoptTabletopScenarios,
+  onAdoptAllTemplates,
+  canAdoptTemplates,
   onUpdateJurisdiction,
   onUpdateRegulatoryProfileField,
   onUpdateRegimeScope,
@@ -793,6 +803,11 @@ export function buildActiveViewPanelProps({
       onRetirePack,
       canManageRegistry,
       feedback,
+      onAdoptRiskCatalogTemplates,
+      onAdoptResiliencePlanTemplate,
+      onAdoptTabletopScenarios,
+      onAdoptAllTemplates,
+      canAdoptTemplates,
     },
     kritisViewProps: {
       applicability: kritisApplicability,

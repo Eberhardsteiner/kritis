@@ -33,6 +33,7 @@
 | 13 | ESM-Modul-Semantik als Singleton-Pattern | Konvention |
 | 14 | Obsolete Imports skalieren mit Cross-Module-Integrations-Tiefe | Methode |
 | 15 | Dokumentations-Overhead aus Iterations-Historie | Methode |
+| 16 | Kalibrierungs-Faktor für schema-lastige Erweiterungen (Entwurf · landet in C5.4) | Methode |
 
 ## Beobachtungen
 
@@ -634,6 +635,67 @@
 - **Kein Code-Fix im Projekt-Scope** — der C3-Abschluss-
   Commit führt die Kompaktierung für C3 durch. Methoden-Notiz
   für C4/C5/C6.
+
+## Sechzehnte Beobachtung (Entwurfs-Stand)
+
+**Kalibrierungs-Faktor für schema-lastige Erweiterungen
+mit verschachtelter Validation.** Landet im nächsten größeren
+Block-Abschluss (vermutlich C5.4).
+
+- **Fundstelle:** C5.1 Status-Report, Abschnitt 2 „Heavy-Tail-
+  Kalibrierung". Projektion 385–550 LoC (untere / obere
+  Bandbreite), gemessen **1.229 LoC** — **+124 % über der
+  oberen Bandbreite**.
+- **Befund:** Bei Erweiterungen, die gleichzeitig Schema,
+  Deep-Validation-Code und Test-Coverage berühren, greift die
+  klassische Drei-Punkt-Schätzung (unten / Mittel / oben) zu
+  eng. Die obere Bandbreite müsste mit einem **Kalibrierungs-
+  Faktor von 1,5×–2,5×** multipliziert werden, um den tat-
+  sächlichen Aufwand zu treffen.
+- **Drei konkrete Treiber der Über-Schätzung:**
+  - **Deep-Validation-Sub-Funktionen (~30 LoC pro Feld):**
+    Die C5.1-Analyse unterschätzte den Code-Footprint von
+    `validateRiskCatalogTemplate` + `validateResiliencePlan-
+    Template` + `validateTabletopScenario`. Jeder Sub-
+    Validator hat 20–45 Zeilen (Enum-Check + Pflicht-Feld-
+    Check + Range-Check + Nested-Iteration). Für drei
+    zusammen ~100 Zeilen allein.
+  - **JSON-Schema-`$defs`-Auslagerung für Lesbarkeit
+    (+50–80 LoC pro verschachtelter Struktur):** Sechs
+    ResiliencePlan-Sub-Sektionen × 5–7 Felder mit klaren
+    `required`-Listen und Enums = +180 Zeilen allein für den
+    Resilienzplan-Teil. Die Projektion ging von inline-
+    Structs aus; die ausgelagerten `$defs` für Lesbarkeit
+    kosten aber zusätzlich.
+  - **Symmetrie-Self-Check-Tests (1 Test-Anforderung wird
+    oft zu 5–7 Test-Implementierungen):** Dr. Steiner bat
+    um genau einen Test gegen TS-Type-Drift; umgesetzt als
+    **fünf eigene Tests**, weil pro TS-Union-Type ein
+    separater Test lesbarer ist und präzisere Fehler-
+    meldungen liefert, wenn der Test rot wird. Projektions-
+    Unterschätzungs-Faktor: **5×**.
+- **Regel für künftige Analysen:**
+  - **Bei schema-lastigen Erweiterungen:** Grund-Bandbreite
+    schätzen wie bisher, dann **Kalibrierungs-Faktor 1,5×–
+    2,5×** auf die obere Grenze aufschlagen als explizite
+    Wirkfaktor-Zeile in der Delta-Schätzung. Dr. Steiner
+    hat den Faktor in der C5.1-Freigaberunde selbst auf
+    **1,5×–2,5×** für schema-lastig und **1,3×–1,5×** für
+    UI-lastig beziffert; C5.2 ist der erste Datenpunkt zum
+    Verifizieren des UI-Faktors.
+  - **Symmetrie-Self-Checks explizit aufzählen:** Wenn
+    eine Analyse-Forderung "X schützt gegen Type-Drift"
+    lautet, im Test-Plan die Aufschlüsselung pro Union-Type
+    vornehmen, nicht als ein Gesamt-Test listen.
+  - **Inline vs. `$defs` als Entscheidung formulieren:**
+    Bei verschachtelten Strukturen explizit dokumentieren,
+    ob Schema inline oder via `$defs` ausgelagert wird —
+    der LoC-Unterschied ist signifikant (Faktor 2–3).
+- **Datenpunkt zum Verifizieren (C5.2):** Nach Abschluss
+  C5.2 den UI-Kalibrierungs-Faktor (Prognose +30–50 %) mit
+  der tatsächlichen Zahl vergleichen. Wenn die Zahl passt,
+  steht ein belastbares zweites Kalibrierungs-Fenster für
+  UI-lastige Arbeit.
 
 ## Verweis
 

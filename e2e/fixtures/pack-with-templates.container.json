@@ -1,0 +1,117 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-test-adoption",
+    "packType": "module",
+    "moduleId": "test-adoption",
+    "name": "Test-Adoption-Modul (E2E)",
+    "version": "1.0.0",
+    "description": "Minimaler C5.2-E2E-Pack. Prueft den Adopt-Flow strukturell, ohne inhaltliche Vorgriffe auf das Healthcare-Pack aus Abschnitt 3.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    }
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "test-adoption",
+    "name": "Test-Adoption-Modul",
+    "version": "1.0.0",
+    "description": "Minimaler C5.2-E2E-Pack.",
+    "sectorCategory": "Test",
+    "riskCatalogTemplates": [
+      {
+        "id": "risk_e2e_minimal",
+        "categoryId": "technical",
+        "subCategoryId": "tech_infrastructure",
+        "titel": "E2E-Minimal-Risiko",
+        "beschreibung": "Minimaler Risiko-Template-Eintrag fuer den C5.2-E2E-Test.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience_e2e_minimal",
+      "templateNote": "E2E-Minimal-Plan zum Infrastrukturtest.",
+      "content": {
+        "scope": {
+          "operatorName": "E2E-Testbetreiber",
+          "sector": "Test",
+          "criticalService": "E2E-Smoke-Test",
+          "locations": "",
+          "employees": "",
+          "personsServed": "",
+          "scopeNote": ""
+        },
+        "riskBasis": {
+          "methodology": "All-Gefahren-Ansatz",
+          "riskAnalysisReference": "",
+          "topRisks": [],
+          "riskBasisNote": ""
+        },
+        "measuresByGoal": {
+          "prevent": [],
+          "protect": [],
+          "respond": [],
+          "recover": []
+        },
+        "governance": {
+          "managementBoardContact": "",
+          "programOwner": "",
+          "escalationPath": "",
+          "boardReviewCadence": "",
+          "governanceNote": ""
+        },
+        "reporting": {
+          "incidentContact": "",
+          "incidentBackupContact": "",
+          "bsiPortalNote": "",
+          "firstReportingTimeline": "",
+          "reportingNote": ""
+        },
+        "evidence": {
+          "evidenceReferences": [],
+          "reviewCycleYears": 2,
+          "equivalentProofsNote": "",
+          "evidenceNote": ""
+        }
+      }
+    },
+    "tabletopScenarios": [
+      {
+        "id": "tabletop_e2e_minimal",
+        "version": "1.0.0",
+        "title": "E2E-Minimal-Tabletop",
+        "summary": "Minimale Timeline fuer den C5.2-E2E-Test.",
+        "sectors": ["Test"],
+        "applicableRegimes": ["KRITISDachG"],
+        "durationMinutes": 30,
+        "roles": [
+          { "id": "role_test", "title": "Testleitung", "briefing": "Durchfuehrung der Szenario-Testmarke." }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              { "id": "inj_start", "title": "Start", "description": "Szenario startet." }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          { "id": "crit_minimal", "description": "Smoke-Test bestanden", "weight": 1, "category": "other" }
+        ]
+      }
+    ]
+  }
+}

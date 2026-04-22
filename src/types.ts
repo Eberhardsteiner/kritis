@@ -1,5 +1,5 @@
 import type { RiskEntry } from './features/riskCatalog/types';
-import type { ResiliencePlan } from './features/resiliencePlan/types';
+import type { ResiliencePlan, ResiliencePlanContent } from './features/resiliencePlan/types';
 import type { ExerciseSession, Scenario as TabletopScenario } from './features/tabletopExercise/types';
 
 export type { RiskEntry };
@@ -336,6 +336,14 @@ export interface SectorModuleDefinition {
     hints?: string[];
     additionalRequirements?: RequirementDefinition[];
   };
+  // C5.1 · Drei neue Template-Felder für den C5.2-Adopt-Flow.
+  riskCatalogTemplates?: RiskEntry[];
+  resiliencePlanTemplate?: {
+    templateId?: string;
+    templateNote?: string;
+    content: ResiliencePlanContent;
+  };
+  tabletopScenarios?: TabletopScenario[];
 }
 
 export type ModulePackType = 'module' | 'overlay';
