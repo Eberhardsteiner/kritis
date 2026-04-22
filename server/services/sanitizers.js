@@ -323,6 +323,93 @@ export function isLocalLoginAllowed(account) {
 
 // === State-Record ===========================================================
 
+// C5.1 · Sub-Helfer für die drei neuen Feature-Datentypen. Normalisieren
+// Shape ohne Schema-Validation (PUT /api/state darf nicht harte Ablehnung
+// legitimer Frontend-Mutations auslösen — strict validation passiert beim
+// Pack-Import, sanitizeState ist Datenspeicher-Shape-Guard).
+
+const RESILIENCE_PLAN_STATUSES = ['draft', 'review', 'approved', 'archived'];
+
+/**
+ * Sub-Helper für `state.resiliencePlan` und Einträge in
+ * `state.archivedResiliencePlans[]`. Spiegelt die ResiliencePlan-Struktur
+ * aus src/features/resiliencePlan/types.ts (14 Top-Level-Felder + content
+ * mit 6 Sektionen).
+ */
+export function sanitizeResiliencePlan(value) {
+  if (value === null || value === undefined) return null;
+  const raw = sanitizeObject(value);
+  const rawContent = sanitizeObject(raw.content);
+  return {
+    id: String(raw.id || '').trim(),
+    tenantId: String(raw.tenantId || '').trim(),
+    version: String(raw.version || '').trim(),
+    status: RESILIENCE_PLAN_STATUSES.includes(raw.status) ? raw.status : 'draft',
+    createdAt: String(raw.createdAt || '').trim(),
+    updatedAt: String(raw.updatedAt || '').trim(),
+    approvedBy: String(raw.approvedBy || '').trim(),
+    approvedAt: String(raw.approvedAt || '').trim(),
+    content: {
+      scope: sanitizeObject(rawContent.scope),
+      riskBasis: {
+        ...sanitizeObject(rawContent.riskBasis),
+        topRisks: sanitizeArray(rawContent.riskBasis?.topRisks),
+      },
+      measuresByGoal: {
+        prevent: sanitizeArray(rawContent.measuresByGoal?.prevent),
+        protect: sanitizeArray(rawContent.measuresByGoal?.protect),
+        respond: sanitizeArray(rawContent.measuresByGoal?.respond),
+        recover: sanitizeArray(rawContent.measuresByGoal?.recover),
+      },
+      governance: sanitizeObject(rawContent.governance),
+      reporting: sanitizeObject(rawContent.reporting),
+      evidence: {
+        ...sanitizeObject(rawContent.evidence),
+        evidenceReferences: sanitizeArray(rawContent.evidence?.evidenceReferences),
+      },
+    },
+  };
+}
+
+const EXERCISE_SESSION_STATUSES = ['not_started', 'active', 'completed', 'abandoned'];
+
+/**
+ * Sub-Helper für `state.currentTabletopSession` und Einträge in
+ * `state.archivedTabletopSessions[]`. Spiegelt die ExerciseSession-
+ * Struktur aus src/features/tabletopExercise/types.ts (12 Top-Level-
+ * Felder inkl. verschachteltem `result`).
+ */
+export function sanitizeExerciseSession(value) {
+  if (value === null || value === undefined) return null;
+  const raw = sanitizeObject(value);
+  const rawResult = raw.result !== undefined && raw.result !== null ? sanitizeObject(raw.result) : null;
+  return {
+    id: String(raw.id || '').trim(),
+    scenarioId: String(raw.scenarioId || '').trim(),
+    scenarioVersion: String(raw.scenarioVersion || '').trim(),
+    tenantId: String(raw.tenantId || '').trim(),
+    status: EXERCISE_SESSION_STATUSES.includes(raw.status) ? raw.status : 'not_started',
+    startedAt: String(raw.startedAt || '').trim(),
+    endedAt: String(raw.endedAt || '').trim(),
+    currentStepIndex: Number.isFinite(Number(raw.currentStepIndex)) ? Number(raw.currentStepIndex) : 0,
+    decisions: sanitizeArray(raw.decisions),
+    injectAcks: sanitizeArray(raw.injectAcks),
+    participantNotes: String(raw.participantNotes || ''),
+    result: rawResult
+      ? {
+          totalScore: Number(rawResult.totalScore) || 0,
+          maxScore: Number(rawResult.maxScore) || 0,
+          percentage: Number(rawResult.percentage) || 0,
+          verdict: ['bestanden', 'bedingt_bestanden', 'nicht_bestanden'].includes(rawResult.verdict)
+            ? rawResult.verdict
+            : 'nicht_bestanden',
+          perCriterion: sanitizeArray(rawResult.perCriterion),
+          summary: String(rawResult.summary || ''),
+        }
+      : undefined,
+  };
+}
+
 export function sanitizeState(input) {
   const raw = sanitizeObject(input);
   return {
@@ -366,6 +453,20 @@ export function sanitizeState(input) {
       ...sanitizeObject(raw.certificationState),
       stageStates: sanitizeObject(raw?.certificationState?.stageStates),
     },
+    // C5.1 · Sechs neue Feature-State-Felder. Vorher wurden Frontend-
+    // Mutations dieser Felder beim PUT /api/state still gestrippt.
+    // Jetzt persistieren sie im Document-Store, damit der Pack-Import-
+    // "Übernehmen"-Flow lauffähig wird.
+    riskEntries: sanitizeArray(raw.riskEntries),
+    resiliencePlan: sanitizeResiliencePlan(raw.resiliencePlan),
+    archivedResiliencePlans: sanitizeArray(raw.archivedResiliencePlans)
+      .map((entry) => sanitizeResiliencePlan(entry))
+      .filter((entry) => entry && entry.id),
+    currentTabletopSession: sanitizeExerciseSession(raw.currentTabletopSession),
+    archivedTabletopSessions: sanitizeArray(raw.archivedTabletopSessions)
+      .map((entry) => sanitizeExerciseSession(entry))
+      .filter((entry) => entry && entry.id),
+    importedTabletopScenarios: sanitizeArray(raw.importedTabletopScenarios),
   };
 }
 

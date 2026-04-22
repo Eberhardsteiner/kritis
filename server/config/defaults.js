@@ -99,6 +99,19 @@ export const collaborativeStateDefaults = {
     decisionNote: '',
     stageStates: {},
   },
+  // C5.1 · Feature-State für riskCatalog (B3, § 12 KRITISDachG),
+  // resiliencePlan (§ 13 KRITISDachG), tabletopExercise (B5, § 18
+  // KRITISDachG). Vorher lebten diese Felder nur im Frontend-RAM
+  // (src/types.ts:1198-1203, WorkspaceStateContext). Die hiesige
+  // Backend-Persistenz aktiviert den "Übernehmen"-Flow aus Pack-
+  // Imports (riskCatalogTemplates → riskEntries, resiliencePlanTemplate
+  // → resiliencePlan, tabletopScenarios → importedTabletopScenarios).
+  riskEntries: [],
+  resiliencePlan: null,
+  archivedResiliencePlans: [],
+  currentTabletopSession: null,
+  archivedTabletopSessions: [],
+  importedTabletopScenarios: [],
 };
 
 export const defaultTenantSettings = {
@@ -213,6 +226,20 @@ export const sectionPermissionMap = {
   auditChecklistStates: 'kritis_edit',
   auditFindings: 'kritis_edit',
   certificationState: 'kritis_edit',
+  // C5.1 · Permission-Mapping der sechs neuen State-Felder. Rationale:
+  //  - riskEntries / Tabletop-Felder → governance_edit: Risiko-Katalog
+  //    und Tabletops sind Governance-Werkzeuge (analog zu scenarios,
+  //    exercises, stakeholders, sites, assets).
+  //  - resiliencePlan + archivedResiliencePlans → kritis_edit: Der
+  //    Resilienzplan ist § 13 KRITISDachG — gleiche Permission wie
+  //    requirementStates, regulatoryProfile, auditChecklistStates,
+  //    auditFindings, certificationState.
+  riskEntries: 'governance_edit',
+  resiliencePlan: 'kritis_edit',
+  archivedResiliencePlans: 'kritis_edit',
+  currentTabletopSession: 'governance_edit',
+  archivedTabletopSessions: 'governance_edit',
+  importedTabletopScenarios: 'governance_edit',
 };
 
 // === Persistence-Limits (C3.0b) =============================================

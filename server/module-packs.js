@@ -152,6 +152,14 @@ function normalizeOverlayShape(value) {
     dependencyTemplates: sanitizeArray(raw.dependencyTemplates),
     scenarioTemplates: sanitizeArray(raw.scenarioTemplates),
     exerciseTemplates: sanitizeArray(raw.exerciseTemplates),
+    // C5.1 · Drei neue Template-Felder für Risiken/Resilienz/Tabletop.
+    // Symmetrisch zu den Tenant-State-Strukturen (src/types.ts:1198-1203
+    // und src/features/{riskCatalog,resiliencePlan,tabletopExercise}/types.ts).
+    // Cross-Reference-Arrays werden in Pack 1.0 leer gelassen (▷ Entscheidung B.1):
+    // Pack-Autor pflegt inhaltlich, Operator verknüpft nach "Übernehmen" manuell.
+    riskCatalogTemplates: sanitizeArray(raw.riskCatalogTemplates),
+    resiliencePlanTemplate: isPlainObject(raw.resiliencePlanTemplate) ? raw.resiliencePlanTemplate : undefined,
+    tabletopScenarios: sanitizeArray(raw.tabletopScenarios),
     uiHints: isPlainObject(raw.uiHints) ? raw.uiHints : undefined,
     kritisExtension: isPlainObject(raw.kritisExtension) ? raw.kritisExtension : undefined,
   };
@@ -210,6 +218,18 @@ export function applyModuleOverlay(baseModule, overlayDefinition, targetModuleId
     dependencyTemplates: mergeById(base.dependencyTemplates, overlay.dependencyTemplates),
     scenarioTemplates: mergeById(base.scenarioTemplates, overlay.scenarioTemplates),
     exerciseTemplates: mergeById(base.exerciseTemplates, overlay.exerciseTemplates),
+    // C5.1 · Merge-Strategien der drei neuen Felder:
+    //  - riskCatalogTemplates: mergeById (id-basiert, analog zu scenarioTemplates etc.)
+    //  - resiliencePlanTemplate: scalar override (nur ein Plan pro Pack, Overlay ersetzt komplett;
+    //    Per-Sektion-Merge ist YAGNI für Pack 1.0 — wer ein AT-Overlay braucht, schreibt einen
+    //    kompletten Ersatz-Template)
+    //  - tabletopScenarios: mergeById (analog zu scenarioTemplates; Scenarios sind id-geschlossene
+    //    Objektgraphen mit Timeline/Injects/Decisions)
+    riskCatalogTemplates: mergeById(base.riskCatalogTemplates, overlay.riskCatalogTemplates),
+    resiliencePlanTemplate: overlay.resiliencePlanTemplate !== undefined
+      ? overlay.resiliencePlanTemplate
+      : (isPlainObject(base.resiliencePlanTemplate) ? base.resiliencePlanTemplate : undefined),
+    tabletopScenarios: mergeById(base.tabletopScenarios, overlay.tabletopScenarios),
     uiHints: {
       ...(isPlainObject(base.uiHints) ? base.uiHints : {}),
       ...(overlay.uiHints || {}),
@@ -235,6 +255,194 @@ export function applyModuleOverlay(baseModule, overlayDefinition, targetModuleId
       ),
     },
   };
+}
+
+// ============================================================================
+// C5.1 · Enums und Sub-Validatoren für die drei neuen Template-Felder
+// ============================================================================
+// Enum-Listen bewusst byte-identisch zu den TS-Type-Unions in
+// src/features/{riskCatalog,resiliencePlan,tabletopExercise}/types.ts.
+// Die Symmetrie-Self-Check-Tests (§ 3.4 der C5.1-Analyse) greifen hier —
+// falls später ein Wert in TS hinzukommt, muss er hier nachgezogen werden;
+// der Test schlägt dann an, bis die Liste angepasst ist.
+
+export const RISK_CATEGORY_IDS = [
+  'nature',
+  'technical',
+  'human_intentional',
+  'human_unintentional',
+  'interdependency',
+  'cyber_physical',
+];
+
+export const SCENARIO_PHASES = [
+  'discovery',
+  'early_response',
+  '24h_reporting',
+  'stabilization',
+  'recovery',
+];
+
+export const EVALUATION_CATEGORIES = [
+  'reporting',
+  'governance',
+  'operations',
+  'communication',
+  'other',
+];
+
+export const RESILIENCE_GOALS = ['prevent', 'protect', 'respond', 'recover'];
+
+export const MEASURE_STATUSES = ['planned', 'active', 'ready'];
+
+function isIntInRange(value, min, max) {
+  const num = Number(value);
+  return Number.isInteger(num) && num >= min && num <= max;
+}
+
+function validateRiskCatalogTemplate(entry, prefix) {
+  const errors = [];
+  if (!isPlainObject(entry)) {
+    errors.push(`${prefix} muss ein Objekt sein.`);
+    return errors;
+  }
+  if (!sanitizeString(entry.id)) errors.push(`${prefix}.id fehlt oder ist leer.`);
+  if (!RISK_CATEGORY_IDS.includes(sanitizeString(entry.categoryId))) {
+    errors.push(`${prefix}.categoryId muss einer von ${RISK_CATEGORY_IDS.join(', ')} sein.`);
+  }
+  if (!sanitizeString(entry.subCategoryId)) errors.push(`${prefix}.subCategoryId fehlt oder ist leer.`);
+  if (!sanitizeString(entry.titel)) errors.push(`${prefix}.titel fehlt oder ist leer.`);
+  if (!isIntInRange(entry.eintrittswahrscheinlichkeit, 1, 5)) {
+    errors.push(`${prefix}.eintrittswahrscheinlichkeit muss ganzzahlig zwischen 1 und 5 liegen.`);
+  }
+  if (!isIntInRange(entry.auswirkung, 1, 5)) {
+    errors.push(`${prefix}.auswirkung muss ganzzahlig zwischen 1 und 5 liegen.`);
+  }
+  if (!isIntInRange(entry.residualRisk, 1, 5)) {
+    errors.push(`${prefix}.residualRisk muss ganzzahlig zwischen 1 und 5 liegen.`);
+  }
+  for (const field of [
+    'affectedAssetIds',
+    'affectedProcessIds',
+    'affectedInterdependencies',
+    'mitigationMeasureIds',
+  ]) {
+    if (entry[field] !== undefined && !Array.isArray(entry[field])) {
+      errors.push(`${prefix}.${field} muss ein Array sein.`);
+    }
+  }
+  return errors;
+}
+
+function validateResiliencePlanTemplate(entry, prefix) {
+  const errors = [];
+  if (!isPlainObject(entry)) {
+    errors.push(`${prefix} muss ein Objekt sein.`);
+    return errors;
+  }
+  const content = entry.content;
+  if (!isPlainObject(content)) {
+    errors.push(`${prefix}.content muss ein Objekt sein.`);
+    return errors;
+  }
+  // Pflicht-Sektionen analog zu ResiliencePlanContent in
+  // src/features/resiliencePlan/types.ts:89-96.
+  const requiredSections = ['scope', 'riskBasis', 'measuresByGoal', 'governance', 'reporting', 'evidence'];
+  for (const section of requiredSections) {
+    if (!isPlainObject(content[section])) {
+      errors.push(`${prefix}.content.${section} fehlt oder ist kein Objekt.`);
+    }
+  }
+  // measuresByGoal muss alle vier Resilienz-Ziele (§ 13 KRITISDachG) enthalten.
+  if (isPlainObject(content.measuresByGoal)) {
+    for (const goal of RESILIENCE_GOALS) {
+      if (!Array.isArray(content.measuresByGoal[goal])) {
+        errors.push(`${prefix}.content.measuresByGoal.${goal} muss ein Array sein.`);
+      }
+    }
+    // Unbekannte Goal-Keys ablehnen (additionalProperties: false).
+    for (const key of Object.keys(content.measuresByGoal)) {
+      if (!RESILIENCE_GOALS.includes(key)) {
+        errors.push(`${prefix}.content.measuresByGoal hat unbekannten Goal-Key: ${key}.`);
+      }
+    }
+    // MeasureReference.status prüfen, wo angegeben.
+    for (const goal of RESILIENCE_GOALS) {
+      const measures = content.measuresByGoal[goal];
+      if (Array.isArray(measures)) {
+        measures.forEach((measure, idx) => {
+          if (isPlainObject(measure) && measure.status !== undefined
+              && !MEASURE_STATUSES.includes(sanitizeString(measure.status))) {
+            errors.push(`${prefix}.content.measuresByGoal.${goal}[${idx}].status muss einer von ${MEASURE_STATUSES.join(', ')} sein.`);
+          }
+        });
+      }
+    }
+  }
+  if (isPlainObject(content.evidence) && content.evidence.reviewCycleYears !== undefined) {
+    const years = Number(content.evidence.reviewCycleYears);
+    if (!Number.isInteger(years) || years < 1) {
+      errors.push(`${prefix}.content.evidence.reviewCycleYears muss ganzzahlig >= 1 sein.`);
+    }
+  }
+  return errors;
+}
+
+function validateTabletopScenario(entry, prefix) {
+  const errors = [];
+  if (!isPlainObject(entry)) {
+    errors.push(`${prefix} muss ein Objekt sein.`);
+    return errors;
+  }
+  if (!sanitizeString(entry.id)) errors.push(`${prefix}.id fehlt oder ist leer.`);
+  if (!isSemver(entry.version)) errors.push(`${prefix}.version muss dem Format x.y.z entsprechen.`);
+  if (!sanitizeString(entry.title)) errors.push(`${prefix}.title fehlt oder ist leer.`);
+  if (!sanitizeString(entry.summary)) errors.push(`${prefix}.summary fehlt oder ist leer.`);
+  if (!Array.isArray(entry.sectors)) errors.push(`${prefix}.sectors muss ein Array sein.`);
+  if (!Array.isArray(entry.applicableRegimes)) errors.push(`${prefix}.applicableRegimes muss ein Array sein.`);
+  if (!Number.isInteger(Number(entry.durationMinutes)) || Number(entry.durationMinutes) < 1) {
+    errors.push(`${prefix}.durationMinutes muss ganzzahlig >= 1 sein.`);
+  }
+  if (!Array.isArray(entry.roles)) errors.push(`${prefix}.roles muss ein Array sein.`);
+  if (!Array.isArray(entry.timeline)) {
+    errors.push(`${prefix}.timeline muss ein Array sein.`);
+  } else {
+    entry.timeline.forEach((step, idx) => {
+      const stepPrefix = `${prefix}.timeline[${idx}]`;
+      if (!isPlainObject(step)) {
+        errors.push(`${stepPrefix} muss ein Objekt sein.`);
+        return;
+      }
+      if (!SCENARIO_PHASES.includes(sanitizeString(step.phase))) {
+        errors.push(`${stepPrefix}.phase muss einer von ${SCENARIO_PHASES.join(', ')} sein.`);
+      }
+      if (step.injects !== undefined && !Array.isArray(step.injects)) {
+        errors.push(`${stepPrefix}.injects muss ein Array sein.`);
+      }
+      if (step.decisions !== undefined && !Array.isArray(step.decisions)) {
+        errors.push(`${stepPrefix}.decisions muss ein Array sein.`);
+      }
+    });
+  }
+  if (!Array.isArray(entry.evaluationCriteria)) {
+    errors.push(`${prefix}.evaluationCriteria muss ein Array sein.`);
+  } else {
+    entry.evaluationCriteria.forEach((crit, idx) => {
+      const critPrefix = `${prefix}.evaluationCriteria[${idx}]`;
+      if (!isPlainObject(crit)) {
+        errors.push(`${critPrefix} muss ein Objekt sein.`);
+        return;
+      }
+      if (crit.category !== undefined
+          && !EVALUATION_CATEGORIES.includes(sanitizeString(crit.category))) {
+        errors.push(`${critPrefix}.category muss einer von ${EVALUATION_CATEGORIES.join(', ')} sein.`);
+      }
+      if (crit.weight !== undefined && !Number.isFinite(Number(crit.weight))) {
+        errors.push(`${critPrefix}.weight muss numerisch sein.`);
+      }
+    });
+  }
+  return errors;
 }
 
 function validateModuleDefinition(module) {
@@ -276,6 +484,29 @@ function validateModuleDefinition(module) {
   }
   if (raw.auditChecklist !== undefined && !Array.isArray(raw.auditChecklist)) {
     errors.push('auditChecklist muss ein Array sein.');
+  }
+  // C5.1 · Drei neue Template-Felder. Alle optional. Wenn vorhanden, werden
+  // sie strukturell deep-validiert (Sub-Helfer oben).
+  if (raw.riskCatalogTemplates !== undefined) {
+    if (!Array.isArray(raw.riskCatalogTemplates)) {
+      errors.push('riskCatalogTemplates muss ein Array sein.');
+    } else {
+      raw.riskCatalogTemplates.forEach((entry, idx) => {
+        errors.push(...validateRiskCatalogTemplate(entry, `riskCatalogTemplates[${idx}]`));
+      });
+    }
+  }
+  if (raw.resiliencePlanTemplate !== undefined) {
+    errors.push(...validateResiliencePlanTemplate(raw.resiliencePlanTemplate, 'resiliencePlanTemplate'));
+  }
+  if (raw.tabletopScenarios !== undefined) {
+    if (!Array.isArray(raw.tabletopScenarios)) {
+      errors.push('tabletopScenarios muss ein Array sein.');
+    } else {
+      raw.tabletopScenarios.forEach((entry, idx) => {
+        errors.push(...validateTabletopScenario(entry, `tabletopScenarios[${idx}]`));
+      });
+    }
   }
   return { valid: errors.length === 0, errors };
 }

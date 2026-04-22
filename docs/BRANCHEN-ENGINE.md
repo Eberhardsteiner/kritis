@@ -53,6 +53,37 @@ Der Inhalt bleibt für alle Branchen gleich strukturiert. Die Engine kann damit 
 - Audit-Checklisten
 - Prozesse, Abhängigkeiten, Szenarien und Übungen
 - KRITIS-Readiness-Erweiterungen
+- **Risikokatalog-Templates (§ 12 KRITISDachG)** · Feld `riskCatalogTemplates[]`
+- **Resilienzplan-Template (§ 13 KRITISDachG)** · Feld `resiliencePlanTemplate`
+- **Tabletop-Übungsszenarien (§ 18 KRITISDachG)** · Feld `tabletopScenarios[]`
+
+### Template-Felder für Risiken, Resilienzplan und Tabletops (C5.1)
+
+Ab C5.1 trägt ein Pack zusätzlich fachliche Vorlagen für die drei Kernfeatures:
+
+- `riskCatalogTemplates[]` — 5×5-Risikomatrix-Einträge mit Kategorie, Beschreibung und Initial-Scoring.
+- `resiliencePlanTemplate` — vollständiger Resilienzplan-Inhalt mit sechs Sektionen (Scope, Risikobasis, Maßnahmen nach vier Resilienzzielen, Governance, Meldewesen, Nachweise).
+- `tabletopScenarios[]` — komplette Tabletop-Szenarios mit Timeline, Injects, Entscheidungen und Bewertungskriterien.
+
+Die Felder folgen **byte-identisch** den TypeScript-Typen in `src/features/{riskCatalog,resiliencePlan,tabletopExercise}/types.ts`. Ein Symmetrie-Self-Check-Test in `server/module-packs.test.js` schützt dauerhaft vor TS-Type-Drift: Sobald ein Feld in den Type-Dateien geändert wird, muss die Pack-Schema-Definition nachgezogen werden.
+
+#### Cross-Reference-Felder: Pack-Autor lässt leer, Operator verknüpft
+
+In Pack 1.0 werden Cross-Reference-Felder (`affectedAssetIds`, `affectedProcessIds`, `mitigationMeasureIds`, `affectedInterdependencies` in `riskCatalogTemplates`; `topRisks[].riskId`, `measuresByGoal[*][].linkedActionItemId` in `resiliencePlanTemplate`) **immer leer** gelassen. Grund: Pack-Zeit-IDs sind nicht mit Tenant-Zeit-IDs identisch; Assets/Prozesse/Maßnahmen entstehen erst nach Pack-Import im Tenant-State. Der Operator verknüpft die Einträge nach "Übernehmen" manuell.
+
+#### Copy-Operator-Symmetrie (Template → Instanz)
+
+Beim "Übernehmen"-Klick gelten folgende Regeln:
+
+- `riskCatalogTemplates[i]` → `state.riskEntries[]`: Feld-für-Feld 1:1, nur die `id` wird neu generiert (Pack-ID bleibt als Pack-stabile Referenz für Overlay-Merger erhalten).
+- `resiliencePlanTemplate.content` → `state.resiliencePlan.content`: Content-Subbaum 1:1. Lifecycle-Felder (`id`, `tenantId`, `version`, `status`, `createdAt`, `updatedAt`) setzt der Frontend-Operator.
+- `tabletopScenarios[i]` → `state.importedTabletopScenarios[]`: komplett 1:1 inkl. ID. `ExerciseSession` entsteht separat beim Übungsstart.
+
+#### Overlay-Merge-Regeln
+
+- `riskCatalogTemplates`: `mergeById` (id-basiert, konsistent mit `scenarioTemplates` etc.)
+- `resiliencePlanTemplate`: **scalar override** — Overlay ersetzt das Template komplett, keine Per-Sektion-Merges. Wer eine AT-Variante braucht, schreibt einen kompletten Ersatz-Template.
+- `tabletopScenarios`: `mergeById`
 
 ## Geladene Inhalte
 

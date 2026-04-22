@@ -317,6 +317,21 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "riskCatalogTemplates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/riskCatalogTemplate"
+                }
+              },
+              "resiliencePlanTemplate": {
+                "$ref": "#/$defs/resiliencePlanTemplate"
+              },
+              "tabletopScenarios": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/tabletopScenario"
+                }
               }
             },
             "$defs": {
@@ -882,6 +897,339 @@
                     "type": "string"
                   }
                 }
+              },
+              "riskCatalogTemplate": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "categoryId",
+                  "subCategoryId",
+                  "titel",
+                  "eintrittswahrscheinlichkeit",
+                  "auswirkung",
+                  "residualRisk"
+                ],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "categoryId": {
+                    "type": "string",
+                    "enum": [
+                      "nature",
+                      "technical",
+                      "human_intentional",
+                      "human_unintentional",
+                      "interdependency",
+                      "cyber_physical"
+                    ]
+                  },
+                  "subCategoryId": { "type": "string", "minLength": 1 },
+                  "titel": { "type": "string", "minLength": 1 },
+                  "beschreibung": { "type": "string" },
+                  "eintrittswahrscheinlichkeit": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "auswirkung": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "residualRisk": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "reviewDate": { "type": "string" },
+                  "owner": { "type": "string" },
+                  "affectedAssetIds": { "type": "array", "items": { "type": "string" } },
+                  "affectedProcessIds": { "type": "array", "items": { "type": "string" } },
+                  "affectedInterdependencies": { "type": "array", "items": { "type": "string" } },
+                  "mitigationMeasureIds": { "type": "array", "items": { "type": "string" } }
+                }
+              },
+              "resiliencePlanTemplate": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["content"],
+                "properties": {
+                  "templateId": { "type": "string", "minLength": 1 },
+                  "templateNote": { "type": "string" },
+                  "content": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "scope",
+                      "riskBasis",
+                      "measuresByGoal",
+                      "governance",
+                      "reporting",
+                      "evidence"
+                    ],
+                    "properties": {
+                      "scope": { "$ref": "#/$defs/resilienceScopeSection" },
+                      "riskBasis": { "$ref": "#/$defs/resilienceRiskBasisSection" },
+                      "measuresByGoal": { "$ref": "#/$defs/resilienceMeasuresByGoal" },
+                      "governance": { "$ref": "#/$defs/resilienceGovernanceSection" },
+                      "reporting": { "$ref": "#/$defs/resilienceReportingSection" },
+                      "evidence": { "$ref": "#/$defs/resilienceEvidenceSection" }
+                    }
+                  }
+                }
+              },
+              "resilienceScopeSection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "operatorName": { "type": "string" },
+                  "sector": { "type": "string" },
+                  "criticalService": { "type": "string" },
+                  "locations": { "type": "string" },
+                  "employees": { "type": "string" },
+                  "personsServed": { "type": "string" },
+                  "scopeNote": { "type": "string" }
+                }
+              },
+              "resilienceRiskBasisSection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "methodology": { "type": "string" },
+                  "riskAnalysisReference": { "type": "string" },
+                  "topRisks": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/resilienceTopRisk" }
+                  },
+                  "riskBasisNote": { "type": "string" }
+                }
+              },
+              "resilienceTopRisk": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["title", "category", "initialScore", "residualScore", "criticality"],
+                "properties": {
+                  "riskId": { "type": "string" },
+                  "title": { "type": "string" },
+                  "category": { "type": "string" },
+                  "initialScore": { "type": "number" },
+                  "residualScore": { "type": "number" },
+                  "criticality": { "type": "string" }
+                }
+              },
+              "resilienceMeasuresByGoal": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["prevent", "protect", "respond", "recover"],
+                "properties": {
+                  "prevent": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/resilienceMeasureReference" }
+                  },
+                  "protect": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/resilienceMeasureReference" }
+                  },
+                  "respond": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/resilienceMeasureReference" }
+                  },
+                  "recover": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/resilienceMeasureReference" }
+                  }
+                }
+              },
+              "resilienceMeasureReference": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "title", "description", "goal", "owner", "dueDate", "status"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "goal": {
+                    "type": "string",
+                    "enum": ["prevent", "protect", "respond", "recover"]
+                  },
+                  "linkedActionItemId": { "type": "string" },
+                  "owner": { "type": "string" },
+                  "dueDate": { "type": "string" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["planned", "active", "ready"]
+                  }
+                }
+              },
+              "resilienceGovernanceSection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "managementBoardContact": { "type": "string" },
+                  "programOwner": { "type": "string" },
+                  "escalationPath": { "type": "string" },
+                  "boardReviewCadence": { "type": "string" },
+                  "governanceNote": { "type": "string" }
+                }
+              },
+              "resilienceReportingSection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "incidentContact": { "type": "string" },
+                  "incidentBackupContact": { "type": "string" },
+                  "bsiPortalNote": { "type": "string" },
+                  "firstReportingTimeline": { "type": "string" },
+                  "reportingNote": { "type": "string" }
+                }
+              },
+              "resilienceEvidenceSection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "evidenceReferences": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["title", "type"],
+                      "properties": {
+                        "title": { "type": "string" },
+                        "type": { "type": "string" },
+                        "sourceStandard": { "type": "string" }
+                      }
+                    }
+                  },
+                  "reviewCycleYears": { "type": "integer", "minimum": 1 },
+                  "equivalentProofsNote": { "type": "string" },
+                  "evidenceNote": { "type": "string" }
+                }
+              },
+              "tabletopScenario": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "version",
+                  "title",
+                  "summary",
+                  "sectors",
+                  "applicableRegimes",
+                  "durationMinutes",
+                  "roles",
+                  "timeline",
+                  "evaluationCriteria"
+                ],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+                  "title": { "type": "string", "minLength": 1 },
+                  "summary": { "type": "string" },
+                  "sectors": { "type": "array", "items": { "type": "string" } },
+                  "applicableRegimes": { "type": "array", "items": { "type": "string" } },
+                  "durationMinutes": { "type": "integer", "minimum": 1 },
+                  "roles": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopExerciseRole" }
+                  },
+                  "timeline": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopTimelineStep" }
+                  },
+                  "evaluationCriteria": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopEvaluationCriterion" }
+                  }
+                }
+              },
+              "tabletopExerciseRole": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "title", "briefing"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "title": { "type": "string" },
+                  "briefing": { "type": "string" }
+                }
+              },
+              "tabletopTimelineStep": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["t", "phase", "injects", "decisions"],
+                "properties": {
+                  "t": { "type": "number" },
+                  "phase": {
+                    "type": "string",
+                    "enum": [
+                      "discovery",
+                      "early_response",
+                      "24h_reporting",
+                      "stabilization",
+                      "recovery"
+                    ]
+                  },
+                  "injects": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopTimelineInject" }
+                  },
+                  "decisions": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopTimelineDecision" }
+                  }
+                }
+              },
+              "tabletopTimelineInject": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "title", "description"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "roleId": { "type": "string" }
+                }
+              },
+              "tabletopTimelineDecision": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "question", "options"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "question": { "type": "string" },
+                  "options": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/tabletopTimelineDecisionOption" }
+                  },
+                  "roleId": { "type": "string" },
+                  "relatedCriteria": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "guidance": { "type": "string" }
+                }
+              },
+              "tabletopTimelineDecisionOption": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "label"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "label": { "type": "string" },
+                  "consequence": { "type": "string" },
+                  "evaluationHints": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "scoreContribution": { "type": "number" }
+                }
+              },
+              "tabletopEvaluationCriterion": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "description", "weight"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "description": { "type": "string" },
+                  "weight": { "type": "number" },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "reporting",
+                      "governance",
+                      "operations",
+                      "communication",
+                      "other"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -1035,6 +1383,21 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/$defs/exerciseTemplate"
+                }
+              },
+              "riskCatalogTemplates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/riskCatalogTemplate"
+                }
+              },
+              "resiliencePlanTemplate": {
+                "$ref": "#/$defs/resiliencePlanTemplate"
+              },
+              "tabletopScenarios": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/tabletopScenario"
                 }
               },
               "uiHints": {
