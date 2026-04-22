@@ -25,3 +25,19 @@ export async function computeSha256(filePath) {
   const fileBuffer = await fs.readFile(filePath);
   return crypto.createHash('sha256').update(fileBuffer).digest('hex');
 }
+
+/**
+ * Baut die URL für Downloads aus dem File-Endpoint unter /api/files/.
+ * Pure String-Konstruktion, kein I/O.
+ *
+ * Eingeführt in C3.4. Wird von services/evidence.js (Attachment-URLs,
+ * Version-Download-Links, Ledger-Summary) konsumiert. Zukünftige
+ * Konsumenten (Snapshot-Download, Export-Inline-Links) nutzen denselben
+ * Builder statt eigener URL-Templates. Die Download-Semantik (filename-
+ * als-download-query) ist damit an einer Stelle zentralisiert.
+ */
+export function buildDownloadUrl(storedFileName, originalName = '') {
+  const filePart = encodeURIComponent(storedFileName);
+  const namePart = encodeURIComponent(originalName || storedFileName);
+  return `/api/files/${filePart}?download=${namePart}`;
+}

@@ -1,17 +1,13 @@
 import crypto from 'node:crypto';
 import express from 'express';
-import multer from 'multer';
 import helmet from 'helmet';
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
-  buildUploadPolicy,
   createCorsMiddleware,
   createRateLimitMiddleware,
-  runAntivirusScan,
-  validateUploadCandidate,
 } from './security.js';
 // parseImportedModulePack lebte bis C3.1 hier (für upsertImportedModulePack);
 // der Import ist mit der Funktions-Extraktion nach
@@ -33,9 +29,14 @@ import {
   createRequestHardeningMiddleware,
   summarizeRestoreDrills,
 } from './hardening.js';
-import { buildEvidenceRetentionInfo, buildEvidenceRetentionSummary } from './evidence-platform.js';
+// C3.4: buildEvidenceRetentionInfo wird nicht mehr direkt von index.js
+// verwendet (alle Konsumenten zogen mit den evidence-Helpers um).
+// buildEvidenceRetentionSummary bleibt, weil die retention_review-
+// Job-Artefakt-Generierung in index.js (C3.6-Residuum) sie aufruft.
+import { buildEvidenceRetentionSummary } from './evidence-platform.js';
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAuthRoutes } from './routes/auth.js';
+import { registerEvidenceRoutes } from './routes/evidence.js';
 import { registerFileRoutes } from './routes/files.js';
 import { registerIntegrationRoutes } from './routes/integration.js';
 import { registerModuleRoutes } from './routes/modules.js';
@@ -49,6 +50,13 @@ import { registerTenantSettingsRoutes } from './routes/tenant-settings.js';
 // in C3.6 (Service-Residuen) um.
 import { listExportEntries } from './services/exports.js';
 import { computeSha256 } from './services/file-utils.js';
+// C3.4: evidence-Helfer aus services/evidence.js re-importiert für
+// buildStateEnvelope (unten) und cleanupOrphanUploads (bleibt bis C3.5).
+import {
+  attachVersionMetadata,
+  attachmentFileNamesFromState,
+  versionFileNamesFromLedger,
+} from './services/evidence.js';
 // C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
 import {
   rootDir,
@@ -74,7 +82,6 @@ import {
 import {
   MAX_AUDIT_ENTRIES,
   MAX_JSON_SIZE,
-  MAX_UPLOAD_BYTES,
   OIDC_PROVIDER_ID,
   PASSWORD_ITERATIONS,
   SESSION_HOURS,
@@ -223,11 +230,9 @@ const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
 // (persistenceLayerPromise, objectStoragePromise) sind seit C3.0b
 // in ./services/persistence-wrappers.js.
 
-const uploadPolicy = buildUploadPolicy(MAX_UPLOAD_BYTES);
-const upload = multer({
-  dest: globalTmpDir,
-  limits: { fileSize: MAX_UPLOAD_BYTES },
-});
+// C3.4: multer-Instanz + uploadPolicy leben jetzt in routes/evidence.js
+// (alleinige Konsumenten-Route). MAX_UPLOAD_BYTES wird dort direkt aus
+// config/defaults.js gezogen, globalTmpDir aus config/paths.js.
 
 const observability = createObservabilityStore({
   recentEventLimit: 120,
@@ -343,23 +348,10 @@ async function getSnapshotPayload(tenantId, snapshotId) {
 // ./services/auth-session.js (Import oben).
 
 
-function attachmentFileNamesFromState(state) {
-  const evidenceItems = sanitizeArray(state?.evidenceItems);
-  return new Set(
-    evidenceItems
-      .map((item) => item?.serverAttachment?.storedFileName)
-      .filter((value) => typeof value === 'string' && value.trim().length > 0),
-  );
-}
-
-function versionFileNamesFromLedger(versions) {
-  return new Set(
-    sanitizeArray(versions)
-      .map((entry) => entry?.storedFileName)
-      .filter((value) => typeof value === 'string' && value.trim().length > 0),
-  );
-}
-
+// attachmentFileNamesFromState, versionFileNamesFromLedger leben seit
+// C3.4 in ./services/evidence.js (Re-Import oben). cleanupOrphanUploads
+// bleibt hier bis C3.5 — Konsumenten sind /api/state PUT und
+// /api/snapshots/:id/restore, die beide mit der state-Route umziehen.
 async function cleanupOrphanUploads(previousState, nextState, tenantId) {
   const previousNames = attachmentFileNamesFromState(previousState);
   const nextNames = attachmentFileNamesFromState(nextState);
@@ -384,133 +376,11 @@ async function cleanupOrphanUploads(previousState, nextState, tenantId) {
 // computeSha256 lebt seit C3.2 in ./services/file-utils.js
 // (wird von C3.2 exports + C3.4 evidence gemeinsam konsumiert).
 
-function buildDownloadUrl(storedFileName, originalName = '') {
-  const filePart = encodeURIComponent(storedFileName);
-  const namePart = encodeURIComponent(originalName || storedFileName);
-  return `/api/files/${filePart}?download=${namePart}`;
-}
-
-function enrichAttachmentWithRetention(evidence, attachment, policy) {
-  if (!attachment) {
-    return attachment;
-  }
-  const retention = buildEvidenceRetentionInfo({ ...evidence, serverAttachment: attachment }, policy);
-  return {
-    ...attachment,
-    storageDriver: attachment.storageDriver || retention.storageDriver,
-    retentionUntil: retention.retentionUntil,
-    retentionStatus: retention.retentionStatus,
-  };
-}
-
-async function attachVersionMetadata(tenantId, state) {
-  const [versions, tenantPolicy] = await Promise.all([readVersions(tenantId), readTenantSettings(tenantId)]);
-  const countByEvidenceId = sanitizeArray(versions).reduce((accumulator, entry) => {
-    if (!entry?.evidenceId) {
-      return accumulator;
-    }
-    accumulator[entry.evidenceId] = (accumulator[entry.evidenceId] || 0) + 1;
-    return accumulator;
-  }, {});
-
-  return {
-    ...state,
-    evidenceItems: sanitizeArray(state.evidenceItems).map((item) => {
-      if (!item?.serverAttachment) {
-        return item;
-      }
-
-      const currentVersion = sanitizeArray(versions).find((entry) => entry?.id === item.serverAttachment?.versionId)
-        ?? sanitizeArray(versions).find((entry) => entry?.evidenceId === item.id && entry?.current);
-
-      return {
-        ...item,
-        serverAttachment: enrichAttachmentWithRetention(item, {
-          ...item.serverAttachment,
-          versionId: currentVersion?.id,
-          checksumSha256: currentVersion?.checksumSha256,
-          historyCount: countByEvidenceId[item.id] || 0,
-          storageDriver: currentVersion?.storageDriver || item.serverAttachment?.storageDriver || 'filesystem',
-          url: buildDownloadUrl(item.serverAttachment.storedFileName, item.serverAttachment.fileName),
-        }, tenantPolicy),
-      };
-    }),
-  };
-}
-
-function listEvidenceVersionEntries(versions, evidenceId, tenantPolicy = defaultTenantSettings) {
-  return sanitizeArray(versions)
-    .filter((entry) => entry?.evidenceId === evidenceId)
-    .sort((left, right) => String(right?.uploadedAt || '').localeCompare(String(left?.uploadedAt || '')))
-    .map((entry) => {
-      const retention = buildEvidenceRetentionInfo({
-        id: entry.evidenceId,
-        createdAt: entry.uploadedAt,
-        reviewCycleDays: tenantPolicy?.evidenceReviewCadenceDays || 0,
-        serverAttachment: {
-          uploadedAt: entry.uploadedAt,
-          storageDriver: entry.storageDriver || 'filesystem',
-        },
-      }, tenantPolicy);
-      return {
-        id: entry.id,
-        evidenceId: entry.evidenceId,
-        versionLabel: entry.versionLabel || '',
-        fileName: entry.fileName,
-        storedFileName: entry.storedFileName,
-        mimeType: entry.mimeType,
-        sizeKb: entry.sizeKb,
-        uploadedAt: entry.uploadedAt,
-        uploadedBy: entry.uploadedBy,
-        checksumSha256: entry.checksumSha256,
-        classification: entry.classification || 'intern',
-        current: Boolean(entry.current),
-        storageDriver: entry.storageDriver || 'filesystem',
-        retentionUntil: retention.retentionUntil,
-        retentionStatus: retention.retentionStatus,
-        downloadUrl: buildDownloadUrl(entry.storedFileName, entry.fileName),
-      };
-    });
-}
-
-async function buildDocumentLedgerSummary(tenantId) {
-  const [versions, tenantPolicy] = await Promise.all([readVersions(tenantId), readTenantSettings(tenantId)]);
-  const normalizedVersions = sanitizeArray(versions);
-  const versionsByDriver = normalizedVersions.reduce((accumulator, entry) => {
-    const driver = String(entry?.storageDriver || 'filesystem');
-    accumulator[driver] = (accumulator[driver] || 0) + 1;
-    return accumulator;
-  }, {});
-  const sorted = [...normalizedVersions].sort((left, right) => String(right?.uploadedAt || '').localeCompare(String(left?.uploadedAt || '')));
-  const evidenceIds = new Set(sorted.map((entry) => entry?.evidenceId).filter(Boolean));
-  const currentAttachments = sorted.filter((entry) => entry?.current).length;
-
-  return {
-    totalVersions: sorted.length,
-    evidenceWithHistory: evidenceIds.size,
-    currentAttachments,
-    latestActivityAt: sorted[0]?.uploadedAt || '',
-    versionsByStorageDriver: Object.entries(versionsByDriver).map(([driver, count]) => ({ driver, count })),
-    recentEntries: sorted.slice(0, 10).map((entry) => ({
-      id: entry.id,
-      evidenceId: entry.evidenceId,
-      versionLabel: entry.versionLabel || '',
-      fileName: entry.fileName,
-      storedFileName: entry.storedFileName,
-      mimeType: entry.mimeType,
-      sizeKb: entry.sizeKb,
-      uploadedAt: entry.uploadedAt,
-      uploadedBy: entry.uploadedBy,
-      checksumSha256: entry.checksumSha256,
-      classification: entry.classification || 'intern',
-      current: Boolean(entry.current),
-      storageDriver: entry.storageDriver || 'filesystem',
-      retentionUntil: buildEvidenceRetentionInfo({ createdAt: entry.uploadedAt, serverAttachment: { uploadedAt: entry.uploadedAt, storageDriver: entry.storageDriver || 'filesystem' } }, tenantPolicy).retentionUntil,
-      retentionStatus: buildEvidenceRetentionInfo({ createdAt: entry.uploadedAt, serverAttachment: { uploadedAt: entry.uploadedAt, storageDriver: entry.storageDriver || 'filesystem' } }, tenantPolicy).retentionStatus,
-      downloadUrl: buildDownloadUrl(entry.storedFileName, entry.fileName),
-    })),
-  };
-}
+// buildDownloadUrl lebt seit C3.4 in ./services/file-utils.js.
+// enrichAttachmentWithRetention, attachVersionMetadata,
+// listEvidenceVersionEntries, buildDocumentLedgerSummary leben seit
+// C3.4 in ./services/evidence.js. Die Route-Handler sind nach
+// ./routes/evidence.js umgezogen (registerEvidenceRoutes(app) weiter unten).
 
 async function listTenantSummaries(tenantSubset = null) {
   const tenants = tenantSubset ?? await readTenants();
@@ -1798,275 +1668,13 @@ app.post('/api/snapshots/:snapshotId/restore', async (req, res, next) => {
   }
 });
 
-app.post('/api/evidence/:evidenceId/attachment', upload.single('file'), async (req, res, next) => {
-  const tempFilePath = req.file?.path;
-  try {
-    if (!req.file) {
-      throw httpError(400, 'Bitte eine Datei hochladen.');
-    }
-
-    const validation = validateUploadCandidate(req.file, uploadPolicy);
-    if (!validation.ok) {
-      throw httpError(400, validation.reason);
-    }
-
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['evidence_edit'], authContext);
-    const evidenceId = req.params.evidenceId;
-    const currentState = await readState(authContext.membership.tenantId);
-    const evidenceIndex = sanitizeArray(currentState.evidenceItems).findIndex((item) => item?.id === evidenceId);
-
-    if (evidenceIndex < 0) {
-      throw httpError(404, 'Der Nachweis wurde nicht gefunden.');
-    }
-
-    const evidence = currentState.evidenceItems[evidenceIndex];
-    const extension = validation.extension.slice(0, 12);
-    const storedFileName = `${Date.now()}-${slugify(path.basename(req.file.originalname, extension) || 'attachment')}-${Math.random().toString(36).slice(2, 6)}${extension}`;
-
-    const scanResult = await runAntivirusScan(req.file.path, runtimeConfig);
-    if (scanResult.status === 'blocked') {
-      await fs.unlink(req.file.path).catch(() => undefined);
-      throw httpError(400, scanResult.detail);
-    }
-
-    const checksumSha256 = await computeSha256(req.file.path);
-    const storage = await getObjectStorage();
-    const storedObject = await storage.storeTempFile(req.file.path, {
-      tenantId: authContext.membership.tenantId,
-      storedFileName,
-      mimeType: req.file.mimetype || 'application/octet-stream',
-    });
-    const versions = sanitizeArray(await readVersions(authContext.membership.tenantId)).map((entry) => (
-      entry?.evidenceId === evidenceId ? { ...entry, current: false } : entry
-    ));
-
-    const versionEntry = {
-      id: createId('ver'),
-      evidenceId,
-      versionLabel: String(evidence?.version || '').trim(),
-      fileName: req.file.originalname,
-      storedFileName,
-      mimeType: req.file.mimetype || 'application/octet-stream',
-      sizeKb: Math.round((req.file.size / 1024) * 10) / 10,
-      uploadedAt: nowIso(),
-      uploadedBy: authContext.account.name,
-      uploadedById: authContext.account.id,
-      checksumSha256,
-      classification: evidence?.classification || 'intern',
-      current: true,
-      storageDriver: storedObject.driver || 'filesystem',
-      objectKey: storedObject.objectKey || storedFileName,
-    };
-    versions.unshift(versionEntry);
-    await writeVersions(authContext.membership.tenantId, versions);
-
-    const historyCount = versions.filter((entry) => entry?.evidenceId === evidenceId).length;
-    const tenantPolicy = await readTenantSettings(authContext.membership.tenantId);
-    const attachment = enrichAttachmentWithRetention(evidence, {
-      id: createId('att'),
-      fileName: req.file.originalname,
-      storedFileName,
-      mimeType: req.file.mimetype || 'application/octet-stream',
-      sizeKb: Math.round((req.file.size / 1024) * 10) / 10,
-      url: buildDownloadUrl(storedFileName, req.file.originalname),
-      uploadedAt: versionEntry.uploadedAt,
-      uploadedBy: authContext.account.name,
-      versionId: versionEntry.id,
-      checksumSha256,
-      historyCount,
-      storageDriver: storedObject.driver || 'filesystem',
-      objectKey: storedObject.objectKey || storedFileName,
-    }, tenantPolicy);
-
-    currentState.evidenceItems[evidenceIndex] = {
-      ...evidence,
-      serverAttachment: attachment,
-      attachment: undefined,
-      status: evidence.status === 'missing' ? 'draft' : evidence.status,
-    };
-
-    await writeState(authContext.membership.tenantId, currentState, {
-      updatedAt: versionEntry.uploadedAt,
-    });
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: versionEntry.uploadedAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Dateiversion hochgeladen',
-      resource: 'evidence',
-      summary: `Datei „${req.file.originalname}“ wurde als neue Version für Nachweis ${evidenceId} gespeichert.${scanResult.status === 'clean' ? ' Antivirus-Scan ohne Treffer.' : ''}`,
-      sections: ['evidenceItems', 'document-versions'],
-    });
-
-    const stateMeta = await readStateMeta(authContext.membership.tenantId);
-    res.json({
-      ok: true,
-      attachment,
-      evidenceId,
-      stateVersion: stateMeta.version,
-      stateUpdatedAt: stateMeta.updatedAt,
-    });
-  } catch (error) {
-    next(error);
-  } finally {
-    if (tempFilePath) {
-      await fs.unlink(tempFilePath).catch(() => undefined);
-    }
-  }
-});
-
-app.delete('/api/evidence/:evidenceId/attachment', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['evidence_edit'], authContext);
-    const currentState = await readState(authContext.membership.tenantId);
-    const evidenceIndex = sanitizeArray(currentState.evidenceItems).findIndex((item) => item?.id === req.params.evidenceId);
-
-    if (evidenceIndex < 0) {
-      throw httpError(404, 'Der Nachweis wurde nicht gefunden.');
-    }
-
-    const versions = sanitizeArray(await readVersions(authContext.membership.tenantId)).map((entry) => (
-      entry?.evidenceId === req.params.evidenceId ? { ...entry, current: false } : entry
-    ));
-    await writeVersions(authContext.membership.tenantId, versions);
-
-    currentState.evidenceItems[evidenceIndex] = {
-      ...currentState.evidenceItems[evidenceIndex],
-      serverAttachment: undefined,
-    };
-
-    const detachedAt = nowIso();
-    await writeState(authContext.membership.tenantId, currentState, {
-      updatedAt: detachedAt,
-    });
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: detachedAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Aktive Dateireferenz entfernt',
-      resource: 'evidence',
-      summary: `Aktive Server-Datei von Nachweis ${req.params.evidenceId} wurde entfernt. Historie bleibt erhalten.`,
-      sections: ['evidenceItems', 'document-versions'],
-    });
-
-    const stateMeta = await readStateMeta(authContext.membership.tenantId);
-    res.json({ ok: true, stateVersion: stateMeta.version, stateUpdatedAt: stateMeta.updatedAt });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/evidence/:evidenceId/versions', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const [versions, tenantPolicy] = await Promise.all([
-      readVersions(authContext.membership.tenantId),
-      readTenantSettings(authContext.membership.tenantId),
-    ]);
-    res.json({ ok: true, versions: listEvidenceVersionEntries(versions, req.params.evidenceId, tenantPolicy) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/evidence/:evidenceId/versions/:versionId/restore', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    assertPermissions(['evidence_edit'], authContext);
-    const currentState = await readState(authContext.membership.tenantId);
-    const evidenceIndex = sanitizeArray(currentState.evidenceItems).findIndex((item) => item?.id === req.params.evidenceId);
-    if (evidenceIndex < 0) {
-      throw httpError(404, 'Der Nachweis wurde nicht gefunden.');
-    }
-
-    const versions = sanitizeArray(await readVersions(authContext.membership.tenantId));
-    const selectedVersion = versions.find((entry) => entry?.id === req.params.versionId && entry?.evidenceId === req.params.evidenceId);
-    if (!selectedVersion) {
-      throw httpError(404, 'Die angeforderte Dokumentenversion wurde nicht gefunden.');
-    }
-
-    const nextVersions = versions.map((entry) => (
-      entry?.evidenceId === req.params.evidenceId ? { ...entry, current: entry.id === selectedVersion.id } : entry
-    ));
-    await writeVersions(authContext.membership.tenantId, nextVersions);
-
-    const tenantPolicy = await readTenantSettings(authContext.membership.tenantId);
-    const restoredAttachment = enrichAttachmentWithRetention(currentState.evidenceItems[evidenceIndex], {
-      id: createId('att'),
-      fileName: selectedVersion.fileName,
-      storedFileName: selectedVersion.storedFileName,
-      mimeType: selectedVersion.mimeType,
-      sizeKb: selectedVersion.sizeKb,
-      url: buildDownloadUrl(selectedVersion.storedFileName, selectedVersion.fileName),
-      uploadedAt: selectedVersion.uploadedAt,
-      uploadedBy: selectedVersion.uploadedBy,
-      versionId: selectedVersion.id,
-      checksumSha256: selectedVersion.checksumSha256,
-      historyCount: nextVersions.filter((entry) => entry?.evidenceId === req.params.evidenceId).length,
-      storageDriver: selectedVersion.storageDriver || 'filesystem',
-      objectKey: selectedVersion.objectKey || selectedVersion.storedFileName,
-    }, tenantPolicy);
-
-    currentState.evidenceItems[evidenceIndex] = {
-      ...currentState.evidenceItems[evidenceIndex],
-      serverAttachment: restoredAttachment,
-    };
-    const restoredAt = nowIso();
-    await writeState(authContext.membership.tenantId, currentState, {
-      updatedAt: restoredAt,
-    });
-
-    const savedState = await attachVersionMetadata(authContext.membership.tenantId, currentState);
-    await appendAuditLog(authContext.membership.tenantId, {
-      id: createId('audit'),
-      at: restoredAt,
-      userId: authContext.account.id,
-      userName: authContext.account.name,
-      action: 'Dokumentenversion wiederhergestellt',
-      resource: 'evidence',
-      summary: `Version ${selectedVersion.versionLabel || selectedVersion.id} für Nachweis ${req.params.evidenceId} wurde wieder als aktiv gesetzt.`,
-      sections: ['evidenceItems', 'document-versions'],
-    });
-
-    const stateMeta = await readStateMeta(authContext.membership.tenantId);
-    res.json({
-      ok: true,
-      evidenceId: req.params.evidenceId,
-      evidence: savedState.evidenceItems[evidenceIndex],
-      versions: listEvidenceVersionEntries(nextVersions, req.params.evidenceId, tenantPolicy),
-      stateVersion: stateMeta.version,
-      stateUpdatedAt: stateMeta.updatedAt,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/document-ledger/summary', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    res.json({ ok: true, summary: await buildDocumentLedgerSummary(authContext.membership.tenantId) });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/evidence-retention/summary', async (req, res, next) => {
-  try {
-    const authContext = await getAuthContext(req, true);
-    const [state, tenantPolicy] = await Promise.all([
-      readState(authContext.membership.tenantId),
-      readTenantSettings(authContext.membership.tenantId),
-    ]);
-    res.json({ ok: true, summary: buildEvidenceRetentionSummary(state, tenantPolicy) });
-  } catch (error) {
-    next(error);
-  }
-});
+// Die sechs Evidence-/Dokumenten-Endpoints (POST/DELETE attachment,
+// GET versions, POST versions/:id/restore, GET document-ledger/summary,
+// GET evidence-retention/summary) leben seit C3.4 in
+// ./routes/evidence.js — registriert über registerEvidenceRoutes(app)
+// weiter unten (Null-Deps-Muster). Audit-Log-Texte byte-identisch:
+// action="Dateiversion hochgeladen" / "Aktive Dateireferenz entfernt" /
+// "Dokumentenversion wiederhergestellt".
 
 // Die zwei /api/tenant-settings-Endpoints leben seit C3.3 in
 // ./routes/tenant-settings.js — registriert über
@@ -2127,6 +1735,10 @@ registerReportingRoutes(app);
 
 // C3.3: Tenant-Settings-Route-Modul, gleiches Null-Deps-Muster.
 registerTenantSettingsRoutes(app);
+
+// C3.4: Evidence-/Dokumenten-Route-Modul, gleiches Null-Deps-Muster.
+// multer + uploadPolicy leben innerhalb des Route-Moduls.
+registerEvidenceRoutes(app);
 
 app.use((error, req, res, _next) => {
   const status = Number(error?.status || 500);

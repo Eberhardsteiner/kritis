@@ -49,9 +49,13 @@
  *  - `buildStateEnvelope` wird als **expliziter Parameter** an die
  *    zwei Auth-Response-Builder (`buildSuccessfulAuthResponse`,
  *    `consumeAuthCallbackTicket`) gereicht, weil die Funktion
- *    evidence-aware ist (ruft `attachVersionMetadata`) und bis C3.4
- *    in `server/index.js` bleibt. Nach C3.4 wird dieser Parameter
- *    durch einen direkten Import aus `services/evidence.js` bzw.
+ *    state-scoped ist und bis C3.5 in `server/index.js` bleibt.
+ *    **Update nach C3.4:** `attachVersionMetadata` ist seit C3.4 nach
+ *    `services/evidence.js` extrahiert und wird von `buildStateEnvelope`
+ *    direkt importiert — aber `buildStateEnvelope` selbst wandert erst
+ *    mit der state-Route in C3.5 um, weil es state-scoped ist
+ *    (nicht evidence-scoped) und mit den state-PUT-Handlern zusammengehört.
+ *    Nach C3.5 wird dieser Parameter durch einen direkten Import aus
  *    `services/state.js` rückwärts aufgelöst.
  *  - `readPlatformSettings` in `getApiClientContext` nutzt den
  *    Raw-Wrapper aus `persistence-wrappers.js` mit expliziten
