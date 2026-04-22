@@ -1,9 +1,5 @@
-import crypto from 'node:crypto';
 import express from 'express';
 import helmet from 'helmet';
-import fs from 'node:fs/promises';
-import fsSync from 'node:fs';
-import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   createCorsMiddleware,
@@ -12,28 +8,18 @@ import {
 // parseImportedModulePack lebte bis C3.1 hier (für upsertImportedModulePack);
 // der Import ist mit der Funktions-Extraktion nach
 // services/module-pack-registry.js umgezogen.
-import {
-  buildPublicAuthProviders,
-  createAuthCallbackTicket,
-  createOidcTransaction,
-  buildOidcAuthorizationUrl,
-  exchangeOidcCode,
-  extractOidcProfile,
-  fetchOidcDiscovery,
-  fetchOidcUserProfile,
-} from './auth-provider.js';
-import { normalizeRegulatoryProfile } from './regulatory-dach.js';
-import {
-  buildSecurityGatesSummary,
-  createObservabilityStore,
-  createRequestHardeningMiddleware,
-  summarizeRestoreDrills,
-} from './hardening.js';
-// C3.4: buildEvidenceRetentionInfo wird nicht mehr direkt von index.js
-// verwendet (alle Konsumenten zogen mit den evidence-Helpers um).
-// buildEvidenceRetentionSummary bleibt, weil die retention_review-
-// Job-Artefakt-Generierung in index.js (C3.6-Residuum) sie aufruft.
-import { buildEvidenceRetentionSummary } from './evidence-platform.js';
+// C3.7a: 8 OIDC-Primitive aus auth-provider.js werden heute
+// ausschließlich von routes/auth.js konsumiert — nicht mehr in index.js.
+// normalizeRegulatoryProfile ist seit C3.0a in den services/sanitizers-
+// Flow integriert, index.js ruft es nicht direkt.
+// buildSecurityGatesSummary + summarizeRestoreDrills sind in
+// services/system-summaries.js konsumiert (C3.6). Nur
+// createRequestHardeningMiddleware bleibt für die Middleware-Setup-
+// Kette in index.js (C3.7b-Scope).
+import { createRequestHardeningMiddleware } from './hardening.js';
+// C3.7a: buildEvidenceRetentionSummary wird seit C3.6 von
+// services/jobs.js konsumiert (retention_review-Job-Typ). index.js
+// ruft die Funktion nicht mehr direkt.
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerEvidenceRoutes } from './routes/evidence.js';
@@ -44,29 +30,16 @@ import { registerReportingRoutes } from './routes/reporting.js';
 import { registerStateRoutes } from './routes/state.js';
 import { registerSystemRoutes } from './routes/system.js';
 import { registerTenantSettingsRoutes } from './routes/tenant-settings.js';
-// C3.2: Export-Service-Helfer + computeSha256 aus den neuen
-// services-Modulen. Die Route-Handler sind in routes/reporting.js,
-// aber einige Bootstrap-/Integrity-/Job-Funktionen in index.js rufen
-// listExportEntries und computeSha256 direkt auf — sie ziehen erst
-// in C3.6 (Service-Residuen) um.
-import { listExportEntries } from './services/exports.js';
-import { computeSha256 } from './services/file-utils.js';
-// C3.4/C3.5: evidence-Helfer aus services/evidence.js re-importiert.
-// Konsumenten nach C3.5:
-//   - attachVersionMetadata: buildTenantBackupPayload (C3.6-Scope)
-//   - attachmentFileNamesFromState / versionFileNamesFromLedger:
-//     Integrity-Checks (C3.6-Scope)
-import {
-  attachVersionMetadata,
-  attachmentFileNamesFromState,
-  versionFileNamesFromLedger,
-} from './services/evidence.js';
-// C3.5: state-Service-Helfer für die Residuen in index.js.
-// buildStateEnvelope und cleanupOrphanUploads werden in index.js NICHT
-// mehr aufgerufen.
-import { listSnapshotFiles, listSnapshots } from './services/state.js';
+// C3.7a: listExportEntries, computeSha256, evidence-Helfer,
+// listSnapshotFiles/listSnapshots werden seit C3.6 von den jeweiligen
+// Services selbst konsumiert (services/jobs.js, services/system-
+// summaries.js). index.js braucht keine direkten Re-Imports mehr.
 // C3.6-Polish: observability-Singleton aus services/observability.js.
 import { observability } from './services/observability.js';
+// C3.7a: Bootstrap-Sequenz (Migration, Seeding, System-File-Init)
+// nach services/storage-init.js gezogen. Einziger Call-Site unten
+// vor app.listen.
+import { initializeStorage } from './services/storage-init.js';
 // C3.6: Job-Executor + System-Summaries aus den beiden neuen Service-
 // Modulen. Die register*Routes-Aufrufe unten reichen diese Symbole
 // per deps-Object weiter — der Polish-Commit nach C3.6 ersetzt die
@@ -81,154 +54,37 @@ import {
   listRestoreDrillSummaries,
   listTenantSummaries,
 } from './services/system-summaries.js';
-// C3.0a: Pure Helpers + Defaults + Paths ausgelagert.
-import {
-  rootDir,
-  storageDir,
-  systemDir,
-  tenantsDir,
-  globalTmpDir,
-  tenantsFile,
-  accountsFile,
-  sessionsFile,
-  pendingAuthFlowsFile,
-  authCallbackTicketsFile,
-  platformSettingsFile,
-  apiClientsFile,
-  jobsFile,
-  jobsArtifactsDir,
-  persistenceDbFile,
-  legacyStateFile,
-  legacyAuditLogFile,
-  legacyUploadsDir,
-  legacySnapshotsDir,
-} from './config/paths.js';
-import {
-  MAX_AUDIT_ENTRIES,
-  MAX_JSON_SIZE,
-  OIDC_PROVIDER_ID,
-  PASSWORD_ITERATIONS,
-  SESSION_HOURS,
-  apiClientScopeSet,
-  buildDefaultPlatformSettings,
-  collaborativeStateDefaults,
-  defaultTenantSettings,
-  exportPackageTypes,
-  rolePermissions,
-  sectionPermissionMap,
-} from './config/defaults.js';
-import {
-  createApiClientSecret,
-  createId,
-  httpError,
-  maskSecret,
-  nowIso,
-  slugify,
-} from './services/ids.js';
-import {
-  buildSeedState,
-  buildSeedUser,
-  getRolePermissions,
-  isLocalLoginAllowed,
-  isPlainObject,
-  normalizeAuthSource,
-  sanitizeAccountList,
-  sanitizeAccountRecord,
-  sanitizeApiClientRecord,
-  sanitizeApiClientScopes,
-  sanitizeArray,
-  sanitizeExportPackageType,
-  sanitizeIdentityRecord,
-  sanitizeJobRecord,
-  sanitizeMembershipRecord,
-  sanitizeModulePackRegistryEntries,
-  sanitizeObject,
-  sanitizePlatformSettings,
-  sanitizeRoleProfile,
-  sanitizeState,
-  sanitizeTenantList,
-  sanitizeTenantRecord,
-  sanitizeTenantSettings,
-  stableEqual,
-} from './services/sanitizers.js';
-// C3.0b: Persistence-Wrappers (Generic JSON-I/O + typisierte Collection-
-// Fassaden + Singleton-Fassade + Tenant-Paths) ausgelagert.
-import {
-  appendAuditLog,
-  ensureDir,
-  ensureTenantStorage,
-  getJsonDocumentMeta,
-  getObjectStorage,
-  getPersistenceLayer,
-  jsonDocumentExists,
-  presentPersistenceTarget,
-  readAccounts,
-  readApiClients,
-  readAuditLog,
-  readAuthCallbackTickets,
-  readExportLog,
-  readJobRuns,
-  readJsonFile,
-  readModulePackRegistry,
-  readPendingAuthFlows,
-  readPlatformSettings as readPlatformSettingsRaw,
-  readSessions,
-  readState,
-  readStateMeta,
-  readTenantSettings,
-  readTenants,
-  readVersions,
-  resolvePersistenceReference,
-  tenantPaths,
-  writeAccounts,
-  writeApiClients,
-  writeAuthCallbackTickets,
-  writeExportLog,
-  writeJobRuns,
-  writeJsonFile,
-  writeModulePackRegistry,
-  writePendingAuthFlows,
-  writePlatformSettings as writePlatformSettingsRaw,
-  writeSessions,
-  writeState,
-  writeTenantSettings,
-  writeTenants,
-  writeVersions,
-} from './services/persistence-wrappers.js';
+// C3.7a: config/paths.js wird nicht mehr direkt von index.js konsumiert.
+// Path-Konstanten werden durch die jeweiligen Services importiert
+// (services/persistence-wrappers, services/storage-init, services/jobs
+// etc.), index.js selbst braucht keine Pfade mehr.
+// C3.7a: config/defaults.js wird heute von den Services direkt
+// konsumiert. index.js braucht nur noch MAX_JSON_SIZE für die
+// express.json()-Middleware.
+import { MAX_JSON_SIZE } from './config/defaults.js';
+// C3.7a: services/ids.js wird heute von den Services direkt
+// konsumiert. index.js braucht keine id/slug/httpError-Helfer mehr.
+// C3.7a: services/sanitizers.js wird heute von den Services direkt
+// konsumiert. index.js braucht keinen Sanitizer-Helfer mehr.
+// C3.0b/C3.7a: Persistence-Wrappers werden heute überwiegend von den
+// Services (persistence-wrappers, jobs, system-summaries, state,
+// storage-init etc.) direkt konsumiert. `server/index.js` braucht
+// nach C3.7a nur noch readPlatformSettings (Middleware-Setup für
+// CORS + WAF-Lite-Toggle).
+import { readPlatformSettings as readPlatformSettingsRaw } from './services/persistence-wrappers.js';
 // C3.0c: Runtime-Config + Auth-Session-Service ausgelagert.
+// C3.7a: Die meisten runtime-Konfig-Symbole werden heute von den
+// Services direkt konsumiert. index.js braucht nur noch runtimeConfig
+// (Middleware-Toggles) + defaultPlatformSettings (für die lokale
+// readPlatformSettings-Bindung).
 import {
-  ANONYMOUS_ACCESS_ENABLED,
-  AUTHENTICATION_REQUIRED,
-  DEFAULT_DEMO_PASSWORD,
-  GENERATED_BOOTSTRAP_PASSWORD,
-  GUEST_ACCOUNT_ID,
-  GUEST_USER_ID,
-  authStrategy,
   defaultPlatformSettings,
   runtimeConfig,
 } from './config/runtime.js';
-import {
-  assertApiClientScopes,
-  assertPermissions,
-  buildAnonymousContext,
-  buildSuccessfulAuthResponse,
-  buildWorkspaceUserSeedFromContext,
-  cleanupExpiredAuthCallbackTickets,
-  cleanupExpiredAuthFlows,
-  cleanupExpiredSessions,
-  consumeAuthCallbackTicket,
-  ensureSystemAdmin,
-  ensureWorkspaceUser,
-  extractAuthToken,
-  getApiClientContext,
-  getAuthContext,
-  getPublicTenant,
-  hashPassword,
-  presentSession,
-  resolveMembershipForAccount,
-  resolveOidcLoginContext,
-  verifyPassword,
-} from './services/auth-session.js';
+// C3.7a: auth-session-Funktionen werden heute von routes/auth.js,
+// routes/admin.js, routes/system.js, services/storage-init.js etc.
+// direkt konsumiert. index.js ruft keine Auth-Session-Funktion mehr
+// auf — der Import-Block ist vollständig stale und entfernt.
 
 const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
 // Persistence-/Auth-/Upload-Limits leben seit C3.0b in ./config/defaults.js.
@@ -237,13 +93,9 @@ const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
 // defaultPlatformSettings und (seit C3.6) GENERATED_BOOTSTRAP_PASSWORD
 // leben in ./config/runtime.js (siehe Import-Block unten).
 //
-// INITIAL_BOOTSTRAP_PASSWORD bleibt hier, weil es nur von
-// seedFreshSystemIfEmpty + migrateLegacyStorageIfNeeded konsumiert wird —
-// beide Seed-Funktionen ziehen in C3.7 nach services/storage-init.js
-// um und nehmen diese Konstante mit.
-const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
-  ? (String(process.env.KRISENFEST_BOOTSTRAP_PASSWORD || GENERATED_BOOTSTRAP_PASSWORD).trim() || DEFAULT_DEMO_PASSWORD)
-  : DEFAULT_DEMO_PASSWORD;
+// INITIAL_BOOTSTRAP_PASSWORD lebt seit C3.7a als module-local const
+// in ./services/storage-init.js (nicht exportiert, nur von den
+// beiden seed-Funktionen im selben Modul konsumiert).
 
 // Path-Konstanten, __dirname/__filename-Auflösung und rootDir leben
 // seit C3.0a in ./config/paths.js. Die Singleton-Caches
@@ -288,7 +140,6 @@ const INITIAL_BOOTSTRAP_PASSWORD = runtimeConfig.appMode === 'production'
 // erhalten bleiben — runtime-abhängige Defaults werden hier einmal
 // zur Bootstrap-Zeit gebunden:
 const readPlatformSettings = () => readPlatformSettingsRaw(defaultPlatformSettings);
-const writePlatformSettings = (value) => writePlatformSettingsRaw(value, defaultPlatformSettings);
 
 // buildStateEnvelope lebt seit C3.5 in ./services/state.js. Konsumenten
 // (routes/state.js, routes/integration.js, services/auth-session.js)
@@ -356,211 +207,11 @@ const writePlatformSettings = (value) => writePlatformSettingsRaw(value, default
 
 // ensureWorkspaceUser lebt seit C3.0c in ./services/auth-session.js.
 
-async function moveDirectoryContents(sourceDir, targetDir) {
-  if (!fsSync.existsSync(sourceDir)) {
-    return;
-  }
-
-  await ensureDir(targetDir);
-  const entries = await fs.readdir(sourceDir).catch(() => []);
-  for (const entry of entries) {
-    const sourcePath = path.join(sourceDir, entry);
-    const targetPath = path.join(targetDir, entry);
-    try {
-      await fs.rename(sourcePath, targetPath);
-    } catch {
-      const stat = await fs.stat(sourcePath).catch(() => null);
-      if (stat?.isFile()) {
-        await fs.copyFile(sourcePath, targetPath).catch(() => undefined);
-        await fs.unlink(sourcePath).catch(() => undefined);
-      }
-    }
-  }
-}
-
-async function migrateLegacyStorageIfNeeded() {
-  const systemExists = (await jsonDocumentExists(tenantsFile)) && (await jsonDocumentExists(accountsFile)) && (await jsonDocumentExists(sessionsFile));
-  if (systemExists) {
-    return;
-  }
-
-  const hasLegacy = fsSync.existsSync(legacyStateFile)
-    || fsSync.existsSync(legacyAuditLogFile)
-    || fsSync.existsSync(legacyUploadsDir)
-    || fsSync.existsSync(legacySnapshotsDir);
-
-  if (!hasLegacy) {
-    return;
-  }
-
-  const legacyState = sanitizeState(await readJsonFile(legacyStateFile, {}));
-  const companyName = legacyState.companyProfile?.companyName || 'Standard-Mandant';
-  const industryLabel = legacyState.companyProfile?.industryLabel || '';
-  const firstUser = sanitizeArray(legacyState.users)[0] ?? null;
-  const workspaceUserId = firstUser?.id || createId('usr');
-  const adminName = firstUser?.name || 'Programmadmin';
-  const adminEmail = firstUser?.email || 'admin@krisenfest.local';
-  const tenantId = slugify(companyName) || 'standard-mandant';
-  const stateWithAdmin = sanitizeState({
-    ...legacyState,
-    users: sanitizeArray(legacyState.users).length
-      ? legacyState.users
-      : [buildSeedUser({ id: workspaceUserId, name: adminName, email: adminEmail, roleProfile: 'admin', scope: companyName })],
-  });
-
-  await ensureTenantStorage(tenantId, stateWithAdmin);
-  await writeState(tenantId, stateWithAdmin);
-  await writeJsonFile(tenantPaths(tenantId).auditLogFile, sanitizeArray(await readJsonFile(legacyAuditLogFile, [])));
-  await moveDirectoryContents(legacyUploadsDir, tenantPaths(tenantId).uploadsDir);
-  await moveDirectoryContents(legacySnapshotsDir, tenantPaths(tenantId).snapshotsDir);
-
-  await writeTenants([
-    {
-      id: tenantId,
-      name: companyName,
-      slug: tenantId,
-      industryLabel,
-      createdAt: nowIso(),
-      active: true,
-    },
-  ]);
-
-  const passwordData = hashPassword(INITIAL_BOOTSTRAP_PASSWORD);
-  await writeAccounts([
-    {
-      id: createId('acct'),
-      name: adminName,
-      email: String(adminEmail).toLowerCase(),
-      status: 'active',
-      isSystemAdmin: true,
-      authSource: 'local',
-      passwordSalt: passwordData.salt,
-      passwordHash: passwordData.hash,
-      lastLoginAt: '',
-      lastAuthProvider: '',
-      identities: [],
-      memberships: [
-        {
-          tenantId,
-          roleProfile: sanitizeRoleProfile(firstUser?.roleProfile || 'admin'),
-          workspaceUserId,
-          scope: companyName,
-        },
-      ],
-    },
-  ]);
-
-  await writeSessions([]);
-
-  if (GENERATED_BOOTSTRAP_PASSWORD) {
-    console.warn(`KRITIS-Readiness API: Für ${adminEmail} wurde ein temporäres Bootstrap-Passwort generiert. Bitte Secret Management verwenden.`);
-  }
-}
-
-async function seedFreshSystemIfEmpty() {
-  const tenants = await readTenants();
-  if (tenants.length) {
-    return;
-  }
-
-  const tenantId = 'demo-unternehmen';
-  const adminName = 'Programmadmin';
-  const adminEmail = 'admin@krisenfest.local';
-  const workspaceUserId = createId('usr');
-  const initialState = buildSeedState({
-    companyName: 'Demo-Unternehmen',
-    industryLabel: 'Produktion',
-    adminName,
-    adminEmail,
-    workspaceUserId,
-    roleProfile: 'admin',
-  });
-
-  await ensureTenantStorage(tenantId, initialState);
-  await writeState(tenantId, initialState);
-  await writeTenants([
-    {
-      id: tenantId,
-      name: 'Demo-Unternehmen',
-      slug: tenantId,
-      industryLabel: 'Produktion',
-      createdAt: nowIso(),
-      active: true,
-    },
-  ]);
-
-  const passwordData = hashPassword(INITIAL_BOOTSTRAP_PASSWORD);
-  await writeAccounts([
-    {
-      id: createId('acct'),
-      name: adminName,
-      email: adminEmail,
-      status: 'active',
-      isSystemAdmin: true,
-      authSource: 'local',
-      passwordSalt: passwordData.salt,
-      passwordHash: passwordData.hash,
-      lastLoginAt: '',
-      lastAuthProvider: '',
-      identities: [],
-      memberships: [
-        {
-          tenantId,
-          roleProfile: 'admin',
-          workspaceUserId,
-          scope: 'Demo-Unternehmen',
-        },
-      ],
-    },
-  ]);
-  await writeSessions([]);
-
-  if (GENERATED_BOOTSTRAP_PASSWORD) {
-    console.warn(`KRITIS-Readiness API: Für ${adminEmail} wurde ein temporäres Bootstrap-Passwort generiert. Bitte Secret Management verwenden.`);
-  }
-}
-
-async function ensureStorage() {
-  await ensureDir(storageDir);
-  await ensureDir(systemDir);
-  await ensureDir(tenantsDir);
-  await ensureDir(globalTmpDir);
-  await ensureDir(jobsArtifactsDir);
-  await migrateLegacyStorageIfNeeded();
-  if (!(await jsonDocumentExists(tenantsFile))) {
-    await writeTenants([]);
-  }
-  if (!(await jsonDocumentExists(accountsFile))) {
-    await writeAccounts([]);
-  }
-  if (!(await jsonDocumentExists(sessionsFile))) {
-    await writeSessions([]);
-  }
-  if (!(await jsonDocumentExists(pendingAuthFlowsFile))) {
-    await writePendingAuthFlows([]);
-  }
-  if (!(await jsonDocumentExists(authCallbackTicketsFile))) {
-    await writeAuthCallbackTickets([]);
-  }
-  if (!(await jsonDocumentExists(platformSettingsFile))) {
-    await writePlatformSettings(defaultPlatformSettings);
-  }
-  if (!(await jsonDocumentExists(apiClientsFile))) {
-    await writeApiClients([]);
-  }
-  if (!(await jsonDocumentExists(jobsFile))) {
-    await writeJobRuns([]);
-  }
-  await seedFreshSystemIfEmpty();
-  await cleanupExpiredSessions();
-  await cleanupExpiredAuthFlows();
-  await cleanupExpiredAuthCallbackTickets();
-
-  const tenants = await readTenants();
-  for (const tenant of tenants) {
-    await ensureTenantStorage(tenant.id);
-  }
-}
+// moveDirectoryContents, migrateLegacyStorageIfNeeded,
+// seedFreshSystemIfEmpty, ensureStorage leben seit C3.7a in
+// ./services/storage-init.js. Die Funktion wurde beim Umzug in
+// initializeStorage umbenannt (Namens-Wechsel begründet in der
+// dortigen Datei-Präambel). Einziger Call-Site unten, vor app.listen.
 
 // C3.6: buildHealthResponse, buildJobDownloadUrl, buildJobLabel,
 // buildHostingReadinessSummary, buildSecurityGateSummary,
@@ -739,7 +390,7 @@ app.use((error, req, res, _next) => {
   res.status(status).json(body);
 });
 
-await ensureStorage();
+await initializeStorage();
 // Main-Module-Check: listen() nur starten, wenn die Datei direkt
 // ausgeführt wurde — nicht beim Import aus Tests. Env-Variablen greifen
 // unter ESM nicht, weil imports vor Statements gehoisted werden.

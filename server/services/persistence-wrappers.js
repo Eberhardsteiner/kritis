@@ -33,6 +33,18 @@
  * **NICHT in dieser Datei**: `buildStateEnvelope` — zieht mit dem
  * evidence-Service in C3.4 um, weil sie `attachVersionMetadata`
  * ruft (evidence-aware Derivation).
+ *
+ * **Abgrenzung zu `services/storage-init.js` (eingeführt in C3.7a):**
+ * Dieses Modul liefert **tenant-scoped und File-I/O-Fassaden**, die
+ * **zur Laufzeit von Request-Handlern** aufgerufen werden. Sie sind
+ * thread-sicher, idempotent und operieren auf einer bereits-
+ * initialisierten Storage-Struktur. Der **Server-Bootstrap** (einmalige
+ * Migration aus pre-multitenancy-Storage, Demo-Tenant-Seed,
+ * System-File-Init-on-missing) lebt getrennt in
+ * `services/storage-init.js`. Die Trennung folgt dem Grundsatz, dass
+ * Bootstrap- und Laufzeit-Storage-Operationen unterschiedliche
+ * Semantik und unterschiedliche Konsumenten haben — einmaliger Setup
+ * vs. Per-Request-Fassaden.
  */
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
