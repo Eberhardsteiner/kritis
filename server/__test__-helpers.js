@@ -30,8 +30,49 @@
  *   - Seed-Varianten wachsen domain-spezifisch — evidence-Varianten
  *     ('empty', 'with-versions', 'with-retention-states') decken die
  *     C3.4-Szenarien, state-Varianten ('with-state-sections',
- *     'with-snapshot-and-attachment') die C3.5-Szenarien. Cross-Domain-
- *     Tests können Varianten kombinieren.
+ *     'with-snapshot-and-attachment') die C3.5-Szenarien,
+ *     jobs-Varianten ('with-orphan-upload', 'with-backup-and-snapshot',
+ *     'with-two-tenants') die C3.6-Szenarien. Cross-Domain-Tests
+ *     können Varianten kombinieren.
+ *
+ * ============================================================================
+ *  SEED-DESIGN-REGEL · PERSISTENCE-REFERENCE vs. RAW-ARTEFAKT
+ * ============================================================================
+ *
+ *  Beim Seeden von Test-Daten gilt eine harte Architektur-Regel, die
+ *  aus einem C3.6-Debug-Zyklus hervorging (siehe Post-C3-Meta-Review-
+ *  Notiz 11):
+ *
+ *  (1) **Files unter Persistence-Reference** (alles, was
+ *      `resolvePersistenceReference(filePath)` zu einem Reference-
+ *      Objekt auflöst — state.json, audit-log.json, export-log.json,
+ *      backup-log.json, versions.json, tenant-settings.json etc.):
+ *      **MÜSSEN via `writeJsonFile` geseedet werden.** Diese
+ *      Funktion schreibt atomar Document-Store (SQLite) + Mirror
+ *      und hält beide Quellen konsistent.
+ *
+ *  (2) **Artefakt-Files ohne Persistence-Reference** (Snapshot-
+ *      Files `snapshots/<id>.json`, Backup-Artefakt-Files
+ *      `backups/<id>.json`, Job-Artefakt-Files `job-artifacts/
+ *      <type>-<jobId>.json`): **DÜRFEN per `fs.writeFile`
+ *      geschrieben werden.** Diese Pfade werden ausschließlich
+ *      per-File gelesen (kein Document-Store-Lookup) —
+ *      `readJsonFile` fällt hier auf den direkten FS-Read zurück.
+ *
+ *  Prüfung im Zweifel:
+ *      node -e "import('./server/services/persistence-wrappers.js')
+ *        .then(m => console.log(m.resolvePersistenceReference('/path/to/file.json')))"
+ *
+ *  Liefert das ein Reference-Objekt, braucht der Seed `writeJsonFile`.
+ *  Liefert es `null`, reicht `fs.writeFile`.
+ *
+ *  **Warum die Regel wichtig ist:** Der Document-Store (SQLite) hält
+ *  eine zweite Quelle der Wahrheit. Raw-fs-Write für Persistence-
+ *  Reference-Files ist mit dem SQLite-Pointer nicht synchron — der
+ *  konsumierende Service-Code liest via `readJsonFile`, das zuerst
+ *  die persistence-Schicht befragt. Raw-geschriebene Files sind
+ *  dort unsichtbar, bis der Fallback auf FS-Read greift (erst bei
+ *  `source !== 'database'`).
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';

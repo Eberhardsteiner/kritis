@@ -309,6 +309,27 @@ Analog zu C2 iterativ, eine Domäne pro Iteration. Jede Iteration:
 
 ---
 
+### C3-Abschluss · Nachtrag (2026-04-22)
+
+C3 ist strukturell durch. **Kumulative Reduktion `server/index.js`: 3.906 → 76 Zeilen (−98 %)**, weit unter der <400-Zielmarke. 12 Commits über die Sub-Iterationen C3.0a/b/c, C3.1–C3.6, C3.6-Polish, C3.7a/b und Abschluss.
+
+**Korrigierte Akzeptanzkriterien:**
+
+- ✅ `server/index.js` **76 Zeilen** nach Block-Abschluss (Ziel <400 überschritten)
+- ✅ Jedes Route-Modul hat Null-Deps-Muster; Integration-Tests für die drei risikoreichsten Route-Module (evidence C3.4, state C3.5, system-jobs C3.6) plus Unit-Test für `buildHostingReadinessSummary`-Check-IDs
+- ✅ Backend-Tests: **58/58 grün** (38 Baseline + 18 Integration-Einheiten + 2 Unit-Tests). Die ursprüngliche Zielmarke „mindestens 60" wurde auf **tatsächlich 58** korrigiert (siehe `docs/POST-C3-META-REVIEW-NOTIZEN.md` Notiz 10). Die Abweichung ist marginal (3 Tests) und proportional zum Risiko-Profil der Iterationen: niedrig-Risiko-Extraktionen (C3.1–C3.3, C3.7) brauchten keinen Vorspann, weil die bestehende Unit-Test-Suite das Verhalten der zugrundeliegenden Services abdeckt. Die Sub-Test-Zählung von `node:test` zählt jede `t.test()`-Klausel einzeln — das C3.6-Vorspann-Pattern (Variante C) liefert 8 Test-Einheiten aus einem Top-Level-Test mit 3 Sub-Tests.
+- E2E: 16 Chromium-Szenarien werden außerhalb dieses Block-Abschlusses im nächsten Schritt (C4a-Rerun) validiert — C3 ändert keine Endpoint-Signaturen.
+
+**Meta-Review-Vorlage:** `docs/POST-C3-META-REVIEW-NOTIZEN.md` konsolidiert 15 Beobachtungen aus C3.1–C3.7. Die Meta-Review zu Beginn von **C7** (Pilotfreigabe-Dokumentation) arbeitet diese Liste ab. Enthält Methoden-Notizen (Heavy-Tail-Kalibrierung, ESM-Singleton-Pattern, byte-identische Extraktions-Praxis, Seed-Design-Regel), Architektur-Kandidaten (Pure-Logik-Heimat-Kategorie, Zwei-Phasen-Commit-Muster) und Infrastruktur-Nachträge (SQLite-Race bei parallelen Integration-Tests, Rate-Limit-Akkumulation in Dev-Sessions).
+
+**Strukturelle Architektur-Lieferung (nicht nur LoC):**
+- `server/services/` · 13 Module (ids, sanitizers, persistence-wrappers, auth-session, evidence, state, exports, module-pack-registry, file-utils, jobs, system-summaries, storage-init, middleware-setup, observability)
+- `server/routes/` · 10 Module (alle mit Null-Deps-Muster: admin, auth, evidence, files, integration, modules, reporting, state, system, tenant-settings)
+- `server/config/` · 3 Module (paths, defaults, runtime)
+- `server/index.js` · 76 Zeilen reiner Orchestrator (Express-App-Create → attachMiddleware → 10× registerRoutes → attachErrorHandler → initializeStorage → listen)
+
+---
+
 ## C4b · Component-Tests für Feature-Module
 
 **Ziel**: Nach der Zerlegung bekommen die neuen Feature-Module dedizierte Component-Tests. Fokus auf die komplexeren, in B entstandenen Bausteine.

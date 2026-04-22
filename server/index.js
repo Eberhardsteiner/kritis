@@ -40,80 +40,25 @@ const PORT = Number(process.env.KRISENFEST_API_PORT || 8787);
 
 const app = express();
 
-// C3.7b: Pre-Route-Middleware-Kette (helmet, observability, WAF-Lite,
-// CORS, 3× rate-limit, json-body, cache-control) lebt seit C3.7b in
-// services/middleware-setup.js. Die 11 app.use-Aufrufe sind dort mit
-// einem Inline-Kommentar-Block als harte Reihenfolge-Invariante
-// dokumentiert.
+// Pre-Route-Middleware-Kette (services/middleware-setup.js).
 attachMiddleware(app);
 
-// C3.6-Polish: Null-Deps-Nachzug für die fünf Alt-Route-Module.
-// Seit diesem Commit importieren admin, auth, files, integration und
-// system ihre Abhängigkeiten direkt aus den jeweiligen services/*-
-// Modulen. Die früheren deps-Object-Aufrufe (register*Routes(app, {...}))
-// werden zu register*Routes(app) reduziert.
+// Route-Module · alle folgen dem Null-Deps-Muster (siehe
+// services/*/JSDoc-Präambeln für Konsumenten-Details). Reihenfolge
+// hier ist nicht semantisch relevant — jede register*Routes-Funktion
+// bindet unabhängig ihre Endpoints an die Express-App.
+registerSystemRoutes(app);            // /api/health*, /api/system/* (C3.6, Polish)
+registerIntegrationRoutes(app);       // /api/integration/* (C3.6-Polish)
+registerAuthRoutes(app);              // /api/auth/* (C3.6-Polish)
+registerAdminRoutes(app);             // /api/admin/* (C3.6-Polish)
+registerFileRoutes(app);              // /api/files/* (C3.6-Polish)
+registerModuleRoutes(app);            // /api/modules/registry (C3.1)
+registerReportingRoutes(app);         // /api/exports (C3.2)
+registerTenantSettingsRoutes(app);    // /api/tenant-settings (C3.3)
+registerEvidenceRoutes(app);          // /api/evidence/*, /api/document-ledger/* (C3.4)
+registerStateRoutes(app);             // /api/state, /api/snapshots/*, /api/audit-log (C3.5)
 
-registerSystemRoutes(app);
-registerIntegrationRoutes(app);
-registerAuthRoutes(app);
-
-// Die sechs State-/Snapshot-/Audit-Endpoints (GET/PUT /api/state,
-// GET /api/audit-log, GET/POST /api/snapshots,
-// POST /api/snapshots/:snapshotId/restore) leben seit C3.5 in
-// ./routes/state.js — registriert über registerStateRoutes(app) weiter
-// unten. Audit-Log-Texte byte-identisch: action="Synchronisierung" /
-// "Snapshot erstellt" / "Snapshot wiederhergestellt". Das 409-
-// Conflict-Mapping (VERSION_CONFLICT → HTTP 409 mit currentVersion +
-// currentUpdatedAt) ist dort mit Architektur-Notiz und Test-Assertion
-// abgesichert. Die Reihenfolge cleanupOrphanUploads → writeState ist
-// dort mit Inline-Ankerkommentaren markiert.
-
-// Die sechs Evidence-/Dokumenten-Endpoints (POST/DELETE attachment,
-// GET versions, POST versions/:id/restore, GET document-ledger/summary,
-// GET evidence-retention/summary) leben seit C3.4 in
-// ./routes/evidence.js — registriert über registerEvidenceRoutes(app)
-// weiter unten (Null-Deps-Muster). Audit-Log-Texte byte-identisch:
-// action="Dateiversion hochgeladen" / "Aktive Dateireferenz entfernt" /
-// "Dokumentenversion wiederhergestellt".
-
-// Die zwei /api/tenant-settings-Endpoints leben seit C3.3 in
-// ./routes/tenant-settings.js — registriert über
-// registerTenantSettingsRoutes(app) weiter unten (Null-Deps-Muster).
-// Audit-Log-Text byte-identisch: action="Mandantenrichtlinien aktualisiert".
-
-// Die vier /api/modules/registry-Endpoints leben seit C3.1 in
-// ./routes/modules.js — registriert über registerModuleRoutes(app)
-// weiter unten (Null-Deps-Muster).
-
-// Die vier /api/exports-Endpoints leben seit C3.2 in
-// ./routes/reporting.js — registriert ueber registerReportingRoutes(app)
-// weiter unten (Null-Deps-Muster).
-
-registerAdminRoutes(app);
-registerFileRoutes(app);
-
-// C3.1: Null-Deps-Muster für neue Route-Module — keine Deps-Object-
-// Durchreichung, alle Services per Direkt-Import in routes/modules.js.
-registerModuleRoutes(app);
-
-// C3.2: Reporting/Exports-Route-Modul, gleiches Null-Deps-Muster.
-registerReportingRoutes(app);
-
-// C3.3: Tenant-Settings-Route-Modul, gleiches Null-Deps-Muster.
-registerTenantSettingsRoutes(app);
-
-// C3.4: Evidence-/Dokumenten-Route-Modul, gleiches Null-Deps-Muster.
-// multer + uploadPolicy leben innerhalb des Route-Moduls.
-registerEvidenceRoutes(app);
-
-// C3.5: State-/Snapshot-/Audit-Route-Modul. buildStateEnvelope,
-// cleanupOrphanUploads, Snapshot-Helper leben in services/state.js.
-registerStateRoutes(app);
-
-
-// C3.7b: Terminaler Error-Handler (VERSION_CONFLICT → 409-Mapping mit
-// currentVersion/currentUpdatedAt, Security-Event-Recording für
-// Status >= 400) lebt seit C3.7b in services/middleware-setup.js.
+// Terminaler Error-Handler (services/middleware-setup.js).
 attachErrorHandler(app);
 
 await initializeStorage();
