@@ -408,7 +408,15 @@ export function PlatformView({
                       type="button"
                       className="button primary"
                       onClick={() => onDemoLogin(loginEmail, loginPassword)}
-                      disabled={!loginEmail || !loginPassword || serverMode === 'offline' || serverMode === 'checking'}
+                      // Radikal vereinfacht: nur „sind beide Felder nicht
+                      // leer (nach Trim)?". Keine serverMode- oder
+                      // Provider-Prüfungen — wenn der Request scheitert,
+                      // wird der Fehler über den Notice-Toast im Handler
+                      // gezeigt. Der frühere serverMode === 'checking'-
+                      // Check blockierte den Button in Bolts Preview
+                      // dauerhaft, weil der initiale Health-Poll dort
+                      // länger als erwartet im Checking-Zustand bleibt.
+                      disabled={!loginEmail.trim() || !loginPassword.trim()}
                     >
                       <LockKeyhole size={16} />
                       Demo-Anmeldung

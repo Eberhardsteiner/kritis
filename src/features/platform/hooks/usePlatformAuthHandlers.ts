@@ -238,6 +238,15 @@ export function usePlatformAuthHandlers(
    */
   const handleDemoLogin = useCallback(
     async (email: string, password: string) => {
+      // TEMP-DEBUG (fix/demo-login-button-disabled): Bestätigt im
+      // Browser-Console, dass der Click-Pfad greift. Zu entfernen,
+      // sobald der Demo-Login in der Bolt-Preview verifiziert ist.
+      console.log('[demo-login] click received', {
+        emailLength: email.length,
+        passwordLength: password.length,
+        emailTrimmed: email.trim(),
+      });
+
       if (!email.trim() || !password.trim()) {
         showNotice('error', 'Bitte E-Mail und Passwort angeben.');
         return;
