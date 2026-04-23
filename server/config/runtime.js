@@ -45,7 +45,7 @@
  */
 import crypto from 'node:crypto';
 
-import { buildRuntimeConfig } from '../security.js';
+import { buildRuntimeConfig, normalizeBoolean } from '../security.js';
 import { buildAuthStrategyConfig } from '../auth-provider.js';
 import { buildDefaultPlatformSettings } from './defaults.js';
 
@@ -78,6 +78,31 @@ export const GUEST_USER_ID = 'usr-public';
 export const DEFAULT_DEMO_PASSWORD = String(
   process.env.KRISENFEST_DEMO_ADMIN_PASSWORD || 'Krisenfest2026!',
 ).trim() || 'Krisenfest2026!';
+
+/**
+ * Demo-Simple-Auth · Ein-Klick-Admin-Zugang ohne Tenant-Dropdown.
+ *
+ * Wenn `true`, darf das Frontend ein vereinfachtes Login-Formular
+ * (nur E-Mail + Passwort, kein Mandant-Select, kein SSO-Block) anzeigen
+ * und der Endpoint `POST /api/auth/demo-login` akzeptiert jedes
+ * nicht-leere E-Mail/Passwort-Paar mit Passwort == DEFAULT_DEMO_PASSWORD
+ * ohne Account-DB-Lookup. Die Session wird mit dem von
+ * `seedDemoAdminIfMissing` gepflegten Admin-Account (erster Tenant)
+ * hergestellt — kein zusätzlicher DB-Insert pro Login.
+ *
+ * **Bewusste Ausgestaltung**: Keine Zeile der bestehenden Auth-Logik
+ * wird deaktiviert oder entfernt. `POST /api/auth/login`, OIDC-Endpoints,
+ * Account-DB, Password-Hashing, Tenant-Membership bleiben unverändert
+ * hinter dem Flag aktiv. Mit `KRISENFEST_DEMO_SIMPLE_AUTH=false` kehrt
+ * die Full-Auth-Kette zurück.
+ *
+ * **Default `true`** während der Demo-Phase. Siehe
+ * `docs/DEMO-AUTH-BYPASS.md` für Reaktivierungs-Checkliste.
+ */
+export const DEMO_SIMPLE_AUTH = normalizeBoolean(
+  process.env.KRISENFEST_DEMO_SIMPLE_AUTH,
+  true,
+);
 
 /**
  * Plattform-Settings-Default-Objekt. Runtime-gebaut über die

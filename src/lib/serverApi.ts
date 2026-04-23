@@ -76,6 +76,11 @@ export interface AuthBootstrapResponse {
   authProviders?: AuthProviderSummary[];
   publicTenant?: TenantSummary | null;
   tenants: TenantSummary[];
+  // Backend-Flag KRISENFEST_DEMO_SIMPLE_AUTH: Wenn true, zeigt das
+  // Frontend ein Ein-Klick-Demo-Login und spricht /api/auth/demo-login
+  // an. Sonst bleibt das volle Login-Formular (Tenant-Dropdown, SSO)
+  // aktiv. Siehe docs/DEMO-AUTH-BYPASS.md.
+  demoSimpleAuth?: boolean;
 }
 
 export interface ServerBootstrapResponse {
@@ -278,6 +283,25 @@ export async function loginToServer(
     method: 'POST',
     headers: withAuthHeaders('', true),
     body: JSON.stringify({ email, password, tenantId }),
+  });
+
+  return parseJsonResponse<AuthLoginResponse>(response);
+}
+
+/**
+ * Ein-Klick-Demo-Login. Sendet nur E-Mail + Passwort an
+ * `/api/auth/demo-login`; das Backend löst Tenant und Admin-Rolle
+ * serverseitig auf. Aktiv nur, wenn das Bootstrap-Feld
+ * `demoSimpleAuth === true` zurückliefert.
+ */
+export async function fetchDemoLogin(
+  email: string,
+  password: string,
+): Promise<AuthLoginResponse> {
+  const response = await fetch(`${API_BASE}/auth/demo-login`, {
+    method: 'POST',
+    headers: withAuthHeaders('', true),
+    body: JSON.stringify({ email, password }),
   });
 
   return parseJsonResponse<AuthLoginResponse>(response);

@@ -20,6 +20,8 @@ import { OIDC_PROVIDER_ID } from '../config/defaults.js';
 import {
   ANONYMOUS_ACCESS_ENABLED,
   AUTHENTICATION_REQUIRED,
+  DEFAULT_DEMO_PASSWORD,
+  DEMO_SIMPLE_AUTH,
   authStrategy,
   defaultPlatformSettings,
   runtimeConfig,
@@ -75,7 +77,82 @@ export function registerAuthRoutes(app) {
       authProviders: buildPublicAuthProviders(authStrategy),
       publicTenant,
       tenants,
+      // Demo-Simple-Auth-Flag · steuert das vereinfachte Frontend-Login
+      // (nur E-Mail + Passwort, kein Tenant-Select, kein SSO). Siehe
+      // runtime.js und docs/DEMO-AUTH-BYPASS.md für Reaktivierungs-Pfad.
+      demoSimpleAuth: DEMO_SIMPLE_AUTH,
     });
+  }));
+
+  // Demo-Simple-Auth-Endpoint · Ein-Klick-Admin-Zugang für die UVM-Demo.
+  //
+  // Akzeptiert ein beliebiges E-Mail/Passwort-Paar, sofern das Passwort
+  // dem DEFAULT_DEMO_PASSWORD (Default „Krisenfest2026!") entspricht.
+  // Die eingegebene E-Mail wird für die Session-Anzeige verwendet, der
+  // eigentliche Auth-Kontext wird mit dem bereits durch
+  // `seedDemoAdminIfMissing` gesetzten Admin-Account gebildet — kein
+  // zusätzlicher Account-Insert pro Login.
+  //
+  // Aktiv nur, wenn DEMO_SIMPLE_AUTH true ist. Bei false → 403, der
+  // bestehende `/api/auth/login`-Endpoint bleibt die einzige gültige
+  // Eingangsroute.
+  app.post('/api/auth/demo-login', asyncRoute(async (req, res) => {
+    if (!DEMO_SIMPLE_AUTH) {
+      throw httpError(403, 'Demo-Login ist deaktiviert. Bitte regulären Login verwenden.');
+    }
+
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+
+    if (!email || !password) {
+      throw httpError(400, 'Bitte E-Mail und Passwort eingeben.');
+    }
+
+    if (password !== DEFAULT_DEMO_PASSWORD) {
+      throw httpError(401, 'Demo-Login fehlgeschlagen. Passwort ist nicht korrekt.');
+    }
+
+    // Default-Tenant auswählen (erster aktiver). Ohne Tenant kann keine
+    // Session gebildet werden — der Bootstrap-Seed legt sonst bereits
+    // `demo-unternehmen` an, sodass dieser Fall praktisch nie eintritt.
+    const tenants = await readTenants();
+    const activeTenants = new Map(sanitizeArray(tenants).filter((entry) => entry?.active !== false).map((entry) => [entry.id, entry]));
+    const firstTenant = [...activeTenants.values()][0];
+    if (!firstTenant) {
+      throw httpError(503, 'Demo-Login nicht möglich: kein aktiver Mandant verfügbar.');
+    }
+
+    // Seeded Demo-Admin-Account suchen. `seedDemoAdminIfMissing` legt
+    // admin@krisenfest.demo idempotent beim Server-Start an; wir finden
+    // ihn hier als bestehenden Account. Fallback: jeder System-Admin
+    // mit einer Membership im Default-Tenant.
+    const accounts = await readAccounts();
+    let adminAccount = accounts.find((entry) => (
+      String(entry?.email || '').toLowerCase() === 'admin@krisenfest.demo'
+      && entry?.status !== 'inactive'
+    ));
+    if (!adminAccount) {
+      adminAccount = accounts.find((entry) => (
+        entry?.isSystemAdmin === true
+        && entry?.status !== 'inactive'
+        && sanitizeArray(entry?.memberships).some((m) => m?.tenantId === firstTenant.id)
+      ));
+    }
+    if (!adminAccount) {
+      throw httpError(503, 'Demo-Login nicht möglich: kein Seed-Admin-Account im System vorhanden. Bitte seedDemoAdminIfMissing sicherstellen (Server-Restart).');
+    }
+
+    const membership = resolveMembershipForAccount(adminAccount, firstTenant.id, activeTenants);
+    if (!membership) {
+      throw httpError(503, 'Demo-Login nicht möglich: Seed-Admin hat keine Mitgliedschaft im Default-Tenant.');
+    }
+
+    res.json(await buildSuccessfulAuthResponse({
+      account: adminAccount,
+      membership,
+      tenant: firstTenant,
+      providerId: 'demo',
+    }));
   }));
 
   app.post('/api/auth/login', asyncRoute(async (req, res) => {
