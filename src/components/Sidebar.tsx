@@ -28,7 +28,6 @@ const items: Array<{
   label: string;
   icon: typeof BarChart3;
 }> = [
-  { key: 'program', label: 'Programm & Sprints', icon: GanttChartSquare },
   { key: 'dashboard', label: 'Übersicht', icon: BarChart3 },
   { key: 'assessment', label: 'Grundanalyse', icon: ClipboardList },
   { key: 'measures', label: 'Maßnahmen & Bibliothek', icon: ListTodo },
@@ -79,6 +78,15 @@ export function Sidebar({ activeView, onChange }: SidebarProps) {
         <p>
           {releaseStatus.currentSummary}
         </p>
+        <button
+          type="button"
+          className={`sidebar-footer-link ${activeView === 'program' ? 'active' : ''}`}
+          onClick={() => onChange('program')}
+          aria-label="Programm & Sprints öffnen"
+        >
+          <GanttChartSquare size={14} />
+          <span>Programm &amp; Sprints</span>
+        </button>
       </div>
     </aside>
   );

@@ -141,6 +141,37 @@ ul {
   color: #e8edf6;
 }
 
+.sidebar-footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(232, 237, 246, 0.7);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.sidebar-footer-link:hover,
+.sidebar-footer-link:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  outline: none;
+}
+
+.sidebar-footer-link.active {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .main-shell {
   padding: 24px;
   display: grid;
