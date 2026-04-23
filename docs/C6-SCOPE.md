@@ -87,6 +87,26 @@ Der CI-Lauf auf `2fc4e4bb` ging grün — aber nur, weil Bolt's Lock-File in sic
 
 **Zeitplan**: C6.5 wird nach der Demo angegangen, zusammen mit C6.4 (SQLite-Race, Notiz 8) und C6.1 (Zwei-Phasen-Commit-Reconciler, Notiz 1), weil alle drei Test-/CI-Infrastruktur betreffen. Reihenfolge: **C6.5 vor C6.4**, weil C6.5 die Grundlage (stabile CI-Runs) für die Verifikation der anderen C6-Teile liefert.
 
+#### Aktualisierung 2026-04-23 · CI-Workaround implementiert (`npm install`)
+
+**Beobachtung nach zwei Force-Pushes auf main (2026-04-22 und 2026-04-23)**: Bolt setzt reproduzierbar Counter-Commits, die neben Lock-File-Regressionen auch Dokumentations-Änderungen (README-Abschnitt Playwright gelöscht) und SQLite-Fallback-Meta-Updates enthalten. Das Muster ist systematisch, nicht zufällig: Bolt synchronisiert das Repo gegen seinen eigenen, älteren Projekt-Zustand zurück. Jeder Push auf main löst einen Bolt-Sync aus, der Pre-C1-Dependencies (Express 4, Vite 5, kein Playwright) wiederherstellt.
+
+**Folge für die CI**: Jeder Push auf main erzeugt einen CI-Lauf, der bei `npm ci` im Typecheck- und Build-Job bricht, weil `package-lock.json` (Bolt-Stand) und `package.json` (unser Stand) divergieren. Das erzeugt wiederkehrende GitHub-Actions-Failure-E-Mails und blockiert schlanke Demo-Vorbereitung.
+
+**Workaround (ab 2026-04-23 in `.github/workflows/ci.yml` aktiv)**: Alle fünf CI-Jobs (Typecheck, Backend-Tests, Frontend-Tests, Build, E2E) nutzen `npm install` statt `npm ci`. Die permissive Install-Semantik löst Caret-Ranges zur neuesten kompatiblen Version auf und ignoriert Lock-File-Drift, solange die `package.json`-Constraints erfüllbar bleiben. Die Build-Reproduzierbarkeit sinkt damit formal — für den aktuellen Betriebsmodus (Einzelkunden-Demo, kein npm-Publish, keine Delivery-Pipeline mit strikten Versions-SLAs) akzeptabel.
+
+**Commit**: `ci: switch typecheck and build to npm install (C6.5 bolt workaround)`
+
+**Drei Langfrist-Optionen (Entscheidung nach der UVM-Demo)**:
+
+- **Option X · Codebasis an Bolt-Dependencies anpassen**: Downgrade `package.json` auf Express 4, Vite 5, Playwright entfernen. Verlust der C1-Upgrades, aber volle Bolt-Kompatibilität. Risiko: C1 war eine bewusste Sicherheits-/Feature-Entscheidung (Express 5 mit automatischem Body-Parser-Limit, Vite 7 mit verbessertem Dev-Server). Aufwand: ~2–4 Stunden plus manuelle Code-Review.
+- **Option Y · Bolt aus dem produktiven Workflow entfernen**: Bolt-Instanz bleibt als reine Demo-Anzeige (read-only-Klon). Entwicklung nur noch via lokale Claude-Code-Sessions + direkten Git-Push. Branch-Protection-Rules auf main (require-PR, dismiss-stale-reviews, restrict-push-to-admins). Bolt-Account aus den main-Push-Rechten ausbauen. Aufwand: ~1 Stunde (GitHub-Settings-Änderung plus Bolt-Zugriffs-Audit).
+- **Option Z · `package-lock.json` in `.gitignore`**: Lock-File aus Repo entfernen, CI baut ausschließlich gegen `package.json`. Weniger reproduzierbare Builds (jeder CI-Lauf installiert potenziell andere Minor-/Patch-Versionen), für ein Produkt ohne npm-Publish und ohne strikte Versions-SLAs vertretbar. Aufwand: ~15 Minuten.
+
+**Entscheidung**: Vertagt bis nach der Kollegen-Demo. Option Y wirkt strukturell am sauberstens (adressiert die Wurzel statt das Symptom), Option Z am günstigsten (schneller Ausstieg), Option X am disruptivsten (Reversal von C1-Arbeit). Die Entscheidung hängt von der Demo-Rückmeldung ab: Wenn die Kollegen Bolt als sinnvolles Anzeige-Werkzeug einstufen, wird Y bevorzugt; wenn Bolt als rein zufälliger Host dient, reicht Z.
+
+**Verhältnis A/B/C ↔ X/Y/Z**: A/B/C (oben in diesem Abschnitt) beschreiben Optionen zur **akuten Lock-File-Konsistenz-Wiederherstellung** (z. B. vor einem npm-Publish-Release). X/Y/Z beschreiben Optionen zur **strukturellen Beseitigung der Bolt-Regression-Schleife**. Beide Achsen können kombiniert werden: z. B. Option Y (Bolt aus dem Workflow) plus Option A (sauberer Lock-File-Reset) nach der Demo.
+
 ### Gesamt-Aufwand C6 (aktualisiert)
 
 | Teil | Charakter | Aufwand |
