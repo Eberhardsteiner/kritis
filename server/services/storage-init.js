@@ -32,6 +32,12 @@
  *     Files fehlen UND Legacy-Files existieren.
  *   - seedFreshSystemIfEmpty:     (intern) legt den Demo-Tenant
  *     an, wenn nach Migration noch keine Tenants existieren.
+ *   - seedDemoAdminIfMissing:     (intern) sichert bei jedem
+ *     Server-Start den Demo-Admin-Account `admin@krisenfest.demo`
+ *     mit deterministischem Passwort. Idempotent: legt den Account
+ *     an, wenn er fehlt, und setzt sonst nur das Passwort zurück.
+ *     Sicherheits-Gate: aktiv nur im Nicht-Produktions-Modus oder
+ *     wenn `KRISENFEST_SEED_DEMO_ADMIN=true` explizit gesetzt ist.
  *   - moveDirectoryContents:      (intern) robuste Verzeichnis-
  *     Migration mit Rename-Fallback auf Copy+Unlink.
  *
@@ -93,6 +99,7 @@ import {
   ensureDir,
   ensureTenantStorage,
   jsonDocumentExists,
+  readAccounts,
   readJsonFile,
   readTenants,
   tenantPaths,
@@ -228,6 +235,119 @@ async function migrateLegacyStorageIfNeeded() {
   }
 }
 
+// ============================================================================
+// Demo-Admin-Seed · reproduzierbarer Login für die UVM-Demo
+// ============================================================================
+
+/**
+ * Fester Demo-Admin-Account, auf den sich `docs/DEMO-ZUGANG.md` und
+ * `docs/DEMO-CLICK-PATHS.md` beziehen. Dieser Account wird bei jedem
+ * Server-Start idempotent gesichert: fehlt er, wird er angelegt; existiert
+ * er, wird nur sein Passwort auf den DEFAULT_DEMO_PASSWORD zurückgesetzt
+ * und die admin-Flags garantiert. Dadurch überlebt der Demo-Login jeden
+ * Bolt-Regressions-Sync und jedes `demo-reset --fresh`.
+ *
+ * Abgrenzung zu `seedFreshSystemIfEmpty`:
+ *   - `seedFreshSystemIfEmpty` legt den Demo-Tenant plus einen initialen
+ *     Admin mit `admin@krisenfest.local` an, aber nur wenn tenants.json
+ *     leer ist.
+ *   - `seedDemoAdminIfMissing` (diese Funktion) garantiert unabhängig
+ *     vom Tenant-Zustand, dass `admin@krisenfest.demo` als System-Admin
+ *     mit festem Passwort existiert und in den ersten verfügbaren
+ *     Tenant eingebunden ist. Läuft bei jedem Server-Start.
+ *
+ * Sicherheits-Gate:
+ *   Aktiv nur in Nicht-Produktions-Modi (`runtimeConfig.appMode !==
+ *   'production'`) ODER wenn explizit `KRISENFEST_SEED_DEMO_ADMIN=true`
+ *   in der Umgebung gesetzt ist (für Bolt-Hosting und UVM-Preview
+ *   relevant, wo der Container möglicherweise als "production" läuft).
+ */
+const DEMO_ADMIN_EMAIL = 'admin@krisenfest.demo';
+const DEMO_ADMIN_NAME = 'Demo-Admin';
+
+function isDemoAdminSeedEnabled() {
+  if (runtimeConfig.appMode !== 'production') {
+    return true;
+  }
+  const optIn = String(process.env.KRISENFEST_SEED_DEMO_ADMIN || '').trim().toLowerCase();
+  return optIn === 'true' || optIn === '1' || optIn === 'yes';
+}
+
+async function seedDemoAdminIfMissing() {
+  if (!isDemoAdminSeedEnabled()) {
+    return;
+  }
+
+  // Der Demo-Admin braucht mindestens einen Tenant, in dem er Mitglied
+  // sein kann. `initializeStorage` ruft `seedFreshSystemIfEmpty` vor
+  // dieser Funktion, daher ist der Default-Fall „ein Tenant existiert".
+  // Defensiv: fehlt trotzdem ein Tenant, bricht die Seed-Funktion
+  // lautlos ab (kein Tenant = kein sinnvoller Admin-Kontext).
+  const tenants = await readTenants();
+  const targetTenant = tenants[0];
+  if (!targetTenant) {
+    return;
+  }
+
+  const accounts = await readAccounts();
+  const existingIndex = accounts.findIndex(
+    (acc) => String(acc.email || '').toLowerCase() === DEMO_ADMIN_EMAIL,
+  );
+  const passwordData = hashPassword(DEFAULT_DEMO_PASSWORD);
+
+  if (existingIndex >= 0) {
+    // Idempotent: Passwort auf Default zurücksetzen, Admin-Flags
+    // garantieren, Tenant-Mitgliedschaft sicherstellen.
+    const existing = accounts[existingIndex];
+    existing.passwordSalt = passwordData.salt;
+    existing.passwordHash = passwordData.hash;
+    existing.isSystemAdmin = true;
+    existing.status = 'active';
+    existing.authSource = 'local';
+
+    const memberships = Array.isArray(existing.memberships) ? existing.memberships : [];
+    const hasMembership = memberships.some((m) => m?.tenantId === targetTenant.id);
+    if (!hasMembership) {
+      memberships.push({
+        tenantId: targetTenant.id,
+        roleProfile: 'admin',
+        workspaceUserId: createId('usr'),
+        scope: targetTenant.name || '',
+      });
+      existing.memberships = memberships;
+    }
+
+    accounts[existingIndex] = existing;
+    await writeAccounts(accounts);
+    console.log(`KRITIS-Readiness API: Demo-Admin ${DEMO_ADMIN_EMAIL} re-seed bestätigt (Passwort auf Default zurückgesetzt).`);
+    return;
+  }
+
+  accounts.push({
+    id: createId('acct'),
+    name: DEMO_ADMIN_NAME,
+    email: DEMO_ADMIN_EMAIL,
+    status: 'active',
+    isSystemAdmin: true,
+    authSource: 'local',
+    passwordSalt: passwordData.salt,
+    passwordHash: passwordData.hash,
+    lastLoginAt: '',
+    lastAuthProvider: '',
+    identities: [],
+    memberships: [
+      {
+        tenantId: targetTenant.id,
+        roleProfile: 'admin',
+        workspaceUserId: createId('usr'),
+        scope: targetTenant.name || '',
+      },
+    ],
+  });
+  await writeAccounts(accounts);
+  console.log(`KRITIS-Readiness API: Demo-Admin ${DEMO_ADMIN_EMAIL} neu angelegt (System-Admin, Tenant ${targetTenant.id}).`);
+}
+
 async function seedFreshSystemIfEmpty() {
   const tenants = await readTenants();
   if (tenants.length) {
@@ -302,8 +422,10 @@ async function seedFreshSystemIfEmpty() {
  *      System-Files (tenants, accounts, sessions, pending-auth-flows,
  *      auth-callback-tickets, platform-settings, api-clients, job-runs)
  *   4. seedFreshSystemIfEmpty (Demo-Tenant-Seed, wenn tenants.json leer)
- *   5. 3× cleanupExpired-* (Sessions, Auth-Flows, Auth-Callback-Tickets)
- *   6. Per-Tenant ensureTenantStorage-Schleife
+ *   5. seedDemoAdminIfMissing (idempotenter Demo-Admin-Seed,
+ *      unabhängig vom Tenant-Zustand, gate via appMode + Opt-in-Env)
+ *   6. 3× cleanupExpired-* (Sessions, Auth-Flows, Auth-Callback-Tickets)
+ *   7. Per-Tenant ensureTenantStorage-Schleife
  *
  * Reihenfolge kritisch: Die 8× jsonDocumentExists-Gates laufen NACH
  * migrateLegacy, weil die Migration die System-Files erst anlegen
@@ -346,6 +468,7 @@ export async function initializeStorage() {
     await writeJobRuns([]);
   }
   await seedFreshSystemIfEmpty();
+  await seedDemoAdminIfMissing();
   await cleanupExpiredSessions();
   await cleanupExpiredAuthFlows();
   await cleanupExpiredAuthCallbackTickets();

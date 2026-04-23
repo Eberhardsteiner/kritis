@@ -241,6 +241,12 @@ Env-Variablen:
 `);
 }
 
+function logDemoLoginHint() {
+  log('Demo-Login: admin@krisenfest.demo / Krisenfest2026!');
+  log('Login-Pfad in der App: Sidebar → "Plattform & Sync" → "Optionaler Login"');
+  log('(Demo-Admin wird durch seedDemoAdminIfMissing bei jedem Server-Start idempotent gesichert.)');
+}
+
 async function main() {
   const mode = process.argv[2] ?? '--help';
   switch (mode) {
@@ -250,6 +256,7 @@ async function main() {
       startServer();
       await healthCheck();
       log('Fertig. Demo-Start bereit (Fresh-Bootstrap).');
+      logDemoLoginHint();
       break;
     case '--demo-ready':
       await stopServer();
@@ -257,6 +264,7 @@ async function main() {
       startServer();
       await healthCheck();
       log('Fertig. Demo-Start bereit (demo-ready-baseline).');
+      logDemoLoginHint();
       break;
     case '--capture-baseline':
       await stopServer();

@@ -40,11 +40,16 @@ npm run demo:capture-baseline
 
 Danach steht `--demo-ready` zur Verfügung. Der erzeugte Ordner `demo-ready-baseline/` kann via Git committed oder lokal in `.gitignore` gehalten werden — Operator-Entscheidung.
 
-### Login-Credentials (Standard-Seed)
+### Login-Credentials
 
-- E-Mail: `admin@krisenfest.local`
-- Passwort: `Krisenfest2026!`
-- Mandant: Nach Seed automatisch vorhanden (`Standard-Mandant` oder `demo-unternehmen`)
+- **E-Mail**: `admin@krisenfest.demo`
+- **Passwort**: `Krisenfest2026!`
+- **Login-Pfad**: Sidebar → **Plattform & Sync** → Sektion **Optionaler Login**
+- **Mandant**: Nach Seed automatisch vorhanden (`demo-unternehmen` oder der in der Baseline gesicherte Tenant)
+
+Diese Credentials sind durch `seedDemoAdminIfMissing()` in `server/services/storage-init.js` **bei jedem Server-Start idempotent gesichert**. Sie überleben jedes `--fresh`- und `--demo-ready`-Reset und lassen sich durch einen Restart auf Default zurücksetzen, falls sie manuell geändert wurden. Detail-Doku: `docs/DEMO-ZUGANG.md`.
+
+Legacy-Zugang (optional, wenn nicht explizit benötigt): `admin@krisenfest.local` mit demselben Passwort — nur beim initialen Fresh-Seed vorhanden, nicht idempotent re-seeded.
 
 ---
 
