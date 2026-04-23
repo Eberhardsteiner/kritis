@@ -53,6 +53,47 @@ Legacy-Zugang (optional, wenn nicht explizit benötigt): `admin@krisenfest.local
 
 ---
 
+## 1.5 · Pack-Import für Szenarien und Templates (Kurz-Referenz)
+
+Dieser Abschnitt fasst die Schritte zusammen, die in den Pfaden 3–6 und 11 einzeln ausgeführt werden. Gedacht als Spickzettel direkt nach dem Login, bevor der Dashboard-Besuch beginnt. Zeit-Details und Stolpersteine: siehe die einzelnen Pfade unten.
+
+### Erst-Import (Healthcare-Pack)
+
+1. Sidebar → **Branchenmodule** öffnen.
+2. In der Sektion **Container oder Legacy-JSON importieren** auf das Upload-Label klicken (File-Input ist optisch verborgen).
+3. Datei wählen: `src/module-packs/healthcare-core.container.json` (Healthcare, 1.309 Zeilen).
+   - Alternative für den Pack-Wechsel-Moment später: `src/module-packs/energy-core.container.json` (Energy, 1.330 Zeilen).
+4. Pack erscheint unten in der **Pack-Registry** mit Status **Entwurf** (`draft`).
+5. Registry-Eintrag → Button **Freigeben / Rollback** → Status wechselt auf **Freigegeben** (`released`).
+6. Pack für den aktuellen Tenant aktivieren:
+   - Topbar → Dropdown **Aktives Modul** → „Gesundheit & Krankenhaus" auswählen, **oder**
+   - Sidebar → Branchenmodule → Modul-Karte „Gesundheit & Krankenhaus" anklicken.
+   - Unter „Ausgewähltes Branchenprofil" wird das **Adopt-Panel** sichtbar.
+7. Adopt-Panel → Button **Alle Templates übernehmen** klicken.
+8. Sync-Success-Toast erscheint („15 Risiko-Einträge hinzugefügt · Resilienzplan übernommen · 2 Tabletop-Szenarios hinzugefügt"). Kurz warten, bis der Toast vergeht.
+9. Sidebar → **Tabletop-Übungen** → 2 neue Szenarien in der Library sichtbar („Ransomware-Angriff auf das zentrale KIS" · 180 min, „Kaskadierender Stromausfall mit Notaufnahme-Überlastung" · 150 min).
+10. Sidebar → **KRITIS-Readiness** → 15 Risiken im All-Gefahren-Risikokatalog (Jurisdiktion DE + KRITISDachG-Scope `in_scope` setzen, damit der Katalog aufklappt).
+11. Sidebar → **Resilienzplan** → Plan-Template mit allen 6 Sektionen gefüllt (Scope, Risikobasis, Maßnahmen nach 4 Zielen, Governance, Meldewesen, Nachweise).
+
+### Pack-Wechsel Healthcare → Energy (Demo-Höhepunkt)
+
+Dieser Block ist der narrative Kern der Demo: „Dieselbe Engine, anderer Sektor." Vorbedingung: Erst-Import (oben) ist bereits durchgespielt, Healthcare ist aktiv adoptiert.
+
+1. Sidebar → **Branchenmodule** → Pack-Registry → Healthcare-Entry → Button **Stilllegen**. Healthcare-Karte verschwindet aus „Verfügbare Module", bleibt aber mit Status **Stillgelegt** in der Registry.
+2. Im gleichen View → **Container oder Legacy-JSON importieren** → `src/module-packs/energy-core.container.json` hochladen.
+3. Neuer Energy-Registry-Eintrag (Status `draft`) → **Freigeben / Rollback** → Status wechselt auf `released`, Energy-Karte erscheint in „Verfügbare Module".
+4. Topbar → Dropdown **Aktives Modul** → „Energie & Versorgung" auswählen. Adopt-Panel zeigt Energy-Counts (15 Risiken, 1 Plan, 2 Tabletops).
+5. Adopt-Panel → **Alle Templates übernehmen**. Success-Toast zeigt die neuen Counts.
+6. Sidebar → **KRITIS-Readiness** → Risikokatalog zeigt **30 Einträge** (Healthcare 15 behalten + Energy 15 neu angehängt — Append-Semantik).
+7. Sidebar → **Resilienzplan** → Der Energy-Plan ist der aktive Plan; im **Versionshistorie**-Tab ist der archivierte Healthcare-Plan sichtbar (Lossless-Eigenschaft).
+8. Sidebar → **Tabletop-Übungen** → alle **4 Szenarien** sichtbar (2 Healthcare + 2 Energy).
+
+**Didaktische Kernbotschaft für diesen Block**: Pack-Retire löscht keine Tenant-Daten — die Healthcare-Inhalte bleiben im State erhalten, Energy wird additiv überlagert. Das illustriert den Lossless-Charakter der Adoption.
+
+**Gesamtzeit Pack-Wechsel**: 2–4 Minuten nach Dr. Steiners Zeit-Budget-Tabelle (siehe Abschnitt 3).
+
+---
+
 ## 2 · Klick-Pfade im Detail
 
 Die Pfade sind in Demo-Reihenfolge sortiert. Jeder Pfad folgt diesem Schema:
@@ -421,7 +462,7 @@ Keine Redezeit:
 - [ ] Pack-Dateien verfügbar:
   - `src/module-packs/healthcare-core.container.json`
   - `src/module-packs/energy-core.container.json`
-- [ ] Login-Credentials bereit (`admin@krisenfest.local` / `Krisenfest2026!`)
+- [ ] Login-Credentials bereit (`admin@krisenfest.demo` / `Krisenfest2026!`)
 - [ ] Terminal-Fenster sichtbar für Reset-Kommando
 - [ ] Fragen-Sammlung griffbereit (`docs/DEMO-EXPECTED-QUESTIONS.md`)
 
