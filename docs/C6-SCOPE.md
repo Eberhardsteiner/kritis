@@ -107,6 +107,34 @@ Der CI-Lauf auf `2fc4e4bb` ging grün — aber nur, weil Bolt's Lock-File in sic
 
 **Verhältnis A/B/C ↔ X/Y/Z**: A/B/C (oben in diesem Abschnitt) beschreiben Optionen zur **akuten Lock-File-Konsistenz-Wiederherstellung** (z. B. vor einem npm-Publish-Release). X/Y/Z beschreiben Optionen zur **strukturellen Beseitigung der Bolt-Regression-Schleife**. Beide Achsen können kombiniert werden: z. B. Option Y (Bolt aus dem Workflow) plus Option A (sauberer Lock-File-Reset) nach der Demo.
 
+### C6.6 · Reaktivierung Full-Auth (nach Demo-Phase)
+
+**Fundstelle**: Eingeführt während der UVM-Demo-Vorbereitung 2026-04-23. Referenz-Dokument: `docs/DEMO-AUTH-BYPASS.md`.
+
+**Kontext**: Für die Demo-Phase ist ein radikal vereinfachter Ein-Klick-Admin-Zugang aktiv (Feature-Flag `KRISENFEST_DEMO_SIMPLE_AUTH=true`, Default in `server/config/runtime.js`). Das Frontend zeigt nur E-Mail + Passwort + einen „Demo-Anmeldung"-Button; der Backend-Endpoint `POST /api/auth/demo-login` akzeptiert jedes nicht-leere Paar mit Passwort == `DEFAULT_DEMO_PASSWORD`. Die Full-Auth-Kette (Multi-Tenant-Membership, OIDC, Account-DB-Lookup) ist **stillgelegt, nicht entfernt**.
+
+**Scope C6.6**: Abarbeitung der Reaktivierungs-Checkliste aus `DEMO-AUTH-BYPASS.md`, Abschnitt „Reaktivierungs-Checkliste (Post-Demo)". Die zehn Punkte umfassen:
+
+1. Env-Flag `KRISENFEST_DEMO_SIMPLE_AUTH=false` setzen (oder Default in `runtime.js` invertieren).
+2. Tenant-Dropdown-Render-Pfad in `PlatformView.tsx` verifizieren.
+3. Echte Admin-Accounts via `/api/admin/accounts`-Flow anlegen.
+4. OIDC-Provider konfigurieren, falls SSO für produktive Umgebungen gewünscht.
+5. Entscheidung: `seedDemoAdminIfMissing` deaktivieren oder belassen.
+6. Session-Management-Verhalten evaluieren (Token-Refresh, Revocation, Session-Dauer).
+7. Multi-Tenant-Membership-Resolution verifizieren (`resolveMembershipForAccount`).
+8. Audit-Log-Bereinigung zu Demo-Session-Einträgen (`providerId: 'demo'`).
+9. Frontend-Branch-Review für den `demoSimpleAuth === false`-Pfad.
+10. Entscheidung: Demo-Bypass-Code entfernen oder als Dauerbereitschaft belassen.
+
+**Trigger für Start von C6.6**: Eines der folgenden Ereignisse.
+- UVM-Kollegen-Demo ist abgeschlossen und das Feedback ist ausgewertet.
+- Ein konkreter Pilotkunde fordert echte Mehr-Tenant- oder SSO-Funktionalität.
+- Die Instanz soll Internet-exponiert werden (z. B. als Staging-URL für einen konkreten Pilot).
+
+**Aufwandsschätzung**: 0,5–1 Arbeitstag (schema-/infrastrukturlastig, Faktor 1,5–2,5× — entfällt teilweise, weil der Code bereits vollständig da ist, nur reaktiviert werden muss). Der Hauptaufwand liegt in Verifikations-Schritten (Punkte 2, 6, 7, 9), nicht in neuem Code.
+
+**Abgrenzung**: C6.6 adressiert die **Rückwärts-Transformation** in den Pre-Demo-Auth-Zustand. Wenn nach der Demo entschieden wird, das Produkt auch jenseits des Demo-Kreises zu nutzen (Pilot, Evaluierungs-Lizenz, PoC), ist C6.6 die erste Iteration, die anstehen muss. Ohne C6.6 bleibt der Server in einer für produktive Nutzung unsicheren Konfiguration.
+
 ### Gesamt-Aufwand C6 (aktualisiert)
 
 | Teil | Charakter | Aufwand |
@@ -116,7 +144,8 @@ Der CI-Lauf auf `2fc4e4bb` ging grün — aber nur, weil Bolt's Lock-File in sic
 | C6.3 | UI-lastig, Debug-Risiko | 1–2 Tage |
 | C6.4 | Infrastruktur | 0,5–1 Tag |
 | C6.5 | CI-/Dependency-Management | 20 Min (Option A) — 4 Std. (Option C, falls nötig) |
-| **Summe** | — | **2,75–5,5 Arbeitstage** |
+| C6.6 | Auth-Reaktivierung (Flag-Flip + Verifikation) | 0,5–1 Tag |
+| **Summe** | — | **3,25–6,5 Arbeitstage** |
 
 ## 3 · C6-Ausschluss · Supabase-Produktionspfad pausiert
 
@@ -174,6 +203,7 @@ Empfohlene Reihenfolge nach Risiko und Dringlichkeit:
 3. **C6.4** (SQLite-Race, 0,5–1 Tag) — Test-Infrastruktur-Verbesserung, hebt die Parallelisierungs-Einschränkung
 4. **C6.1** (Zwei-Phasen-Commit-Reconciler, 1–2 Tage) — Datenintegritäts-Konsolidierung, am besten nach C6.4 wegen Test-Anforderungen
 5. **C6.3** (Frontend-Notice-Akkumulation, 1–2 Tage) — Der komplexeste Teil, Debug-Risiko; besser am Schluss, wenn andere C6-Teile bereits grün sind
+6. **C6.6** (Reaktivierung Full-Auth, 0,5–1 Tag) — erst wenn UVM-Demo abgeschlossen und Feedback verarbeitet ist; Trigger siehe `docs/DEMO-AUTH-BYPASS.md`
 
 Jeder C6-Teil bekommt einen eigenen Commit nach dem C3/C5-Muster (`C6.1: …`, `C6.2: …` etc.), mit Verweis auf die jeweilige Meta-Review-Notiz. Die Kalibrierungs-Regel-Dreiheit aus Notiz 16/17/18 hilft bei der Schätzung pro Teil.
 
@@ -187,6 +217,7 @@ Jeder C6-Teil bekommt einen eigenen Commit nach dem C3/C5-Muster (`C6.1: …`, `
 - ✅ Supabase-Code-Pfad bleibt lauffähig (wird nicht unabsichtlich deaktiviert)
 - ✅ Meta-Review-Notizen 1, 2, 4 Teil B, 8 als „erledigt" markiert; die übrigen Notizen (3, 5–7, 9–15, 16–18) bleiben offen für C7 oder spätere Iterationen
 - ✅ C6.5-Befund zum Bolt-Verhalten dokumentiert (falls Counter-Commits auftreten, wurde Option C evaluiert)
+- ✅ C6.6-Reaktivierungs-Checkliste (siehe `docs/DEMO-AUTH-BYPASS.md`) durchlaufen, falls der Trigger-Fall eingetreten ist; oder dokumentierte Begründung, warum der Demo-Bypass als Dauerzustand belassen wird
 
 ## 6 · Abgrenzung zu C7
 
