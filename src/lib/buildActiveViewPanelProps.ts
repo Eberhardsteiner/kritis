@@ -83,6 +83,7 @@ interface BuildActiveViewPanelPropsArgs {
   serverAuthRequired: PlatformViewProps['serverAuthRequired'];
   publicTenant: PlatformViewProps['publicTenant'];
   availableTenants: PlatformViewProps['availableTenants'];
+  demoSimpleAuth: PlatformViewProps['demoSimpleAuth'];
   accessAccounts: PlatformViewProps['accessAccounts'];
   documentLedger: PlatformViewProps['documentLedger'];
   evidenceRetentionSummary: PlatformViewProps['evidenceRetentionSummary'];
@@ -186,6 +187,7 @@ interface BuildActiveViewPanelPropsArgs {
   onCreateSnapshot: PlatformViewProps['onCreateSnapshot'];
   onRestoreSnapshot: PlatformViewProps['onRestoreSnapshot'];
   onLogin: PlatformViewProps['onLogin'];
+  onDemoLogin: PlatformViewProps['onDemoLogin'];
   onStartOidcLogin: PlatformViewProps['onStartOidcLogin'];
   onLogout: PlatformViewProps['onLogout'];
   onCreateTenant: PlatformViewProps['onCreateTenant'];
@@ -349,6 +351,7 @@ export function buildActiveViewPanelProps({
   serverAuthRequired,
   publicTenant,
   availableTenants,
+  demoSimpleAuth,
   accessAccounts,
   documentLedger,
   evidenceRetentionSummary,
@@ -452,6 +455,7 @@ export function buildActiveViewPanelProps({
   onCreateSnapshot,
   onRestoreSnapshot,
   onLogin,
+  onDemoLogin,
   onStartOidcLogin,
   onLogout,
   onCreateTenant,
@@ -708,6 +712,7 @@ export function buildActiveViewPanelProps({
       serverAuthRequired,
       publicTenant,
       availableTenants,
+      demoSimpleAuth,
       accessAccounts,
       documentLedger,
       evidenceRetentionSummary,
@@ -729,6 +734,7 @@ export function buildActiveViewPanelProps({
       onCreateSnapshot,
       onRestoreSnapshot,
       onLogin,
+      onDemoLogin,
       onStartOidcLogin,
       onLogout,
       onCreateTenant,

@@ -44,6 +44,13 @@ interface PlatformViewProps {
   serverAuthRequired: boolean;
   publicTenant: TenantSummary | null;
   availableTenants: TenantSummary[];
+  /**
+   * Wenn true, rendert der Auth-Block nur ein Ein-Klick-Demo-Login:
+   * E-Mail-Input, Passwort-Input, „Demo-Anmeldung"-Button. Kein
+   * Mandant-Dropdown, kein SSO-Block, keine Provider-Chips. Aktiviert
+   * über `KRISENFEST_DEMO_SIMPLE_AUTH=true` in der Backend-Env.
+   */
+  demoSimpleAuth: boolean;
   accessAccounts: AccessAccountSummary[];
   documentLedger: DocumentLedgerSummaryServer | null;
   evidenceRetentionSummary: EvidenceRetentionSummary | null;
@@ -65,6 +72,7 @@ interface PlatformViewProps {
   onCreateSnapshot: (name: string, comment: string) => void;
   onRestoreSnapshot: (snapshotId: string) => void;
   onLogin: (email: string, password: string, tenantId: string) => void;
+  onDemoLogin: (email: string, password: string) => void;
   onStartOidcLogin: (tenantId: string) => void;
   onLogout: () => void;
   onCreateTenant: (payload: {
@@ -139,6 +147,7 @@ export function PlatformView({
   serverAuthRequired,
   publicTenant,
   availableTenants,
+  demoSimpleAuth,
   accessAccounts,
   documentLedger,
   evidenceRetentionSummary,
@@ -160,6 +169,7 @@ export function PlatformView({
   onCreateSnapshot,
   onRestoreSnapshot,
   onLogin,
+  onDemoLogin,
   onStartOidcLogin,
   onLogout,
   onCreateTenant,
@@ -363,6 +373,56 @@ export function PlatformView({
           </div>
 
           {!authSession ? (
+            demoSimpleAuth ? (
+              /* Demo-Simple-Auth · Ein-Klick-Admin-Zugang.
+                 Die Full-Auth-Kette (Tenant-Dropdown, SSO, Provider-Chips)
+                 ist bewusst ausgeblendet, bleibt aber code-seitig intakt
+                 im sonst-Zweig unten. Reaktivierung via
+                 KRISENFEST_DEMO_SIMPLE_AUTH=false. Siehe
+                 docs/DEMO-AUTH-BYPASS.md. */
+              <div className="view-stack top-gap">
+                <div className="chip-row">
+                  <span className="chip outline">Demo-Modus · Ein-Klick-Login</span>
+                </div>
+                <div className="form-grid two-column">
+                  <label className="field-label wide">
+                    E-Mail
+                    <input
+                      type="email"
+                      value={loginEmail}
+                      onChange={(event) => setLoginEmail(event.target.value)}
+                      placeholder="demo@krisenfest.local"
+                    />
+                  </label>
+                  <label className="field-label">
+                    Passwort
+                    <input
+                      type="password"
+                      value={loginPassword}
+                      onChange={(event) => setLoginPassword(event.target.value)}
+                      placeholder="Passwort"
+                    />
+                  </label>
+                  <div className="inline-actions align-end wide">
+                    <button
+                      type="button"
+                      className="button primary"
+                      onClick={() => onDemoLogin(loginEmail, loginPassword)}
+                      disabled={!loginEmail || !loginPassword || serverMode === 'offline' || serverMode === 'checking'}
+                    >
+                      <LockKeyhole size={16} />
+                      Demo-Anmeldung
+                    </button>
+                  </div>
+                  <div className="feedback-box wide top-gap">
+                    <strong>Vereinfachter Demo-Zugang</strong>
+                    <p className="top-gap">
+                      Für die UVM-Demo ist der Login auf ein Paar aus E-Mail und Passwort reduziert. Default-Tenant und Admin-Rolle werden serverseitig aufgelöst. Passwort: wie im Demo-Briefing (<code>docs/DEMO-ZUGANG.md</code>).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
             <div className="view-stack top-gap">
               <div className="chip-row">
                 <span className="chip outline">Auth-Modus: {authMode}</span>
@@ -455,6 +515,7 @@ export function PlatformView({
                 </div>
               ) : null}
             </div>
+            )
           ) : (
             <div className="mini-list top-gap">
               <div className="mini-list-row"><span>Angemeldet als</span><strong>{authSession.name} · {authSession.email}</strong></div>

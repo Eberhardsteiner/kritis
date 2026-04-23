@@ -92,6 +92,9 @@ export function AppProvider({ children }: AppProviderProps) {
   const [authMode, setAuthMode] = useState<AuthMode>('local_only');
   const [authProviders, setAuthProviders] = useState<AuthProviderSummary[]>([]);
   const [publicTenant, setPublicTenant] = useState<TenantSummary | null>(null);
+  // Default `false`: das Frontend zeigt die Full-Auth-UI, bis der
+  // Backend-Bootstrap den Demo-Simple-Auth-Modus bestätigt.
+  const [demoSimpleAuth, setDemoSimpleAuth] = useState<boolean>(false);
 
   // === Auth-Session-State ====================================================
   const [authToken, setAuthToken] = useState<string>(() => loadAuthToken());
@@ -228,6 +231,8 @@ export function AppProvider({ children }: AppProviderProps) {
       setAuthProviders,
       publicTenant,
       setPublicTenant,
+      demoSimpleAuth,
+      setDemoSimpleAuth,
       authToken,
       setAuthToken,
       authSession,
@@ -306,6 +311,7 @@ export function AppProvider({ children }: AppProviderProps) {
       authMode,
       authProviders,
       publicTenant,
+      demoSimpleAuth,
       authToken,
       authSession,
       availableTenants,

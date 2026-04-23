@@ -103,6 +103,12 @@ export interface WorkspaceStateValue {
   setAuthProviders: Dispatch<SetStateAction<AuthProviderSummary[]>>;
   publicTenant: TenantSummary | null;
   setPublicTenant: Dispatch<SetStateAction<TenantSummary | null>>;
+  // Demo-Simple-Auth-Flag · spiegelt das Backend-Bootstrap-Feld
+  // `demoSimpleAuth`. Wenn true, rendert PlatformView ein vereinfachtes
+  // Ein-Klick-Login und ruft /api/auth/demo-login (statt /api/auth/login)
+  // auf. Steuerbar über KRISENFEST_DEMO_SIMPLE_AUTH in der Backend-Env.
+  demoSimpleAuth: boolean;
+  setDemoSimpleAuth: Dispatch<SetStateAction<boolean>>;
 
   // === Auth-Session-State ====================================================
   authToken: string;

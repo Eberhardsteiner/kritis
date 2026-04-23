@@ -13,6 +13,7 @@ import type { TenantPolicy, UserRoleProfile, UserStatus } from '../../../types';
 import { saveAuthToken } from '../../../lib/storage';
 import {
   createTenant,
+  fetchDemoLogin,
   loginToServer,
   logoutFromServer,
   resetAccessAccountPassword,
@@ -37,6 +38,7 @@ export interface PlatformAuthHandlerDependencies {
 
 export interface PlatformAuthHandlers {
   handleServerLogin: (email: string, password: string, tenantId: string) => Promise<void>;
+  handleDemoLogin: (email: string, password: string) => Promise<void>;
   handleStartOidcLogin: (tenantId: string) => Promise<void>;
   handleServerLogout: () => Promise<void>;
   handleCreateTenantOnServer: (payload: {
@@ -204,6 +206,72 @@ export function usePlatformAuthHandlers(
       } catch (error) {
         const details = extractErrorDetails(error);
         const message = error instanceof Error ? error.message : 'Anmeldung fehlgeschlagen.';
+        setServerMode(serverAuthRequired ? 'auth_required' : 'connected');
+        setSyncError(message);
+        showNotice('error', message, details);
+      }
+    },
+    [
+      extractErrorDetails,
+      lastSyncedPayloadRef,
+      refreshServerSideData,
+      serverAuthRequired,
+      serverInitializedRef,
+      setAuthSession,
+      setAuthToken,
+      setLastServerLoadAt,
+      setServerMode,
+      setState,
+      setSyncError,
+      showNotice,
+      state,
+      suppressNextServerSyncRef,
+      updateServerStateMarkers,
+    ],
+  );
+
+  /**
+   * Demo-Simple-Auth-Login · ruft /api/auth/demo-login ohne Tenant-
+   * Parameter auf. Default-Tenant und Admin-Rolle werden serverseitig
+   * aufgelöst. Strukturell identisch zu handleServerLogin, aber mit
+   * vereinfachter Input-Validation (keine tenantId nötig).
+   */
+  const handleDemoLogin = useCallback(
+    async (email: string, password: string) => {
+      if (!email.trim() || !password.trim()) {
+        showNotice('error', 'Bitte E-Mail und Passwort angeben.');
+        return;
+      }
+
+      try {
+        setServerMode('checking');
+        const response = await fetchDemoLogin(email, password);
+        const nextToken = response.session.token || '';
+        saveAuthToken(nextToken);
+        setAuthToken(nextToken);
+        setAuthSession(response.session);
+        const hydrated = applyRemoteState(
+          response.state ?? {},
+          state,
+          response.session,
+          response.workspaceUserSeed,
+        );
+        suppressNextServerSyncRef.current = true;
+        setState(hydrated);
+        lastSyncedPayloadRef.current = serializeServerPayload(hydrated);
+        setLastServerLoadAt(new Date().toISOString());
+        updateServerStateMarkers(response.stateVersion, response.stateUpdatedAt);
+        setSyncError('');
+        setServerMode('connected');
+        serverInitializedRef.current = true;
+        await refreshServerSideData(response.session.token, response.session);
+        showNotice(
+          'success',
+          `Demo-Anmeldung erfolgreich · Mandant „${response.session.tenantName}“.`,
+        );
+      } catch (error) {
+        const details = extractErrorDetails(error);
+        const message = error instanceof Error ? error.message : 'Demo-Anmeldung fehlgeschlagen.';
         setServerMode(serverAuthRequired ? 'auth_required' : 'connected');
         setSyncError(message);
         showNotice('error', message, details);
@@ -455,6 +523,7 @@ export function usePlatformAuthHandlers(
   return useMemo(
     () => ({
       handleServerLogin,
+      handleDemoLogin,
       handleStartOidcLogin,
       handleServerLogout,
       handleCreateTenantOnServer,
@@ -465,6 +534,7 @@ export function usePlatformAuthHandlers(
     }),
     [
       handleServerLogin,
+      handleDemoLogin,
       handleStartOidcLogin,
       handleServerLogout,
       handleCreateTenantOnServer,

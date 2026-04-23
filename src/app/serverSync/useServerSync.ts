@@ -120,6 +120,7 @@ export function useServerSync(): ServerSyncHandlers {
     setAuthMode,
     setAuthProviders,
     setPublicTenant,
+    setDemoSimpleAuth,
     setAvailableTenants,
     setAccessAccounts,
     setServerMode,
@@ -307,6 +308,7 @@ export function useServerSync(): ServerSyncHandlers {
         setAuthMode(bootstrap.authMode ?? 'local_only');
         setAuthProviders(bootstrap.authProviders ?? []);
         setPublicTenant(bootstrap.publicTenant ?? null);
+        setDemoSimpleAuth(Boolean(bootstrap.demoSimpleAuth));
         setAvailableTenants(
           bootstrap.tenants.length
             ? bootstrap.tenants
@@ -474,6 +476,7 @@ export function useServerSync(): ServerSyncHandlers {
       setAuthSession,
       setAuthToken,
       setAvailableTenants,
+      setDemoSimpleAuth,
       setDocumentLedger,
       setEvidenceRetentionSummary,
       setExportPackages,
@@ -709,6 +712,7 @@ export function useServerSync(): ServerSyncHandlers {
     setAuthSession,
     setAuthToken,
     setAvailableTenants,
+    setDemoSimpleAuth,
     setDocumentLedger,
     setEvidenceRetentionSummary,
     setExportPackages,
