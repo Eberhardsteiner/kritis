@@ -97,6 +97,16 @@ Die gleiche Schutzfunktion greift auf zwei Ebenen:
 
 Beide Schichten müssen gemeinsam missbraucht werden, um die Demo-Backdoor in Produktion zu erreichen. Beide sind dokumentiert und über Umgebungsvariablen steuerbar.
 
+## Frontend-Feature-Flags (parallel zum Auth-Bypass)
+
+Während der Demo-Phase werden zusätzlich zum Auth-Bypass auch UI-Bestandteile via Frontend-Flags ausgeblendet, die für die Demo-Dramaturgie ablenkend wirken könnten. Die Flags wohnen in `src/lib/featureFlags.ts`. Konvention: Konstante als `const`, sodass Vite den abgeschalteten Pfad inline-toten kann.
+
+| Flag | Default Demo | Wirkung wenn `false` | Reaktivierung |
+|---|---|---|---|
+| `SHOW_PENALTY_EXPOSURE` | `false` | KritisView blendet `ManagementLiabilityCard` + `PenaltyExposureCard` aus (Sanktionsrisiko + Bußgeldexposition) | In `src/lib/featureFlags.ts` auf `true` setzen — Komponenten und Datenpfad (`kritisPenaltyEstimate`, `regulatoryProfile`, `kritisMilestones`) sind unverändert vorhanden |
+
+**Reaktivierungs-Checklist-Punkt für SHOW_PENALTY_EXPOSURE**: `SHOW_PENALTY_EXPOSURE` in `src/lib/featureFlags.ts` auf `true` setzen, um die Sanktionsrisiko-Anzeige in KritisView wieder zu aktivieren. Verifikation: KritisView öffnen, Abschnitt unter „Standards & Mappings" zeigt zwei Karten („Geschäftsführungs-Haftung", „Bußgeldexposition").
+
 ## Verweis auf das C6-Scope-Dokument
 
 Die Reaktivierung ist als `C6.6 · Reaktivierung Full-Auth` in `docs/C6-SCOPE.md` geführt. Der zeitliche Rahmen ist bewusst offen — die Entscheidung „Full-Auth zurück oder Demo-Bypass als Dauerzustand akzeptieren" wird anhand der Kollegen-Demo und ggf. Pilot-Feedback getroffen.

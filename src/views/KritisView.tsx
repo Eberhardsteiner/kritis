@@ -18,6 +18,7 @@ import { RiskEntryForm } from '../features/riskCatalog/views/RiskEntryForm';
 import { RiskMatrixView } from '../features/riskCatalog/views/RiskMatrixView';
 import { RiskRegisterView } from '../features/riskCatalog/views/RiskRegisterView';
 import type { RiskEntry } from '../features/riskCatalog/types';
+import { SHOW_PENALTY_EXPOSURE } from '../lib/featureFlags';
 import { ALL_STANDARD_IDS, standardLabels } from '../lib/standardMappings';
 import type { StandardId } from '../types';
 import { kritisCertificationStages } from '../data/kritisBase';
@@ -525,7 +526,13 @@ export function KritisView({
         </article>
       </section>
 
-      {isGermanKritisInScope ? (
+      {/*
+       * Sanktionsrisiko + Bußgeldexposition · während der Demo-Phase
+       * via SHOW_PENALTY_EXPOSURE (src/lib/featureFlags.ts) ausgeblendet.
+       * Komponenten und Datenpfad bleiben intakt — Reaktivierung über
+       * das Flag, kein Code-Restore nötig.
+       */}
+      {isGermanKritisInScope && SHOW_PENALTY_EXPOSURE ? (
         <section className="content-grid two-column">
           <ManagementLiabilityCard regulatoryProfile={regulatoryProfile} milestones={kritisMilestones} />
           <PenaltyExposureCard penaltyEstimate={kritisPenaltyEstimate} />
