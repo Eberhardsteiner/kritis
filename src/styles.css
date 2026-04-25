@@ -435,51 +435,83 @@ textarea:focus {
 }
 
 /*
- * Domain-Gauge · Halbkreis-Tacho für Stärken/Schwächen im Dashboard.
- * Nutzt das gleiche Karten-Styling wie StatCard (gleicher Padding,
- * Border, Shadow), damit die Tachos visuell zur StatCard-Reihe passen.
+ * Domain-Gauge-Cockpit · 2×4-Tacho-Raster im Dashboard.
+ *
+ * Desktop: 4 Spalten, 2 Zeilen → 8 kompakte Tachos. Pro Tacho ca.
+ * 140×100 px, das ergibt zusammen mit Gap ca. 640 px Breite und passt
+ * in die übliche Dashboard-Karten-Spalte ohne horizontalen Scroll.
+ *
+ * Tablet (≤1024 px): 2 Spalten, 4 Zeilen — vertikal lesbar.
+ * Mobile (≤640 px): 1 Spalte, 8 Zeilen.
  */
-.domain-gauge {
+.gauge-cockpit-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.gauge-cockpit-cell {
+  display: flex;
+}
+
+@media (max-width: 1024px) {
+  .gauge-cockpit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .gauge-cockpit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.domain-gauge-card {
   margin: 0;
-  padding: 18px;
-  border-radius: 18px;
+  padding: 12px 8px 10px;
+  border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  flex: 1;
+  cursor: help; /* Tooltip-Hint, weil das `title`-Attribut den vollen Domain-Namen liefert. */
+  transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
-.domain-gauge-caption {
-  font-size: 0.88rem;
-  color: var(--muted);
-  font-weight: 500;
+.domain-gauge-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
 }
 
 .domain-gauge-svg {
   width: 100%;
   height: auto;
-  max-height: 168px;
   display: block;
 }
 
 .domain-gauge-value {
-  font-size: 2.2rem;
+  font-size: 1.45rem;
   font-weight: 700;
+  font-feature-settings: 'tnum' 1; /* Tabellen-Ziffern, damit der Score nicht springt. */
 }
 
-.domain-gauge-unit {
+.domain-gauge-percent {
   font-size: 0.85rem;
-  fill: var(--muted);
+  font-weight: 600;
+  margin-left: 1px;
 }
 
-.domain-gauge-label {
+.domain-gauge-shortlabel {
   text-align: center;
-  font-size: 0.96rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--muted);
+  margin-top: 2px;
+  letter-spacing: 0.01em;
 }
 
 .content-grid {

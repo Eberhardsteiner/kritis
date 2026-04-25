@@ -1,50 +1,49 @@
 /**
- * DomainGauge · Halbkreis-Tachometer für Domain-Scores im Dashboard.
+ * DomainGauge · Halbkreis-Tachometer für einen Domain-Score.
  *
  * Bewusst SVG statt Recharts: Recharts ist nicht im Bundle (≈200 KB
  * Mehrgewicht), und ein Halbkreis-Gauge ist mit einer einzigen
- * Pfadberechnung beschrieben. Geometrie steckt vollständig in
- * `describeArc` und ist im Test mit drei Stütz-Scores (0/50/100)
- * sanity-checkbar.
+ * Pfadberechnung beschrieben. Die Geometrie steckt vollständig in
+ * `describeArc` und ist mit drei Stütz-Scores (0/50/100) sanity-
+ * checkbar.
+ *
+ * Die Farbe leitet sich aus dem Score ab — weicher Verlauf von Rot
+ * (0) über Gelb (50) nach Grün (100), via HSL-Interpolation. Damit
+ * gibt es keine harten Sprungstellen an den 33%/66%-Schwellen, die
+ * Wahrnehmung folgt der Score-Skala kontinuierlich.
  *
  * Zwei Bögen werden gestapelt:
  *  - Hintergrund: voller Halbkreis in `--line`-Farbe.
- *  - Vordergrund: Anteil des Scores, eingefärbt (Prop `accent`).
+ *  - Vordergrund: Anteil des Scores, eingefärbt via HSL-Lookup.
  *
- * Der Score steht als Großzahl in der Mitte, das Domain-Label
- * darunter — beides text-anchor: middle, damit die Komponente
- * gleichmäßig in beliebiger Container-Breite zentriert.
+ * Score und Kurz-Label stehen in der Mitte; das volle Domain-Label
+ * landet im `title`-Attribut der `figure`, sodass ein Hover-Tooltip
+ * ohne JS-Layer den vollständigen Domain-Namen + Beschreibung zeigt.
  */
 
 interface DomainGaugeProps {
   /** Score-Wert 0..100. Werte außerhalb werden geklammert. */
   score: number;
-  /** Anzeige-Label unter dem Tacho (z. B. „Governance & Verantwortung"). */
-  label: string;
-  /** Kurze Beschreibung über dem Tacho (z. B. „Stärkste Domäne"). */
-  caption: string;
-  /** Foreground-Farbe (Hex). Default ist neutral-blau. */
-  accent?: string;
-  /**
-   * Erweiterungs-Klassen-Name für das wrapper-`figure`-Element.
-   * Erlaubt das Layout (Grid-Span etc.) von außen zu steuern.
-   */
+  /** Kurz-Label unter dem Score (z. B. „Standorte"). */
+  shortLabel: string;
+  /** Voller Domain-Name + ggf. Beschreibung für den Hover-Tooltip. */
+  tooltip: string;
+  /** Erweiterungs-Klassen-Name für das wrapper-`figure`-Element. */
   className?: string;
 }
 
-const VIEW_WIDTH = 200;
-const VIEW_HEIGHT = 130;
-const CENTER_X = 100;
-const CENTER_Y = 100;
-const RADIUS = 80;
-const STROKE_WIDTH = 16;
+const VIEW_WIDTH = 140;
+const VIEW_HEIGHT = 92;
+const CENTER_X = 70;
+const CENTER_Y = 76;
+const RADIUS = 56;
+const STROKE_WIDTH = 12;
 
 /**
- * Berechnet einen SVG-Arc-Path-`d` für einen Halbkreis von links nach
- * rechts, der bis zu `progress` (0..1) gefüllt ist. progress=0 → leerer
- * Bogen (zero-length arc, SVG-konform), progress=1 → voller Halbkreis.
+ * SVG-Arc-Path für einen Halbkreis von links nach rechts, gefüllt bis
+ * `progress` (0..1). progress=0 → zero-length arc (SVG-konform leer);
+ * progress=1 → voller Halbkreis.
  *
- * Mathematischer Hintergrund:
  *  - Start fix bei Winkel π (links).
  *  - End-Winkel: π - π·progress (im Uhrzeigersinn auf dem Bildschirm).
  *  - SVG-y ist invertiert, daher `centerY - radius·sin(...)`.
@@ -61,18 +60,34 @@ function describeArc(progress: number): string {
   return `M ${startX} ${startY} A ${RADIUS} ${RADIUS} 0 ${largeArcFlag} ${sweepFlag} ${endX.toFixed(2)} ${endY.toFixed(2)}`;
 }
 
-export function DomainGauge({ score, label, caption, accent = '#1d4ed8', className }: DomainGaugeProps) {
+/**
+ * Score-zu-Farbe-Mapping: HSL-Interpolation von Rot (Hue 0) über Gelb
+ * (Hue 60) nach Grün (Hue 120). Saturation und Lightness sind fix
+ * gewählt für ausreichende Lesbarkeit auf weißem Karten-Hintergrund:
+ * S=72%, L=44%. Damit liegen alle Farben im gleichen
+ * Wahrnehmungsband.
+ */
+export function scoreToHslColor(score: number): string {
+  const clamped = Math.max(0, Math.min(100, score));
+  const hue = clamped * 1.2; // 0 → 0 (rot), 50 → 60 (gelb), 100 → 120 (grün)
+  return `hsl(${hue.toFixed(0)}, 72%, 44%)`;
+}
+
+export function DomainGauge({ score, shortLabel, tooltip, className }: DomainGaugeProps) {
   const safeScore = Number.isFinite(score) ? Math.max(0, Math.min(100, Math.round(score))) : 0;
   const backgroundArc = describeArc(1);
   const foregroundArc = describeArc(safeScore / 100);
+  const accent = scoreToHslColor(safeScore);
 
   return (
-    <figure className={['domain-gauge', className].filter(Boolean).join(' ')}>
-      <figcaption className="domain-gauge-caption">{caption}</figcaption>
+    <figure
+      className={['domain-gauge-card', className].filter(Boolean).join(' ')}
+      title={tooltip}
+    >
       <svg
         viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
         role="img"
-        aria-label={`${caption}: ${label} mit ${safeScore} von 100`}
+        aria-label={`${shortLabel}: ${safeScore}%`}
         className="domain-gauge-svg"
       >
         <path
@@ -91,23 +106,16 @@ export function DomainGauge({ score, label, caption, accent = '#1d4ed8', classNa
         />
         <text
           x={CENTER_X}
-          y={CENTER_Y - 12}
+          y={CENTER_Y - 6}
           textAnchor="middle"
           className="domain-gauge-value"
           fill={accent}
         >
           {safeScore}
-        </text>
-        <text
-          x={CENTER_X}
-          y={CENTER_Y + 14}
-          textAnchor="middle"
-          className="domain-gauge-unit"
-        >
-          / 100
+          <tspan className="domain-gauge-percent" fill={accent}>%</tspan>
         </text>
       </svg>
-      <div className="domain-gauge-label">{label}</div>
+      <figcaption className="domain-gauge-shortlabel">{shortLabel}</figcaption>
     </figure>
   );
 }
