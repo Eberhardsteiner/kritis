@@ -16,6 +16,30 @@
   --danger-soft: #fee4e2;
   --shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
   --radius: 20px;
+
+  /*
+   * Score-Farben für die Grundanalyse (ScoreSelector). Jede Farbe
+   * hat zwei Varianten: ein gesättigter Wert für den selected/hover-
+   * State und ein abgeschwächter Tint für den Idle-State, damit der
+   * Bewertungsspiegel auch ohne Klick lesbar ist.
+   *
+   * Skala (von „belastbar" zu „nicht vorhanden"):
+   *   Score 4 → Dunkelgrün
+   *   Score 3 → Hellgrün
+   *   Score 2 → Gelb (Bernstein)
+   *   Score 1 → Hellrot
+   *   Score 0 → Dunkelrot
+   */
+  --score-4: #1b6e3a;
+  --score-4-soft: #d8ebde;
+  --score-3: #4caf50;
+  --score-3-soft: #e0f2e1;
+  --score-2: #fbc02d;
+  --score-2-soft: #fff4cc;
+  --score-1: #ef5350;
+  --score-1-soft: #fde0df;
+  --score-0: #b71c1c;
+  --score-0-soft: #f6d2d2;
 }
 
 * {
@@ -647,15 +671,61 @@ textarea:focus {
   transition: 140ms ease;
 }
 
-.score-button:hover,
-.score-button.selected {
-  border-color: #8db1ff;
-  background: #eef5ff;
+.score-button:hover {
   transform: translateY(-1px);
 }
 
+/*
+ * Score-Level-Klassen färben den Button bereits im Idle-Zustand
+ * dezent ein (Tint-Background, Score-Farbe als Border + Text-Akzent).
+ * Im selected-Zustand wird die Sättigung erhöht: voller Hintergrund,
+ * weißer Text, kräftigere Border. Der Hover-Zustand sitzt zwischen
+ * den beiden — Tint bleibt, Border und Schatten wachsen.
+ */
+.score-button.score-level-0 { background: var(--score-0-soft); border-color: var(--score-0); color: var(--score-0); }
+.score-button.score-level-1 { background: var(--score-1-soft); border-color: var(--score-1); color: var(--score-1); }
+.score-button.score-level-2 { background: var(--score-2-soft); border-color: var(--score-2); color: #6b4500; }
+.score-button.score-level-3 { background: var(--score-3-soft); border-color: var(--score-3); color: #1b6e3a; }
+.score-button.score-level-4 { background: var(--score-4-soft); border-color: var(--score-4); color: var(--score-4); }
+
+.score-button.score-level-0:hover { box-shadow: 0 4px 12px rgba(183, 28, 28, 0.18); }
+.score-button.score-level-1:hover { box-shadow: 0 4px 12px rgba(239, 83, 80, 0.18); }
+.score-button.score-level-2:hover { box-shadow: 0 4px 12px rgba(251, 192, 45, 0.22); }
+.score-button.score-level-3:hover { box-shadow: 0 4px 12px rgba(76, 175, 80, 0.22); }
+.score-button.score-level-4:hover { box-shadow: 0 4px 12px rgba(27, 110, 58, 0.22); }
+
+.score-button.score-level-0.selected { background: var(--score-0); border-color: var(--score-0); color: #ffffff; }
+.score-button.score-level-1.selected { background: var(--score-1); border-color: var(--score-1); color: #ffffff; }
+.score-button.score-level-2.selected { background: var(--score-2); border-color: #d99c00; color: #1c1500; }
+.score-button.score-level-3.selected { background: var(--score-3); border-color: var(--score-3); color: #ffffff; }
+.score-button.score-level-4.selected { background: var(--score-4); border-color: var(--score-4); color: #ffffff; }
+
+.score-button.score-level-0.selected .score-button-text,
+.score-button.score-level-1.selected .score-button-text,
+.score-button.score-level-3.selected .score-button-text,
+.score-button.score-level-4.selected .score-button-text {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.score-button.score-level-2.selected .score-button-text {
+  color: rgba(28, 21, 0, 0.74);
+}
+
+/*
+ * „Offen"-Button bleibt visuell neutral, damit er als „kein Wert"
+ * lesbar ist. Selected-State: subtiler Schiefer-Tint statt Farbe.
+ */
 .score-button.ghost {
   background: #fafcff;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.score-button.ghost:hover { box-shadow: 0 4px 12px rgba(93, 107, 130, 0.16); }
+.score-button.ghost.selected {
+  background: #eef2f9;
+  border-color: #8da0bf;
+  color: var(--text);
 }
 
 .score-button-value {
