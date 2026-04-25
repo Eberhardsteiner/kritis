@@ -9,6 +9,7 @@ import {
   Target,
 } from 'lucide-react';
 import { GapAnalysisDashboard } from '../features/gap';
+import { DomainGauge } from '../components/DomainGauge';
 import { StatCard } from '../components/StatCard';
 import type {
   ActionSummary,
@@ -76,6 +77,13 @@ export function DashboardView({
   const lowDomains = [...scoreSnapshot.domainScores]
     .sort((a, b) => a.score - b.score)
     .slice(0, 3);
+
+  // Tacho-Werte: stärkste = höchster Score, schwächste = niedrigster.
+  // Bei leerem domainScores-Array (sehr früher Mandanten-Zustand) gibt
+  // es nichts darzustellen; der Gauge-Block bleibt dann unsichtbar.
+  const sortedDomains = [...scoreSnapshot.domainScores].sort((a, b) => b.score - a.score);
+  const strongestDomain = sortedDomains[0] ?? null;
+  const weakestDomain = sortedDomains.length > 1 ? sortedDomains[sortedDomains.length - 1] : null;
 
   const benchmarkGaps = scoreSnapshot.domainScores
     .map((domain) => {
@@ -184,6 +192,23 @@ export function DashboardView({
           tone={findingSummary.critical ? 'alert' : findingSummary.open ? 'warn' : 'good'}
         />
       </section>
+
+      {strongestDomain && weakestDomain ? (
+        <section className="content-grid two-column">
+          <DomainGauge
+            caption="Stärkste Domäne"
+            label={strongestDomain.label}
+            score={strongestDomain.score}
+            accent="var(--score-4)"
+          />
+          <DomainGauge
+            caption="Schwächste Domäne"
+            label={weakestDomain.label}
+            score={weakestDomain.score}
+            accent="var(--score-0)"
+          />
+        </section>
+      ) : null}
 
       <section className="content-grid two-column">
         <article className="card">

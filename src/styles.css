@@ -434,6 +434,54 @@ textarea:focus {
   font-size: 0.92rem;
 }
 
+/*
+ * Domain-Gauge · Halbkreis-Tacho für Stärken/Schwächen im Dashboard.
+ * Nutzt das gleiche Karten-Styling wie StatCard (gleicher Padding,
+ * Border, Shadow), damit die Tachos visuell zur StatCard-Reihe passen.
+ */
+.domain-gauge {
+  margin: 0;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.domain-gauge-caption {
+  font-size: 0.88rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.domain-gauge-svg {
+  width: 100%;
+  height: auto;
+  max-height: 168px;
+  display: block;
+}
+
+.domain-gauge-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.domain-gauge-unit {
+  font-size: 0.85rem;
+  fill: var(--muted);
+}
+
+.domain-gauge-label {
+  text-align: center;
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .content-grid {
   display: grid;
   gap: 16px;
