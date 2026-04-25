@@ -134,6 +134,27 @@ ul {
   transform: translateY(-1px);
 }
 
+/*
+ * Admin-Akzent für „Steuerung & Rechte". Trennlinie oberhalb signalisiert
+ * Bereichswechsel zu administrativen Funktionen, eine zarte Bernstein-
+ * Tönung hebt die Zeile dezent ab, ohne den Workflow-Lesefluss zu
+ * dominieren. Der `transform`-Hover bleibt aus der Basisregel erhalten.
+ */
+.nav-item-admin {
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(252, 211, 77, 0.18);
+  background: rgba(252, 211, 77, 0.04);
+  color: rgba(252, 211, 77, 0.92);
+}
+
+.nav-item-admin:hover,
+.nav-item-admin.active {
+  background: rgba(252, 211, 77, 0.1);
+  border-color: rgba(252, 211, 77, 0.32);
+  color: #fef3c7;
+}
+
 .sidebar-footer {
   margin-top: auto;
   background: rgba(255, 255, 255, 0.05);

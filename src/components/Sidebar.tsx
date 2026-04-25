@@ -23,17 +23,26 @@ interface SidebarProps {
   onChange: (view: ViewKey) => void;
 }
 
+/**
+ * Reihenfolge der Sidebar-Einträge folgt dem operativen Workflow:
+ * Übersicht → Grundanalyse → Maßnahmen → BIA → Governance → Plattform
+ * → Betrieb → Go-Live → Module → KRITIS → Resilienzplan → Tabletop →
+ * Reporting. „Steuerung & Rechte" ist als letzter Eintrag bewusst
+ * abgesetzt: es ist ein Admin-Bereich, der vom inhaltlich-fachlichen
+ * Workflow getrennt ist. Die `admin`-Markierung steuert den dezenten
+ * CSS-Akzent (siehe `.nav-item-admin` in `src/styles.css`).
+ */
 const items: Array<{
   key: ViewKey;
   label: string;
   icon: typeof BarChart3;
+  admin?: boolean;
 }> = [
   { key: 'dashboard', label: 'Übersicht', icon: BarChart3 },
   { key: 'assessment', label: 'Grundanalyse', icon: ClipboardList },
   { key: 'measures', label: 'Maßnahmen & Bibliothek', icon: ListTodo },
   { key: 'resilience', label: 'BIA & Szenarien', icon: Siren },
   { key: 'governance', label: 'Governance & Struktur', icon: Network },
-  { key: 'control', label: 'Steuerung & Rechte', icon: SlidersHorizontal },
   { key: 'platform', label: 'Plattform & Sync', icon: Database },
   { key: 'operations', label: 'Betrieb & APIs', icon: CloudCog },
   { key: 'rollout', label: 'Go-Live & Übergabe', icon: CheckCircle2 },
@@ -42,6 +51,7 @@ const items: Array<{
   { key: 'resilience_plan', label: 'Resilienzplan', icon: BookOpen },
   { key: 'tabletop_exercise', label: 'Tabletop-Übungen', icon: Dices },
   { key: 'report', label: 'Reporting', icon: FileSpreadsheet },
+  { key: 'control', label: 'Steuerung & Rechte', icon: SlidersHorizontal, admin: true },
 ];
 
 export function Sidebar({ activeView, onChange }: SidebarProps) {
@@ -58,11 +68,16 @@ export function Sidebar({ activeView, onChange }: SidebarProps) {
       <nav className="sidebar-nav">
         {items.map((item) => {
           const Icon = item.icon;
+          const classNames = [
+            'nav-item',
+            activeView === item.key ? 'active' : '',
+            item.admin ? 'nav-item-admin' : '',
+          ].filter(Boolean).join(' ');
           return (
             <button
               key={item.key}
               type="button"
-              className={`nav-item ${activeView === item.key ? 'active' : ''}`}
+              className={classNames}
               onClick={() => onChange(item.key)}
             >
               <Icon size={18} />
