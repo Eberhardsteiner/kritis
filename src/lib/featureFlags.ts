@@ -29,3 +29,31 @@
  * bleiben in jedem Branch erhalten.
  */
 export const SHOW_PENALTY_EXPOSURE = false;
+
+/**
+ * Wenn `true`, gibt `hasPermission(...)` für jede angefragte Permission
+ * `true` zurück und `getReadOnlyHint(...)` immer einen leeren String.
+ * Effekt: Jeder Browser-Besucher hat in der Demo-Phase Admin-äquivalente
+ * Rechte; alle Buttons sind aktiv, der Pack-Import ist sichtbar, kein
+ * Lesemodus-Banner erscheint.
+ *
+ * Begründung für die Demo: Solange der Demo-Login (Backend
+ * `KRISENFEST_DEMO_SIMPLE_AUTH` + `/api/auth/demo-login`) in Bolts
+ * Preview noch nicht zuverlässig zur Admin-Session führt, würde die
+ * normale Permission-Logik die Demo blockieren. Dieses Flag entkoppelt
+ * die UI vom Auth-Zustand: selbst ohne funktionierenden Login bleibt
+ * die App vollständig bedienbar.
+ *
+ * Reaktivierung der echten Permission-Logik vor Produktivbetrieb:
+ *   1. Demo-Login-Funktionalität für alle Rollen verifizieren
+ *   2. Diese Konstante auf `false` setzen
+ *   3. Pro Rolle (Admin, Lead, Editor, Reviewer, Auditor, Viewer)
+ *      testen, dass die korrekten Permissions greifen
+ *   4. Lesemodus-Banner-Texte in `getReadOnlyHint` prüfen
+ *
+ * Sicherheits-Hinweis: Mit diesem Flag aktiv ist die App **nicht
+ * produktionstauglich**. Vor jedem Internet-exponierten Deployment
+ * muss das Flag auf `false` stehen — analog zum Auth-Bypass in
+ * `KRISENFEST_DEMO_SIMPLE_AUTH`.
+ */
+export const DEMO_MODE_ALL_PERMISSIONS = true;

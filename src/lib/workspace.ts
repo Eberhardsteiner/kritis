@@ -1,4 +1,5 @@
 import { defaultDocumentFolders, getAccessProfile } from '../data/workspaceBase';
+import { DEMO_MODE_ALL_PERMISSIONS } from './featureFlags';
 import { KRITIS_EARLIEST_REGISTRATION_DATE, computeKritisMilestones, normalizeRegulatoryProfile } from './regulatory';
 import type {
   ActionItem,
@@ -694,5 +695,11 @@ export function getDocumentFolderSuggestions(
 }
 
 export function hasPermission(roleProfile: UserRoleProfile, permission: PermissionKey): boolean {
+  // Demo-Phase-Override: hebt jede Permission-Prüfung aus, sodass
+  // jeder Browser-Besucher die App vollständig bedienen kann. Siehe
+  // `src/lib/featureFlags.ts` und `docs/DEMO-AUTH-BYPASS.md`.
+  if (DEMO_MODE_ALL_PERMISSIONS) {
+    return true;
+  }
   return getAccessProfile(roleProfile).permissions.includes(permission);
 }

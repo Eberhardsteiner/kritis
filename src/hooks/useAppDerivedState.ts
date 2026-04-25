@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { DEMO_MODE_ALL_PERMISSIONS } from '../lib/featureFlags';
 import {
   buildEffectiveModuleCatalog,
   builtInModules,
@@ -408,6 +409,11 @@ export function getReadOnlyHint(
   activeView: AppState['activeView'],
   hasPermission: (permission: PermissionKey) => boolean,
 ): string {
+  // Demo-Phase-Override: keine Lesemodus-Banner anzeigen, weil
+  // jeder Besucher via DEMO_MODE_ALL_PERMISSIONS effektiv Admin ist.
+  if (DEMO_MODE_ALL_PERMISSIONS) {
+    return '';
+  }
   if (activeView === 'assessment' && !hasPermission('assessment_edit')) {
     return 'Lesemodus: Für Analyse und Unternehmensprofil fehlen dem aktiven Profil Schreibrechte.';
   }

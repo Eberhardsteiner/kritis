@@ -101,11 +101,32 @@ Beide Schichten müssen gemeinsam missbraucht werden, um die Demo-Backdoor in Pr
 
 Während der Demo-Phase werden zusätzlich zum Auth-Bypass auch UI-Bestandteile via Frontend-Flags ausgeblendet, die für die Demo-Dramaturgie ablenkend wirken könnten. Die Flags wohnen in `src/lib/featureFlags.ts`. Konvention: Konstante als `const`, sodass Vite den abgeschalteten Pfad inline-toten kann.
 
-| Flag | Default Demo | Wirkung wenn `false` | Reaktivierung |
+| Flag | Default Demo | Wirkung wenn aktiv | Reaktivierung |
 |---|---|---|---|
 | `SHOW_PENALTY_EXPOSURE` | `false` | KritisView blendet `ManagementLiabilityCard` + `PenaltyExposureCard` aus (Sanktionsrisiko + Bußgeldexposition) | In `src/lib/featureFlags.ts` auf `true` setzen — Komponenten und Datenpfad (`kritisPenaltyEstimate`, `regulatoryProfile`, `kritisMilestones`) sind unverändert vorhanden |
+| `DEMO_MODE_ALL_PERMISSIONS` | `true` | `hasPermission(...)` antwortet immer `true`, `getReadOnlyHint(...)` gibt immer einen leeren String zurück. Jeder Besucher hat Admin-äquivalente Rechte, kein Lesemodus-Banner | Auf `false` setzen, dann greift die Rolle-/Permission-Logik aus `data/workspaceBase.ts` wie zuvor |
 
 **Reaktivierungs-Checklist-Punkt für SHOW_PENALTY_EXPOSURE**: `SHOW_PENALTY_EXPOSURE` in `src/lib/featureFlags.ts` auf `true` setzen, um die Sanktionsrisiko-Anzeige in KritisView wieder zu aktivieren. Verifikation: KritisView öffnen, Abschnitt unter „Standards & Mappings" zeigt zwei Karten („Geschäftsführungs-Haftung", „Bußgeldexposition").
+
+### `DEMO_MODE_ALL_PERMISSIONS` · Permission-Bypass für die Demo-Phase
+
+**Stand**: aktiviert (`true`) während der Demo-Phase.
+
+**Was es tut**:
+- `hasPermission(roleProfile, permission)` in `src/lib/workspace.ts` antwortet ohne weitere Prüfung mit `true`. Die normale Rollen-Lookup-Logik (`getAccessProfile(...).permissions.includes(...)`) wird übersprungen.
+- `getReadOnlyHint(activeView, hasPermission)` in `src/hooks/useAppDerivedState.ts` gibt unmittelbar einen leeren String zurück, sodass keine „Lesemodus: …"-Banner erscheinen.
+
+**Effekt für den Besucher**: Jeder Browser-Klick öffnet die App effektiv mit Admin-Rechten. Pack-Import in Branchenmodule, „Neue Übung" in BIA & Szenarien, Edit-Buttons in Maßnahmen & Bibliothek, Resilienzplan-Editor und KRITIS-Bausteine sind alle aktiv und funktional — unabhängig vom Auth-Zustand der laufenden Sitzung.
+
+**Warum zusätzlich zum Auth-Bypass nötig**: Der Demo-Login (`KRISENFEST_DEMO_SIMPLE_AUTH` + `/api/auth/demo-login`) liefert bei Erfolg eine Admin-Session, aber die UI hat in Bolts Preview-Container Verhaltensspuren gezeigt, in denen der Login-Pfad zu einem Anonymous- oder Viewer-Profil führt. Solange diese Auth-Pfade nicht zuverlässig die Admin-Permissions liefern, blockiert die normale Permission-Logik die Demo. Dieses Flag entkoppelt die UI-Bedienbarkeit vom Auth-Zustand.
+
+**Reaktivierungs-Checklist-Punkt für DEMO_MODE_ALL_PERMISSIONS**:
+1. Demo-Login-Funktionalität für die Demo-Credentials (`demo@krisenfest.local` + `Krisenfest2026!`) verifizieren — Admin-Session mit allen relevanten Permissions wird erzeugt.
+2. Pro Standard-Rolle (Admin, Lead, Editor, Reviewer, Auditor, Viewer) testen, dass der entsprechende Account die korrekten Permissions im UI sieht (z. B. Viewer sieht keine Edit-Buttons, Reviewer kann keine Pack-Imports starten).
+3. `DEMO_MODE_ALL_PERMISSIONS` in `src/lib/featureFlags.ts` auf `false` setzen.
+4. Lesemodus-Banner in jeder View prüfen — die Texte aus `getReadOnlyHint` sollen wieder erscheinen, sobald die aktive Rolle die jeweilige Permission nicht hat.
+
+**Sicherheits-Hinweis**: Mit aktivem Flag ist die App in einem Internet-exponierten Deployment ein offenes Tor — jeder Besucher kann jeden Zustand schreiben. Vor jedem Deployment außerhalb der UVM-Demo-Umgebung muss das Flag auf `false` stehen, parallel zum Auth-Bypass-Flag `KRISENFEST_DEMO_SIMPLE_AUTH`.
 
 ## Verweis auf das C6-Scope-Dokument
 
