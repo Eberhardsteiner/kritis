@@ -1,9 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActiveViewPanel } from './components/ActiveViewPanel';
 import { AppFooter } from './components/AppFooter';
 import { AppNotice } from './components/AppNotice';
 import { Sidebar } from './components/Sidebar';
 import { ProjectTopbar } from './components/ProjectTopbar';
+import { SplashScreen } from './components/SplashScreen';
 import { buildActiveViewPanelProps } from './lib/buildActiveViewPanelProps';
 import { buildProjectTopbarProps } from './lib/buildProjectTopbarProps';
 import { exportAssessmentAsJson } from './lib/exporters';
@@ -70,7 +71,48 @@ export default function App() {
  * — useServerSync und usePlatformAuthHandlers rufen den Helper
  * direkt auf, ohne Ref-Indirection.
  */
+/**
+ * Session-Marker für die Splash-Anzeige. Erscheint einmal pro
+ * Browser-Session (sessionStorage statt localStorage), kann via
+ * Ctrl+Shift+S für Demo-Reset gelöscht werden.
+ */
+const SPLASH_SESSION_KEY = 'uvm-splash-seen';
+
 function AppShell() {
+  // ─── Splash-State (C5.5) ──────────────────────────────────────────
+  // Sichtbar einmal pro Browser-Session beim ersten Eintritt.
+  // sessionStorage-gepuffert, damit Reload während der Arbeit nicht
+  // wieder auf den Splash zurückwirft. Beim Browser-Schließen wird
+  // der Marker automatisch gelöscht — neue Session startet wieder
+  // mit Splash.
+  const [showSplash, setShowSplash] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(SPLASH_SESSION_KEY) !== 'true';
+  });
+
+  const handleSplashStart = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SPLASH_SESSION_KEY, 'true');
+    }
+    setShowSplash(false);
+  }, []);
+
+  // Demo-Reset via Tastenkürzel Ctrl+Shift+S — bewusst unauffällig,
+  // damit Dr. Steiner für eine UVM-Demo den Splash zurücksetzen kann
+  // ohne den Browser komplett zu schließen.
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handler = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && (event.key === 'S' || event.key === 's')) {
+        event.preventDefault();
+        sessionStorage.removeItem(SPLASH_SESSION_KEY);
+        setShowSplash(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   const ws = useWorkspaceState();
   const {
     state,
@@ -659,6 +701,13 @@ function AppShell() {
     state,
   });
   useModuleSelectionGuard(state.selectedModuleId, effectiveModuleCatalog, setState);
+
+  // Splash-Screen wird einmal pro Browser-Session vor der App-Shell
+  // angezeigt (C5.5). Demo-Reset via Ctrl+Shift+S — siehe useEffect
+  // am Anfang dieser Funktion.
+  if (showSplash) {
+    return <SplashScreen onStart={handleSplashStart} />;
+  }
 
   return (
     <div className="app-shell">
