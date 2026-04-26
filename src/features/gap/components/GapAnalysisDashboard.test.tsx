@@ -17,6 +17,8 @@ const requirementFixture: RequirementDefinition[] = [
 
 const summaryFixture: GapAnalysisSummary = {
   totalPersonDays: 8.5,
+  minPersonDays: 8.5,
+  maxPersonDays: 8.5,
   calendarWeeks: 2,
   entryCount: 1,
   byRegime: [
@@ -24,6 +26,8 @@ const summaryFixture: GapAnalysisSummary = {
       regimeId: 'de_kritisdachg',
       regimeLabel: 'KRITIS-DachG',
       totalPersonDays: 8.5,
+      minPersonDays: 8.5,
+      maxPersonDays: 8.5,
       byCategory: { risk: 8.5 },
       entries: [
         {
@@ -36,6 +40,7 @@ const summaryFixture: GapAnalysisSummary = {
             personDays: 8.5,
             confidence: 'medium',
             assumptions: ['Basis-Aufwand 5 PT (Kategorie medium)', 'Gap-Faktor 1.00 (Status: open)'],
+            source: 'heuristic',
           },
           dependencies: [],
         },
@@ -46,6 +51,8 @@ const summaryFixture: GapAnalysisSummary = {
 
 const emptySummary: GapAnalysisSummary = {
   totalPersonDays: 0,
+  minPersonDays: 0,
+  maxPersonDays: 0,
   calendarWeeks: 0,
   entryCount: 0,
   byRegime: [],

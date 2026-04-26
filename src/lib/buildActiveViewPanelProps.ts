@@ -248,6 +248,8 @@ interface BuildActiveViewPanelPropsArgs {
   onExportAuditPdf: ReportViewProps['onExportAuditPdf'];
   onExportFormalHtml: ReportViewProps['onExportFormalHtml'];
   onExportGapAnalysisDocx: DashboardViewProps['onExportGapAnalysisDocx'];
+  consultingRate: DashboardViewProps['consultingRate'];
+  onConsultingRateChange: DashboardViewProps['onConsultingRateChange'];
   onSaveRiskEntry: KritisViewProps['onSaveRiskEntry'];
   onDeleteRiskEntry: KritisViewProps['onDeleteRiskEntry'];
   onExportRiskEntriesJson: KritisViewProps['onExportRiskEntriesJson'];
@@ -516,6 +518,8 @@ export function buildActiveViewPanelProps({
   onExportAuditPdf,
   onExportFormalHtml,
   onExportGapAnalysisDocx,
+  consultingRate,
+  onConsultingRateChange,
   onSaveRiskEntry,
   onDeleteRiskEntry,
   onExportRiskEntriesJson,
@@ -584,12 +588,14 @@ export function buildActiveViewPanelProps({
       findingSummary,
       gapAnalysisSummary,
       activeRequirements,
+      consultingRate,
       onGoToAssessment: () => onGoToView('assessment'),
       onGoToMeasures: () => onGoToView('measures'),
       onGoToGovernance: () => onGoToView('governance'),
       onGoToResilience: () => onGoToView('resilience'),
       onGoToKritis: () => onGoToView('kritis'),
       onExportGapAnalysisDocx,
+      onConsultingRateChange,
     },
     assessmentViewProps: {
       questions,

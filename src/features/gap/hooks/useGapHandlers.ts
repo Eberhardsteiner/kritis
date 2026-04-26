@@ -36,13 +36,14 @@ export function useGapHandlers(): GapHandlers {
         companyProfile,
         gapAnalysisSummary,
         requirements: activeRequirements,
+        consultingRate: state.consultingRate,
       });
       const fileName = buildGapAnalysisFileName(companyProfile);
       triggerFileDownload(blob, fileName);
     } catch (error) {
       showNotice('error', `Angebotsgrundlage konnte nicht erzeugt werden: ${String(error)}`);
     }
-  }, [activeRequirements, companyProfile, gapAnalysisSummary, hasPermission, showNotice]);
+  }, [activeRequirements, companyProfile, gapAnalysisSummary, hasPermission, showNotice, state.consultingRate]);
 
   return useMemo(
     () => ({ handleExportGapAnalysisDocx }),

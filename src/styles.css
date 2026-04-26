@@ -598,6 +598,39 @@ textarea:focus {
   gap: 12px;
 }
 
+/*
+ * Tätigkeits-Tabelle in der aufgeklappten Gap-Analyse-Karte
+ * (GapEntryDetail). Zeigt pro Anforderung mit ausgearbeitetem
+ * effortBreakdown die Tätigkeiten mit Stunden- und Euro-Bandbreite.
+ * Kompaktes Layout mit hellen Borders, damit es als Sub-Element der
+ * priority-item-Karte erkennbar bleibt ohne visuell zu dominieren.
+ */
+.effort-activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin-top: 8px;
+}
+
+.effort-activity-table th,
+.effort-activity-table td {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.effort-activity-table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.effort-activity-table .block-note {
+  display: block;
+  margin-top: 2px;
+}
+
 .priority-icon,
 .inline-note svg {
   color: var(--primary);
