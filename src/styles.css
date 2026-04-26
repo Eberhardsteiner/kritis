@@ -938,6 +938,11 @@ textarea:focus {
   background: rgba(228, 218, 245, 0.22);
 }
 
+.module-card-pack-finance {
+  border-left: 3px solid rgba(170, 130, 50, 0.45);
+  background: rgba(238, 226, 195, 0.22);
+}
+
 /*
  * Selected/Hover-Zustand: der bestehende blaue Selected-Stil bleibt
  * dominant, aber die Sektor-Border-Left-Linie bleibt auch bei
@@ -948,7 +953,8 @@ textarea:focus {
 .module-card-pack-manufacturing.selected,
 .module-card-pack-logistics.selected,
 .module-card-pack-water.selected,
-.module-card-pack-it-telecom.selected {
+.module-card-pack-it-telecom.selected,
+.module-card-pack-finance.selected {
   background: #f6faff;
 }
 
