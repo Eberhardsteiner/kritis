@@ -6,7 +6,7 @@
     "moduleId": "kmu-basis",
     "name": "KMU-Basis-Modul",
     "version": "1.0.0",
-    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne klare KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Fokus auf Geschäftskontinuität und NIS2-Mindest-Compliance.",
+    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Geschäftskontinuität und NIS2-Mindest-Compliance.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "KMU-Basis (NIS2-Querschnitt)",
@@ -43,7 +43,7 @@
     "id": "kmu-basis",
     "name": "KMU-Basis (Mittelstand-Querschnitt)",
     "version": "1.0.0",
-    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne klare KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Fokus auf Geschäftskontinuität und NIS2-Mindest-Compliance.",
+    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Geschäftskontinuität und NIS2-Mindest-Compliance.",
     "sectorCategory": "KMU-Basis (NIS2-Querschnitt)",
     "domainWeightAdjustments": {
       "supply": 1.3,
