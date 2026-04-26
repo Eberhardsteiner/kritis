@@ -131,6 +131,10 @@ export function buildAppStateFromLoaded(
     importedTabletopScenarios: Array.isArray(loaded?.importedTabletopScenarios)
       ? (loaded?.importedTabletopScenarios as TabletopScenarioDef[])
       : [],
+    consultingRate:
+      loaded?.consultingRate === undefined
+        ? { ratePerPersonDay: 1500, currency: 'EUR' }
+        : loaded?.consultingRate,
   };
 }
 

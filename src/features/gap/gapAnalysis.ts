@@ -153,8 +153,6 @@ function buildEstimate(params: {
 }): EffortEstimate {
   const { requirement, currentStatus, primaryMappings, evidenceCount, domainScore, domainId } =
     params;
-  const size = resolveSize(requirement.category);
-  const basePersonDays = BASE_PERSON_DAYS[size];
 
   const baseGap = STATUS_GAP_FACTOR[currentStatus] ?? 1;
   const domainModulator = computeDomainModulator(domainScore);
@@ -172,6 +170,63 @@ function buildEstimate(params: {
     currentStatus === 'not_applicable' || baseGap === 0
       ? 0
       : Math.max(MIN_GAP_FLOOR, rawGap);
+
+  // ─── Branch 1: explizite effortBreakdown-Aufschlüsselung ────────────
+  // Wenn der Requirement einen ausgearbeiteten Breakdown hat, nutzen wir
+  // dessen Min/Max-PT als Basis und multiplizieren mit demselben Gap-
+  // Faktor (inkl. Domain-Modulator und Reduktionen wie bei der Heuristik).
+  // Das gibt UVM-Angebotsgrundlagen mit verteidigbaren Bandbreiten und
+  // Tätigkeits-Listen, statt einer einzelnen Heuristik-Zahl.
+  const breakdown = requirement.effortBreakdown;
+  if (breakdown) {
+    const minPersonDaysRaw =
+      currentStatus === 'not_applicable' || baseGap === 0 ? 0 : breakdown.minPersonDays * gap;
+    const maxPersonDaysRaw =
+      currentStatus === 'not_applicable' || baseGap === 0 ? 0 : breakdown.maxPersonDays * gap;
+    const minPersonDays = Number(minPersonDaysRaw.toFixed(2));
+    const maxPersonDays = Number(maxPersonDaysRaw.toFixed(2));
+    const personDays = Number(((minPersonDays + maxPersonDays) / 2).toFixed(2));
+
+    const assumptions: string[] = [
+      `Breakdown ${breakdown.minPersonDays} – ${breakdown.maxPersonDays} PT aus ${breakdown.activities.length} Tätigkeit${breakdown.activities.length === 1 ? '' : 'en'}`,
+      `Gap-Faktor ${baseGap.toFixed(2)} (Status: ${currentStatus})`,
+    ];
+    if (domainScore !== undefined && domainModulator !== 1) {
+      const surcharge = baseGap * domainModulator - baseGap;
+      const domainHint = domainId ? ` (${domainId})` : '';
+      assumptions.push(
+        `Aufschlag durch Domain-Score ${Math.round(domainScore)} %${domainHint}: ${surcharge >= 0 ? '+' : ''}${surcharge.toFixed(2)}`,
+      );
+    }
+    if (mappingReduction > 0) {
+      assumptions.push(
+        `Reduktion durch ${primaryMappings} primary-Mapping${primaryMappings === 1 ? '' : 's'}: -${mappingReduction.toFixed(2)}`,
+      );
+    }
+    if (evidenceReduction > 0) {
+      assumptions.push(
+        `Reduktion durch ${evidenceCount} Evidenz${evidenceCount === 1 ? '' : 'en'}: -${evidenceReduction.toFixed(2)}`,
+      );
+    }
+    if (breakdown.sourceNote) {
+      assumptions.push(breakdown.sourceNote);
+    }
+
+    return {
+      personDays,
+      minPersonDays,
+      maxPersonDays,
+      confidence: pickConfidence({ primaryMappings, evidenceCount, currentStatus }),
+      assumptions,
+      activities: breakdown.activities,
+      drivers: breakdown.drivers,
+      source: 'breakdown',
+    };
+  }
+
+  // ─── Branch 2: Heuristik-Fallback (ohne effortBreakdown) ────────────
+  const size = resolveSize(requirement.category);
+  const basePersonDays = BASE_PERSON_DAYS[size];
 
   const personDays = Number((basePersonDays * gap).toFixed(1));
 
@@ -204,6 +259,7 @@ function buildEstimate(params: {
     personDays,
     confidence: pickConfidence({ primaryMappings, evidenceCount, currentStatus }),
     assumptions,
+    source: 'heuristic',
   };
 }
 
@@ -265,6 +321,27 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
     const totalPersonDays = Number(
       regimeEntries.reduce((sum, entry) => sum + entry.effortEstimate.personDays, 0).toFixed(1),
     );
+    // Min/Max-Aggregation: Anforderungen mit Breakdown tragen Min/Max
+    // separat bei; Anforderungen mit Heuristik tragen `personDays` zu
+    // beiden Aggregaten bei (point-Estimate ohne Bandbreite).
+    const minPersonDays = Number(
+      regimeEntries
+        .reduce(
+          (sum, entry) =>
+            sum + (entry.effortEstimate.minPersonDays ?? entry.effortEstimate.personDays),
+          0,
+        )
+        .toFixed(2),
+    );
+    const maxPersonDays = Number(
+      regimeEntries
+        .reduce(
+          (sum, entry) =>
+            sum + (entry.effortEstimate.maxPersonDays ?? entry.effortEstimate.personDays),
+          0,
+        )
+        .toFixed(2),
+    );
     const byCategory: Record<string, number> = {};
     for (const entry of regimeEntries) {
       byCategory[entry.category] = Number(
@@ -275,6 +352,8 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
       regimeId: definition.id,
       regimeLabel: regimeLabelById.get(definition.id) ?? definition.label,
       totalPersonDays,
+      minPersonDays,
+      maxPersonDays,
       byCategory,
       entries: regimeEntries,
     };
@@ -283,9 +362,17 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
   const totalPersonDays = Number(
     byRegime.reduce((sum, regime) => sum + regime.totalPersonDays, 0).toFixed(1),
   );
+  const minPersonDays = Number(
+    byRegime.reduce((sum, regime) => sum + regime.minPersonDays, 0).toFixed(2),
+  );
+  const maxPersonDays = Number(
+    byRegime.reduce((sum, regime) => sum + regime.maxPersonDays, 0).toFixed(2),
+  );
 
   return {
     totalPersonDays,
+    minPersonDays,
+    maxPersonDays,
     calendarWeeks: Math.ceil(totalPersonDays / 5),
     entryCount: entries.length,
     byRegime,

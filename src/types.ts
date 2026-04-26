@@ -82,10 +82,52 @@ export interface StandardControlCatalogEntry {
 
 export type EffortConfidence = 'low' | 'medium' | 'high';
 
+/**
+ * Eine einzelne Tätigkeit innerhalb der Aufwands-Aufschlüsselung einer
+ * Compliance-Anforderung. Stunden-Bandbreite ermöglicht Min/Max-PT-
+ * Berechnung; optionale Notiz erläutert Multiplikatoren oder
+ * Sonderfälle (z. B. „pro Bundesland multiplizieren bei Standorten").
+ */
+export interface RequirementEffortActivity {
+  label: string;
+  minHours: number;
+  maxHours: number;
+  note?: string;
+}
+
+/**
+ * Vollständige Aufwands-Aufschlüsselung einer Compliance-Anforderung
+ * für UVM-Angebotsgrundlagen. Wenn vorhanden, ersetzt sie die
+ * Heuristik-Schätzung in `computeGapAnalysis` durch ein verteidig-
+ * bares Min/Max-PT-Band aus expliziten Tätigkeiten.
+ */
+export interface RequirementEffortBreakdown {
+  minPersonDays: number;
+  maxPersonDays: number;
+  activities: RequirementEffortActivity[];
+  drivers?: string[];
+  sourceNote?: string;
+}
+
 export interface EffortEstimate {
   personDays: number;
+  /**
+   * Untere Bandbreite in Personentagen — nur gesetzt, wenn der
+   * Requirement einen `effortBreakdown` hat. Bei Heuristik-Schätzungen
+   * (Fallback) bleibt das Feld undefiniert und das UI zeigt nur den
+   * `personDays`-Mittelwert.
+   */
+  minPersonDays?: number;
+  maxPersonDays?: number;
   confidence: EffortConfidence;
   assumptions: string[];
+  activities?: RequirementEffortActivity[];
+  drivers?: string[];
+  /**
+   * Quelle der PT-Schätzung. 'breakdown' = aus expliziten Tätigkeiten,
+   * 'heuristic' = aus Kategorie-Basis × Gap-Faktor × Domain-Modulator.
+   */
+  source: 'breakdown' | 'heuristic';
 }
 
 export interface GapAnalysisEntry {
@@ -102,15 +144,40 @@ export interface GapAnalysisByRegime {
   regimeId: RegulatoryRegimeId;
   regimeLabel: string;
   totalPersonDays: number;
+  /**
+   * Min/Max-Bandbreiten-Aggregation. Anforderungen ohne Breakdown
+   * tragen mit ihrem `personDays`-Wert zu beiden Werten bei (point-
+   * Estimate). Anforderungen mit Breakdown tragen mit `minPersonDays`
+   * zur Untergrenze und `maxPersonDays` zur Obergrenze bei.
+   */
+  minPersonDays: number;
+  maxPersonDays: number;
   byCategory: Record<string, number>;
   entries: GapAnalysisEntry[];
 }
 
 export interface GapAnalysisSummary {
   totalPersonDays: number;
+  /**
+   * Gesamt-Bandbreite über alle Regimes. Bei Tenants ohne ausgearbei-
+   * tete Breakdowns gilt min == total == max (point-estimate).
+   */
+  minPersonDays: number;
+  maxPersonDays: number;
   calendarWeeks: number;
   entryCount: number;
   byRegime: GapAnalysisByRegime[];
+}
+
+/**
+ * Tagessatz-Konfiguration für die Euro-Berechnung in der Gap-Analyse-
+ * Angebotsgrundlage. Pro Tenant konfigurierbar mit Default 1.500 €/PT.
+ */
+export interface ConsultingRateSettings {
+  ratePerPersonDay: number;
+  currency: 'EUR' | 'CHF';
+  effectiveFrom?: string;
+  note?: string;
 }
 
 export type RequirementOverrideStatus =
@@ -209,6 +276,13 @@ export interface RequirementDefinition {
   regimeId?: RegulatoryRegimeId;
   category?: string;
   mappedControls?: StandardControlReference[];
+  /**
+   * Optionaler Aufwands-Breakdown mit Min/Max-PT und expliziten
+   * Tätigkeiten. Wenn vorhanden, nutzt die Gap-Analyse diese Bandbreite
+   * statt der Kategorie-Heuristik — Voraussetzung für UVM-Angebots-
+   * grundlagen mit verteidigbarer Tätigkeits-Aufschlüsselung.
+   */
+  effortBreakdown?: RequirementEffortBreakdown;
 }
 
 export interface ActionTemplateDefinition {
@@ -1209,6 +1283,12 @@ export interface AppState {
   currentTabletopSession: ExerciseSession | null;
   archivedTabletopSessions: ExerciseSession[];
   importedTabletopScenarios: TabletopScenario[];
+  /**
+   * Tagessatz für Gap-Analyse-Euro-Berechnung. Pro Tenant konfigurier-
+   * bar; Default 1.500 €/PT bei neu angelegten Workspaces. Wenn
+   * `null`, blendet die UI Euro-Beträge aus und zeigt nur PT.
+   */
+  consultingRate: ConsultingRateSettings | null;
 }
 
 export interface DomainScore {
