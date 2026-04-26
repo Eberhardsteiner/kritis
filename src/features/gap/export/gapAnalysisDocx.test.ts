@@ -30,6 +30,8 @@ const requirements: RequirementDefinition[] = [
 
 const summary: GapAnalysisSummary = {
   totalPersonDays: 12.5,
+  minPersonDays: 12.5,
+  maxPersonDays: 12.5,
   calendarWeeks: 3,
   entryCount: 1,
   byRegime: [
@@ -37,6 +39,8 @@ const summary: GapAnalysisSummary = {
       regimeId: 'de_kritisdachg',
       regimeLabel: 'KRITIS-DachG',
       totalPersonDays: 12.5,
+      minPersonDays: 12.5,
+      maxPersonDays: 12.5,
       byCategory: { risk: 12.5 },
       entries: [
         {
@@ -49,6 +53,7 @@ const summary: GapAnalysisSummary = {
             personDays: 12.5,
             confidence: 'medium',
             assumptions: ['Basis-Aufwand 5 PT', 'Gap-Faktor 1'],
+            source: 'heuristic',
           },
           dependencies: [],
         },
@@ -86,6 +91,8 @@ describe('buildGapAnalysisDocument', () => {
   it('funktioniert bei leerer Zusammenfassung ohne Zeilen', async () => {
     const emptySummary: GapAnalysisSummary = {
       totalPersonDays: 0,
+      minPersonDays: 0,
+      maxPersonDays: 0,
       calendarWeeks: 0,
       entryCount: 0,
       byRegime: [],

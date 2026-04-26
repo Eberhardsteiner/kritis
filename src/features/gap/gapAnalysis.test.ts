@@ -411,6 +411,114 @@ describe('computeGapAnalysis · Domain-Score-Modulator', () => {
   });
 });
 
+describe('computeGapAnalysis · effortBreakdown', () => {
+  function makeBreakdownRequirement(): RequirementDefinition {
+    return makeRequirement({
+      id: 'req-bk',
+      category: 'risk',
+      effortBreakdown: {
+        minPersonDays: 4,
+        maxPersonDays: 8,
+        activities: [
+          { label: 'Recherche', minHours: 4, maxHours: 8 },
+          { label: 'Bewertung', minHours: 8, maxHours: 16 },
+          { label: 'Dokumentation', minHours: 4, maxHours: 8 },
+          { label: 'Review', minHours: 4, maxHours: 8 },
+          { label: 'Empfehlung', minHours: 12, maxHours: 24 },
+        ],
+        drivers: ['Anzahl Bundesländer', 'Tenant-Größe'],
+        sourceNote: 'Test-Quelle',
+      },
+    });
+  }
+
+  it('Mit effortBreakdown wird die Bandbreite korrekt berechnet (Status open, Gap 1.0)', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeBreakdownRequirement()],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    expect(entry.effortEstimate.source).toBe('breakdown');
+    expect(entry.effortEstimate.minPersonDays).toBe(4);
+    expect(entry.effortEstimate.maxPersonDays).toBe(8);
+    expect(entry.effortEstimate.personDays).toBe(6); // Mittelwert
+    expect(entry.effortEstimate.activities).toHaveLength(5);
+    expect(entry.effortEstimate.drivers).toEqual(['Anzahl Bundesländer', 'Tenant-Größe']);
+  });
+
+  it('Bandbreite reagiert auf Domain-Modulator (Min und Max werden moduliert)', () => {
+    const baseline = computeGapAnalysis({
+      requirements: [makeBreakdownRequirement()],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // Domain governance, score 0 → modulator 1.5 → min 6, max 12
+    const withZero = computeGapAnalysis({
+      requirements: [makeBreakdownRequirement()],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'governance', label: 'Führung', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    expect(baseline.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(4);
+    expect(baseline.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(8);
+    expect(withZero.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(6);
+    expect(withZero.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(12);
+  });
+
+  it('Ohne effortBreakdown fällt die Berechnung auf Heuristik zurück', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeRequirement({ id: 'req-h', category: 'measures' })],
+      requirementStates: { 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    expect(entry.effortEstimate.source).toBe('heuristic');
+    expect(entry.effortEstimate.minPersonDays).toBeUndefined();
+    expect(entry.effortEstimate.maxPersonDays).toBeUndefined();
+    expect(entry.effortEstimate.personDays).toBe(10); // measures × open = 10 PT
+  });
+
+  it('Aggregation pro Regime liefert Min-Total und Max-Total', () => {
+    const breakdownReq = makeBreakdownRequirement();
+    const heuristicReq = makeRequirement({ id: 'req-h', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [breakdownReq, heuristicReq],
+      requirementStates: { 'req-bk': 'open', 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // Breakdown: 4 / 8, Heuristik: 10 / 10 (point-Estimate)
+    // Min-Total: 4 + 10 = 14, Max-Total: 8 + 10 = 18
+    expect(summary.byRegime[0].minPersonDays).toBe(14);
+    expect(summary.byRegime[0].maxPersonDays).toBe(18);
+    expect(summary.minPersonDays).toBe(14);
+    expect(summary.maxPersonDays).toBe(18);
+    // totalPersonDays bleibt der Heuristik-Mittelwert: 6 (Mittelwert von 4-8) + 10 = 16
+    expect(summary.byRegime[0].totalPersonDays).toBe(16);
+  });
+
+  it('Bei not_applicable bleibt die Bandbreite 0 PT (keine Berechnung notwendig)', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeBreakdownRequirement()],
+      requirementStates: { 'req-bk': 'not_applicable' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    expect(entry.effortEstimate.source).toBe('breakdown');
+    expect(entry.effortEstimate.minPersonDays).toBe(0);
+    expect(entry.effortEstimate.maxPersonDays).toBe(0);
+    expect(entry.effortEstimate.personDays).toBe(0);
+  });
+});
+
 describe('getConfidenceLabel', () => {
   it('übersetzt die drei Confidence-Stufen', () => {
     expect(getConfidenceLabel('high')).toBe('Hoch');
