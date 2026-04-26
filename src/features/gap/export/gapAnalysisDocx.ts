@@ -113,7 +113,7 @@ function buildRegimeTable(
       tableCell(String(regime.entries.length)),
       tableCell(
         Object.entries(regime.byCategory)
-          .map(([category, pt]) => `${category}: ${formatPersonDays(pt)}`)
+          .map(([category, range]) => `${category}: ${formatPersonDaysRange(range.minPersonDays, range.maxPersonDays)}`)
           .join(', ') || '–',
       ),
     );

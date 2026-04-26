@@ -521,7 +521,7 @@ export function ReportView({
                       <span className="muted small">
                         {' '}(
                         {Object.entries(regime.byCategory)
-                          .map(([category, pt]) => `${category}: ${pt.toLocaleString('de-DE', { maximumFractionDigits: 1 })}`)
+                          .map(([category, range]) => `${category}: ${formatPersonDaysRange(range.minPersonDays, range.maxPersonDays)}`)
                           .join(', ')}
                         )
                       </span>

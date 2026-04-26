@@ -30,7 +30,7 @@ const summaryFixture: GapAnalysisSummary = {
       totalPersonDays: 8.5,
       minPersonDays: 8.5,
       maxPersonDays: 8.5,
-      byCategory: { risk: 8.5 },
+      byCategory: { risk: { minPersonDays: 8.5, maxPersonDays: 8.5, midPersonDays: 8.5 } },
       entries: [
         {
           requirementId: 'req-r',
@@ -154,7 +154,7 @@ describe('GapAnalysisDashboard · Aktivitäts-Tabelle Brutto/Rest (C5.4.4)', () 
         totalPersonDays: 0.2,
         minPersonDays: 0.15,
         maxPersonDays: 0.25,
-        byCategory: { governance: 0.2 },
+        byCategory: { governance: { minPersonDays: 0.15, maxPersonDays: 0.25, midPersonDays: 0.2 } },
         entries: [
           {
             requirementId: 'req-laenderoeffnung',

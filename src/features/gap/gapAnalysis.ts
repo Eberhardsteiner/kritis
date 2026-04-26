@@ -1,4 +1,5 @@
 import type {
+  CategoryEffortRange,
   DomainScore,
   EffortConfidence,
   EffortEstimate,
@@ -435,11 +436,24 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
         )
         .toFixed(2),
     );
-    const byCategory: Record<string, number> = {};
+    // C5.4.7 Bug 8: byCategory aggregiert jetzt min/max/mid, nicht nur
+    // den Mittelwert. Anforderungen ohne effortBreakdown tragen ihren
+    // `personDays`-Wert zu allen drei Werten bei (point-Estimate);
+    // Anforderungen mit Breakdown tragen min/max separat bei.
+    const byCategory: Record<string, CategoryEffortRange> = {};
     for (const entry of regimeEntries) {
-      byCategory[entry.category] = Number(
-        ((byCategory[entry.category] ?? 0) + entry.effortEstimate.personDays).toFixed(1),
-      );
+      const minPt = entry.effortEstimate.minPersonDays ?? entry.effortEstimate.personDays;
+      const maxPt = entry.effortEstimate.maxPersonDays ?? entry.effortEstimate.personDays;
+      const existing = byCategory[entry.category] ?? {
+        minPersonDays: 0,
+        maxPersonDays: 0,
+        midPersonDays: 0,
+      };
+      byCategory[entry.category] = {
+        minPersonDays: Number((existing.minPersonDays + minPt).toFixed(2)),
+        maxPersonDays: Number((existing.maxPersonDays + maxPt).toFixed(2)),
+        midPersonDays: Number((existing.midPersonDays + entry.effortEstimate.personDays).toFixed(1)),
+      };
     }
     return {
       regimeId: definition.id,

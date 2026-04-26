@@ -169,6 +169,23 @@ export interface GapAnalysisEntry {
   dependencies: string[];
 }
 
+/**
+ * Aufwands-Bandbreite pro Kategorie. C5.4.7 Bug 8: vorher war das
+ * `byCategory: Record<string, number>` und summierte nur den Mittelwert
+ * — inkonsistent zur Regime-Bandbreite. Seit C5.4.7 trägt jede Kategorie
+ * Min/Max/Mid, sodass Chips und DOCX-Tabellen ehrliche Bandbreiten
+ * zeigen können.
+ */
+export interface CategoryEffortRange {
+  minPersonDays: number;
+  maxPersonDays: number;
+  /**
+   * Bestehender Mittelwert für Bestandskompatibilität (Aufrufer, die
+   * weiterhin nur eine Zahl pro Kategorie brauchen, lesen `midPersonDays`).
+   */
+  midPersonDays: number;
+}
+
 export interface GapAnalysisByRegime {
   regimeId: RegulatoryRegimeId;
   regimeLabel: string;
@@ -181,7 +198,7 @@ export interface GapAnalysisByRegime {
    */
   minPersonDays: number;
   maxPersonDays: number;
-  byCategory: Record<string, number>;
+  byCategory: Record<string, CategoryEffortRange>;
   entries: GapAnalysisEntry[];
 }
 

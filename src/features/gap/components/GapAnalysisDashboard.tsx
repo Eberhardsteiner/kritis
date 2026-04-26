@@ -258,9 +258,9 @@ export function GapAnalysisDashboard({
                 </div>
                 {Object.keys(regime.byCategory).length > 0 ? (
                   <div className="chip-row top-gap">
-                    {Object.entries(regime.byCategory).map(([category, personDays]) => (
+                    {Object.entries(regime.byCategory).map(([category, range]) => (
                       <span key={category} className="chip outline">
-                        {category}: {formatPersonDays(personDays)}
+                        {category}: {formatPersonDaysRange(range.minPersonDays, range.maxPersonDays)}
                       </span>
                     ))}
                   </div>

@@ -43,7 +43,7 @@ const summary: GapAnalysisSummary = {
       totalPersonDays: 12.5,
       minPersonDays: 12.5,
       maxPersonDays: 12.5,
-      byCategory: { risk: 12.5 },
+      byCategory: { risk: { minPersonDays: 12.5, maxPersonDays: 12.5, midPersonDays: 12.5 } },
       entries: [
         {
           requirementId: 'de_kritis_risk_assessment',
@@ -139,7 +139,7 @@ describe('buildGapAnalysisDocument · Tätigkeits-Tabelle Brutto/Rest (C5.4.4)',
         totalPersonDays: 0.2,
         minPersonDays: 0.15,
         maxPersonDays: 0.25,
-        byCategory: { governance: 0.2 },
+        byCategory: { governance: { minPersonDays: 0.15, maxPersonDays: 0.25, midPersonDays: 0.2 } },
         entries: [
           {
             requirementId: 'de_kritis_laenderoeffnung',
