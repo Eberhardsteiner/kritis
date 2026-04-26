@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { BarChart3, Calculator, ChevronDown, ChevronRight } from 'lucide-react';
 import { getConfidenceLabel } from '../gapAnalysis';
+import {
+  CURRENCY_LABELS,
+  formatEuroRange,
+  formatHoursRange,
+  formatPersonDays,
+  formatPersonDaysRange,
+} from '../utils/formatters';
 import type {
   ConsultingRateSettings,
   EffortConfidence,
@@ -32,53 +39,6 @@ function getConfidenceTone(confidence: EffortConfidence): 'success' | 'warn' | '
     return 'warn';
   }
   return 'outline';
-}
-
-function formatPersonDays(value: number): string {
-  return `${value.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} PT`;
-}
-
-/**
- * Formatiert eine PT-Bandbreite als "min – max PT". Bei min == max
- * (point-Estimate ohne Bandbreite, z. B. reine Heuristik) gibt nur eine
- * Zahl aus.
- */
-function formatPersonDaysRange(min: number, max: number): string {
-  if (Math.abs(min - max) < 0.01) {
-    return formatPersonDays(min);
-  }
-  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  return `${minStr} – ${maxStr} PT`;
-}
-
-function formatHoursRange(min: number, max: number): string {
-  if (Math.abs(min - max) < 0.01) {
-    return `${min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} h`;
-  }
-  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  return `${minStr} – ${maxStr} h`;
-}
-
-const CURRENCY_LABELS: Record<ConsultingRateSettings['currency'], string> = {
-  EUR: '€',
-  CHF: 'CHF',
-};
-
-function formatEuro(value: number, currency: ConsultingRateSettings['currency']): string {
-  const formatted = value.toLocaleString('de-DE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return `${formatted} ${CURRENCY_LABELS[currency]}`;
-}
-
-function formatEuroRange(min: number, max: number, currency: ConsultingRateSettings['currency']): string {
-  if (Math.abs(min - max) < 1) {
-    return formatEuro(min, currency);
-  }
-  return `${formatEuro(min, currency)} – ${formatEuro(max, currency)}`;
 }
 
 function GapEntryDetail({

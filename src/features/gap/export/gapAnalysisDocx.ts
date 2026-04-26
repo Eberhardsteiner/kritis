@@ -11,6 +11,13 @@ import {
   WidthType,
 } from 'docx';
 import { getConfidenceLabel } from '../gapAnalysis';
+import {
+  CURRENCY_LABELS,
+  formatEuro,
+  formatEuroRange,
+  formatPersonDays,
+  formatPersonDaysRange,
+} from '../utils/formatters';
 import type {
   CompanyProfile,
   ConsultingRateSettings,
@@ -31,58 +38,12 @@ export interface GapAnalysisDocxInput {
   generatedAt?: Date;
 }
 
-const CURRENCY_LABELS: Record<ConsultingRateSettings['currency'], string> = {
-  EUR: '€',
-  CHF: 'CHF',
-};
-
-function formatEuro(value: number, currency: ConsultingRateSettings['currency']): string {
-  const formatted = value.toLocaleString('de-DE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return `${formatted} ${CURRENCY_LABELS[currency]}`;
-}
-
-function formatEuroRange(
-  min: number,
-  max: number,
-  currency: ConsultingRateSettings['currency'],
-): string {
-  if (Math.abs(min - max) < 1) {
-    return formatEuro(min, currency);
-  }
-  return `${formatEuro(min, currency)} – ${formatEuro(max, currency)}`;
-}
-
-function formatPersonDaysRange(min: number, max: number): string {
-  if (Math.abs(min - max) < 0.01) {
-    return formatPersonDays(min);
-  }
-  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  return `${minStr} – ${maxStr} PT`;
-}
-
-function formatHoursRange(min: number, max: number): string {
-  if (Math.abs(min - max) < 0.01) {
-    return `${min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} h`;
-  }
-  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-  return `${minStr} – ${maxStr} h`;
-}
-
 function formatDate(date: Date): string {
   return date.toLocaleDateString('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
   });
-}
-
-function formatPersonDays(value: number): string {
-  return `${value.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} PT`;
 }
 
 function headingParagraph(text: string, level: (typeof HeadingLevel)[keyof typeof HeadingLevel]): Paragraph {

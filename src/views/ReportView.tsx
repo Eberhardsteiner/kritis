@@ -29,6 +29,8 @@ import type {
 import { getBsigEntityClassLabel, getEntityClassFieldLabel, getJurisdictionLabel, shouldShowEntityClass } from '../lib/regulatory';
 import type { KritisMilestones } from '../lib/regulatory';
 import type { PenaltyEstimate } from '../lib/penaltyCalculator';
+import { SHOW_PENALTY_EXPOSURE } from '../lib/featureFlags';
+import { formatPersonDaysRange } from '../features/gap/utils/formatters';
 
 interface ReportViewProps {
   companyProfile: CompanyProfile;
@@ -504,9 +506,9 @@ export function ReportView({
             <h3>Gap-Analyse und Aufwandsschätzung</h3>
             <p className="top-gap">
               <strong>Geschätzter Restaufwand:</strong>{' '}
-              {gapAnalysisSummary.totalPersonDays.toLocaleString('de-DE', { maximumFractionDigits: 1 })} PT
+              {formatPersonDaysRange(gapAnalysisSummary.minPersonDays, gapAnalysisSummary.maxPersonDays)}
               {gapAnalysisSummary.totalPersonDays > 0
-                ? ` · ≈ ${gapAnalysisSummary.calendarWeeks} Kalenderwoche${gapAnalysisSummary.calendarWeeks === 1 ? '' : 'n'}`
+                ? ` · ≈ ${gapAnalysisSummary.calendarWeeks} Kalenderwoche${gapAnalysisSummary.calendarWeeks === 1 ? '' : 'n'} (Mittelwert)`
                 : ''}
             </p>
             {gapAnalysisSummary.byRegime.length > 0 ? (
@@ -514,7 +516,7 @@ export function ReportView({
                 {gapAnalysisSummary.byRegime.map((regime) => (
                   <li key={regime.regimeId}>
                     <strong>{regime.regimeLabel}:</strong>{' '}
-                    {regime.totalPersonDays.toLocaleString('de-DE', { maximumFractionDigits: 1 })} PT
+                    {formatPersonDaysRange(regime.minPersonDays, regime.maxPersonDays)}
                     {Object.keys(regime.byCategory).length > 0 ? (
                       <span className="muted small">
                         {' '}(
@@ -531,8 +533,10 @@ export function ReportView({
               <p className="muted">Keine Pflichten im aktuellen Mandantenbild.</p>
             )}
             <p className="muted small top-gap">
-              Heuristik: Basis je Kategorie (2/5/10 PT) × Gap-Faktor je Status, reduziert um
-              Standard-Mappings und Evidenzen. Konservativ gewählt; Ausgangsbasis für Projektangebote.
+              Aufwandsschätzung pro Anforderung mit Bandbreite (Min – Max). Status der
+              Anforderungen wird primär aus expliziten Setzungen, sekundär aus den Antworten der
+              Grundanalyse abgeleitet. Detail-Aufschlüsselung pro Anforderung im Dashboard und
+              im DOCX-Angebotsdokument.
             </p>
           </article>
 
@@ -585,26 +589,28 @@ export function ReportView({
                 </p>
               </article>
 
-              <article className="report-card">
-                <h3>Bußgeldrahmen (§ 24 KRITISDachG)</h3>
-                <p className="top-gap">
-                  <strong>Potenzielle Oberschwelle:</strong>{' '}
-                  {kritisPenaltyEstimate.upperBound.toLocaleString('de-DE')} €
-                </p>
-                {kritisPenaltyEstimate.rationale.length ? (
-                  <ul className="plain-list top-gap">
-                    {kritisPenaltyEstimate.rationale.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="muted">Keine offenen Tatbestände erkannt.</p>
-                )}
-                <p className="muted small top-gap">
-                  Die Oberschwelle ist kumulativ; Sanktionen werden ab 2027 wirksam. Behördliche
-                  Einzelfallbewertung bleibt vorbehalten.
-                </p>
-              </article>
+              {SHOW_PENALTY_EXPOSURE ? (
+                <article className="report-card">
+                  <h3>Bußgeldrahmen (§ 24 KRITISDachG)</h3>
+                  <p className="top-gap">
+                    <strong>Potenzielle Oberschwelle:</strong>{' '}
+                    {kritisPenaltyEstimate.upperBound.toLocaleString('de-DE')} €
+                  </p>
+                  {kritisPenaltyEstimate.rationale.length ? (
+                    <ul className="plain-list top-gap">
+                      {kritisPenaltyEstimate.rationale.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="muted">Keine offenen Tatbestände erkannt.</p>
+                  )}
+                  <p className="muted small top-gap">
+                    Die Oberschwelle ist kumulativ; Sanktionen werden ab 2027 wirksam. Behördliche
+                    Einzelfallbewertung bleibt vorbehalten.
+                  </p>
+                </article>
+              ) : null}
             </>
           ) : null}
         </div>
