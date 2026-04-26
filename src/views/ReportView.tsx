@@ -462,6 +462,7 @@ export function ReportView({
             <div className="mini-list top-gap">
               <div className="mini-list-row"><span>Gesamt</span><strong>{deadlineSummary.total}</strong></div>
               <div className="mini-list-row"><span>Überfällig</span><strong>{deadlineSummary.overdue}</strong></div>
+              <div className="mini-list-row"><span>Ohne Fälligkeitsdatum</span><strong>{deadlineSummary.undated}</strong></div>
               <div className="mini-list-row"><span>≤ 30 Tage</span><strong>{deadlineSummary.dueSoon}</strong></div>
               <div className="mini-list-row"><span>Regulatorisch</span><strong>{deadlineSummary.regulatory}</strong></div>
             </div>

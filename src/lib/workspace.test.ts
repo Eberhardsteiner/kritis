@@ -123,3 +123,79 @@ describe('buildDeadlineSummary · KRITIS-Fristen aus Registrierungsdatum', () =>
     expect(management?.dueDate).toBe('2027-05-17');
   });
 });
+
+describe('buildDeadlineSummary · undated vs overdue (C5.4.7 Bug 12)', () => {
+  it('zählt Items mit Status "open" als undated, NICHT als overdue', () => {
+    // Action ohne dueDate produziert Status 'open'.
+    const summary = buildDeadlineSummary({
+      actionItems: [
+        {
+          id: 'a1',
+          moduleId: 'm-1',
+          title: 'Aktion ohne Datum',
+          owner: '',
+          dueDate: '',
+          status: 'open',
+          priority: 'mittel',
+          description: '',
+          relatedQuestionIds: [],
+          relatedRequirementIds: [],
+          sourceType: 'manual',
+          sourceLabel: '',
+          notes: '',
+          createdAt: '',
+        },
+      ],
+      evidenceItems: [],
+      exercises: [],
+      reviewPlan: makeReviewPlan(),
+      complianceCalendar: makeComplianceCalendar(),
+      applicability: makeApplicability(),
+      regulatoryProfile: makeProfile({ kritisRegistrationDate: '' }),
+    });
+    expect(summary.undated).toBeGreaterThan(0);
+    // Vor C5.4.7 zählte das gleiche Item als overdue. Jetzt nicht mehr.
+    expect(summary.overdue).toBe(0);
+  });
+
+  it('zählt Items mit dueDate in der Vergangenheit als overdue', () => {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const summary = buildDeadlineSummary({
+      actionItems: [
+        {
+          id: 'a1',
+          moduleId: 'm-1',
+          title: 'Überfällige Aktion',
+          owner: '',
+          dueDate: yesterday,
+          status: 'open',
+          priority: 'mittel',
+          description: '',
+          relatedQuestionIds: [],
+          relatedRequirementIds: [],
+          sourceType: 'manual',
+          sourceLabel: '',
+          notes: '',
+          createdAt: '',
+        },
+      ],
+      evidenceItems: [],
+      exercises: [],
+      reviewPlan: makeReviewPlan(),
+      complianceCalendar: makeComplianceCalendar(),
+      applicability: makeApplicability(),
+      regulatoryProfile: makeProfile({ kritisRegistrationDate: '' }),
+    });
+    expect(summary.overdue).toBeGreaterThan(0);
+  });
+
+  it('Greenfield-Tenant ohne befüllte Aktionen: overdue=0 (nur Compliance-Milestones, ohne Vergangenheit)', () => {
+    const summary = summaryFor(makeProfile({ kritisRegistrationDate: '' }));
+    expect(summary.overdue).toBe(0);
+    // undated ist >= 0 — leerer ReviewPlan erzeugt open-Items, das ist
+    // korrekt und zählt jetzt unter `undated`, NICHT unter `overdue`.
+    expect(summary.undated).toBeGreaterThanOrEqual(0);
+  });
+});

@@ -617,9 +617,14 @@ export function buildDeadlineSummary(params: {
     ...buildComplianceDeadlines(params.complianceCalendar, params.applicability, params.regulatoryProfile),
   ]);
 
+  // C5.4.7 Bug 12: 'overdue' und 'open' (kein Datum gepflegt) werden
+  // jetzt separat gezählt. Vorher waren beide unter `overdue` zusammen-
+  // gefasst, was Demo-blamabel war: Drei Aktionen ohne Fälligkeitsdatum
+  // zeigten als „3 überfällige Termine".
   return {
     total: items.length,
-    overdue: items.filter((item) => item.status === 'overdue' || item.status === 'open').length,
+    overdue: items.filter((item) => item.status === 'overdue').length,
+    undated: items.filter((item) => item.status === 'open').length,
     dueSoon: items.filter((item) => item.status === 'soon').length,
     regulatory: items.filter((item) => item.category === 'regulatorisch').length,
     nextItems: items.slice(0, 12),

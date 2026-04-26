@@ -1546,7 +1546,20 @@ export interface DeadlineItem {
 
 export interface DeadlineSummary {
   total: number;
+  /**
+   * Termine mit Fälligkeitsdatum, das in der Vergangenheit liegt.
+   * Vor C5.4.7 wurden Termine ohne Datum (Status `'open'`) hier
+   * mitgezählt — semantisch falsch, weil „kein Datum gepflegt" und
+   * „überfällig" zwei unterschiedliche Kategorien sind. Seit C5.4.7
+   * trennen sich die beiden Zahlen.
+   */
   overdue: number;
+  /**
+   * Termine ohne Fälligkeitsdatum (Status `'open'`). Eingeführt in
+   * C5.4.7 (Bug 12) als Pendant zu `overdue`. Demo-Anzeige: „X ohne
+   * Fälligkeitsdatum".
+   */
+  undated: number;
   dueSoon: number;
   regulatory: number;
   nextItems: DeadlineItem[];

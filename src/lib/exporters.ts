@@ -452,7 +452,7 @@ export function exportManagementReportAsMarkdown(params: {
 - Feststellungen offen: ${findingSummary.open}
 - Interne Readiness-Reife: ${certificationProgress.dataAvailable ? `${certificationProgress.score}%` : 'noch nicht erfasst'}
 ${documentLibrarySummary ? `- Dokumentenregister: ${documentLibrarySummary.total} Einträge, ${documentLibrarySummary.expired} abgelaufen, ${documentLibrarySummary.missingFolder} ohne Ordner` : ''}
-${deadlineSummary ? `- Fristen-Cockpit: ${deadlineSummary.overdue} überfällig, ${deadlineSummary.dueSoon} in den nächsten 30 Tagen` : ''}
+${deadlineSummary ? `- Fristen-Cockpit: ${deadlineSummary.overdue} überfällig, ${deadlineSummary.undated} ohne Fälligkeitsdatum, ${deadlineSummary.dueSoon} in den nächsten 30 Tagen` : ''}
 
 ## ${getRegulatorySectionTitle(regulatoryProfile)}
 ${buildRegulatoryMetaRows(regulatoryProfile).map(([label, value]) => `- ${label}: ${value}`).join('\n')}

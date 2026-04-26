@@ -176,7 +176,13 @@ export function ControlView({
         <StatCard
           title="Fristen kritisch"
           value={`${deadlineSummary.overdue}`}
-          subtitle={deadlineSummary.regulatory ? `${deadlineSummary.regulatory} regulatorische Termine` : 'Keine regulatorischen Termine erkannt'}
+          subtitle={
+            deadlineSummary.undated
+              ? `${deadlineSummary.undated} ohne Fälligkeitsdatum${deadlineSummary.regulatory ? ` · ${deadlineSummary.regulatory} regulatorisch` : ''}`
+              : deadlineSummary.regulatory
+                ? `${deadlineSummary.regulatory} regulatorische Termine`
+                : 'Keine regulatorischen Termine erkannt'
+          }
           tone={deadlineSummary.overdue ? 'alert' : 'good'}
         />
         <StatCard

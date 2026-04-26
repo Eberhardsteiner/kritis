@@ -124,6 +124,7 @@ const documentLibrarySummary: DocumentLibrarySummary = {
 const deadlineSummary: DeadlineSummary = {
   total: 0,
   overdue: 0,
+  undated: 0,
   dueSoon: 0,
   regulatory: 0,
   nextItems: [],
