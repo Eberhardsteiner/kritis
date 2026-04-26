@@ -899,15 +899,16 @@ textarea:focus {
  * erhalten — selected/hover-Zustand greift weiterhin und nimmt
  * Vorrang vor dem Akzent. Mapping nutzt module.id (nicht packId), da
  * der ModulesView-Render-Loop module.id als CSS-Klassen-Suffix
- * vergibt: `module-card-pack-${module.id}`. Acht Sektoren werden
+ * vergibt: `module-card-pack-${module.id}`. Neun Sektoren werden
  * abgedeckt; nicht-gemappte Module behalten den neutralen Stil.
  *
  * Farbphilosophie: jede Sektor-Farbe hat eine offensichtliche
  * Assoziation (rot-rosa = Gesundheit, gelb-orange = Strom/Wärme,
  * grau-blau = Industrie/Stahl, grün = Bewegung/Logistik, hellblau =
  * Wasser, violett = Daten/Netz, gold-bronze = Finanz/Vertrauen,
- * dunkelblau-schiefer = Verwaltung/Administration). Sättigung niedrig,
- * max. 8 % Tint im Hintergrund, damit es elegant bleibt.
+ * dunkelblau-schiefer = Verwaltung/Administration, dunkelgrau-neutral
+ * = KMU-Basis/Querschnitt). Sättigung niedrig, max. 8 % Tint im
+ * Hintergrund, damit es elegant bleibt.
  */
 .module-card-pack-healthcare {
   border-left: 3px solid rgba(220, 53, 69, 0.4);
@@ -949,6 +950,11 @@ textarea:focus {
   background: rgba(220, 225, 235, 0.22);
 }
 
+.module-card-pack-kmu-basis {
+  border-left: 3px solid rgba(95, 95, 100, 0.45);
+  background: rgba(228, 228, 230, 0.2);
+}
+
 /*
  * Selected/Hover-Zustand: der bestehende blaue Selected-Stil bleibt
  * dominant, aber die Sektor-Border-Left-Linie bleibt auch bei
@@ -961,7 +967,8 @@ textarea:focus {
 .module-card-pack-water.selected,
 .module-card-pack-it-telecom.selected,
 .module-card-pack-finance.selected,
-.module-card-pack-administration.selected {
+.module-card-pack-administration.selected,
+.module-card-pack-kmu-basis.selected {
   background: #f6faff;
 }
 
