@@ -149,12 +149,13 @@ export function GapAnalysisDashboard({
         dienen als Ausgangsbasis für Projektangebote, nicht als Festpreis.
       </p>
       <p className="muted small top-gap">
-        Die Schätzung basiert auf den Status der Compliance-Anforderungen im Bereich Maßnahmen
-        &amp; Bibliothek (offen / in Bearbeitung / erfüllt / nicht zutreffend). Solange
-        Anforderungen den Status „offen" haben, fließen sie mit vollem Gap-Faktor in die
-        Berechnung ein. Die Antworten der Grundanalyse beeinflussen die Domain-Scores im
-        Dashboard, aber nicht direkt den Restaufwand. Setzen Sie Anforderungs-Status im
-        Maßnahmen-Bereich, um den Restaufwand zu reduzieren.
+        Die Schätzung basiert primär auf dem Status der Compliance-Anforderungen im Bereich
+        Maßnahmen &amp; Bibliothek (offen / in Bearbeitung / erfüllt / nicht zutreffend).
+        Zusätzlich modulieren die Domain-Scores aus der Grundanalyse den Restaufwand:
+        Niedrige Scores erhöhen die PT um bis zu 50 %, hohe Scores entsprechen der
+        Basis-Schätzung. Setzen Sie Anforderungs-Status im Maßnahmen-Bereich, um den
+        Restaufwand strukturell zu senken; verbessern Sie die Grundanalyse-Antworten,
+        um den Domain-Aufschlag zu reduzieren.
       </p>
     </section>
   );
