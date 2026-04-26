@@ -297,13 +297,13 @@ export function GapAnalysisDashboard({
         Ausgangsbasis für Projektangebote, nicht als Festpreis.
       </p>
       <p className="muted small top-gap">
-        Die Schätzung basiert primär auf dem Status der Compliance-Anforderungen im Bereich
-        Maßnahmen &amp; Bibliothek (offen / in Bearbeitung / erfüllt / nicht zutreffend).
-        Zusätzlich modulieren die Domain-Scores aus der Grundanalyse den Restaufwand:
-        Niedrige Scores erhöhen die PT um bis zu 50 %, hohe Scores entsprechen der
-        Basis-Schätzung. Setzen Sie Anforderungs-Status im Maßnahmen-Bereich, um den
-        Restaufwand strukturell zu senken; verbessern Sie die Grundanalyse-Antworten,
-        um den Domain-Aufschlag zu reduzieren.
+        Die Schätzung basiert auf dem Status der Compliance-Anforderungen. Wenn die
+        Grundanalyse für eine Domäne hohe Reife signalisiert (Domain-Score ≥ 75 %),
+        wird der Status der zugehörigen Anforderungen automatisch auf „erfüllt" gesetzt
+        — das ergibt 10 % Restaufwand für Pflege. Bei Domain-Score 50–74 % gilt
+        „in Bearbeitung" (50 % Restaufwand), unter 50 % gilt „offen" (volle Umsetzung).
+        Im Bereich Maßnahmen &amp; Bibliothek können Sie die Status manuell überschreiben
+        — ein expliziter Eintrag schlägt immer den Vorschlag aus der Grundanalyse.
       </p>
       <p className="muted small top-gap">
         Der Tagessatz für die Euro-Berechnung wird im Bereich
