@@ -274,7 +274,7 @@ export function ReportView({
               <span>KRITIS-Readiness</span>
             </div>
             <div>
-              <strong>{certificationProgress.score}%</strong>
+              <strong>{certificationProgress.dataAvailable ? `${certificationProgress.score}%` : '—'}</strong>
               <span>Readiness-Reife</span>
             </div>
           </div>
@@ -324,7 +324,7 @@ export function ReportView({
           <article className="report-card">
             <h3>Governance & Struktur</h3>
             <div className="mini-list top-gap">
-              <div className="mini-list-row"><span>Governance-Reife</span><strong>{governanceSummary.score}%</strong></div>
+              <div className="mini-list-row"><span>Governance-Reife</span><strong>{governanceSummary.dataAvailable ? `${governanceSummary.score}%` : '—'}</strong></div>
               <div className="mini-list-row"><span>Stakeholder</span><strong>{stakeholders.length}</strong></div>
               <div className="mini-list-row"><span>Standorte</span><strong>{sites.length}</strong></div>
               <div className="mini-list-row"><span>Fällige Reviews</span><strong>{governanceSummary.dueReviews}</strong></div>
@@ -429,7 +429,7 @@ export function ReportView({
           <article className="report-card">
             <h3>Nachweisabdeckung</h3>
             <div className="mini-list top-gap">
-              <div className="mini-list-row"><span>Abdeckung</span><strong>{evidenceSummary.coverage}%</strong></div>
+              <div className="mini-list-row"><span>Abdeckung</span><strong>{evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}%` : '—'}</strong></div>
               <div className="mini-list-row"><span>Freigegeben</span><strong>{evidenceSummary.approved}</strong></div>
               <div className="mini-list-row"><span>In Review</span><strong>{evidenceSummary.review}</strong></div>
               <div className="mini-list-row"><span>Fehlend</span><strong>{evidenceSummary.missing}</strong></div>

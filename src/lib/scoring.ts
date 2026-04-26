@@ -399,6 +399,8 @@ export function getEvidenceSummary(evidenceItems: EvidenceItem[]): EvidenceSumma
   });
 
   const total = evidenceItems.length;
+  // C5.4.5: dataAvailable trennt Greenfield (keine Evidenzen) von
+  // Tenants mit erfassten Items, deren Coverage legitim niedrig ist.
   return {
     total,
     approved,
@@ -406,6 +408,7 @@ export function getEvidenceSummary(evidenceItems: EvidenceItem[]): EvidenceSumma
     draft,
     missing,
     coverage: total ? round((weightedCoverage / total) * 100) : 0,
+    dataAvailable: total > 0,
   };
 }
 
@@ -438,10 +441,20 @@ export function getCertificationProgress(
 
   const score = round(stageCompletion * 0.5 + requirementScore * 0.35 + evidenceCoverage * 0.15);
 
+  // C5.4.5: dataAvailable wahr, sobald irgendeine Stage angefasst wurde
+  // ODER Anforderungs-/Evidenz-Daten vorliegen (über die Sub-Scores).
+  // Greenfield-Tenants haben weder Stages noch Daten → "—" im UI.
+  const anyStageTouched = kritisCertificationStages.some((stage) => {
+    const status = certificationState.stageStates[stage.id]?.status;
+    return status === 'in_progress' || status === 'ready';
+  });
+  const dataAvailable = anyStageTouched || requirementScore > 0 || evidenceCoverage > 0;
+
   return {
     score,
     readyStages,
     stageCompletion,
+    dataAvailable,
   };
 }
 
@@ -566,6 +579,23 @@ export function getGovernanceSummary(
     + reviewCoverage * 0.2,
   );
 
+  // C5.4.5: dataAvailable trennt Greenfield-Tenants ("nichts erfasst")
+  // von Tenants mit erfassten, aber dürftigen Daten ("Score 5 % ist
+  // legitim"). Eine einzige nicht-leere Zeile ODER ein einziges
+  // gefülltes ReviewPlan-Feld zählt schon als "erfasst".
+  const reviewPlanFilled =
+    reviewPlan.executiveSponsor.trim() !== '' ||
+    reviewPlan.approver.trim() !== '' ||
+    reviewPlan.nextInternalAuditDate.trim() !== '' ||
+    reviewPlan.nextManagementReviewDate.trim() !== '' ||
+    reviewPlan.nextExerciseDate.trim() !== '' ||
+    reviewPlan.nextEvidenceReviewDate.trim() !== '';
+  const dataAvailable =
+    stakeholders.length > 0
+    || sites.length > 0
+    || assets.length > 0
+    || reviewPlanFilled;
+
   return {
     score,
     stakeholderCoverage,
@@ -573,6 +603,7 @@ export function getGovernanceSummary(
     assetCoverage,
     reviewCoverage,
     dueReviews,
+    dataAvailable,
   };
 }
 
@@ -647,6 +678,14 @@ export function getResilienceSummary(
     + exerciseScore * 0.2,
   );
 
+  // C5.4.5: dataAvailable, siehe Kommentar in `getGovernanceSummary`.
+  // Auch hier: eine einzige Zeile in einer der vier Listen reicht aus.
+  const dataAvailable =
+    processes.length > 0
+    || dependencies.length > 0
+    || scenarios.length > 0
+    || exercises.length > 0;
+
   return {
     processCoverage: processCompleteness,
     criticalProcesses,
@@ -655,6 +694,7 @@ export function getResilienceSummary(
     untestedScenarios,
     dueExercises,
     score,
+    dataAvailable,
   };
 }
 

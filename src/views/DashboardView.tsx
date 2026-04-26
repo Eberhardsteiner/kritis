@@ -152,15 +152,43 @@ export function DashboardView({
         />
         <StatCard
           title="Governance-Reife"
-          value={`${governanceSummary.score}%`}
-          subtitle={governanceSummary.dueReviews ? `${governanceSummary.dueReviews} Reviewtermine fällig` : 'Reviewkalender gepflegt'}
-          tone={governanceSummary.score >= 75 ? 'good' : governanceSummary.score >= 50 ? 'warn' : 'default'}
+          value={governanceSummary.dataAvailable ? `${governanceSummary.score}%` : '—'}
+          subtitle={
+            !governanceSummary.dataAvailable
+              ? 'Noch keine Stakeholder, Standorte oder Assets erfasst'
+              : governanceSummary.dueReviews
+                ? `${governanceSummary.dueReviews} Reviewtermine fällig`
+                : 'Reviewkalender gepflegt'
+          }
+          tone={
+            !governanceSummary.dataAvailable
+              ? 'default'
+              : governanceSummary.score >= 75
+                ? 'good'
+                : governanceSummary.score >= 50
+                  ? 'warn'
+                  : 'default'
+          }
         />
         <StatCard
           title="Operative Resilienz"
-          value={`${resilienceSummary.score}%`}
-          subtitle={resilienceSummary.highRiskScenarios ? `${resilienceSummary.highRiskScenarios} Hochrisiko-Szenarien` : 'Szenariobild im grünen Bereich'}
-          tone={resilienceSummary.highRiskScenarios ? 'warn' : resilienceSummary.score >= 75 ? 'good' : 'default'}
+          value={resilienceSummary.dataAvailable ? `${resilienceSummary.score}%` : '—'}
+          subtitle={
+            !resilienceSummary.dataAvailable
+              ? 'Noch keine Prozesse, Abhängigkeiten oder Szenarien erfasst'
+              : resilienceSummary.highRiskScenarios
+                ? `${resilienceSummary.highRiskScenarios} Hochrisiko-Szenarien`
+                : 'Szenariobild im grünen Bereich'
+          }
+          tone={
+            !resilienceSummary.dataAvailable
+              ? 'default'
+              : resilienceSummary.highRiskScenarios
+                ? 'warn'
+                : resilienceSummary.score >= 75
+                  ? 'good'
+                  : 'default'
+          }
         />
         <StatCard
           title="Maßnahmen offen"
@@ -170,9 +198,21 @@ export function DashboardView({
         />
         <StatCard
           title="Nachweisabdeckung"
-          value={`${evidenceSummary.coverage}%`}
-          subtitle={`${evidenceSummary.approved} freigegeben`}
-          tone={evidenceSummary.coverage >= 75 ? 'good' : evidenceSummary.coverage >= 50 ? 'warn' : 'default'}
+          value={evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}%` : '—'}
+          subtitle={
+            !evidenceSummary.dataAvailable
+              ? 'Noch keine Evidenzen erfasst'
+              : `${evidenceSummary.approved} freigegeben`
+          }
+          tone={
+            !evidenceSummary.dataAvailable
+              ? 'default'
+              : evidenceSummary.coverage >= 75
+                ? 'good'
+                : evidenceSummary.coverage >= 50
+                  ? 'warn'
+                  : 'default'
+          }
         />
         <StatCard
           title="KRITIS-Readiness"
@@ -263,15 +303,15 @@ export function DashboardView({
           <div className="mini-list">
             <div className="mini-list-row">
               <span>Rollenabdeckung</span>
-              <strong>{governanceSummary.stakeholderCoverage}%</strong>
+              <strong>{governanceSummary.dataAvailable ? `${governanceSummary.stakeholderCoverage}%` : '—'}</strong>
             </div>
             <div className="mini-list-row">
               <span>Strukturabdeckung</span>
-              <strong>{governanceSummary.siteCoverage}%</strong>
+              <strong>{governanceSummary.dataAvailable ? `${governanceSummary.siteCoverage}%` : '—'}</strong>
             </div>
             <div className="mini-list-row">
               <span>Asset-Abdeckung</span>
-              <strong>{governanceSummary.assetCoverage}%</strong>
+              <strong>{governanceSummary.dataAvailable ? `${governanceSummary.assetCoverage}%` : '—'}</strong>
             </div>
           </div>
           <div className="inline-note top-gap">
@@ -286,15 +326,15 @@ export function DashboardView({
           <div className="mini-list">
             <div className="mini-list-row">
               <span>Prozessabdeckung</span>
-              <strong>{resilienceSummary.processCoverage}%</strong>
+              <strong>{resilienceSummary.dataAvailable ? `${resilienceSummary.processCoverage}%` : '—'}</strong>
             </div>
             <div className="mini-list-row">
               <span>Single Points</span>
-              <strong>{resilienceSummary.singlePointsOfFailure}</strong>
+              <strong>{resilienceSummary.dataAvailable ? resilienceSummary.singlePointsOfFailure : '—'}</strong>
             </div>
             <div className="mini-list-row">
               <span>Übungen fällig</span>
-              <strong>{resilienceSummary.dueExercises}</strong>
+              <strong>{resilienceSummary.dataAvailable ? resilienceSummary.dueExercises : '—'}</strong>
             </div>
           </div>
           <div className="inline-note top-gap">
@@ -317,7 +357,7 @@ export function DashboardView({
             </div>
             <div className="mini-list-row">
               <span>Readiness-Reife</span>
-              <strong>{certificationProgress.score}%</strong>
+              <strong>{certificationProgress.dataAvailable ? `${certificationProgress.score}%` : '—'}</strong>
             </div>
           </div>
           <div className="inline-note top-gap">

@@ -1416,6 +1416,12 @@ export interface EvidenceSummary {
   draft: number;
   missing: number;
   coverage: number;
+  /**
+   * `false` wenn keine Evidenzen erfasst sind — UI soll dann „—" /
+   * „noch nicht erfasst" zeigen, statt „0 %" (Pessimismus-Signal beim
+   * Demo-Anfang). Eingeführt in C5.4.5 analog zu Governance/Resilienz.
+   */
+  dataAvailable: boolean;
 }
 
 export interface GovernanceSummary {
@@ -1425,6 +1431,13 @@ export interface GovernanceSummary {
   assetCoverage: number;
   reviewCoverage: number;
   dueReviews: number;
+  /**
+   * `false` wenn weder Stakeholder, Sites, Assets noch ReviewPlan-Felder
+   * erfasst sind — UI soll dann „—" / „noch nicht erfasst" zeigen,
+   * statt „0 %" (Pessimismus-Signal beim Demo-Anfang). Eingeführt in
+   * C5.4.5; siehe `getGovernanceSummary` für die Heuristik.
+   */
+  dataAvailable: boolean;
 }
 
 export interface ResilienceSummary {
@@ -1435,6 +1448,13 @@ export interface ResilienceSummary {
   untestedScenarios: number;
   dueExercises: number;
   score: number;
+  /**
+   * `false` wenn weder Prozesse, Dependencies, Szenarien noch Übungen
+   * erfasst sind — UI soll dann „—" / „noch nicht erfasst" zeigen,
+   * statt „0 %" (Pessimismus-Signal beim Demo-Anfang). Eingeführt in
+   * C5.4.5; siehe `getResilienceSummary` für die Heuristik.
+   */
+  dataAvailable: boolean;
 }
 
 export interface BenchmarkSnapshot {
@@ -1464,6 +1484,12 @@ export interface CertificationProgress {
   score: number;
   readyStages: number;
   stageCompletion: number;
+  /**
+   * `false` wenn weder Stages bearbeitet noch Anforderungs- oder
+   * Evidenz-Datenbasis vorhanden ist — UI soll „—" zeigen statt „0 %".
+   * Eingeführt in C5.4.5.
+   */
+  dataAvailable: boolean;
 }
 
 export interface DocumentLibrarySummary {

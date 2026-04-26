@@ -445,12 +445,12 @@ export function exportManagementReportAsMarkdown(params: {
 - Zielwert: ${benchmark.overallTarget}%
 - Reifegrad: ${scoreSnapshot.maturityLabel}
 - Bearbeitungsgrad: ${scoreSnapshot.completion}%
-- Governance-Reife: ${governanceSummary.score}%
+- Governance-Reife: ${governanceSummary.dataAvailable ? `${governanceSummary.score}%` : 'noch nicht erfasst'}
 - KRITIS-Einordnung: ${applicability.title}
 - KRITIS-Readiness: ${requirementProgress.score}%
 - Audit-Checklist: ${checklistProgress.score}%
 - Feststellungen offen: ${findingSummary.open}
-- Interne Readiness-Reife: ${certificationProgress.score}%
+- Interne Readiness-Reife: ${certificationProgress.dataAvailable ? `${certificationProgress.score}%` : 'noch nicht erfasst'}
 ${documentLibrarySummary ? `- Dokumentenregister: ${documentLibrarySummary.total} Einträge, ${documentLibrarySummary.expired} abgelaufen, ${documentLibrarySummary.missingFolder} ohne Ordner` : ''}
 ${deadlineSummary ? `- Fristen-Cockpit: ${deadlineSummary.overdue} überfällig, ${deadlineSummary.dueSoon} in den nächsten 30 Tagen` : ''}
 
@@ -480,7 +480,7 @@ ${topActions.length
     : '- Noch keine Maßnahmen angelegt.'}
 
 ## Nachweisregister
-- Nachweisabdeckung: ${evidenceSummary.coverage}%
+- Nachweisabdeckung: ${evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}%` : 'noch nicht erfasst'}
 - Freigegeben: ${evidenceSummary.approved}
 - In Review: ${evidenceSummary.review}
 - Entwurf: ${evidenceSummary.draft}
@@ -588,17 +588,17 @@ export function exportFormalAuditReportAsHtml(params: {
     <div class="card"><div class="metric">${scoreSnapshot.overallScore}%</div><div class="muted">Resilienzstatus</div></div>
     <div class="card"><div class="metric">${benchmark.overallTarget}%</div><div class="muted">Zielwert</div></div>
     <div class="card"><div class="metric">${requirementProgress.score}%</div><div class="muted">KRITIS-Readiness</div></div>
-    <div class="card"><div class="metric">${certificationProgress.score}%</div><div class="muted">Readiness-Reife</div></div>
+    <div class="card"><div class="metric">${certificationProgress.dataAvailable ? `${certificationProgress.score}%` : '—'}</div><div class="muted">Readiness-Reife</div></div>
   </section>
 
   <h2>Einordnung</h2>
   <div class="card">
     <div class="row"><strong>KRITIS-Einordnung</strong><span class="tag">${htmlEscape(applicability.title)}</span></div>
     <p class="muted">${htmlEscape(applicability.text)}</p>
-    <div class="row"><span>Governance-Reife</span><strong>${governanceSummary.score}%</strong></div>
+    <div class="row"><span>Governance-Reife</span><strong>${governanceSummary.dataAvailable ? `${governanceSummary.score}%` : '—'}</strong></div>
     <div class="row"><span>Audit-Checklist</span><strong>${checklistProgress.score}%</strong></div>
     <div class="row"><span>Offene Feststellungen</span><strong>${findingSummary.open}</strong></div>
-    <div class="row"><span>Nachweisabdeckung</span><strong>${evidenceSummary.coverage}%</strong></div>
+    <div class="row"><span>Nachweisabdeckung</span><strong>${evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}%` : '—'}</strong></div>
     ${documentLibrarySummary ? `<div class="row"><span>Dokumentenregister</span><strong>${documentLibrarySummary.total} Einträge</strong></div>` : ''}
     ${deadlineSummary ? `<div class="row"><span>Überfällige Fristen</span><strong>${deadlineSummary.overdue}</strong></div>` : ''}
   </div>
@@ -705,14 +705,14 @@ export function exportManagementReportAsPdf(params: {
     { label: 'Resilienz', value: `${scoreSnapshot.overallScore}%` },
     { label: 'Zielwert', value: `${benchmark.overallTarget}%` },
     { label: 'KRITIS-Readiness', value: `${requirementProgress.score}%` },
-    { label: 'Readiness-Reife', value: `${certificationProgress.score}%` },
+    { label: 'Readiness-Reife', value: certificationProgress.dataAvailable ? `${certificationProgress.score}%` : '—' },
   ]);
 
   doc.addSection('Einordnung');
   doc.addMiniTable([
     ['Bewertung', applicability.title],
-    ['Governance-Reife', `${governanceSummary.score}%`],
-    ['Nachweisabdeckung', `${evidenceSummary.coverage}%`],
+    ['Governance-Reife', governanceSummary.dataAvailable ? `${governanceSummary.score}%` : '—'],
+    ['Nachweisabdeckung', evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}%` : '—'],
     ['Dokumentenregister', `${documentLibrarySummary.total} Einträge`],
     ['Überfällige Fristen', deadlineSummary.overdue],
     ['Fristen in 30 Tagen', deadlineSummary.dueSoon],

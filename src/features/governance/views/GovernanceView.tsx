@@ -84,7 +84,7 @@ export function GovernanceView({
           <span>{stakeholders.length} Stakeholder</span>
           <span>{sites.length} Standorte</span>
           <span>{assets.length} kritische Assets/Services</span>
-          <span>{governanceSummary.score}% Governance-Reife</span>
+          <span>{governanceSummary.dataAvailable ? `${governanceSummary.score}% Governance-Reife` : 'Governance-Reife: noch nicht erfasst'}</span>
           <span>{benchmark.overallTarget}% Zielkorridor</span>
         </div>
       </section>
@@ -181,7 +181,7 @@ export function GovernanceView({
             </div>
             <div className="mini-list-row">
               <span>Governance-Reife</span>
-              <strong>{governanceSummary.score}%</strong>
+              <strong>{governanceSummary.dataAvailable ? `${governanceSummary.score}%` : '—'}</strong>
             </div>
           </div>
 

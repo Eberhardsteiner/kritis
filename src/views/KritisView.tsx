@@ -631,8 +631,16 @@ export function KritisView({
             <h3>Steuerung der Freigabestrecke</h3>
           </div>
           <div className="chip-row">
-            <span className={`chip ${certificationProgress.score >= 75 ? 'success' : certificationProgress.score >= 50 ? 'warn' : 'danger'}`}>
-              Reife {certificationProgress.score}%
+            <span className={`chip ${
+              !certificationProgress.dataAvailable
+                ? 'outline'
+                : certificationProgress.score >= 75
+                  ? 'success'
+                  : certificationProgress.score >= 50
+                    ? 'warn'
+                    : 'danger'
+            }`}>
+              {certificationProgress.dataAvailable ? `Reife ${certificationProgress.score}%` : 'Reife: noch nicht erfasst'}
             </span>
             <span className="chip outline">{certificationProgress.readyStages}/6 Stufen abgeschlossen</span>
           </div>
