@@ -41,6 +41,7 @@ import {
   normalizeRegulatoryProfile,
 } from '../lib/regulatory';
 import { deriveOpenViolations, estimatePenalty } from '../lib/penaltyCalculator';
+import { buildEffectiveRequirementStates } from '../lib/requirementStatusResolver';
 import { resolveAuthorities } from '../lib/authorities';
 import { enrichRequirementsWithMappings } from '../lib/standardMappings';
 import { computeGapAnalysis } from '../features/gap';
@@ -140,17 +141,6 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     () => filterActiveChecklist(auditChecklist, regulatoryProfile),
     [auditChecklist, regulatoryProfile],
   );
-  const regimeSummaries = useMemo<RegulatoryRegimeSummary[]>(
-    () => buildRegimeSummaries({
-      requirements,
-      requirementStates: state.requirementStates,
-      checklist: auditChecklist,
-      checklistStates: state.auditChecklistStates,
-      regulatoryProfile,
-    }),
-    [requirements, state.requirementStates, auditChecklist, state.auditChecklistStates, regulatoryProfile],
-  );
-
   const scoreSnapshot = useMemo(
     () => computeScoreSnapshot(questions, state.answers, currentModule),
     [questions, state.answers, currentModule],
@@ -221,9 +211,37 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     () => applyOverridesToRequirementStates(activeRequirements, state.requirementStates, regulatoryProfile),
     [activeRequirements, state.requirementStates, regulatoryProfile],
   );
+  // Drop-in-Replacement für `effectiveRequirementStates`. Reichert die
+  // Map mit Status-Vorschlägen aus der Grundanalyse an, sofern für eine
+  // Anforderung kein expliziter Eintrag existiert. Alle nachgelagerten
+  // Berechnungen (Reifegrad, Penalty, Gap-Analyse, Reports, PDF-/MD-
+  // Exports) MÜSSEN diese Map verwenden — sonst entsteht die in C5.4.3
+  // beobachtete Inkonsistenz "Dashboard 35 % vs. Gap 3,4 PT".
+  const resolvedRequirementStates = useMemo(
+    () => buildEffectiveRequirementStates({
+      requirements: activeRequirements,
+      requirementStates: effectiveRequirementStates,
+      domainScores: scoreSnapshot.domainScores,
+    }),
+    [activeRequirements, effectiveRequirementStates, scoreSnapshot.domainScores],
+  );
   const requirementProgress = useMemo(
-    () => getRequirementProgress(activeRequirements, effectiveRequirementStates),
-    [activeRequirements, effectiveRequirementStates],
+    () => getRequirementProgress(activeRequirements, resolvedRequirementStates),
+    [activeRequirements, resolvedRequirementStates],
+  );
+  const regimeSummaries = useMemo<RegulatoryRegimeSummary[]>(
+    // Pre-C5.4.3: lief auf `state.requirementStates` (RAW). Damit fehlten
+    // sowohl die `applyOverridesToRequirementStates`-Korrekturen für
+    // not_applicable als auch die Status-Vorschläge aus der Grundanalyse.
+    // Ergebnis: Regime-Reife im Footer/Topbar wich vom Dashboard ab.
+    () => buildRegimeSummaries({
+      requirements,
+      requirementStates: resolvedRequirementStates,
+      checklist: auditChecklist,
+      checklistStates: state.auditChecklistStates,
+      regulatoryProfile,
+    }),
+    [requirements, resolvedRequirementStates, auditChecklist, state.auditChecklistStates, regulatoryProfile],
   );
   const kritisApplicability = useMemo(
     () => assessKritisApplicability(state.companyProfile, currentModule, regulatoryProfile.jurisdiction),
@@ -278,27 +296,28 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     [regulatoryProfile.kritisRegistrationDate, state.complianceCalendar.registrationDate],
   );
   const kritisOpenViolations = useMemo(
-    () => deriveOpenViolations({ requirementStates: effectiveRequirementStates, regulatoryProfile }),
-    [effectiveRequirementStates, regulatoryProfile],
+    () => deriveOpenViolations({ requirementStates: resolvedRequirementStates, regulatoryProfile }),
+    [resolvedRequirementStates, regulatoryProfile],
   );
   const kritisPenaltyEstimate = useMemo(
     () => estimatePenalty(kritisOpenViolations),
     [kritisOpenViolations],
   );
   const gapAnalysisSummary = useMemo(
+    // Status ist bereits in `resolvedRequirementStates` aufgelöst —
+    // `domainScores` werden hier NICHT mehr durchgereicht, sonst würde
+    // computeGapAnalysis die Auflösung doppelt anwenden.
     () => computeGapAnalysis({
       requirements: activeRequirements,
-      requirementStates: effectiveRequirementStates,
+      requirementStates: resolvedRequirementStates,
       evidenceItems: currentEvidenceItems,
       regimeDefinitions,
-      domainScores: scoreSnapshot.domainScores,
     }),
     [
       activeRequirements,
-      effectiveRequirementStates,
+      resolvedRequirementStates,
       currentEvidenceItems,
       regimeDefinitions,
-      scoreSnapshot.domainScores,
     ],
   );
   const effectiveKritisSector = useMemo(() => {
@@ -387,6 +406,7 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
     requirementProgress,
     requirementOverrides,
     effectiveRequirementStates,
+    resolvedRequirementStates,
     kritisApplicability,
     kritisMilestones,
     kritisOpenViolations,
