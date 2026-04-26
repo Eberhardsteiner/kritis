@@ -9,6 +9,7 @@ import type {
   RegulatoryRegimeDefinition,
   RequirementDefinition,
   RequirementStatus,
+  ResolvedActivityHours,
 } from '../../types';
 
 type RequirementEffortSize = 'small' | 'medium' | 'large';
@@ -234,6 +235,55 @@ function buildEstimate(params: {
       assumptions.push(breakdown.sourceNote);
     }
 
+    // C5.4.4: Pro Tätigkeit Brutto + Netto/Restaufwand. Brutto-Stunden
+    // bleiben unverändert (Beratungs-Aufwand-Begründung), Effective-
+    // Stunden werden mit dem gleichen Gap-Faktor wie der Header
+    // skaliert. Damit summiert sich die Effective-Spalte auf
+    // `minPersonDays * 8` bzw. `maxPersonDays * 8` — mathematisch
+    // konsistent mit dem Anforderungs-Header.
+    const isZeroBranch = currentStatus === 'not_applicable' || baseGap === 0;
+    const resolvedActivities: ResolvedActivityHours[] = breakdown.activities.map((activity) => ({
+      label: activity.label,
+      minHoursRaw: activity.minHours,
+      maxHoursRaw: activity.maxHours,
+      minHoursEffective: isZeroBranch ? 0 : Number((activity.minHours * gap).toFixed(2)),
+      maxHoursEffective: isZeroBranch ? 0 : Number((activity.maxHours * gap).toFixed(2)),
+      note: activity.note,
+    }));
+
+    // Plausibilitäts-Sanity-Check: Summe der Effective-Stunden muss
+    // mit `minPersonDays * 8` / `maxPersonDays * 8` übereinstimmen
+    // (Toleranz 0.1h). Schützt vor Drift bei zukünftigen Änderungen
+    // an `gap` oder Bandbreiten-Berechnung. Im Production-Build wird
+    // der Block durch Vite-Define entfernt — `__DEV__` ist hier ein
+    // Type-Cast, weil tsc `import.meta.env` nicht ohne `vite/client`
+    // kennt; zur Laufzeit liefert Vite die Variable wie üblich.
+    const __DEV__ = (import.meta as { env?: { DEV?: boolean } }).env?.DEV ?? false;
+    if (__DEV__) {
+      const sumMinHoursEff = resolvedActivities.reduce(
+        (sum, activity) => sum + activity.minHoursEffective,
+        0,
+      );
+      const sumMaxHoursEff = resolvedActivities.reduce(
+        (sum, activity) => sum + activity.maxHoursEffective,
+        0,
+      );
+      const expectedMinHoursEff = minPersonDays * 8;
+      const expectedMaxHoursEff = maxPersonDays * 8;
+      if (Math.abs(sumMinHoursEff - expectedMinHoursEff) > 0.1) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[gapAnalysis] resolvedActivities min-Summe (${sumMinHoursEff} h) ≠ minPersonDays*8 (${expectedMinHoursEff} h) für ${requirement.id}`,
+        );
+      }
+      if (Math.abs(sumMaxHoursEff - expectedMaxHoursEff) > 0.1) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[gapAnalysis] resolvedActivities max-Summe (${sumMaxHoursEff} h) ≠ maxPersonDays*8 (${expectedMaxHoursEff} h) für ${requirement.id}`,
+        );
+      }
+    }
+
     return {
       personDays,
       minPersonDays,
@@ -241,6 +291,7 @@ function buildEstimate(params: {
       confidence: pickConfidence({ primaryMappings, evidenceCount, currentStatus }),
       assumptions,
       activities: breakdown.activities,
+      resolvedActivities,
       drivers: breakdown.drivers,
       source: 'breakdown',
     };

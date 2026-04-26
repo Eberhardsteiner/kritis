@@ -164,31 +164,60 @@ function buildRegimeTable(
 }
 
 /**
- * Tätigkeits-Tabelle pro Anforderung mit effortBreakdown. Spalten:
- * Tätigkeit | Min-h | Max-h | (Min-€ | Max-€ wenn Tagessatz gesetzt).
+ * Tätigkeits-Tabelle pro Anforderung mit effortBreakdown. C5.4.4:
+ * Brutto-Aufwand und Restaufwand stehen jetzt nebeneinander, weil sie
+ * zwei legitime Fragen beantworten:
+ *  - Brutto = vollständige Durchführung (Beratungs-Aufwand-Begründung,
+ *    status-unabhängig).
+ *  - Restaufwand = status-skaliert; deren Summe stimmt mit dem
+ *    Anforderungs-Header überein.
+ *
+ * Spalten:
+ *  - Mit Tagessatz (5):  Tätigkeit | Brutto-h | Brutto-€ | Rest-h | Rest-€
+ *  - Ohne Tagessatz (3): Tätigkeit | Brutto-h | Rest-h
+ *
+ * Min/Max-Bandbreite wird als "min – max" innerhalb einer Zelle
+ * formatiert, damit die Spaltenanzahl nicht explodiert.
  */
 function buildActivityTable(
   entry: GapAnalysisEntry,
   rate: ConsultingRateSettings | null | undefined,
 ): Table {
-  const headerCells = [tableCell('Tätigkeit', true), tableCell('Min-h', true), tableCell('Max-h', true)];
-  if (rate && rate.ratePerPersonDay > 0) {
-    headerCells.push(tableCell(`Min-${CURRENCY_LABELS[rate.currency]}`, true));
-    headerCells.push(tableCell(`Max-${CURRENCY_LABELS[rate.currency]}`, true));
+  const hasRate = !!rate && rate.ratePerPersonDay > 0;
+  const headerCells = [
+    tableCell('Tätigkeit', true),
+    tableCell('Brutto-h (min – max)', true),
+  ];
+  if (hasRate && rate) {
+    headerCells.push(tableCell(`Brutto-${CURRENCY_LABELS[rate.currency]} (min – max)`, true));
+  }
+  headerCells.push(tableCell('Rest-h (min – max)', true));
+  if (hasRate && rate) {
+    headerCells.push(tableCell(`Rest-${CURRENCY_LABELS[rate.currency]} (min – max)`, true));
   }
   const header = new TableRow({ tableHeader: true, children: headerCells });
-  const activities = entry.effortEstimate.activities ?? [];
-  const rows = activities.map((activity) => {
+  const resolvedActivities = entry.effortEstimate.resolvedActivities ?? [];
+  const rows = resolvedActivities.map((activity) => {
     const cells = [
       tableCell(activity.note ? `${activity.label} — ${activity.note}` : activity.label),
-      tableCell(`${activity.minHours}`),
-      tableCell(`${activity.maxHours}`),
+      tableCell(`${activity.minHoursRaw} – ${activity.maxHoursRaw}`),
     ];
-    if (rate && rate.ratePerPersonDay > 0) {
-      const minEuro = (activity.minHours / 8) * rate.ratePerPersonDay;
-      const maxEuro = (activity.maxHours / 8) * rate.ratePerPersonDay;
-      cells.push(tableCell(formatEuro(minEuro, rate.currency)));
-      cells.push(tableCell(formatEuro(maxEuro, rate.currency)));
+    if (hasRate && rate) {
+      const minRawEuro = (activity.minHoursRaw / 8) * rate.ratePerPersonDay;
+      const maxRawEuro = (activity.maxHoursRaw / 8) * rate.ratePerPersonDay;
+      cells.push(
+        tableCell(`${formatEuro(minRawEuro, rate.currency)} – ${formatEuro(maxRawEuro, rate.currency)}`),
+      );
+    }
+    cells.push(
+      tableCell(`${activity.minHoursEffective} – ${activity.maxHoursEffective}`),
+    );
+    if (hasRate && rate) {
+      const minEffEuro = (activity.minHoursEffective / 8) * rate.ratePerPersonDay;
+      const maxEffEuro = (activity.maxHoursEffective / 8) * rate.ratePerPersonDay;
+      cells.push(
+        tableCell(`${formatEuro(minEffEuro, rate.currency)} – ${formatEuro(maxEffEuro, rate.currency)}`),
+      );
     }
     return new TableRow({ children: cells });
   });
@@ -196,6 +225,27 @@ function buildActivityTable(
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [header, ...rows],
   });
+}
+
+/**
+ * Erläuterungs-Zeile unterhalb der Tätigkeits-Tabelle. Beantwortet die
+ * Kunden-Frage "warum sind die zwei Spalten unterschiedlich groß?" und
+ * benennt den konkreten Skalierungs-Faktor je nach Status.
+ */
+function buildActivityTableLegend(entry: GapAnalysisEntry): Paragraph {
+  const restLabel =
+    entry.currentStatus === 'ready'
+      ? '10 % (nur Pflege)'
+      : entry.currentStatus === 'in_progress'
+        ? '50 % (in Bearbeitung)'
+        : entry.currentStatus === 'not_applicable'
+          ? '0 % (nicht anwendbar)'
+          : '100 % (volle Umsetzung)';
+  return bodyParagraph(
+    `Brutto-Aufwand: vollständige Durchführung der Tätigkeit (status-unabhängig). `
+      + `Restaufwand: skaliert auf aktuellen Status — ${restLabel} des Brutto-Aufwands. `
+      + `Die Summe der Restaufwand-Spalte stimmt mit dem Anforderungs-Aufwand-Header überein.`,
+  );
 }
 
 function buildRequirementBreakdownBlocks(
@@ -230,9 +280,10 @@ function buildRequirementBreakdownBlocks(
           getConfidenceLabel(entry.effortEstimate.confidence),
         ),
       );
-      const activities = entry.effortEstimate.activities ?? [];
-      if (activities.length > 0) {
+      const resolvedActivities = entry.effortEstimate.resolvedActivities ?? [];
+      if (resolvedActivities.length > 0) {
         blocks.push(buildActivityTable(entry, rate));
+        blocks.push(buildActivityTableLegend(entry));
       }
       const drivers = entry.effortEstimate.drivers ?? [];
       if (drivers.length > 0) {

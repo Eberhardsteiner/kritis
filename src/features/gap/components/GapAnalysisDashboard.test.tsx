@@ -115,3 +115,95 @@ describe('GapAnalysisDashboard', () => {
     expect(screen.queryByRole('button', { name: /Angebotsgrundlage/ })).toBeNull();
   });
 });
+
+describe('GapAnalysisDashboard · Aktivitäts-Tabelle Brutto/Rest (C5.4.4)', () => {
+  // Eigenes Fixture mit `breakdown`-Source und `resolvedActivities`,
+  // damit die Tabellen-Spalten gerendert werden. Status `ready`,
+  // damit Brutto und Effective sich um Faktor 10 unterscheiden —
+  // Dr. Steiners Original-Bug.
+  const breakdownRequirementFixture: RequirementDefinition[] = [
+    {
+      id: 'req-laenderoeffnung',
+      title: 'Länderöffnungsklausel geprüft',
+      description: '',
+      guidance: '',
+      lawRef: '§ 14 KRITISDachG',
+      category: 'governance',
+      regimeId: 'de_kritisdachg',
+    },
+  ];
+
+  const breakdownSummaryFixture: GapAnalysisSummary = {
+    totalPersonDays: 0.2,
+    minPersonDays: 0.15,
+    maxPersonDays: 0.25,
+    calendarWeeks: 1,
+    entryCount: 1,
+    byRegime: [
+      {
+        regimeId: 'de_kritisdachg',
+        regimeLabel: 'KRITIS-DachG',
+        totalPersonDays: 0.2,
+        minPersonDays: 0.15,
+        maxPersonDays: 0.25,
+        byCategory: { governance: 0.2 },
+        entries: [
+          {
+            requirementId: 'req-laenderoeffnung',
+            regimeId: 'de_kritisdachg',
+            category: 'governance',
+            currentStatus: 'ready',
+            targetStatus: 'ready',
+            effortEstimate: {
+              personDays: 0.2,
+              minPersonDays: 0.15,
+              maxPersonDays: 0.25,
+              confidence: 'high',
+              assumptions: ['Breakdown 1.5 – 2.5 PT'],
+              source: 'breakdown',
+              activities: [
+                { label: 'Recherche', minHours: 4, maxHours: 6 },
+                { label: 'Bewertung', minHours: 4, maxHours: 6 },
+                { label: 'Stakeholder-Abstimmung', minHours: 2, maxHours: 4 },
+                { label: 'Dokumentation', minHours: 2, maxHours: 4 },
+              ],
+              resolvedActivities: [
+                { label: 'Recherche', minHoursRaw: 4, maxHoursRaw: 6, minHoursEffective: 0.4, maxHoursEffective: 0.6 },
+                { label: 'Bewertung', minHoursRaw: 4, maxHoursRaw: 6, minHoursEffective: 0.4, maxHoursEffective: 0.6 },
+                { label: 'Stakeholder-Abstimmung', minHoursRaw: 2, maxHoursRaw: 4, minHoursEffective: 0.2, maxHoursEffective: 0.4 },
+                { label: 'Dokumentation', minHoursRaw: 2, maxHoursRaw: 4, minHoursEffective: 0.2, maxHoursEffective: 0.4 },
+              ],
+              drivers: ['Anzahl Bundesländer'],
+            },
+            dependencies: [],
+          },
+        ],
+      },
+    ],
+  };
+
+  it('zeigt zwei Spalten-Gruppen "Brutto-Aufwand" und "Restaufwand bei aktuellem Status"', () => {
+    render(<GapAnalysisDashboard summary={breakdownSummaryFixture} requirements={breakdownRequirementFixture} />);
+    fireEvent.click(screen.getByRole('button', { name: /Länderöffnungsklausel/ }));
+    expect(screen.getByText('Brutto-Aufwand')).toBeInTheDocument();
+    expect(screen.getByText('Restaufwand bei aktuellem Status')).toBeInTheDocument();
+  });
+
+  it('rendert sowohl Brutto- als auch Effective-Stunden in der Tabelle', () => {
+    render(<GapAnalysisDashboard summary={breakdownSummaryFixture} requirements={breakdownRequirementFixture} />);
+    fireEvent.click(screen.getByRole('button', { name: /Länderöffnungsklausel/ }));
+    // Brutto: zwei Aktivitäten mit 4 – 6 h, zwei mit 2 – 4 h.
+    expect(screen.getAllByText(/4 – 6 h/)).toHaveLength(2);
+    expect(screen.getAllByText(/2 – 4 h/)).toHaveLength(2);
+    // Effective bei Status ready: 10 % davon, also 0,4 – 0,6 h und 0,2 – 0,4 h.
+    expect(screen.getAllByText(/0,4 – 0,6 h/)).toHaveLength(2);
+    expect(screen.getAllByText(/0,2 – 0,4 h/)).toHaveLength(2);
+  });
+
+  it('zeigt status-spezifischen Restaufwand-Hinweis (10 % Pflege-Aufwand bei Status ready)', () => {
+    render(<GapAnalysisDashboard summary={breakdownSummaryFixture} requirements={breakdownRequirementFixture} />);
+    fireEvent.click(screen.getByRole('button', { name: /Länderöffnungsklausel/ }));
+    expect(screen.getByText(/10 % Pflege-Aufwand/)).toBeInTheDocument();
+    expect(screen.getByText(/Summe der Restaufwand-Spalte stimmt mit dem Anforderungs-Header überein/)).toBeInTheDocument();
+  });
+});

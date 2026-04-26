@@ -103,9 +103,20 @@ function GapEntryDetail({
           consultingRate.currency,
         )
       : null;
-  const activities = entry.effortEstimate.activities ?? [];
+  const resolvedActivities = entry.effortEstimate.resolvedActivities ?? [];
   const drivers = entry.effortEstimate.drivers ?? [];
   const isBreakdown = entry.effortEstimate.source === 'breakdown';
+  const hasRate = !!consultingRate && consultingRate.ratePerPersonDay > 0;
+  // Restaufwand-Beschriftung passend zum Status — wird im Untertext der
+  // Tabelle als kurze Erläuterung referenziert.
+  const restAufwandHint =
+    entry.currentStatus === 'ready'
+      ? '10 % Pflege-Aufwand'
+      : entry.currentStatus === 'in_progress'
+        ? '50 % Restaufwand'
+        : entry.currentStatus === 'not_applicable'
+          ? '0 % (nicht anwendbar)'
+          : '100 % volle Umsetzung';
 
   return (
     <article className="priority-item compact-item">
@@ -124,40 +135,64 @@ function GapEntryDetail({
         </p>
         {open ? (
           <div className="top-gap">
-            {isBreakdown && activities.length > 0 ? (
-              <table className="effort-activity-table">
-                <thead>
-                  <tr>
-                    <th>Tätigkeit</th>
-                    <th>Stunden</th>
-                    {consultingRate ? <th>{CURRENCY_LABELS[consultingRate.currency]}</th> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activities.map((activity) => {
-                    const minHoursPt = activity.minHours / 8;
-                    const maxHoursPt = activity.maxHours / 8;
-                    const euroCell =
-                      consultingRate && consultingRate.ratePerPersonDay > 0
-                        ? formatEuroRange(
-                            minHoursPt * consultingRate.ratePerPersonDay,
-                            maxHoursPt * consultingRate.ratePerPersonDay,
-                            consultingRate.currency,
-                          )
-                        : '';
-                    return (
-                      <tr key={activity.label}>
-                        <td>
-                          {activity.label}
-                          {activity.note ? <span className="muted small block-note"> · {activity.note}</span> : null}
-                        </td>
-                        <td>{formatHoursRange(activity.minHours, activity.maxHours)}</td>
-                        {consultingRate ? <td>{euroCell}</td> : null}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {isBreakdown && resolvedActivities.length > 0 ? (
+              <>
+                <table className="effort-activity-table">
+                  <thead>
+                    <tr>
+                      <th rowSpan={2}>Tätigkeit</th>
+                      <th colSpan={hasRate ? 2 : 1}>Brutto-Aufwand</th>
+                      <th colSpan={hasRate ? 2 : 1}>Restaufwand bei aktuellem Status</th>
+                    </tr>
+                    <tr>
+                      <th>Stunden</th>
+                      {hasRate && consultingRate ? <th>{CURRENCY_LABELS[consultingRate.currency]}</th> : null}
+                      <th>Stunden</th>
+                      {hasRate && consultingRate ? <th>{CURRENCY_LABELS[consultingRate.currency]}</th> : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resolvedActivities.map((activity) => {
+                      const rawEuroCell =
+                        hasRate && consultingRate
+                          ? formatEuroRange(
+                              (activity.minHoursRaw / 8) * consultingRate.ratePerPersonDay,
+                              (activity.maxHoursRaw / 8) * consultingRate.ratePerPersonDay,
+                              consultingRate.currency,
+                            )
+                          : '';
+                      const effEuroCell =
+                        hasRate && consultingRate
+                          ? formatEuroRange(
+                              (activity.minHoursEffective / 8) * consultingRate.ratePerPersonDay,
+                              (activity.maxHoursEffective / 8) * consultingRate.ratePerPersonDay,
+                              consultingRate.currency,
+                            )
+                          : '';
+                      return (
+                        <tr key={activity.label}>
+                          <td>
+                            {activity.label}
+                            {activity.note ? <span className="muted small block-note"> · {activity.note}</span> : null}
+                          </td>
+                          <td>{formatHoursRange(activity.minHoursRaw, activity.maxHoursRaw)}</td>
+                          {hasRate ? <td>{rawEuroCell}</td> : null}
+                          <td>{formatHoursRange(activity.minHoursEffective, activity.maxHoursEffective)}</td>
+                          {hasRate ? <td>{effEuroCell}</td> : null}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <p className="muted small top-gap">
+                  <strong>Brutto-Aufwand:</strong> Stunden für die vollständige Durchführung der Tätigkeit
+                  (status-unabhängig, dient als Beratungs-Aufwand-Begründung).
+                  {' '}
+                  <strong>Restaufwand:</strong> tatsächlich nötige Zeit auf Basis des aktuellen Status der
+                  Anforderung — {restAufwandHint}. Die Summe der Restaufwand-Spalte stimmt mit dem
+                  Anforderungs-Header überein.
+                </p>
+              </>
             ) : null}
             {drivers.length > 0 ? (
               <p className="muted small top-gap">

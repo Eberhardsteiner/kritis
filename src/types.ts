@@ -109,6 +109,29 @@ export interface RequirementEffortBreakdown {
   sourceNote?: string;
 }
 
+/**
+ * Aufgelöste Tätigkeits-Stunden pro Aktivität — Brutto + status-skaliert
+ * (Netto/Restaufwand). In C5.4.4 eingeführt, weil die Aktivitäts-Tabelle
+ * vorher nur Brutto-Stunden zeigte, der Anforderungs-Header aber bereits
+ * status-skalierte PT — Faktor 10 Diskrepanz bei Status `ready`.
+ *
+ *  - `*HoursRaw`        = Brutto: Stunden für die vollständige
+ *                          Durchführung der Tätigkeit (Beratungs-Aufwand-
+ *                          Begründung, status-unabhängig).
+ *  - `*HoursEffective`  = Restaufwand: status-skalierte Stunden, deren
+ *                          Summe pro Anforderung mit dem Header über-
+ *                          einstimmen MUSS (Sanity-Check in
+ *                          `buildEstimate`).
+ */
+export interface ResolvedActivityHours {
+  label: string;
+  minHoursRaw: number;
+  maxHoursRaw: number;
+  minHoursEffective: number;
+  maxHoursEffective: number;
+  note?: string;
+}
+
 export interface EffortEstimate {
   personDays: number;
   /**
@@ -122,6 +145,12 @@ export interface EffortEstimate {
   confidence: EffortConfidence;
   assumptions: string[];
   activities?: RequirementEffortActivity[];
+  /**
+   * Pro Tätigkeit Brutto + Netto/Restaufwand. Drop-in für Tabellen,
+   * deren Summe mit dem Anforderungs-Header übereinstimmen soll.
+   * Nur bei `source: 'breakdown'` befüllt.
+   */
+  resolvedActivities?: ResolvedActivityHours[];
   drivers?: string[];
   /**
    * Quelle der PT-Schätzung. 'breakdown' = aus expliziten Tätigkeiten,
