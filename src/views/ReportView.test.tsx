@@ -177,6 +177,8 @@ function buildRequiredProps(overrides: Partial<{
     minPersonDays: 6,
     maxPersonDays: 10,
     calendarWeeks: 2,
+    minCalendarWeeks: 1.2,
+    maxCalendarWeeks: 2,
     entryCount: 2,
     byRegime: [
       {
@@ -276,7 +278,9 @@ describe('ReportView · PT-Bandbreite (C5.4.6 Bug 3)', () => {
     const paragraph = labelNode.closest('p');
     expect(paragraph).not.toBeNull();
     expect(paragraph!.textContent).toMatch(/6 – 10 PT/);
-    expect(paragraph!.textContent).toMatch(/\(Mittelwert\)/);
+    // C5.4.7: Kalenderwochen jetzt als Bandbreite — bei min=1.2, max=2.0
+    // entsteht „1,2 – 2 Kalenderwochen" (über die Toleranz von 0,1).
+    expect(paragraph!.textContent).toMatch(/1,2 – 2 Kalenderwochen/);
   });
 
   it('zeigt eine einzelne PT-Zahl, wenn min == max (kein Bandbreiten-Strich)', () => {
@@ -285,6 +289,8 @@ describe('ReportView · PT-Bandbreite (C5.4.6 Bug 3)', () => {
       minPersonDays: 5,
       maxPersonDays: 5,
       calendarWeeks: 1,
+      minCalendarWeeks: 1,
+      maxCalendarWeeks: 1,
       entryCount: 1,
       byRegime: [
         {

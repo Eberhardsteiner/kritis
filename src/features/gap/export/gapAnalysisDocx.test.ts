@@ -33,6 +33,8 @@ const summary: GapAnalysisSummary = {
   minPersonDays: 12.5,
   maxPersonDays: 12.5,
   calendarWeeks: 3,
+  minCalendarWeeks: 2.5,
+  maxCalendarWeeks: 2.5,
   entryCount: 1,
   byRegime: [
     {
@@ -94,6 +96,8 @@ describe('buildGapAnalysisDocument', () => {
       minPersonDays: 0,
       maxPersonDays: 0,
       calendarWeeks: 0,
+      minCalendarWeeks: 0,
+      maxCalendarWeeks: 0,
       entryCount: 0,
       byRegime: [],
     };
@@ -125,6 +129,8 @@ describe('buildGapAnalysisDocument · Tätigkeits-Tabelle Brutto/Rest (C5.4.4)',
     minPersonDays: 0.15,
     maxPersonDays: 0.25,
     calendarWeeks: 1,
+    minCalendarWeeks: 0.1,
+    maxCalendarWeeks: 0.1,
     entryCount: 1,
     byRegime: [
       {

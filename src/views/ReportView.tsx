@@ -30,7 +30,7 @@ import { getBsigEntityClassLabel, getEntityClassFieldLabel, getJurisdictionLabel
 import type { KritisMilestones } from '../lib/regulatory';
 import type { PenaltyEstimate } from '../lib/penaltyCalculator';
 import { SHOW_PENALTY_EXPOSURE } from '../lib/featureFlags';
-import { formatPersonDaysRange } from '../features/gap/utils/formatters';
+import { formatCalendarWeeksRange, formatPersonDaysRange } from '../features/gap/utils/formatters';
 
 interface ReportViewProps {
   companyProfile: CompanyProfile;
@@ -508,7 +508,7 @@ export function ReportView({
               <strong>Geschätzter Restaufwand:</strong>{' '}
               {formatPersonDaysRange(gapAnalysisSummary.minPersonDays, gapAnalysisSummary.maxPersonDays)}
               {gapAnalysisSummary.totalPersonDays > 0
-                ? ` · ≈ ${gapAnalysisSummary.calendarWeeks} Kalenderwoche${gapAnalysisSummary.calendarWeeks === 1 ? '' : 'n'} (Mittelwert)`
+                ? ` · ≈ ${formatCalendarWeeksRange(gapAnalysisSummary.minCalendarWeeks, gapAnalysisSummary.maxCalendarWeeks)}`
                 : ''}
             </p>
             {gapAnalysisSummary.byRegime.length > 0 ? (

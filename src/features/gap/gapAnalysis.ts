@@ -462,11 +462,21 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
     byRegime.reduce((sum, regime) => sum + regime.maxPersonDays, 0).toFixed(2),
   );
 
+  // C5.4.7 Bug 6: Kalenderwochen aus dem Mittelwert ist zu unscharf —
+  // bei 3,4 – 6 PT Bandbreite hieß es vorher „≈ 1 Kalenderwoche", die
+  // Realität ist 0,7 – 1,2 Wochen. Wir liefern jetzt zusätzlich
+  // min/max-CalendarWeeks mit einer Nachkommastelle, damit UI und
+  // DOCX-Export eine ehrliche Bandbreite anzeigen können.
+  const calendarWeeksFromPt = (pt: number): number =>
+    pt > 0 ? Math.ceil((pt / 5) * 10) / 10 : 0;
+
   return {
     totalPersonDays,
     minPersonDays,
     maxPersonDays,
     calendarWeeks: Math.ceil(totalPersonDays / 5),
+    minCalendarWeeks: calendarWeeksFromPt(minPersonDays),
+    maxCalendarWeeks: calendarWeeksFromPt(maxPersonDays),
     entryCount: entries.length,
     byRegime,
   };

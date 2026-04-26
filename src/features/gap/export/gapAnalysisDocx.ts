@@ -13,6 +13,7 @@ import {
 import { getConfidenceLabel } from '../gapAnalysis';
 import {
   CURRENCY_LABELS,
+  formatCalendarWeeksRange,
   formatEuro,
   formatEuroRange,
   formatPersonDays,
@@ -385,7 +386,7 @@ export function buildGapAnalysisDocument(input: GapAnalysisDocxInput): Document 
     ...(hasRate ? [labelValueParagraph(`Restaufwand gesamt (${CURRENCY_LABELS[consultingRate!.currency]}-Bandbreite)`, totalEuroLabel)] : []),
     labelValueParagraph(
       'Mittelwert',
-      `${formatPersonDays(gapAnalysisSummary.totalPersonDays)} (Kalenderwochen: ${gapAnalysisSummary.totalPersonDays > 0 ? `${gapAnalysisSummary.calendarWeeks}, ein Consultant in Vollauslastung` : '0'})`,
+      `${formatPersonDays(gapAnalysisSummary.totalPersonDays)} (Kalenderwochen: ${gapAnalysisSummary.totalPersonDays > 0 ? `${formatCalendarWeeksRange(gapAnalysisSummary.minCalendarWeeks, gapAnalysisSummary.maxCalendarWeeks)}, ein Consultant in Vollauslastung` : '0'})`,
     ),
     labelValueParagraph('Anzahl Pflichtbausteine', String(gapAnalysisSummary.entryCount)),
 

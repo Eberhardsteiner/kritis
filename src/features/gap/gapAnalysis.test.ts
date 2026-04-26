@@ -260,6 +260,56 @@ describe('computeGapAnalysis · Aggregation', () => {
   });
 });
 
+describe('computeGapAnalysis · Kalenderwochen-Bandbreite (C5.4.7 Bug 6)', () => {
+  it('berechnet minCalendarWeeks und maxCalendarWeeks mit einer Nachkommastelle', () => {
+    const req = makeRequirement({
+      id: 'req-bk',
+      category: 'risk',
+      effortBreakdown: {
+        minPersonDays: 3.4,
+        maxPersonDays: 6,
+        activities: [{ label: 'Recherche', minHours: 8, maxHours: 16 }],
+      },
+    });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // 3.4 PT / 5 = 0.68 → ceil(6.8)/10 = 0.7
+    expect(summary.minCalendarWeeks).toBe(0.7);
+    // 6 PT / 5 = 1.2 → ceil(12.0)/10 = 1.2
+    expect(summary.maxCalendarWeeks).toBe(1.2);
+    // Bestand: calendarWeeks aus Mittelwert bleibt 1
+    expect(summary.calendarWeeks).toBe(1);
+  });
+
+  it('liefert minCalendarWeeks=maxCalendarWeeks, wenn min == max (point-Estimate)', () => {
+    const req = makeRequirement({ id: 'req-h', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // measures+open Heuristik = 10 PT, min == max == 10 → calendarWeeks 2
+    expect(summary.minCalendarWeeks).toBe(summary.maxCalendarWeeks);
+    expect(summary.maxCalendarWeeks).toBe(2);
+  });
+
+  it('liefert 0 für beide CalendarWeeks bei leerer Anforderungsliste', () => {
+    const summary = computeGapAnalysis({
+      requirements: [],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    expect(summary.minCalendarWeeks).toBe(0);
+    expect(summary.maxCalendarWeeks).toBe(0);
+  });
+});
+
 describe('computeGapAnalysis · Confidence', () => {
   it('setzt high bei mehreren primary-Mappings und Evidenz', () => {
     const mapped: StandardControlReference[] = [

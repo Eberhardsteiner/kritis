@@ -20,6 +20,8 @@ const summaryFixture: GapAnalysisSummary = {
   minPersonDays: 8.5,
   maxPersonDays: 8.5,
   calendarWeeks: 2,
+  minCalendarWeeks: 1.7,
+  maxCalendarWeeks: 1.7,
   entryCount: 1,
   byRegime: [
     {
@@ -54,6 +56,8 @@ const emptySummary: GapAnalysisSummary = {
   minPersonDays: 0,
   maxPersonDays: 0,
   calendarWeeks: 0,
+  minCalendarWeeks: 0,
+  maxCalendarWeeks: 0,
   entryCount: 0,
   byRegime: [],
 };
@@ -63,7 +67,9 @@ describe('GapAnalysisDashboard', () => {
     const { container } = render(<GapAnalysisDashboard summary={summaryFixture} requirements={requirementFixture} />);
     const statValue = container.querySelector('.stat-value');
     expect(statValue?.textContent).toBe('8,5 PT');
-    expect(screen.getByText(/≈ 2 Kalenderwochen/)).toBeInTheDocument();
+    // C5.4.7: Kalenderwochen jetzt als Bandbreite mit einer Nachkommastelle.
+    // Fixture min=max=1.7 → "1,7 Kalenderwochen".
+    expect(screen.getByText(/≈ 1,7 Kalenderwochen/)).toBeInTheDocument();
   });
 
   it('zeigt pro Regime die PT-Summe und die Kategorien-Chips', () => {
@@ -138,6 +144,8 @@ describe('GapAnalysisDashboard · Aktivitäts-Tabelle Brutto/Rest (C5.4.4)', () 
     minPersonDays: 0.15,
     maxPersonDays: 0.25,
     calendarWeeks: 1,
+    minCalendarWeeks: 0.1,
+    maxCalendarWeeks: 0.1,
     entryCount: 1,
     byRegime: [
       {

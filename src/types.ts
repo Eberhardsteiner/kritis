@@ -193,7 +193,20 @@ export interface GapAnalysisSummary {
    */
   minPersonDays: number;
   maxPersonDays: number;
+  /**
+   * Kalenderwochen-Schätzung auf Basis des Mittelwerts (totalPersonDays).
+   * Bestandskompatibel; UI bevorzugt seit C5.4.7 die Bandbreite
+   * `minCalendarWeeks` – `maxCalendarWeeks`, weil bei 3,4 – 6 PT
+   * Bandbreite die Aussage „≈ 1 Kalenderwoche" zu unscharf ist
+   * (Realität: 0,7 – 1,2 Wochen).
+   */
   calendarWeeks: number;
+  /**
+   * Untere Kalenderwochen-Grenze, mit einer Nachkommastelle. 0 wenn
+   * `minPersonDays` 0 ist. Berechnung: `ceil((minPersonDays / 5) * 10) / 10`.
+   */
+  minCalendarWeeks: number;
+  maxCalendarWeeks: number;
   entryCount: number;
   byRegime: GapAnalysisByRegime[];
 }

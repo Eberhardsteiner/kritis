@@ -3,6 +3,7 @@ import { BarChart3, Calculator, ChevronDown, ChevronRight } from 'lucide-react';
 import { getConfidenceLabel } from '../gapAnalysis';
 import {
   CURRENCY_LABELS,
+  formatCalendarWeeksRange,
   formatEuroRange,
   formatHoursRange,
   formatPersonDays,
@@ -237,7 +238,7 @@ export function GapAnalysisDashboard({
         {totalEuroLabel ? <p className="stat-subtitle"><strong>{totalEuroLabel}</strong></p> : null}
         <p className="stat-subtitle">
           {summary.totalPersonDays > 0
-            ? `≈ ${summary.calendarWeeks} Kalenderwoche${summary.calendarWeeks === 1 ? '' : 'n'} bei einem Consultant in Vollauslastung (Mittelwert ${formatPersonDays(summary.totalPersonDays)})`
+            ? `≈ ${formatCalendarWeeksRange(summary.minCalendarWeeks, summary.maxCalendarWeeks)} bei einem Consultant in Vollauslastung (Mittelwert ${formatPersonDays(summary.totalPersonDays)})`
             : 'Keine offenen Pflichtbausteine erkannt.'}
         </p>
       </div>
