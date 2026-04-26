@@ -22,6 +22,7 @@ import type {
   GovernanceSummary,
   KritisApplicability,
   RequirementDefinition,
+  ConsultingRateSettings,
   ResilienceSummary,
   ScoreSnapshot,
   SectorModuleDefinition,
@@ -43,12 +44,14 @@ interface DashboardViewProps {
   resilienceSummary: ResilienceSummary;
   gapAnalysisSummary: GapAnalysisSummary;
   activeRequirements: RequirementDefinition[];
+  consultingRate: ConsultingRateSettings | null;
   onGoToAssessment: () => void;
   onGoToMeasures: () => void;
   onGoToResilience: () => void;
   onGoToGovernance: () => void;
   onGoToKritis: () => void;
   onExportGapAnalysisDocx?: () => void;
+  onConsultingRateChange?: (next: ConsultingRateSettings | null) => void;
 }
 
 export function DashboardView({
@@ -67,12 +70,14 @@ export function DashboardView({
   resilienceSummary,
   gapAnalysisSummary,
   activeRequirements,
+  consultingRate,
   onGoToAssessment,
   onGoToMeasures,
   onGoToResilience,
   onGoToGovernance,
   onGoToKritis,
   onExportGapAnalysisDocx,
+  onConsultingRateChange,
 }: DashboardViewProps) {
   const lowDomains = [...scoreSnapshot.domainScores]
     .sort((a, b) => a.score - b.score)
@@ -344,6 +349,8 @@ export function DashboardView({
       <GapAnalysisDashboard
         summary={gapAnalysisSummary}
         requirements={activeRequirements}
+        consultingRate={consultingRate}
+        onConsultingRateChange={onConsultingRateChange}
         onTriggerDocxExport={onExportGapAnalysisDocx}
       />
     </div>

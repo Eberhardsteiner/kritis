@@ -603,6 +603,8 @@ function AppShell() {
     onExportAuditPdf: reportingHandlers.handleExportAuditPdf,
     onExportFormalHtml: reportingHandlers.handleExportFormalHtml,
     onExportGapAnalysisDocx: gapHandlers.handleExportGapAnalysisDocx,
+    consultingRate: state.consultingRate,
+    onConsultingRateChange: (next) => setState((prev) => ({ ...prev, consultingRate: next })),
     onSaveRiskEntry: riskCatalogHandlers.handleSaveRiskEntry,
     onDeleteRiskEntry: riskCatalogHandlers.handleDeleteRiskEntry,
     onExportRiskEntriesJson: riskCatalogHandlers.handleExportRiskEntriesJson,
