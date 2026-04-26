@@ -248,8 +248,12 @@ interface BuildActiveViewPanelPropsArgs {
   onExportAuditPdf: ReportViewProps['onExportAuditPdf'];
   onExportFormalHtml: ReportViewProps['onExportFormalHtml'];
   onExportGapAnalysisDocx: DashboardViewProps['onExportGapAnalysisDocx'];
+  // consultingRate wird in DashboardView für die Euro-Anzeige im Gap-
+  // Analyse-Dashboard sowie in ControlView für die Konfiguration genutzt.
+  // onConsultingRateChange läuft seit C5.4.1 ausschließlich in ControlView
+  // (Admin-Bereich) — DashboardView hat keine Edit-UI mehr.
   consultingRate: DashboardViewProps['consultingRate'];
-  onConsultingRateChange: DashboardViewProps['onConsultingRateChange'];
+  onConsultingRateChange: ControlViewProps['onConsultingRateChange'];
   onSaveRiskEntry: KritisViewProps['onSaveRiskEntry'];
   onDeleteRiskEntry: KritisViewProps['onDeleteRiskEntry'];
   onExportRiskEntriesJson: KritisViewProps['onExportRiskEntriesJson'];
@@ -595,7 +599,6 @@ export function buildActiveViewPanelProps({
       onGoToResilience: () => onGoToView('resilience'),
       onGoToKritis: () => onGoToView('kritis'),
       onExportGapAnalysisDocx,
-      onConsultingRateChange,
     },
     assessmentViewProps: {
       questions,
@@ -699,6 +702,7 @@ export function buildActiveViewPanelProps({
       documentLibrarySummary,
       deadlineSummary,
       complianceCalendar,
+      consultingRate,
       onSelectActiveUser,
       userSelectionLocked,
       onCreateUser,
@@ -706,6 +710,7 @@ export function buildActiveViewPanelProps({
       onUpdateUser,
       onDeleteUser,
       onUpdateComplianceCalendar,
+      onConsultingRateChange,
     },
     platformViewProps: {
       serverMode,

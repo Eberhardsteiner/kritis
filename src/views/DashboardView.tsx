@@ -44,6 +44,11 @@ interface DashboardViewProps {
   resilienceSummary: ResilienceSummary;
   gapAnalysisSummary: GapAnalysisSummary;
   activeRequirements: RequirementDefinition[];
+  /**
+   * Tagessatz für die Euro-Anzeige in der Gap-Analyse-View. Seit C5.4.1
+   * read-only — die Konfiguration läuft ausschließlich über ControlView
+   * (Steuerung & Rechte). DashboardView hat keine Edit-UI mehr.
+   */
   consultingRate: ConsultingRateSettings | null;
   onGoToAssessment: () => void;
   onGoToMeasures: () => void;
@@ -51,7 +56,6 @@ interface DashboardViewProps {
   onGoToGovernance: () => void;
   onGoToKritis: () => void;
   onExportGapAnalysisDocx?: () => void;
-  onConsultingRateChange?: (next: ConsultingRateSettings | null) => void;
 }
 
 export function DashboardView({
@@ -77,7 +81,6 @@ export function DashboardView({
   onGoToGovernance,
   onGoToKritis,
   onExportGapAnalysisDocx,
-  onConsultingRateChange,
 }: DashboardViewProps) {
   const lowDomains = [...scoreSnapshot.domainScores]
     .sort((a, b) => a.score - b.score)
@@ -350,7 +353,6 @@ export function DashboardView({
         summary={gapAnalysisSummary}
         requirements={activeRequirements}
         consultingRate={consultingRate}
-        onConsultingRateChange={onConsultingRateChange}
         onTriggerDocxExport={onExportGapAnalysisDocx}
       />
     </div>

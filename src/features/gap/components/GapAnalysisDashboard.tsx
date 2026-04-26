@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart3, Calculator, ChevronDown, ChevronRight, Euro } from 'lucide-react';
+import { BarChart3, Calculator, ChevronDown, ChevronRight } from 'lucide-react';
 import { getConfidenceLabel } from '../gapAnalysis';
 import type {
   ConsultingRateSettings,
@@ -13,8 +13,13 @@ import type {
 interface GapAnalysisDashboardProps {
   summary: GapAnalysisSummary;
   requirements: RequirementDefinition[];
+  /**
+   * Tagessatz für die Euro-Anzeige in den Karten und im DOCX-Export.
+   * Read-only seit C5.4.1 — die Konfiguration läuft über ControlView
+   * (Steuerung & Rechte). Der Hilfetext am Ende der View weist
+   * darauf hin.
+   */
   consultingRate?: ConsultingRateSettings | null;
-  onConsultingRateChange?: (next: ConsultingRateSettings | null) => void;
   onTriggerDocxExport?: () => void;
   compact?: boolean;
 }
@@ -176,85 +181,6 @@ function GapEntryDetail({
   );
 }
 
-/**
- * Mini-Settings-Card für den Tagessatz. Direkt im Dashboard-Footer,
- * weil die Eingabe unmittelbar die Euro-Anzeige in den Karten triggert.
- * Bewusst sehr schlicht: ein Eingabefeld, ein Currency-Select, Speichern-
- * Button mit lokalem State und onConsultingRateChange-Callback an den
- * Workspace-State.
- */
-function ConsultingRateSettingsCard({
-  consultingRate,
-  onConsultingRateChange,
-}: {
-  consultingRate: ConsultingRateSettings | null | undefined;
-  onConsultingRateChange: (next: ConsultingRateSettings | null) => void;
-}) {
-  const initialRate = consultingRate?.ratePerPersonDay ?? 1500;
-  const initialCurrency = consultingRate?.currency ?? 'EUR';
-  const [rateInput, setRateInput] = useState(String(initialRate));
-  const [currencyInput, setCurrencyInput] = useState<ConsultingRateSettings['currency']>(initialCurrency);
-  const [savedNotice, setSavedNotice] = useState<string | null>(null);
-
-  const handleSave = () => {
-    const parsed = Number(rateInput.replace(',', '.'));
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      setSavedNotice('Bitte einen gültigen Tagessatz ≥ 0 eingeben.');
-      return;
-    }
-    onConsultingRateChange({
-      ratePerPersonDay: Math.round(parsed),
-      currency: currencyInput,
-      effectiveFrom: new Date().toISOString().slice(0, 10),
-    });
-    setSavedNotice(`Tagessatz gespeichert: ${formatEuro(Math.round(parsed), currencyInput)} pro PT.`);
-  };
-
-  return (
-    <article className="card compact top-gap">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Tagessatz-Konfiguration</p>
-          <h4>Kalkulationsgrundlage für Angebot</h4>
-          <p className="muted small">
-            Tagessatz pro PT für die Euro-Bandbreite in der Gap-Analyse und der DOCX-
-            Angebotsgrundlage. Wird tenant-weit gespeichert. Default 1.500 € / PT.
-          </p>
-        </div>
-        <Euro size={20} />
-      </div>
-      <div className="profile-grid top-gap">
-        <label className="field-label">
-          <span>Tagessatz pro PT</span>
-          <input
-            type="number"
-            min={0}
-            step={50}
-            value={rateInput}
-            onChange={(event) => setRateInput(event.target.value)}
-          />
-        </label>
-        <label className="field-label">
-          <span>Währung</span>
-          <select
-            value={currencyInput}
-            onChange={(event) => setCurrencyInput(event.target.value as ConsultingRateSettings['currency'])}
-          >
-            <option value="EUR">EUR</option>
-            <option value="CHF">CHF</option>
-          </select>
-        </label>
-      </div>
-      <div className="chip-row top-gap">
-        <button type="button" className="button primary" onClick={handleSave}>
-          Tagessatz speichern
-        </button>
-        {savedNotice ? <span className="muted small">{savedNotice}</span> : null}
-      </div>
-    </article>
-  );
-}
-
 function buildRegimeRangeLabel(
   regime: GapAnalysisByRegime,
   rate: ConsultingRateSettings | null | undefined,
@@ -275,7 +201,6 @@ export function GapAnalysisDashboard({
   summary,
   requirements,
   consultingRate,
-  onConsultingRateChange,
   onTriggerDocxExport,
   compact = false,
 }: GapAnalysisDashboardProps) {
@@ -380,13 +305,14 @@ export function GapAnalysisDashboard({
         Restaufwand strukturell zu senken; verbessern Sie die Grundanalyse-Antworten,
         um den Domain-Aufschlag zu reduzieren.
       </p>
-
-      {onConsultingRateChange ? (
-        <ConsultingRateSettingsCard
-          consultingRate={consultingRate}
-          onConsultingRateChange={onConsultingRateChange}
-        />
-      ) : null}
+      <p className="muted small top-gap">
+        Der Tagessatz für die Euro-Berechnung wird im Bereich
+        {' '}<strong>Steuerung &amp; Rechte</strong>{' '}
+        konfiguriert (Card „Beratungs-Tagessatz"). Aktuell hinterlegt:
+        {' '}{consultingRate
+          ? `${consultingRate.ratePerPersonDay} ${consultingRate.currency === 'EUR' ? '€' : 'CHF'} pro PT`
+          : 'Default 1.500 € pro PT (noch nicht konfiguriert)'}.
+      </p>
     </section>
   );
 }

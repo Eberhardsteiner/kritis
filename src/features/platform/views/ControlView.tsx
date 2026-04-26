@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import {
   BellRing,
   CalendarClock,
+  Calculator,
   FolderArchive,
   PlusCircle,
   ShieldCheck,
@@ -13,11 +15,17 @@ import { accessProfiles, permissionLabels } from '../../../data/workspaceBase';
 import type {
   AccessProfileDefinition,
   ComplianceCalendar,
+  ConsultingRateSettings,
   DeadlineItem,
   DeadlineSummary,
   DocumentLibrarySummary,
   UserItem,
 } from '../../../types';
+
+const DEFAULT_CONSULTING_RATE: ConsultingRateSettings = {
+  ratePerPersonDay: 1500,
+  currency: 'EUR',
+};
 
 interface ControlViewProps {
   users: UserItem[];
@@ -26,6 +34,7 @@ interface ControlViewProps {
   documentLibrarySummary: DocumentLibrarySummary;
   deadlineSummary: DeadlineSummary;
   complianceCalendar: ComplianceCalendar;
+  consultingRate: ConsultingRateSettings | null;
   onSelectActiveUser: (userId: string) => void;
   userSelectionLocked?: boolean;
   onCreateUser: () => void;
@@ -33,6 +42,7 @@ interface ControlViewProps {
   onUpdateUser: (userId: string, patch: Partial<UserItem>) => void;
   onDeleteUser: (userId: string) => void;
   onUpdateComplianceCalendar: (field: keyof ComplianceCalendar, value: string) => void;
+  onConsultingRateChange: (rate: ConsultingRateSettings) => void;
 }
 
 function getDeadlineTone(item: DeadlineItem): 'alert' | 'warn' | 'good' | 'default' {
@@ -68,15 +78,48 @@ export function ControlView({
   documentLibrarySummary,
   deadlineSummary,
   complianceCalendar,
+  consultingRate,
   onSelectActiveUser,
   onCreateUser,
   onGenerateUsersFromStakeholders,
   onUpdateUser,
   onDeleteUser,
   onUpdateComplianceCalendar,
+  onConsultingRateChange,
   userSelectionLocked = false,
 }: ControlViewProps) {
   const activeUser = users.find((user) => user.id === activeUserId) ?? users[0];
+
+  // Tagessatz-Form-State: defensiv mit Default 1.500 € vorbelegt, falls
+  // im Tenant noch nichts konfiguriert ist. Sobald der Benutzer auf
+  // „Tagessatz aktualisieren" klickt, wird der Default als expliziter
+  // Settings-Eintrag persistiert — danach läuft alles aus consultingRate.
+  const isRateConfigured = consultingRate !== null;
+  const initialRate = consultingRate?.ratePerPersonDay ?? DEFAULT_CONSULTING_RATE.ratePerPersonDay;
+  const initialCurrency = consultingRate?.currency ?? DEFAULT_CONSULTING_RATE.currency;
+  const initialNote = consultingRate?.note ?? '';
+  const [rateInput, setRateInput] = useState<string>(String(initialRate));
+  const [currencyInput, setCurrencyInput] = useState<ConsultingRateSettings['currency']>(initialCurrency);
+  const [noteInput, setNoteInput] = useState<string>(initialNote);
+  const [savedNotice, setSavedNotice] = useState<string | null>(null);
+
+  const handleRateSubmit = () => {
+    const parsed = Number(rateInput.replace(',', '.'));
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      setSavedNotice('Bitte einen gültigen Tagessatz ≥ 0 eingeben.');
+      return;
+    }
+    const next: ConsultingRateSettings = {
+      ratePerPersonDay: Math.round(parsed),
+      currency: currencyInput,
+      effectiveFrom: new Date().toISOString().slice(0, 10),
+    };
+    if (noteInput.trim().length > 0) {
+      next.note = noteInput.trim();
+    }
+    onConsultingRateChange(next);
+    setSavedNotice(`Tagessatz aktualisiert: ${next.ratePerPersonDay} ${next.currency} pro PT.`);
+  };
 
   return (
     <div className="view-stack">
@@ -364,6 +407,79 @@ export function ControlView({
             )}
           </div>
         </article>
+      </section>
+
+      {/*
+       * Tagessatz-Konfiguration (C5.4.1):
+       * Aus dem Gap-Analyse-Dashboard hierher umgesiedelt, weil der
+       * Tagessatz UVM-intern festgelegt wird und nicht in den täglichen
+       * Beratungs-Workflow gehört. Defensive Default-Logik: bei
+       * `consultingRate === null` zeigt das Formular 1.500 EUR
+       * voreingestellt + Hinweis „noch nicht konfiguriert"; auf
+       * Speichern wird der Default als expliziter Settings-Eintrag
+       * persistiert.
+       */}
+      <section className="card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Beratungs-Tagessatz</p>
+            <h3>Kalkulationsbasis für Aufwandsschätzung und Angebotsgrundlage</h3>
+            <p className="muted small top-gap">
+              Tagessatz für die Aufwandsschätzung in der Gap-Analyse. Wird im
+              DOCX-Export als Kalkulations-Basis prominent ausgewiesen. Diese
+              Einstellung gilt tenant-weit für alle Berater im Workspace.
+            </p>
+          </div>
+          <div className="inline-note">
+            <Calculator size={16} />
+            <span>
+              {isRateConfigured
+                ? 'Konfiguriert'
+                : 'Noch nicht konfiguriert – Default wird verwendet'}
+            </span>
+          </div>
+        </div>
+
+        <div className="form-grid two-column top-gap">
+          <label className="field-label">
+            Tagessatz pro PT
+            <input
+              type="number"
+              min={0}
+              step={50}
+              value={rateInput}
+              onChange={(event) => setRateInput(event.target.value)}
+            />
+          </label>
+          <label className="field-label">
+            Währung
+            <select
+              value={currencyInput}
+              onChange={(event) =>
+                setCurrencyInput(event.target.value as ConsultingRateSettings['currency'])
+              }
+            >
+              <option value="EUR">EUR</option>
+              <option value="CHF">CHF</option>
+            </select>
+          </label>
+          <label className="field-label wide">
+            Notiz (optional)
+            <textarea
+              rows={2}
+              value={noteInput}
+              placeholder="z. B. UVM-Senior-Tagessatz 2026"
+              onChange={(event) => setNoteInput(event.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="chip-row top-gap">
+          <button type="button" className="button primary" onClick={handleRateSubmit}>
+            Tagessatz aktualisieren
+          </button>
+          {savedNotice ? <span className="muted small">{savedNotice}</span> : null}
+        </div>
       </section>
 
       <section className="card">
