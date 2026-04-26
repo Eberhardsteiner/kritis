@@ -1,0 +1,2058 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-finance-core",
+    "packType": "module",
+    "moduleId": "finance",
+    "name": "Finanz-Basismodul",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilienz.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Finanz- und Versicherungswesen",
+    "industryClass": "Finanzdienstleistungen",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "finanz",
+      "bank",
+      "sparkasse",
+      "versicherung",
+      "zahlungsdienst",
+      "dora",
+      "bafin",
+      "marisk"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "sector"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "finance",
+    "name": "Finanz- und Versicherungswesen",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilienz.",
+    "sectorCategory": "Finanz- und Versicherungswesen",
+    "domainWeightAdjustments": {
+      "cyber": 1.3,
+      "operations": 1.25,
+      "governance": 1.2,
+      "people": 1.1
+    },
+    "additionalQuestions": [
+      {
+        "id": "fin_dora_incident_reporting",
+        "domainId": "cyber",
+        "title": "DORA-Vorfallmeldung ist binnen 4 h einsatzbereit",
+        "prompt": "Existiert ein dokumentierter Vorfall-Klassifikations- und Meldeprozess nach DORA Art. 19, der binnen 4 h nach Erkennung eines majorellen ICT-Vorfalls zur BaFin meldet?",
+        "guidance": "DORA (in Kraft 17.01.2025) verlangt für 'majorelle' ICT-Vorfälle Erstmeldung binnen 4 h nach Klassifizierung, Zwischenbericht binnen 72 h, Abschlussbericht binnen 1 Monat. Klassifikations-Kriterien sind technisch in den DORA-RTS festgelegt (Anzahl betroffener Kunden, Daten-Verlust-Schwere, Service-Unterbrechungs-Dauer).",
+        "recommendation": "Vorfall-Klassifikations-Matrix nach DORA-RTS dokumentiert, BaFin-Meldeportal-Zugang vorbereitet, Meldungsvorlagen für die drei Stufen (Erst/Zwischen/Abschluss), quartalsweise Eskalations-Übung.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "DORA-Klassifikations-Matrix, BaFin-Meldevorlagen, Eskalations-Übungs-Protokoll",
+        "tags": [
+          "DORA",
+          "BaFin",
+          "Vorfall-Meldung"
+        ]
+      },
+      {
+        "id": "fin_marisk_at7_2",
+        "domainId": "bcm",
+        "title": "MaRisk AT 7.2-Notfallplan ist getestet und auditfähig",
+        "prompt": "Ist ein Notfallmanagement nach MaRisk AT 7.2 etabliert, mit dokumentierten Notfallplänen für alle zeitkritischen Aktivitäten, jährlichen Tests und BaFin-Audit-Spur?",
+        "guidance": "MaRisk AT 7.2 verlangt explizit Notfall-Konzepte für zeitkritische Geschäftsprozesse — Online-Banking, Settlement, Bargeldversorgung, Karten-Autorisierung. Bei Versicherern entsprechend VAIT/MaGo-Pflichten.",
+        "recommendation": "MaRisk-AT-7.2-konformes Notfallhandbuch mit dokumentierten Wiederanlauf-Zeiten pro Prozess, jährliche Notfall-Übung mit BaFin-vorlegbarer Protokoll-Dokumentation.",
+        "weight": 1.25,
+        "critical": true,
+        "evidenceHint": "Notfallhandbuch nach AT 7.2, Übungs-Protokolle, BaFin-Audit-Vorlage",
+        "tags": [
+          "MaRisk",
+          "AT 7.2",
+          "BCM"
+        ]
+      },
+      {
+        "id": "fin_customer_data_protection",
+        "domainId": "cyber",
+        "title": "Customer-Daten-Schutz mit MFA und SCHUFA-Sensitivität",
+        "prompt": "Sind alle Zugriffe auf Customer-Daten (Kontostände, Transaktions-Historie, SCHUFA-Daten, Versicherungsbedarf) mit MFA gesichert und werden Massen-Lese-Zugriffe als Anomalie erkannt?",
+        "guidance": "DG Immobilien Management 2024–2025-Schablone: Tochter der DZ Bank, Customer-Daten von Zehntausenden Volksbank-Produktinvestoren kompromittiert. AT&T-Snowflake-Pattern (110 Mio. Datensätze) ist auf Finanzbereich übertragbar — fehlende MFA in Drittsystemen ist die Lücke. SCHUFA-Daten sind nach DSGVO Art. 9 besonders schützenswerte Daten.",
+        "recommendation": "MFA-Pflicht für alle privilegierten und Customer-zugewandten Accounts, UEBA für Massen-Lese-Anomalien, vertragliche Verankerung der MFA-Pflicht bei IT-Dienstleistern (Atruvia, Finanz Informatik), Quartals-Privilegien-Rezertifizierung.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "MFA-Coverage-Bericht, UEBA-Konfiguration, Dienstleister-Verträge, Privilegien-Rezertifizierungs-Protokoll",
+        "tags": [
+          "MFA",
+          "Customer-Daten",
+          "SCHUFA",
+          "DSGVO"
+        ]
+      },
+      {
+        "id": "fin_ddos_mitigation",
+        "domainId": "cyber",
+        "title": "Online-Banking-DDoS-Mitigation mit Bank-Run-Vermeidungs-Disziplin",
+        "prompt": "Ist die Mitigation gegen DDoS-Angriffe auf Online-Banking-Frontends vertraglich gesichert, und ist die parallele Customer-Kommunikations-Kette zur Bank-Run-Vermeidung dokumentiert?",
+        "guidance": "Lehre aus Silicon Valley Bank März 2023: Twitter-fueled Bank-Run, 42 Mrd. $ Abhebungen in einem Tag, < 48 h. Bei Online-Banking-Ausfall heutiger Größenordnung ist Customer-Communication-Disziplin ebenso wichtig wie technische Mitigation — Schweigen lädt zu Spekulation und Panik ein.",
+        "recommendation": "DDoS-Mitigation mit § 3 BSIG-qualifiziertem Anbieter; vorab-textierte Customer-Kommunikations-Vorlagen für drei Eskalationsstufen (Hinweis, Empfehlung, Akut-Warnung); halbjährliche Übung mit Marketing-/Pressesprecher-Beteiligung.",
+        "weight": 1.25,
+        "critical": true,
+        "evidenceHint": "DDoS-Mitigation-Vertrag, Customer-Komm-Vorlagen, Übungs-Protokoll",
+        "tags": [
+          "DDoS",
+          "Bank-Run",
+          "Customer-Kommunikation"
+        ]
+      },
+      {
+        "id": "fin_third_party_dora",
+        "domainId": "supply",
+        "title": "Third-Party-ICT-Provider sind nach DORA Art. 28 erfasst und auditiert",
+        "prompt": "Existiert ein vollständiges Register aller kritischen ICT-Drittanbieter (Cloud, Core-Banking-Provider, SWIFT-/SEPA-Gateway, Trading-Platform, BaFin-Reporting-Tool) mit Risikoklassifikation und Vertrags-Klauseln nach DORA Art. 28?",
+        "guidance": "DORA Art. 28 verlangt explizit ein Drittanbieter-Register mit Kritikalitäts-Bewertung, Vertrags-Klauseln zur Resilienz, regelmäßiger Audit-Bereitschaft. Atruvia und Finanz Informatik sind systemrelevante kritische Drittanbieter für Volksbanken/Sparkassen — der gesamte Sektor hängt an diesen zwei Häusern.",
+        "recommendation": "DORA-Art.-28-konformes Register mit jährlichem Update; Vertrags-Klauseln zur Audit-Bereitschaft, Subkontrahenten-Transparenz, Exit-Strategie; Cross-Provider-Notfall-Pläne bei systemrelevantem Drittanbieter.",
+        "weight": 1.2,
+        "critical": true,
+        "evidenceHint": "DORA-Drittanbieter-Register, Vertrags-Klausel-Matrix, Audit-Berichte",
+        "tags": [
+          "DORA",
+          "Third-Party",
+          "Atruvia"
+        ]
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "Finanz- und Versicherungswesen"
+      ],
+      "hints": [
+        "Schwellenwerte für Finanz-KRITIS in Anhang 6 BSI-KritisV (Bargeldversorgung, kartengestützter Zahlungsverkehr, konventioneller Zahlungsverkehr, Wertpapier-/Derivathandel, Verrechnung+Abwicklung).",
+        "Seit 17.01.2025 ist DORA wirksam — DORA-regulierte Anlagen sind weitgehend vom KRITIS-Aufsichtsregime des BSI ausgenommen, dafür greift die BaFin-Aufsicht direkter.",
+        "Bei kleineren Genossenschaftsbanken / Sparkassen unterhalb der KRITIS-Schwelle greifen weiterhin BAIT/VAIT/KAIT/ZAIT als sektorale BaFin-Anforderungen.",
+        "PSD2-Pflichten für Zahlungsdienstleister parallel zu DORA und KRITIS."
+      ],
+      "additionalRequirements": []
+    },
+    "uiHints": {
+      "accentLabel": "Customer-Trust, transaktionelle Verfügbarkeit, DORA",
+      "focusAreas": [
+        "DORA Art. 19 Vorfall-Meldung",
+        "MaRisk AT 7.2 Notfall",
+        "MFA-Vollabdeckung",
+        "DDoS-Mitigation + Bank-Run-Vermeidung",
+        "Third-Party-Register"
+      ]
+    },
+    "recommendedActions": [
+      {
+        "id": "fin_action_dora_classification",
+        "title": "DORA-Vorfall-Klassifikations-Matrix einführen",
+        "description": "Klassifikations-Matrix nach DORA-RTS, BaFin-Meldeportal-Zugang vorbereiten, Vorlagen für 4-h-/72-h-/1-Monats-Meldungen, Eskalations-Übung quartalsweise.",
+        "priority": "kritisch",
+        "ownerRole": "CISO / Compliance",
+        "relatedQuestionIds": [
+          "fin_dora_incident_reporting"
+        ]
+      },
+      {
+        "id": "fin_action_marisk_notfall",
+        "title": "MaRisk-AT-7.2-Notfallhandbuch aktualisieren und üben",
+        "description": "Notfallpläne pro zeitkritischem Geschäftsprozess (Online-Banking, Settlement, Bargeldversorgung, Karten-Autorisierung), jährliche Übung mit BaFin-vorlegbarer Dokumentation.",
+        "priority": "kritisch",
+        "ownerRole": "Vorstand / Bereichsleiter Risikomanagement",
+        "relatedQuestionIds": [
+          "fin_marisk_at7_2"
+        ]
+      },
+      {
+        "id": "fin_action_mfa_customer_data",
+        "title": "MFA-Vollabdeckung und UEBA für Customer-Daten",
+        "description": "MFA für alle privilegierten und Customer-zugewandten Accounts, UEBA für Massen-Lese-Anomalien, vertragliche MFA-Pflicht bei IT-Dienstleistern, Quartals-Rezertifizierung.",
+        "priority": "kritisch",
+        "ownerRole": "CISO / IAM",
+        "relatedQuestionIds": [
+          "fin_customer_data_protection"
+        ]
+      },
+      {
+        "id": "fin_action_ddos_bank_run",
+        "title": "DDoS-Mitigation + Bank-Run-Vermeidungs-Kommunikation",
+        "description": "Mitigation-Vertrag mit § 3 BSIG-qualifiziertem Anbieter, vorab-textierte Customer-Kommunikations-Vorlagen, halbjährliche Übung mit Pressesprecher.",
+        "priority": "hoch",
+        "ownerRole": "CISO / Marketing / Pressesprecher",
+        "relatedQuestionIds": [
+          "fin_ddos_mitigation"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "fin_evidence_dora_register",
+        "title": "DORA-Vorfall-Klassifikations-Matrix und Meldevorlagen",
+        "type": "policy",
+        "ownerRole": "CISO / Compliance",
+        "reviewCycleHint": "Halbjährlich prüfen, nach BaFin-RTS-Updates anpassen",
+        "relatedQuestionIds": [
+          "fin_dora_incident_reporting"
+        ],
+        "folder": "DORA-Compliance",
+        "tags": [
+          "DORA",
+          "BaFin"
+        ]
+      },
+      {
+        "id": "fin_evidence_marisk_notfall",
+        "title": "MaRisk-AT-7.2-Notfallhandbuch",
+        "type": "plan",
+        "ownerRole": "Vorstand / Risikomanagement",
+        "reviewCycleHint": "Jährlich plus nach jeder Übung",
+        "relatedQuestionIds": [
+          "fin_marisk_at7_2"
+        ],
+        "folder": "Notfallmanagement",
+        "tags": [
+          "MaRisk",
+          "BCM"
+        ]
+      },
+      {
+        "id": "fin_evidence_third_party_register",
+        "title": "DORA Art. 28-Drittanbieter-Register",
+        "type": "report",
+        "ownerRole": "CISO / Einkauf",
+        "reviewCycleHint": "Jährlich, nach jeder Vertrags-Änderung",
+        "relatedQuestionIds": [
+          "fin_third_party_dora"
+        ],
+        "folder": "Third-Party-Management",
+        "tags": [
+          "DORA",
+          "Drittanbieter"
+        ]
+      },
+      {
+        "id": "fin_evidence_customer_comm",
+        "title": "Customer-Kommunikations-Vorlagen für Bank-Run-Vermeidung",
+        "type": "policy",
+        "ownerRole": "Marketing / Pressesprecher / CISO",
+        "reviewCycleHint": "Halbjährlich, vor jedem Übungs-Zyklus",
+        "relatedQuestionIds": [
+          "fin_ddos_mitigation"
+        ],
+        "folder": "Customer-Kommunikation",
+        "tags": [
+          "Bank-Run",
+          "Kommunikation"
+        ]
+      }
+    ],
+    "roleTemplates": [
+      {
+        "id": "fin_role_vorstand",
+        "label": "Vorstand / Geschäftsleitung",
+        "responsibility": "Gesamt-Verantwortung für DORA-Compliance, MaRisk-AT-7.2-Disziplin, Customer-Trust-Erhalt. Strategische Freigaben (Bank-Run-Vermeidungs-Kommunikation, Vorfall-Disclosure-Timing, Lösegeld-Entscheidung).",
+        "approvalScope": "Strategische Cyber-/Compliance-Entscheidungen, Customer-Disclosure-Freigaben",
+        "focusAreas": [
+          "DORA",
+          "MaRisk",
+          "Customer-Trust"
+        ]
+      },
+      {
+        "id": "fin_role_ciso",
+        "label": "CISO / Informationssicherheits-Beauftragte*r",
+        "responsibility": "Operative Cyber-Verantwortung, DORA-Vorfall-Klassifikation, BSI-/BaFin-Meldewege, Forensik-Koordination, Schnittstelle zu IT-Dienstleistern (Atruvia, Finanz Informatik).",
+        "approvalScope": "Cyber-Incident-Eskalation, Forensik-Initiierung, Dienstleister-Klauseln",
+        "focusAreas": [
+          "Cyber-Incident",
+          "DORA Art. 19",
+          "Forensik"
+        ]
+      },
+      {
+        "id": "fin_role_compliance",
+        "label": "Compliance-Beauftragte*r / GwG-Beauftragte*r",
+        "responsibility": "MaRisk-Compliance, DORA-Reporting, GwG-Pflichten, BaFin-Schnittstelle, KWG § 25a-Anforderungen.",
+        "approvalScope": "Meldungen an BaFin, GwG-Verdachtsmeldungen an FIU, KWG-Berichte",
+        "focusAreas": [
+          "MaRisk",
+          "DORA",
+          "GwG"
+        ]
+      },
+      {
+        "id": "fin_role_marketing",
+        "label": "Marketing / Customer-Kommunikation / Pressesprecher",
+        "responsibility": "Customer-Trust-Erhalt, Multi-Channel-Information bei Vorfällen mit Customer-Sichtbarkeit, Bank-Run-Vermeidungs-Kommunikation, Schnittstelle zu Lokal- und Wirtschaftspresse.",
+        "approvalScope": "Pressetexte, Customer-Newsletter, Stamm-Kunden-Information",
+        "focusAreas": [
+          "Customer-Kommunikation",
+          "Bank-Run-Vermeidung",
+          "Presse"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 84,
+      "targetByDomain": {
+        "governance": 86,
+        "operations": 84,
+        "people": 76,
+        "physical": 74,
+        "cyber": 88,
+        "supply": 80,
+        "finance": 78,
+        "bcm": 84
+      },
+      "notes": [
+        "Finanz-Tenants benötigen sehr hohe Werte in Cyber (88 % Ziel — Customer-Daten + Trading-Systeme + Online-Banking) und Governance (86 % — DORA + MaRisk + KWG).",
+        "Bei Versicherern weniger transaktionelle Mikrosekunden-Druck, dafür stärkere Schadens-/Reserve-Disziplin.",
+        "Bei Zahlungsdienstleistern PSD2-Konformität als zusätzliche Compliance-Achse."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "fin_audit_dora_meldung",
+        "area": "DORA-Compliance",
+        "title": "DORA-Vorfall-Klassifikations-Matrix dokumentiert und geübt",
+        "guidance": "Prüfen Sie Klassifikations-Matrix nach RTS, BaFin-Meldevorlagen, Eskalations-Übungs-Protokolle.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "fin_dora_incident_reporting"
+        ]
+      },
+      {
+        "id": "fin_audit_marisk_notfall",
+        "area": "Notfallmanagement",
+        "title": "MaRisk-AT-7.2-Notfallhandbuch ist auditfähig",
+        "guidance": "Prüfen Sie Notfallpläne pro zeitkritischem Geschäftsprozess, Übungs-Protokolle, BaFin-Audit-Vorlage.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "fin_marisk_at7_2"
+        ]
+      },
+      {
+        "id": "fin_audit_mfa_coverage",
+        "area": "Customer-Daten-Schutz",
+        "title": "MFA-Vollabdeckung für privilegierte und Customer-zugewandte Accounts",
+        "guidance": "Prüfen Sie MFA-Coverage-Bericht, UEBA-Konfiguration, Dienstleister-Vertrags-Klauseln.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "fin_customer_data_protection"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "Risikoanalyse",
+      "Resilienzplan",
+      "DORA-Compliance",
+      "Notfallmanagement",
+      "Third-Party-Management",
+      "Customer-Kommunikation",
+      "Trading-/Settlement-Sicherheit",
+      "GwG-/PSD2-Compliance"
+    ],
+    "processTemplates": [
+      {
+        "id": "fin_proc_online_banking",
+        "title": "Online-Banking-Frontend-Betrieb",
+        "ownerRole": "IT-Operations / NOC",
+        "criticality": "kritisch",
+        "mtpdHours": "2",
+        "rtoHours": "1",
+        "rpoHours": "0",
+        "dependencies": "Core-Banking-Provider, DDoS-Mitigation, Customer-Authentifizierung",
+        "outputs": "Customer-Sicht auf Konto, Transaktionen, Online-Überweisungen",
+        "notes": "Bei DDoS-Lawine Mitigation-Aktivierung binnen 5 min, parallel Customer-Kommunikations-Kette aktivieren."
+      },
+      {
+        "id": "fin_proc_settlement",
+        "title": "Settlement und Zahlungsverkehr",
+        "ownerRole": "Settlement-Operations",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "1",
+        "dependencies": "Core-Banking-System, SEPA-/SWIFT-Gateway, Bundesbank-Schnittstelle",
+        "outputs": "Tagesendverarbeitung, SEPA-Lastschriften, SWIFT-Übermittlungen",
+        "notes": "Manueller Settlement-Modus bei Cyber-Vorfall (USB-Stick-Pattern wie ICBC 2023)."
+      },
+      {
+        "id": "fin_proc_compliance",
+        "title": "GwG-/MaRisk-Compliance-Betrieb",
+        "ownerRole": "Compliance / Geldwäsche-Beauftragte*r",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "1",
+        "dependencies": "Transaktions-Monitoring-System, FIU-Meldeportal, BaFin-Reporting",
+        "outputs": "GwG-Verdachtsmeldungen, MaRisk-Berichte, BaFin-Anfragen",
+        "notes": "Bei Compliance-Officer-Ausfall Vertretungs-Kette dokumentiert."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "fin_dep_core_banking",
+        "title": "Core-Banking-Provider (Atruvia / Finanz Informatik)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Im Sektor faktisch nicht ersetzbar — abhängig von Provider-eigener Resilienz",
+        "contractReference": "Atruvia-Rahmenvertrag bzw. Finanz Informatik (Sparkassen-Verbund)",
+        "notes": "Systemrelevanter Drittanbieter nach DORA Art. 28; Audit-Klauseln + Exit-Strategie pflegen."
+      },
+      {
+        "id": "fin_dep_sepa_swift",
+        "title": "SEPA-/SWIFT-Gateway",
+        "category": "infrastruktur",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Manueller Settlement-Modus (USB-Übergabe analog ICBC-Schablone)",
+        "contractReference": "EBA Clearing / SWIFT-Mitgliedschaft",
+        "notes": "SEPA-Pause = Customer-sichtbare Liquiditätslücke, SWIFT-Pause = internationale Settlement-Cascade."
+      },
+      {
+        "id": "fin_dep_bundesbank",
+        "title": "Bundesbank-Schnittstelle (TARGET2 / TIPS)",
+        "category": "infrastruktur",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Manueller Settlement-Modus, gegebenenfalls verzögerter Übertrag",
+        "contractReference": "Bundesbank-Mitgliedschaft",
+        "notes": "TARGET2 ist seit März 2023 abgelöst durch T2/TIPS — Bundesbank-Notfall-Hotline dokumentiert halten."
+      },
+      {
+        "id": "fin_dep_ddos_mitigation",
+        "title": "DDoS-Mitigation-Anbieter",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Zweit-Anbieter mit Failover-Vertrag",
+        "contractReference": "DDoS-Mitigation-Rahmenvertrag",
+        "notes": "§ 3 BSIG-qualifizierter Anbieter empfohlen; quartalsweise Aktivierungs-Übung."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "fin_scn_online_banking_ddos",
+        "title": "DDoS-Angriff auf Online-Banking mit Bank-Run-Risiko",
+        "category": "Cyber / Customer-Trust",
+        "description": "Online-Banking-Frontend ist nicht erreichbar, Customer-Sorgen verbreiten sich über Twitter/WhatsApp, Bank-Run-Risiko steigt mit jeder Stunde.",
+        "likelihood": 4,
+        "impact": 5,
+        "ownerRole": "Vorstand / CISO",
+        "linkedProcessTemplateIds": [
+          "fin_proc_online_banking"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_ddos_mitigation"
+        ],
+        "playbook": "DDoS-Mitigation aktivieren, parallel Customer-Kommunikations-Kette starten, BaFin DORA Art. 19-Meldung vorbereiten.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "SVB-Twitter-Bank-Run-Schablone."
+      },
+      {
+        "id": "fin_scn_core_banking_outage",
+        "title": "Core-Banking-Provider-Outage mit Settlement-Cascade",
+        "category": "Infrastruktur",
+        "description": "Atruvia oder Finanz Informatik haben einen Software-Update-Bug, Settlement steht, ATM-Netz teilweise gestört.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Vorstand / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "fin_proc_settlement",
+          "fin_proc_online_banking"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_core_banking",
+          "fin_dep_sepa_swift"
+        ],
+        "playbook": "Manuellen Settlement-Modus aktivieren, Customer-Kommunikation, Bundesbank informieren, BaFin DORA-Meldung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "ICBC-2023-Schablone."
+      },
+      {
+        "id": "fin_scn_insider_trading",
+        "title": "Insider mit Trading-Zugang missbraucht Privilegien",
+        "category": "Insider",
+        "description": "Mitarbeiter*in mit Trading-Zugang führt unautorisierte Trades aus oder exfiltriert Customer-Daten.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "CISO / Compliance",
+        "linkedProcessTemplateIds": [
+          "fin_proc_compliance"
+        ],
+        "linkedDependencyTemplateIds": [],
+        "playbook": "Sofortige Account-Sperrung, Forensik-Initiierung, BaFin-Meldung, Strafanzeige (§ 38 WpHG).",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Société Générale Kerviel 2008 / abgewandelte Patterns."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "fin_ex_online_banking_ddos",
+        "title": "Online-Banking-DDoS Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "fin_scn_online_banking_ddos",
+        "ownerRole": "Krisenstab",
+        "cadenceMonths": 6,
+        "notes": "Halbjährliche Übung wegen Bank-Run-Risiko; mit Marketing/Pressesprecher."
+      },
+      {
+        "id": "fin_ex_core_banking_outage",
+        "title": "Core-Banking-Outage Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "fin_scn_core_banking_outage",
+        "ownerRole": "Krisenstab",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Übung mit Settlement-Operations + Compliance + IT-Leitung."
+      }
+    ],
+    "riskCatalogTemplates": [
+      {
+        "id": "risk-fin-online-banking-ddos",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ddos_with_bankrun",
+        "titel": "Online-Banking-DDoS mit Bank-Run-Risiko",
+        "beschreibung": "Volumetrische DDoS-Angriffe gegen Online-Banking-Frontends, Mobile-Banking-APIs und Customer-Authentifizierungs-Endpunkte. Klassische Cyber-Bedrohung mit finanzspezifischem Hebel: SVB-März-2023-Schablone zeigt, dass Customer-Trust in 48 Stunden kippen kann (42 Mrd. $ Abhebungen in einem Tag, ausgelöst durch Twitter-/Slack-/WhatsApp-Spread). Heute genügt eine Stunde Online-Banking-Ausfall, damit Customer-Foren mit Spekulation überschwemmt werden — der DDoS-Vorfall wird zum Bank-Run-Trigger. Tenant-Profil-Hinweis: Banken und Sparkassen mit Privatkundengeschäft sind primär betroffen; reine Versicherer und B2B-Wertpapier-Dienstleister weniger Bank-Run-empfindlich, dafür Reputations-Hebel über Vertrieb-Partnerschaften. Mitigation: § 3 BSIG-qualifizierter Mitigation-Vertrag, vorab-textierte Customer-Komm-Vorlagen, halbjährliche Übung mit Marketing/Pressesprecher.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "CISO / Vorstand",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-customer-data-exfiltration",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "customer_data_exfiltration",
+        "titel": "Customer-Daten-Exfiltration mit SCHUFA-Sensitivität",
+        "beschreibung": "Massen-Exfiltration von Customer-Datensätzen über kompromittierte Drittsysteme oder Insider-Zugang. Schablone DG Immobilien Management 2024–2025 (Tochter der DZ Bank): Customer-Daten von Zehntausenden Volksbank-Produkt-Investoren kompromittiert. AT&T-Snowflake-Pattern (110 Mio. Datensätze) ist auf Finanz-Sektor übertragbar — fehlende MFA bei Drittsystemen mit Customer-Daten ist die strukturelle Lücke. Finanz-spezifische Sensitivität: Verbindungs-/Kontodaten plus SCHUFA-Bonitätsdaten unterliegen DSGVO Art. 9 (besonders schützenswert); BaFin-Bußgelder bis 10 % Konzern-Umsatz nach KWG § 56; DORA Art. 19-Meldepflicht binnen 4 h nach Klassifikation. Tenant-Profil-Hinweis: alle Sub-Profile betroffen (Bank/Sparkasse/Versicherung/Zahlungsdienstleister/Wertpapier-Dienstleister); Versicherer mit Gesundheits-/Bonitätsdaten sogar verschärft.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "CISO / Datenschutzbeauftragte*r / Compliance",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-trading-system-manipulation",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "trading_manipulation",
+        "titel": "Trading-System-Manipulation oder unautorisierte Order-Ausführung",
+        "beschreibung": "Manipulation der Trading-Infrastruktur durch externe Angreifer oder kompromittierten Insider-Zugang. Mögliche Schadens-Vektoren: unautorisierte Großorders (Société-Générale-Kerviel-Pattern 2008, 4,9 Mrd. € Schaden), Latenz-Manipulation für HFT-Vorteile, Pre-Trade-Compliance-Umgehung, unautorisiertes Trading auf Eigen-Konto. Mikrosekunden-Verfügbarkeits-Anforderung der modernen Trading-Plattformen macht jede Sekunde technischer Manipulation potenziell millionenschwer. BaFin-Sanctions nach KWG § 6a / WpHG § 10 streng. Tenant-Profil-Hinweis: nur Banken mit Trading-Desk und Wertpapier-Dienstleister betroffen; reine Sparkassen-Privatkundengeschäft und Versicherer ohne Eigenanlage-Trading nicht primär exponiert.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Trading-Risikomanagement / CISO",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-swift-sepa-manipulation",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "swift_sepa_manipulation",
+        "titel": "SWIFT-/SEPA-Manipulation mit unautorisierten Überweisungen",
+        "beschreibung": "Kompromittierter Zugang zur SWIFT- oder SEPA-Schnittstelle wird für unautorisierte Auslandsüberweisungen oder Massenmanipulation genutzt. Klassische Schablone: Bangladesh Bank Heist Februar 2016 — 81 Mio. $ über SWIFT abgezweigt, erfolgreicher Angriff auf eines der zentralen Vertrauenssysteme der Finanzwelt. Nachfolgende Vorfälle 2017–2024 mit ähnlicher TTP (Banco de Chile, NIC Asia Bank, mehrere asiatische Tier-2-Banken). Vektor: kompromittierter Operator-Account oder lateral movement von Workstation zu SWIFT-Gateway. Mitigation: Hardware-Token für SWIFT-Operator-Konsolen, Vier-Augen-Prinzip oberhalb definierter Beträge, Out-of-Band-Audit-Trail, SWIFT-Customer-Security-Programme-Compliance.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Settlement-Operations / CISO",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-core-banking-outage",
+        "categoryId": "technical",
+        "subCategoryId": "core_system_outage",
+        "titel": "Core-Banking-System-Ausfall durch Provider-Update-Bug",
+        "beschreibung": "Software-Update beim Core-Banking-Provider (Atruvia für Volks-/Raiffeisenbanken, Finanz Informatik für Sparkassen) verursacht systemweiten Ausfall. Dependency-Risiko: ein einzelner Update-Bug bei Atruvia / FI kann Hunderte Banken gleichzeitig treffen — die ganze Genossenschaftsbank-Familie oder das ganze Sparkassen-Lager. Real beobachtet: mehrere kleinere Atruvia-Outages 2023–2025 mit Customer-sichtbarer Wirkung (Online-Banking-Login fehlschlägt, Karten-Autorisierung verzögert). Wiederherstellung typisch 2–8 h, im schweren Fall 24–48 h mit Customer-Kommunikations-Aufwand. Tenant-Profil-Hinweis: alle Volks-/Raiffeisen-/Sparkassen-Tenants mit Atruvia/FI-Anbindung betroffen, Großbanken mit eigenem Core-Banking weniger.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Vendor-Management",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-trading-latency-spike",
+        "categoryId": "technical",
+        "subCategoryId": "trading_latency",
+        "titel": "Trading-Plattform-Latenz-Spike mit HFT-Wirkung",
+        "beschreibung": "Mikrosekunden-Latenz-Spitzen in der Trading-Plattform — durch Network-Congestion, fehlerhafte Konfigurations-Änderung, Last-Spitze. Bei HFT-Strategien sind Mikrosekunden gleichbedeutend mit Millionen-Trades; Kunde-/Eigen-Order-Mismatches haben sofortigen Marktwert-Impact. Häufiges Pattern in stark genutzten Trading-Häusern; BaFin-Reporting-Pflicht ab definierter Schwelle nach WpHG/MiFIR. Tenant-Profil-Hinweis: nur Banken mit Trading-Desk und algorithmischem Trading betroffen; klassische Volksbank/Sparkasse-Vertriebs-Kanäle deutlich unkritischer.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Trading-Operations / IT-Performance",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-settlement-outage",
+        "categoryId": "technical",
+        "subCategoryId": "settlement_outage",
+        "titel": "Settlement-System-Outage mit ICBC-Schablonen-Wirkung",
+        "beschreibung": "Settlement-System (interne Tagesendverarbeitung, SEPA-Clearing, Wertpapier-Settlement) fällt aus durch Software-Defekt, Datenbank-Korruption oder Cyber-Vorfall. Schablone ICBC Financial Services November 2023 (LockBit 3.0 via Citrix CVE-2023-4966): Settlement von > 9 Mrd. $ Treasury-Assets blockiert, US Treasury repo fails stiegen auf 62,2 Mrd. $ (höchster Stand seit März), ICBC-Mitarbeiter musste Settlement-Details auf USB-Stick per Messenger durch Manhattan transportieren. Mitigation: Manueller Settlement-Modus dokumentiert und geübt, Bundesbank-Notfall-Hotline, Cross-Bank-Notfallpooling. Tenant-Profil-Hinweis: alle mit Settlement-Funktion, also faktisch alle größeren Banken; Versicherer und reine Brokerage weniger Settlement-zentrisch.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Settlement-Operations / IT-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-cloud-region-outage",
+        "categoryId": "technical",
+        "subCategoryId": "cloud_region_outage",
+        "titel": "Cloud-Region-Outage bei kritischen Workloads",
+        "beschreibung": "Cloud-Provider-Region (AWS, Azure, GCP) fällt aus oder bekommt Massen-Misconfiguration. Auswirkung in Finanzbereich verstärkt durch DORA Art. 28-Pflichten zur Drittanbieter-Resilienz. Schablonen 2024–2025: AWS-Region-Outages, Cloudflare 14.7.2025 globale Withdrawal, OVHcloud 30.10.2024. Bei Banken mit Cloud-First-Architektur (Online-Banking-Backend, Customer-Service-Plattform) direkter Customer-sichtbarer Effekt. Mitigation: Multi-Region-Failover, Out-of-Band-Monitoring, Vertrags-Klauseln nach DORA Art. 28. Tenant-Profil-Hinweis: Banken mit eigener Cloud-Architektur direkt; klassische Atruvia-/FI-gebundene Genossenschaftsbanken sehen den Effekt indirekt über ihren Provider.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Cloud-Operations / Vendor-Management",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-insider-trading-access",
+        "categoryId": "human_intentional",
+        "subCategoryId": "insider_trading_abuse",
+        "titel": "Insider-Mitarbeiter*in mit Trading-Zugang missbraucht Privilegien",
+        "beschreibung": "Mitarbeiter*in mit Trading-Zugang führt unautorisierte Trades aus, exfiltriert sensitive Order-Bücher oder manipuliert Pre-Trade-Compliance-Schwellen. Klassische Schablonen: Société Générale / Jérôme Kerviel 2008 (4,9 Mrd. € Schaden über versteckte Großorders); Barings Bank / Nick Leeson 1995 (1,4 Mrd. £ Schaden, Insolvenz-Auslöser). Häufigkeit moderner Insider-Trades niedriger durch verschärfte Vier-Augen-Disziplin, aber Insider-Risk strukturell höher als in anderen Sektoren wegen direkter finanzieller Hebel. Mitigation: Background-Checks für Trading-Rollen, Pre-Trade-Compliance-Schwellen mit hardcoded Vier-Augen-Pflicht, Out-of-Band-Logging im SOC, GwG-Auffälligkeits-Monitoring auf Mitarbeiter-Konten. Tenant-Profil-Hinweis: Bank mit Trading-Desk + Wertpapier-Dienstleister + Asset-Management-Gesellschaft betroffen; reine Privatkundengeschäfts-Sparkassen / Versicherer weniger.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Trading-Risikomanagement / CISO / Compliance",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-atm-attack",
+        "categoryId": "human_intentional",
+        "subCategoryId": "organized_crime_atm",
+        "titel": "ATM-Netz-Angriff durch Organisierte Kriminalität (Carbanak-Schablone)",
+        "beschreibung": "Organisierte-Kriminalität-Angriff auf das ATM-Netz mit Insider-Wissen — Carbanak/Cobalt-Group-Pattern: Täter mit tiefem System-Wissen platzieren Malware im ATM-Backend, lassen Geräte zu definierten Zeitpunkten 'Jackpotten' (Geld auswerfen ohne Karten-Autorisierung). Vorfälle 2018–2024 in DACH und Osteuropa mit Schäden im Millionen-Bereich pro Angriff. Vektor: Spear-Phishing oder kompromittierter Mitarbeiter-Workplace, lateral movement zum ATM-Management-System; Money-Mules holen das Geld zur Cash-out-Zeit. Tenant-Profil-Hinweis: Banken und Sparkassen mit eigenem ATM-Netz primär betroffen; Versicherer und Wertpapier-Dienstleister nicht relevant, Zahlungsdienstleister nur bei Whitelabel-Karten-Angeboten. Schadensbild: direkter monetärer Verlust + Reputations-Schaden + Customer-Trust-Erosion. Mitigation: Netzwerk-Segmentierung ATM-Backend, Hardware-Hardening, Anomalie-Monitoring auf Geld-Auszahlungen, schnelle Sperr-Mechanismen, Tabletop mit BKA-Kontakt.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "ATM-Operations / CISO",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-money-laundering-insider",
+        "categoryId": "human_intentional",
+        "subCategoryId": "aml_insider_collusion",
+        "titel": "Geldwäsche-Insider-Sabotage / GwG-Detection-Umgehung",
+        "beschreibung": "Mitarbeiter*in im Compliance-/GwG-Bereich kollaboriert mit organisierter Kriminalität und unterdrückt Verdachtsmeldungen, manipuliert Transaktions-Monitoring-Schwellen oder löscht digitale Spuren. Schadensbild: BaFin-Bußgelder nach KWG § 56 plus GwG-Bußgelder bis 5 Mio. € pro Vorfall, Lizenzentzugs-Risiko bei systematischer Verstoß-Kette. Häufigkeit sehr niedrig (Compliance-Bereich strukturell überwacht), aber Auswirkung hoch und Audit-Spur schwach. Mitigation: Mehrstufige Compliance-Auditierung, Out-of-Band-Logging im SOC mit unveränderlichen Backups, jährliche unabhängige Audit-Prüfung der GwG-Konfiguration, Background-Checks für GwG-Officer-Funktionen.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Compliance-Leitung / Vorstand",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-settlement-error",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "settlement_error",
+        "titel": "Settlement-Fehler / Falsch-Buchung mit Customer-Wirkung",
+        "beschreibung": "Bedienfehler in der Tagesendverarbeitung führt zu falschen Customer-Belastungen, Doppel-Lastschriften, fehlenden Gutschriften oder Wertstellungs-Verzerrungen. Häufigkeitsmuster: pro Jahr im niedrigen einstelligen Bereich pro 100.000 Customer; kumulierter Korrektur-Aufwand und Customer-Beschwerde-Eskalation hoch. Bei massivem Fehler (z. B. Update-Bug im Skript-Modul) Tausende Customer betroffen, Customer-Trust-Erosion direkt. Mitigation: Vier-Augen-Prinzip bei Skript-Änderungen, Test-Environment mit produktionsidentischer Datenbasis, automatisierte Plausibilitäts-Checks vor dem produktiven Run.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Settlement-Operations / IT-QA",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-compliance-shortage",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "compliance_skill_shortage",
+        "titel": "Compliance-Officer-Mangel und GwG-Detection-Lücke",
+        "beschreibung": "Strukturell unbesetzte Stellen im Compliance-/GwG-/MaRisk-Bereich. Bundesweiter Trend, verstärkt durch DORA-Aufwand seit 2025 (zusätzliche Compliance-Pflichten mit gleicher Personal-Decke). Folge: GwG-Verdachtsmeldungen werden verspätet bearbeitet, MaRisk-Audits unzureichend dokumentiert, BaFin-Anfragen mit Verzögerung beantwortet. Tenant-Profil-Hinweis: kleinere Genossenschaftsbanken / Sparkassen mit Allein-Compliance-Funktion strukturell anfälliger als Großbanken mit Compliance-Abteilung; Versicherer und Zahlungsdienstleister mit eigenem Compliance-Bereich tendenziell besser ausgestattet, aber DORA-Druck trifft alle gleich.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Personalabteilung / Vorstand",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-core-it-provider-failure",
+        "categoryId": "interdependency",
+        "subCategoryId": "core_provider_failure",
+        "titel": "Kern-IT-Dienstleister-Ausfall (Atruvia / Finanz Informatik)",
+        "beschreibung": "Sektor-systemrelevanter Kern-IT-Dienstleister (Atruvia für Genossenschaftsbanken, Finanz Informatik für Sparkassen) hat einen schweren Ausfall — Cyber-Vorfall, Insolvenz, Cloud-Region-Outage, Strom-Kaskade. Im DORA-Sinne 'kritischer ICT-Drittanbieter' nach Art. 28 mit besonderen Pflichten. Bei Vollausfall: gesamte Genossenschaftsbank-Familie oder gesamtes Sparkassen-Lager gleichzeitig betroffen, Wiederherstellung Stunden bis Tage. Tenant-Profil-Hinweis: Volks-/Raiffeisenbanken (Atruvia) und Sparkassen (FI) direkt; Großbanken mit eigenem Kern-System (Deutsche Bank, Commerzbank) weniger; Versicherer mit eigenen Provider-Beziehungen separat exponiert.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Vorstand / Vendor-Management / Compliance",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-bundesbank-disruption",
+        "categoryId": "interdependency",
+        "subCategoryId": "central_bank_disruption",
+        "titel": "Bundesbank- / TARGET2-/T2-/TIPS-Schnittstelle-Disruption",
+        "beschreibung": "Bundesbank-/TARGET2-Nachfolger T2/TIPS (seit 20.3.2023) ist die zentrale Settlement-Infrastruktur für SEPA-Großbetrags-Zahlungen und Instant-Payments. Bei Disruption durch Cyber-Vorfall, Software-Bug oder Stromausfall steht der gesamte deutsche Großbetrags-Zahlungsverkehr still. Erinnerung: T2-Migration Q1 2023 hatte Anfangs-Schwierigkeiten mit Stabilität; größere Disruption-Szenarien sind im EZB-Continuity-Plan abgebildet. Bei Cyber-Disruption Cross-Sektor-Kaskade: Banken können nicht abwickeln, Industrie-Großzahlungen verzögert, Energie-Sektor-Zahlungen für Großeinkäufe gestört. Mitigation: Bundesbank-Notfall-Hotline dokumentiert, manueller Settlement-Modus, gegebenenfalls Tagesverzögerung akzeptieren.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Settlement-Operations / Vorstand",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-fin-rz-flood-pandemic",
+        "categoryId": "nature",
+        "subCategoryId": "datacenter_natural_event",
+        "titel": "Hochwasser am Rechenzentrum oder Pandemie-Continuity-Stress",
+        "beschreibung": "Bündel-Risiko für seltene aber existenzielle Naturereignisse mit Finanz-Wirkung. Hochwasser am eigenen Rechenzentrum (Schablone Süddeutschland Mai/Juni 2024 mit 100–150 mm Niederschlag im Allgäu/Augsburg) oder Pandemie-Continuity-Stress wie März 2020: Heimarbeit-Mobilisierung, gleichzeitige Customer-Eskalation (Kreditausfälle, Versicherungsschäden), Settlement-Personal in Quarantäne. Schadensbild: Tage bis Wochen Wiederaufbau, Customer-Service-Engpass, MaRisk-Notfallplan-Aktivierung. Tenant-Profil-Hinweis: alle physischen RZ-Betreiber gleichermaßen Hochwasser-empfindlich; Pandemie-Continuity trifft alle gleichmäßig, aber kleinere Tenants mit Allein-Schicht im Settlement strukturell anfälliger.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "RZ-Leitung / Vorstand / Personalabteilung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "tabletopScenarios": [
+      {
+        "id": "tabletop-fin-online-banking-ddos-bankrun",
+        "version": "1.0.0",
+        "title": "Online-Banking-DDoS mit Bank-Run-Risiko",
+        "summary": "Volumetrische DDoS-Angriffe gegen Online-Banking-Frontends, Mobile-Banking-APIs und Customer-Authentifizierungs-Endpunkte einer mittelständischen Genossenschaftsbank (ca. 200.000 Privatkunden, 30.000 B2B, 12.000 Wertpapier-Depots, KRITIS-pflichtig nach BSI-KritisV § 7 Anhang 6 wegen Anzahl bargeldloser Transaktionen). Bereits zur 30. Minute schwillt die Twitter-/X-/WhatsApp-Spekulation an („mein Banking geht nicht — was ist da los?\"). Das Szenario simuliert die ersten 3 Stunden mit Fokus auf DORA-Art.-19-Erstmeldung (4 h harte Frist), BaFin-/BAIT-Reporting, MaRisk-AT-7.2-Notfallmanagement, DSGVO-Art.-33-Bewertung, und der zentralen Customer-Trust-Disziplin: SVB-März-2023-Schablone (42 Mrd. $ Abhebungen in einem Tag, „first Twitter-fueled bank run\") zeigt, dass eine schlecht koordinierte Customer-Komm aus einem operativen DDoS einen Bank-Run-Trigger machen kann. Zentraler Trade-off: offene Kommunikation mit Risiko Bank-Run-Beschleunigung versus zurückhaltende Kommunikation mit Risiko BaFin-Reputations-Eskalation. Realitätsbezug: SVB-Twitter-Bank-Run März 2023, ICBC-LockBit-3.0-Ransomware November 2023 ($9 Mrd. Treasury-Settlement-Disruption, USB-Stick-Boten-Lösung), DG-Immobilien-Cyber-Vorfall 2024. Das Szenario komprimiert auf 180 Minuten.",
+        "sectors": [
+          "Finanz- und Versicherungswesen"
+        ],
+        "applicableRegimes": [
+          "DORA",
+          "BAIT",
+          "BSIG",
+          "DSGVO",
+          "MaRisk"
+        ],
+        "durationMinutes": 180,
+        "roles": [
+          {
+            "id": "role-vorstand",
+            "title": "Krisenstabs-Leitung (Vorstand)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (DDoS-Mitigation-Aktivierung, Customer-Komm-Strategie, Bank-Run-Liquiditäts-Vorprüfung mit Bundesbank, Pressemitteilung, Filialen-Briefing). DORA Art. 5 verlangt explizit Verantwortung für ICT-Risiko auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung; KWG § 25a überträgt den Vorständen die persönliche Compliance-Verantwortung. Schnittstelle zu BaFin-Spitze, Bundesbank-Direktorium und Verbandsspitze (BVR/DSGV) bei systemischen Implikationen."
+          },
+          {
+            "id": "role-ciso",
+            "title": "CISO / DORA-Verantwortliche*r",
+            "briefing": "Cyber-Incident-Response-Lead. Koordiniert DDoS-Mitigation-Vertrag (Akamai/Cloudflare/Link11), bewertet Anomalie-Telemetrie, beauftragt Forensik. DORA Art. 6/7-Risiko-Management-Rahmenwerk, BAIT-Pflichten (Banken) bzw. VAIT (Versicherer), KAIT (Kapitalverwaltung) oder ZAIT (Zahlungsdienste) je nach Tenant-Profil. Schnittstelle zu BSI-CERT-Bund, BaFin-IT-Aufsicht und sektor-spezifischen Threat-Sharing-Plattformen (DK / FS-ISAC)."
+          },
+          {
+            "id": "role-online-banking-ops",
+            "title": "Online-Banking-Operations-Lead",
+            "briefing": "24/7-Plattform-Verantwortung. Hat das DDoS-Anomalie-Monitoring beobachtet, kennt die Backend-Topologie, koordiniert Failover auf Backup-Region und Aktivierung der Mitigation-Provider. Zweite Eskalationsstufe nach NOC, entscheidender Fakten-Lieferer für Krisenstab. Ist im Tenant-Profil-„Bank/Sparkasse\" oft beim Atruvia/FI-Drittanbieter angesiedelt — ICT-Drittanbieter-Koordination nach DORA Art. 28 ist Pflicht."
+          },
+          {
+            "id": "role-bafin-liaison",
+            "title": "BaFin-Liaison / DORA-Reporting",
+            "briefing": "Koordiniert DORA-Art.-19-Meldewege gegenüber BaFin (4 h Erstmeldung, 72 h Folgemeldung, 1 Monat Abschlussbericht für „major ICT-related incidents\"). Parallel BAIT/VAIT/KAIT/ZAIT-Reporting, MaRisk-AT-7.2-Notfallmanagement-Pflichten, BSI-§-8d-Doppel-Meldung bei KRITIS-Schnittmenge. Bei DSGVO-Aspekten zusätzlich Schnittstelle zur BfDI bzw. zur zuständigen Landes-Datenschutzbehörde."
+          },
+          {
+            "id": "role-press-customer",
+            "title": "Pressesprecher / Customer-Kommunikation",
+            "briefing": "Externe Kommunikation, Customer-Trust-Disziplin. Multi-Channel: Online-Banking-Status-Page, Push-Benachrichtigung der Banking-App, E-Mail-Massenmailing, Pressemitteilung, Lokal- und Branchenpresse. Zentraler Trade-off: SVB-März-2023-Lehre — Twitter/X/WhatsApp-Spekulation eskaliert in Stunden, schweigen verstärkt Misstrauen, falsche Beruhigung untergräbt Glaubwürdigkeit. Vor-textierte Krisen-Botschaften mit BVR/DSGV-Verbandsabstimmung sind Pflicht."
+          },
+          {
+            "id": "role-bundesbank-liaison",
+            "title": "Bundesbank-Liaison / Liquiditäts-Notpfad",
+            "briefing": "Schnittstelle zur Bundesbank-Hauptverwaltung (TARGET2/T2/TIPS-Settlement-Infrastruktur). Bei Bank-Run-Verdacht: Vorab-Klärung der Liquiditäts-Notfallfazilitäten (ELA — Emergency Liquidity Assistance), Information der Hauptverwaltung über Customer-Beschwerde-Welle. Bei systemrelevanten Tenants zusätzlich EZB/SSM-Liaison. Diese Rolle ist Tenant-Profil-abhängig: Genossenschaftsbanken oft über DZ-Bank vermittelt, Sparkassen über Landesbank/Verband."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu DORA-Meldepflichten (Art. 19), MaRisk-AT-7.2-Notfallmanagement, BAIT-Anzeige-Pflichten, DSGVO Art. 33 (72 h) und Art. 34 (unverzüglich bei hohem Risiko), KWG § 25a-Vorstandsverantwortung. Bei DDoS-Erpressungs-Komponente zusätzlich Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung, OFAC-SDN-Compliance). GwG-Aspekte falls Vorfall mit Geldwäsche-Verdacht überlagert."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-ddos-alarm",
+                "title": "DDoS-Alarm Online-Banking-Frontend",
+                "description": "Online-Banking-Operations meldet: Mitigation-Provider-Telemetrie zeigt seit 8 Minuten anschwellenden Volumen-Angriff auf das Banking-Frontend — aktuell 240 Gbit/s, Tendenz steigend. Customer-Login-Erfolgsrate fällt unter 30 %. Mobile-App-API meldet 503-Fehler. Erste Customer-Service-Anrufe laufen ein. Vektor: Mix aus UDP-Reflection (NTP, DNS) und HTTP-Layer-7-Flood gegen die Login-Endpunkte. Quelle: Mehrere zehntausend IP-Adressen, vermutlich Mirai-Botnet-Variante.",
+                "roleId": "role-online-banking-ops"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-initial-ddos-response",
+                "question": "Wie reagiert das Online-Banking-Operations-Team auf den DDoS-Angriff?",
+                "roleId": "role-online-banking-ops",
+                "guidance": "Trade-off zwischen Sofort-Aktivierung des Mitigation-Vertrags (Akamai Prolexic / Cloudflare Magic Transit / Link11 — vorab vertraglich gebunden, BGP-Anycast-Mitigation) und Eigen-Filterung am Edge (eigene Scrubbing-Center, geringere Kosten, aber Kapazitäts-Limit). DORA Art. 6 verlangt vorab definierte ICT-Sicherheits-Mechanismen — der Mitigation-Vertrag ist dafür der saubere Pfad.",
+                "options": [
+                  {
+                    "id": "opt-mitigation-vertrag-aktivieren",
+                    "label": "Sofort vertraglich gebundenen DDoS-Mitigation-Provider aktivieren (BGP-Anycast-Umroutung, vor-konfiguriert) — parallel CISO und Vorstand alarmieren",
+                    "consequence": "Mitigation greift binnen 5–10 Minuten, Frontend wieder erreichbar. DORA-Art.-6-konform. Kosten 50–150 T€ je nach Vertragsstaffel. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Vorab gebundener Mitigation-Vertrag konsequent genutzt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-eigen-scrubbing",
+                    "label": "Eigen-Scrubbing am Edge versuchen, Mitigation-Provider erst bei Eskalation aktivieren",
+                    "consequence": "Kapazität reicht für 240 Gbit/s wahrscheinlich nicht — bei weiterer Eskalation 30–60 Minuten Verzug bis Mitigation greift. In dieser Zeit Customer-Trust-Erosion. Schwächer.",
+                    "evaluationHints": [
+                      "Eigen-Filterung mit Kapazitäts-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-beobachten",
+                    "label": "Erst beobachten, ob der Angriff von selbst nachlässt",
+                    "consequence": "Frontend bleibt unerreichbar, Customer-Beschwerde-Welle eskaliert, Twitter-/X-Spekulation wächst. Bank-Run-Risiko steigt. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Reine Beobachtung — gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-operations-online-banking",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-twitter-spread",
+                "title": "Twitter-/X-/WhatsApp-Spekulation eskaliert",
+                "description": "Customer-Service meldet 380 Anrufe in 12 Minuten (normal: 25). Social-Media-Monitoring erkennt zwei virale Tweets („Mein Online-Banking geht seit ner Stunde nicht — bin ich der einzige?\") mit jeweils 1.500+ Retweets. WhatsApp-Customer-Foren der Genossenschaftsbank-Community melden ähnliches. Erste Stimmen spekulieren über „Hacker-Angriff\", „Insolvenz-Gerücht\", „Geld weg\". SVB-März-2023-Schablone offensichtlich anwendbar. Bisher kein offizielles Statement.",
+                "roleId": "role-press-customer"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-customer-komm-erste-welle",
+                "question": "Wie reagiert die Customer-Kommunikation auf die Twitter-Welle?",
+                "roleId": "role-press-customer",
+                "guidance": "Trade-off zwischen offener Kommunikation („Wir haben technische Probleme, daran arbeiten wir, kein Daten-/Geld-Verlust\") und zurückhaltender Kommunikation („Untersuchung läuft\"). SVB-Lehre: Schweigen verstärkt Misstrauen, falsche Beruhigung untergräbt Glaubwürdigkeit. Vor-textierte Krisen-Botschaften mit BVR/DSGV-Verbandsabstimmung sollten in den Templates liegen.",
+                "options": [
+                  {
+                    "id": "opt-offen-kommunizieren",
+                    "label": "Sofort offene Status-Meldung über Online-Banking-Status-Page, App-Push, Tweet, Pressemitteilung — „technische Störung durch externen Angriff, an Mitigation wird gearbeitet, Kundengelder sind sicher\"",
+                    "consequence": "Twitter-Welle stabilisiert sich, Customer-Trust gewahrt. BaFin-Reputations-Risiko reduziert. SVB-Schablone richtig vermieden. Empfohlene Variante. Gleichwertig zu opt-koordiniert-mit-bvr-dsgv.",
+                    "evaluationHints": [
+                      "Offene Krisenkommunikation — gleichwertig zu opt-koordiniert-mit-bvr-dsgv"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-koordiniert-mit-bvr-dsgv",
+                    "label": "Erst BVR/DSGV-Verbandsabstimmung (15–20 min), dann gemeinsame Krisen-Botschaft mit Verbandsspitze",
+                    "consequence": "Politische Disziplin maximal, gemeinsame Sprache mit Verband. Aufwand höher, aber Customer-Trust gewahrt. Empfohlene Variante in Verbund-Strukturen. Gleichwertig zu opt-offen-kommunizieren.",
+                    "evaluationHints": [
+                      "Koordinierte Verbandskommunikation — gleichwertig zu opt-offen-kommunizieren"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zurueckhaltend",
+                    "label": "Status-Page-Update „technische Störung — Untersuchung läuft\", keine weiteren Details",
+                    "consequence": "Twitter-Spekulation füllt das Informationsvakuum, Bank-Run-Risiko steigt. SVB-Schablone verwirklicht. Schwächste Option.",
+                    "evaluationHints": [
+                      "Informations-Vakuum gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-communication-customer-trust",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-bundesbank",
+                "title": "Krisenstab konstituiert + Bundesbank-Liquiditäts-Vorprüfung",
+                "description": "Krisenstabs-Leitung (Vorstand) hat CISO, Online-Banking-Ops, BaFin-Liaison, Pressesprecher, Bundesbank-Liaison, Rechtsabteilung einberufen. BaFin-IT-Aufsicht informiert (DORA-Art.-19-Vor-Stadium). Bundesbank-Liaison hat Hauptverwaltung über Customer-Beschwerde-Welle informiert und vorab Liquiditäts-Notfallfazilitäten geprüft (ELA-Bereitschaft) — falls Bank-Run-Symptome eintreten, ist die Liquiditäts-Schiene vorbereitet.",
+                "roleId": "role-vorstand"
+              },
+              {
+                "id": "inj-mitigation-greift",
+                "title": "Mitigation-Provider greift, aber Customer-Welle hält an",
+                "description": "Mitigation-Provider hat seit Minute 12 BGP-Anycast-Umroutung aktiv, DDoS-Volumen wird gescrubbt, Frontend wieder zu 95 % erreichbar. Aber: Customer-Service-Volumen weiter hoch (Beschwerde-Stau aus den ersten 30 Minuten + neue Verunsicherungs-Anrufe). Filialen melden Customer-Anfragen am Schalter („Ist mein Geld noch da?\"). Erste Filiale (Donauwörth-Hauptstelle) hat eine Schlange von 25 Personen.",
+                "roleId": "role-online-banking-ops"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bank-run-vorbereitung",
+                "question": "Welche Vorbereitungen werden für ein potenzielles Bank-Run-Szenario getroffen?",
+                "roleId": "role-vorstand",
+                "guidance": "Zentraler Customer-Trust-Trade-off. Bargeld-Vorhaltung in Filialen erhöhen ist sichtbares Signal („Bank stockt Bargeld auf — gibt es Probleme?\"), aber bei realem Bank-Run notwendig. SVB-Schablone: Bank-Run kann in 24–48 h zur Existenzfrage werden. Vorab-Klärung mit Bundesbank/ELA ist Pflicht, sichtbare Bargeld-Aufstockung ist Trade-off.",
+                "options": [
+                  {
+                    "id": "opt-stille-vorbereitung",
+                    "label": "Stille Vorbereitung: Bundesbank-ELA-Vereinbarung aktiv halten, Bargeld-Logistik intern auf Bereitschaft, aber Filialen-Bargeld-Bestand normal halten — erst bei realen Symptomen aufstocken",
+                    "consequence": "Vorbereitet, aber kein Signal-Effekt. Bei stabilisierender Customer-Komm wahrscheinlich ausreichend. Empfohlene Variante. Gleichwertig zu opt-pro-aktiv-aufstocken bei stabilisierter Kommunikation.",
+                    "evaluationHints": [
+                      "Stille Vorbereitung mit Bundesbank-Schiene"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-pro-aktiv-aufstocken",
+                    "label": "Pro-aktiv Filialen-Bargeld auf 150 % aufstocken, Bundesbank-ELA scharf stellen, gemeinsame Erklärung mit Verband ergänzen",
+                    "consequence": "Bei realem Bank-Run-Signal sofort handlungsfähig. Risiko: Aufstocken sichtbar, kann Misstrauen befeuern. Vertretbar bei eskalierender Welle. Gleichwertig zu opt-stille-vorbereitung in stabilisierter Kommunikation.",
+                    "evaluationHints": [
+                      "Pro-aktive Bargeld-Vorbereitung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-keine-vorbereitung",
+                    "label": "Keine Bank-Run-Vorbereitung — der Vorfall ist nur ein DDoS, keine Solvenz-Frage",
+                    "consequence": "Bei eskalierender Twitter-Welle ohne Bargeld-Backup-Plan handlungsunfähig. Kontraindiziert in DORA-Welt. SVB-Schablone ignoriert.",
+                    "evaluationHints": [
+                      "Keine Vorbereitung — gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-cross-sector-bundesbank",
+                  "crit-fin-communication-customer-trust"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-erpressungs-mail",
+                "title": "Erpressungs-Mail eingegangen",
+                "description": "CISO meldet: Über generischen info@-Postfach ist eine Mail eingegangen mit Betreff „Bank-Service kostet 8 BTC\". Inhalt: Behauptung, der DDoS sei nur „Demo\", weiteres Volumen folge, falls 8 BTC (~ 480 T€) nicht binnen 6 h überwiesen werden. Adresse: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa-Variante (typische Erpresser-Adresse). Forensik prüft Authentizität.",
+                "roleId": "role-ciso"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-loesegeld",
+                "question": "Wie reagiert die Bank auf die Erpressungs-Mail?",
+                "roleId": "role-rechtsabteilung",
+                "guidance": "Rechtlich klare Lage in Deutschland: Lösegeld-Zahlung an Cyberkriminelle ist nach § 89c StGB (Terrorismusfinanzierung) strafbar, falls die Empfänger-Adresse OFAC-SDN-gelistet ist (Conti-Cluster, REvil-Cluster, Nachfolger). BaFin- und BSI-Position eindeutig: nicht zahlen, BKA-Anzeige, Mitigation hochfahren. Trade-off nur scheinbar — die richtige Antwort ist klar.",
+                "options": [
+                  {
+                    "id": "opt-nicht-zahlen-bka",
+                    "label": "Nicht zahlen, BKA-Anzeige, BSI-CERT informieren, Mitigation auf Maximal-Stufe hochfahren, vor-präparierte Krisen-Reserven aktivieren",
+                    "consequence": "Rechtlich saubere und einzig empfohlene Variante. BaFin-/BSI-Linie. Mitigation hält den Folgeangriff ab. Empfohlen.",
+                    "evaluationHints": [
+                      "Lösegeld-Verweigerung mit BKA-Anzeige"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zeit-spielen",
+                    "label": "Mit Erpressern Zeit-Spiel führen (Verhandlung andeuten, ohne zu zahlen) — parallel BKA und BSI",
+                    "consequence": "Vom BKA in einigen Fällen toleriert für Forensik-Gewinn. Risiko: Mit Erpressern Kommunizieren erhöht Anwalts-/Strafrecht-Komplexität. Akzeptabel, aber CISO/Rechtsabteilung muss konsultieren.",
+                    "evaluationHints": [
+                      "Verzögerungs-Taktik mit Behörden-Koordination"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-zahlen",
+                    "label": "8 BTC zahlen, um den Folge-Angriff zu vermeiden",
+                    "consequence": "§ 89c StGB-Risiko, OFAC-SDN-Konflikt, BaFin-Reputations-Schaden, Vorstand-Haftung. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Lösegeld-Zahlung — strafrechtlich problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-bsig",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-dora-art19-frist",
+                "title": "DORA Art. 19 Erstmeldung — Frist 90 Minuten nach Bestätigung als „major\"",
+                "description": "BaFin-Liaison meldet: Vorfall ist als „major ICT-related incident\" einzustufen (DDoS mit > 10 % der Customer-Base betroffen + Erpressungs-Komponente). DORA Art. 19 Erstmeldungs-Frist (4 h ab Klassifikation) tickt seit Minute 30. Verbleibende Zeit: ca. 90 min für vollständige Erstmeldung über das BaFin-Meldeportal. Parallel: BSI-Doppelmeldung wegen KRITIS-Status, DSGVO Art. 33 (72 h, kein Datenabfluss bisher bestätigt — Forensik läuft).",
+                "roleId": "role-bafin-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-dora-erstmeldung",
+                "question": "Wie wird die DORA Art. 19 Erstmeldung an BaFin gestaltet?",
+                "roleId": "role-bafin-liaison",
+                "guidance": "DORA-Erstmeldung muss enthalten: Vorfalls-Kategorie, Betroffene Systeme/Customer-Reichweite, ICT-Drittanbieter-Beteiligung, ergriffene Sofort-Maßnahmen, geplante Folgemeldung. Trade-off: minimal-konforme Meldung (schnell, sicher, aber wenig Information) versus ausführliche Meldung (zeit-aufwändig, aber zeigt Disziplin und reduziert BaFin-Nachfragen).",
+                "options": [
+                  {
+                    "id": "opt-erstmeldung-vollstaendig",
+                    "label": "Vollständige strukturierte Erstmeldung mit allen DORA-Pflichtfeldern, ICT-Drittanbieter-Bezug (falls Atruvia/FI involviert), Customer-Reichweite-Schätzung, Mitigation-Status — innerhalb 4-h-Frist",
+                    "consequence": "BaFin-konform, signalisiert Disziplin, reduziert Nachfragen. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "DORA-Erstmeldung vollständig in 4-h-Frist"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-erstmeldung-minimal",
+                    "label": "Minimal-konforme Erstmeldung mit Pflichtfeldern, ergänzende Details in der 72-h-Folgemeldung",
+                    "consequence": "Frist-konform, aber BaFin-Nachfragen wahrscheinlich. Akzeptabel bei Zeitdruck. Schwächer.",
+                    "evaluationHints": [
+                      "Minimal-konforme Erstmeldung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-erstmeldung-verspaetet",
+                    "label": "Erstmeldung erst nach Stabilisierung — Frist um 30 min überschritten",
+                    "consequence": "DORA-Verstoß. BaFin-Bußgeld-Risiko. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Frist-Verstoß"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-dora-art19",
+                  "crit-fin-reporting-bafin"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-filial-strom",
+                "title": "Filial-Schlangen wachsen — Bank-Run-Symptome erkennbar",
+                "description": "Filialen-Lagebild: Donauwörth-Hauptstelle 65 Personen Schlange (vor 30 min: 25). Augsburg-Filiale 40 Personen. Nördlingen 15. Mehrere Customer fragen explizit nach Bargeld-Abhebung („Sicherheitshalber 5.000 €\"). Customer-Service-Welle hat sich von „technische Frage\" zu „Vertrauens-Frage\" verschoben. Die Online-Banking-Plattform ist seit ca. 90 Minuten stabil, aber das Vertrauens-Signal ist verzögert.",
+                "roleId": "role-press-customer"
+              },
+              {
+                "id": "inj-vorstands-presse",
+                "title": "Vorstands-Pressemitteilung in Vorbereitung",
+                "description": "Pressesprecher hat einen Entwurf vorbereitet: Vorstand persönlich, Foto, Statement „Wir hatten einen DDoS-Angriff, unsere Mitigation hat gegriffen, Kundengelder sind zu jeder Zeit sicher gewesen, wir bedauern die Unannehmlichkeit, wir kooperieren mit BaFin und BKA\". Vorstand entscheidet, ob die Pressemitteilung jetzt heraus geht oder erst nach Filialen-Stabilisierung.",
+                "roleId": "role-vorstand"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-vorstands-presse",
+                "question": "Wann geht die Vorstands-Pressemitteilung heraus?",
+                "roleId": "role-vorstand",
+                "guidance": "Customer-Trust-Disziplin. SVB-Schablone: Vorstand musste im März 2023 zu spät reagieren — bis dahin war der Bank-Run via Twitter unaufhaltsam. Das persönliche Vorstands-Statement mit Foto erhöht Glaubwürdigkeit. Trade-off: Sofort-Statement (proaktiv, aber Risiko von zusätzlicher Aufmerksamkeit) versus stabilisiertes Statement (nach Filialen-Beruhigung, aber Twitter-Welle inzwischen evtl. außer Kontrolle).",
+                "options": [
+                  {
+                    "id": "opt-presse-sofort",
+                    "label": "Vorstands-Pressemitteilung sofort heraus, parallel BVR/DSGV-Verbandsabstimmung in 5 min, Multi-Channel-Verteilung (Pressemitteilung, App-Push, Tweet, lokale Presse)",
+                    "consequence": "Customer-Trust-Signal stark, Filialen-Schlangen werden sich entspannen. Pro-aktive SVB-Lehre angewandt. Empfohlene Variante. Gleichwertig zu opt-presse-koordiniert.",
+                    "evaluationHints": [
+                      "Sofortige Vorstandskommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-presse-koordiniert",
+                    "label": "Erst BVR/DSGV + BaFin-Stand-by-Info (10 min), dann Vorstands-Pressemitteilung gemeinsam mit Verbandsspitze",
+                    "consequence": "Verbund-Disziplin maximal, gemeinsame Sprache. 10-min-Verzögerung akzeptabel. Empfohlene Variante in Verbund-Strukturen. Gleichwertig zu opt-presse-sofort.",
+                    "evaluationHints": [
+                      "Koordinierte Verbandskommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-presse-warten",
+                    "label": "Pressemitteilung erst nach vollständiger Filialen-Stabilisierung (frühestens t=160)",
+                    "consequence": "Twitter-Welle füllt das Vakuum weiter, Filialen-Schlangen wachsen. Bank-Run-Trigger möglich. Schwächste Option.",
+                    "evaluationHints": [
+                      "Späte Kommunikation gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-communication-customer-trust",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-mitigation-stabil",
+                "title": "Mitigation stabil, Customer-Beruhigung beginnt",
+                "description": "Online-Banking-Ops meldet: DDoS-Volumen seit 40 min konstant abnehmend (nach Erpresser-Frist abgelaufen). Mitigation-Provider auf Standard-Stufe zurück. Frontend zu 100 % erreichbar, App-Login-Erfolgsrate 98 %. Customer-Service-Volumen sinkt. Vorstands-Pressemitteilung wirkt: Twitter-Sentiment-Analyse zeigt Tonus-Wechsel von „Bank in Schwierigkeiten\" zu „Bank hat es professionell gelöst\". Filialen melden Schlangen-Auflösung.",
+                "roleId": "role-online-banking-ops"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-filialen-mitarbeiter-briefing",
+                "question": "Wie werden die Filialen-Mitarbeiter*innen jetzt gebrieft?",
+                "roleId": "role-press-customer",
+                "guidance": "Mitarbeiter-Briefing ist die zweite Customer-Trust-Schiene. Filialen-Mitarbeiter müssen Customer-Fragen souverän beantworten („Ja, wir hatten einen DDoS, ja, Mitigation hat gegriffen, nein, kein Daten-/Geld-Verlust\"). Schriftliches Briefing-Drehbuch ist Pflicht, sonst entstehen widersprüchliche Aussagen.",
+                "options": [
+                  {
+                    "id": "opt-briefing-schriftlich-drehbuch",
+                    "label": "Schriftliches Frage-Antwort-Drehbuch an alle Filialen-Mitarbeiter*innen via Intranet + WhatsApp-Mitarbeiter-Gruppe, parallel kurze Videoschalte des CISO",
+                    "consequence": "Konsistente Aussagen über alle Filialen, Customer-Trust gewahrt. Empfohlen.",
+                    "evaluationHints": [
+                      "Mitarbeiter-Briefing strukturiert"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-briefing-mundlich",
+                    "label": "Filial-Leiter*innen mündlich briefen, sie geben Information an ihre Teams weiter",
+                    "consequence": "Risiko inkonsistenter Aussagen über Filialen. Akzeptabel in kleineren Strukturen.",
+                    "evaluationHints": [
+                      "Mündliches Briefing — Konsistenz-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-communication-customer-trust"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 160,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-presse-koordination-verband",
+                "title": "Verbands-Pressekonferenz in Vorbereitung",
+                "description": "BVR/DSGV-Verbandsspitze plant gemeinsame Pressekonferenz mit der betroffenen Bank für 17:00 Uhr — Statement, dass Mitigation-Verträge im Verbund Standard sind, dass DDoS-Angriffe gegen Banken zunehmen, dass die Bank vorbildlich reagiert hat. Schnittstelle zur BaFin-Pressestelle ist abgestimmt — BaFin wird parallel ein eigenes Statement zur DORA-Wirksamkeit publizieren.",
+                "roleId": "role-press-customer"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-verbands-pressekonferenz",
+                "question": "Wie positioniert sich die Bank in der Verbands-Pressekonferenz?",
+                "roleId": "role-vorstand",
+                "guidance": "Trade-off zwischen offen-selbstkritischer Position (Lessons-Learned, Verbesserungsbereiche, langfristige Resilienz-Investitionen) und schützender Position (Vorbild-Charakter, Mitigation hat gegriffen, alles unter Kontrolle).",
+                "options": [
+                  {
+                    "id": "opt-verbands-offen",
+                    "label": "Offene Position: „Wir haben den DDoS abgewehrt, aber wir haben Lehren gezogen — wir investieren weiter in Resilienz, sektorübergreifend\"",
+                    "consequence": "Glaubwürdig, signalisiert Lern-Disziplin, stärkt langfristiges Customer-Trust. Empfohlen.",
+                    "evaluationHints": [
+                      "Offene Lessons-Learned-Kommunikation"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-verbands-schuetzend",
+                    "label": "Schützende Position: „Mitigation hat gegriffen wie geplant, Disziplin im Verbund hat sich bewährt\"",
+                    "consequence": "Vorsichtig, aber Lehrer-Effekt geht verloren. Akzeptabel.",
+                    "evaluationHints": [
+                      "Schützende Position"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-communication-customer-trust",
+                  "crit-fin-cross-sector-bundesbank"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 175,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned-setup",
+                "title": "Lessons-Learned-Setup + DORA-Folgemeldung",
+                "description": "Die Bank ist operativ stabilisiert. Krisenstab leitet Lessons-Learned-Phase ein: Forensik-Bericht in 5 Tagen, Mitigation-Vertrags-Review (Kapazität reichte aus, aber Trigger-Zeit von 12 min ist optimierbar — Ziel 3 min), Customer-Komm-Lessons (Vorstands-Pressemitteilung war zu spät, hätte t=60 statt t=120 sein können), Filialen-Mitarbeiter-Briefing-Pattern (das schriftliche Drehbuch funktioniert, sollte als Standard etabliert werden).",
+                "roleId": "role-ciso"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-dora-folgemeldung",
+                "question": "Wie wird die DORA-Folgemeldung (72 h) und der Abschlussbericht (1 Monat) vorbereitet?",
+                "roleId": "role-bafin-liaison",
+                "guidance": "Folgemeldung muss enthalten: Vollständige Vorfalls-Beschreibung, Root-Cause, Mitigation-Wirksamkeit, Customer-Impact-Schätzung, ICT-Drittanbieter-Bezug (falls Atruvia/FI/Mitigation-Provider involviert), geplante Verbesserungs-Maßnahmen. Der Abschlussbericht ergänzt forensische Tiefe und Lessons-Learned. Trade-off: Eigene-Kapazität versus externe Forensik-Firma.",
+                "options": [
+                  {
+                    "id": "opt-folgemeldung-mit-externer-forensik",
+                    "label": "Folgemeldung-Vorbereitung mit externer Forensik-Firma (4-h-SLA, finanz-spezialisiert), strukturierte Lessons-Learned, klare Maßnahmen-Roadmap",
+                    "consequence": "Hochwertige Folgemeldung, BaFin-Audit-Vorbereitung sauber. Empfohlen.",
+                    "evaluationHints": [
+                      "Externe Forensik mit Lessons-Learned"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-folgemeldung-eigen",
+                    "label": "Eigene SOC-Team Folgemeldung, externe Forensik nur falls BaFin-Nachfragen",
+                    "consequence": "Akzeptabel bei kleineren Vorfällen, aber Risiko unvollständiger Forensik-Tiefe.",
+                    "evaluationHints": [
+                      "Eigen-Forensik mit Reaktivkapazität"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-dora-art19",
+                  "crit-fin-reporting-bafin"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 180,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 7 evaluationCriteria-Achsen. Customer-Trust hat gehalten — kein Bank-Run ausgelöst, Filialen-Schlangen aufgelöst, Twitter-Sentiment positiv. DORA-Erstmeldung in Frist, BaFin-/BSI-/DSGVO-Reporting koordiniert. Lessons-Learned: Mitigation-Trigger-Zeit von 12 min auf 3 min verkürzen, Vorstands-Pressemitteilung-Pattern bei t=60 etablieren statt t=120, Filialen-Briefing-Drehbuch als Pflichtteil des MaRisk-AT-7.2-Notfallplans.",
+                "roleId": "role-vorstand"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-fin-reporting-dora-art19",
+            "description": "DORA Art. 19 Erstmeldung (4 h) und Folgemeldung (72 h) eingehalten",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-reporting-bafin",
+            "description": "BaFin-/BAIT/VAIT/KAIT/ZAIT-Reporting koordiniert",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-reporting-bsig",
+            "description": "BSI-§-8d-Doppelmeldung bei KRITIS-Schnittmenge + DSGVO-Art.-33-/-34-Bewertung",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-governance-krisenstab",
+            "description": "Krisenstabs-Konstituierung, Vorstands-Verantwortung nach DORA Art. 5 / KWG § 25a",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-fin-operations-online-banking",
+            "description": "Online-Banking-Plattform-Wiederherstellung, Mitigation-Provider-Nutzung",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-fin-communication-customer-trust",
+            "description": "Customer-Trust-Disziplin: SVB-Schablone-Vermeidung, Filialen-Mitarbeiter-Briefing, Verbands-Koordination",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-fin-cross-sector-bundesbank",
+            "description": "Bundesbank-/EZB-Liquiditäts-Notpfad, ELA-Vorprüfung, Bank-Run-Vorbereitung",
+            "weight": 2,
+            "category": "cross_sector"
+          }
+        ]
+      },
+      {
+        "id": "tabletop-fin-core-banking-outage-settlement",
+        "version": "1.0.0",
+        "title": "Core-Banking-Ausfall mit Settlement-Cascade",
+        "summary": "Das Kernbankensystem einer mittelständischen Genossenschaftsbank fällt um 14:30 Uhr aus — ICT-Drittanbieter-Vorfall bei Atruvia (für Volksbanken) bzw. Finanz Informatik (für Sparkassen) als Schablone. Filialen können keine Buchungen vornehmen, Online-Banking wirft Fehler, ATM-Geld-Abhebungen funktionieren nur mit Tageslimit-Cache. Kritische Frist: TARGET2/T2/TIPS-Settlement-Schluss um 18:00 MEZ — alle Settlement-Anweisungen, die heute nicht durchgehen, kosten Zinsstrafe und Bundesbank-Verzugsmeldung. Das Szenario simuliert die ersten 2,5 Stunden mit Fokus auf MaRisk-AT-7.2-Notfallmanagement, DORA-Art.-19-Erstmeldung mit ICT-Drittanbieter-Bezug nach Art. 28, BAIT-Meldepflichten, Bundesbank-Settlement-Vorabmeldung, Customer-Komm bei Filialen-Stillstand. Realitätsbezug: ICBC-LockBit-Ransomware November 2023 ($9 Mrd. Treasury-Settlement-Disruption, USB-Stick-Boten-Lösung), historische Atruvia/FI-Vorfälle. Das Szenario komprimiert auf 150 Minuten.",
+        "sectors": [
+          "Finanz- und Versicherungswesen"
+        ],
+        "applicableRegimes": [
+          "DORA",
+          "BAIT",
+          "MaRisk",
+          "BSIG"
+        ],
+        "durationMinutes": 150,
+        "roles": [
+          {
+            "id": "role-vorstand",
+            "title": "Krisenstabs-Leitung (Vorstand)",
+            "briefing": "Gesamtkoordination und strategische Freigaben. KWG § 25a-Vorstandsverantwortung, DORA Art. 5-ICT-Risiko-Verantwortung. Kritische Entscheidungen: Aktivierung des MaRisk-AT-7.2-Notfallplans, Customer-Komm-Strategie bei Filialen-Stillstand, Bundesbank-Settlement-Vorabmeldung, Verbands-Schnittstelle (BVR/DSGV)."
+          },
+          {
+            "id": "role-it-ops-lead",
+            "title": "IT-Operations-Lead / ICT-Drittanbieter-Schnittstelle",
+            "briefing": "Schnittstelle zum ausgelagerten ICT-Drittanbieter (Atruvia für Volksbanken-Verbund, Finanz Informatik für Sparkassen-Verbund — beide nach DORA Art. 31 als „kritische ICT-Drittanbieter\" eingestuft). Koordiniert Vorfall-Status, Wiederanlauf-Plan, Eskalation auf Atruvia/FI-Vorstand. ICT-Drittanbieter-Register nach DORA Art. 28 dokumentiert die Vertrags- und Eskalations-Pfade."
+          },
+          {
+            "id": "role-cfo",
+            "title": "CFO / Settlement-Verantwortliche*r",
+            "briefing": "Settlement-Disziplin. TARGET2/T2/TIPS-Settlement-Schluss um 18:00 MEZ ist hart — verspätete Anweisungen kosten Zinsstrafe und Bundesbank-Verzugsmeldung. Verantwortung: Settlement-Nachholungs-Plan, Liquiditäts-Vorausplanung für T+1, Bundesbank-Hauptverwaltung-Liaison, EZB-/SSM-Liaison falls systemrelevant."
+          },
+          {
+            "id": "role-bafin-liaison",
+            "title": "BaFin-Liaison / DORA-Reporting",
+            "briefing": "DORA Art. 19 Erstmeldung (4 h ab Klassifikation als „major\"), 72-h-Folgemeldung, 1-Monat-Abschlussbericht. ICT-Drittanbieter-Bezug nach Art. 28 ist explizit zu kennzeichnen — der Vorfall ist beim Drittanbieter, aber die Meldepflicht liegt beim Finanzunternehmen. Parallel BAIT-Reporting, MaRisk-AT-7.2-Notfallmanagement-Dokumentation, BSI-§-8d-Doppelmeldung."
+          },
+          {
+            "id": "role-press-customer",
+            "title": "Pressesprecher / Customer-Kommunikation",
+            "briefing": "Customer-Komm bei Filialen-Stillstand. Multi-Channel: Filial-Aushang, Online-Banking-Status-Page, App-Push, SMS-Massenversand für Bestandskunden, Pressemitteilung. Trade-off: Vollständige Transparenz („Atruvia/FI hat einen Vorfall, deshalb funktioniert das Banking nicht\") versus zurückhaltende Sprache („Wartungsfenster\") — Customer-Trust-Disziplin im Vordergrund."
+          },
+          {
+            "id": "role-compliance",
+            "title": "Compliance / Risikomanagement",
+            "briefing": "MaRisk-AT-7.2-Notfallmanagement-Dokumentation, GwG-Compliance bei manueller Buchung (kein automatisierter AML-Filter), BAIT-Meldepflichten, KWG § 25a-Berichts-Pflichten. Rechtliche Beratung bei Settlement-Verzug, OFAC-/Sanktions-Compliance bei manuellen Settlement-Workarounds."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-core-banking-ausfall",
+                "title": "Core-Banking-System ausgefallen",
+                "description": "IT-Operations meldet: Um 14:30 Uhr ist die Verbindung zum Atruvia/FI-Rechenzentrum unterbrochen. Filial-Terminals melden „Connection Lost\". Online-Banking wirft 503-Fehler. Mobile-App-Login funktioniert nicht. ATM-Geld-Abhebungen funktionieren nur mit dem Lokal-Cache (ca. 90 Minuten Restkapazität bei normaler Customer-Frequenz). Atruvia/FI-Status-Portal meldet „Untersuchung läuft\".",
+                "roleId": "role-it-ops-lead"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-eskalation-atruvia",
+                "question": "Wie wird der ICT-Drittanbieter-Vorfall eskaliert?",
+                "roleId": "role-it-ops-lead",
+                "guidance": "DORA Art. 28 ICT-Drittanbieter-Register dokumentiert Eskalations-Pfade. Trade-off: Standard-Status-Portal (langsam, aber dokumentiert) versus Eskalation auf Atruvia/FI-Vorstand-Hotline (schnell, aber nur bei klarem „major\"-Charakter zulässig).",
+                "options": [
+                  {
+                    "id": "opt-eskalation-vorstands-hotline",
+                    "label": "Sofort Atruvia/FI-Vorstands-Hotline aktivieren (24/7-SLA, vor-vertraglich gebunden), parallel Status-Portal beobachten",
+                    "consequence": "Schneller Status-Update, schneller Wiederanlauf-Eskalations-Pfad. Vor-vertraglich abgesichert. Empfohlen.",
+                    "evaluationHints": [
+                      "Vorab-Eskalations-Vertrag konsequent genutzt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-status-portal-warten",
+                    "label": "Status-Portal beobachten, erst bei Stillstand > 30 min Vorstands-Hotline aktivieren",
+                    "consequence": "Verzögerung von 30 min, in dieser Zeit Customer-Service-Welle. Akzeptabel bei kleinen Vorfällen, schwächer bei Settlement-Frist.",
+                    "evaluationHints": [
+                      "Verzögerte Eskalation"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-operations-core-banking",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-filial-konsequenzen",
+                "title": "Filialen melden Customer-Welle",
+                "description": "Customer-Service meldet: Alle Filialen melden Customer-Welle. Donauwörth-Hauptstelle 50 Personen, Augsburg 35, Nördlingen 12. Customer-Anfragen: Geldabhebung, Überweisungen, Wertpapier-Orders. ATM-Lokal-Cache verbleiben ca. 60 Minuten Restkapazität. Atruvia/FI-Vorstands-Hotline meldet: Untersuchung läuft, vermutlich Hardware-Vorfall in Karlsruhe-RZ, geschätzte Wiederanlauf-Zeit 2–3 Stunden.",
+                "roleId": "role-press-customer"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-filial-customer-komm",
+                "question": "Wie werden die Filialen-Customer informiert?",
+                "roleId": "role-press-customer",
+                "guidance": "Trade-off zwischen vollständiger Transparenz („Atruvia/FI hat einen Vorfall\") und zurückhaltender Sprache („Wartungsfenster, voraussichtlich 2–3 h\"). Genossenschaftsbanken-Customer-Erwartung in Donau-Ries-Region: ehrliche Sprache, keine PR-Phrasen.",
+                "options": [
+                  {
+                    "id": "opt-volle-transparenz",
+                    "label": "Volle Transparenz: Filial-Aushang + App-Push „Unser ICT-Dienstleister Atruvia/FI hat einen Vorfall, voraussichtlich 2–3 h Wiederanlauf, Geldabhebungen am Schalter manuell möglich, Online-Banking gestört\"",
+                    "consequence": "Customer-Trust gewahrt, Filialen-Welle stabilisiert sich. Customer-Service-Anrufe sinken. Empfohlen.",
+                    "evaluationHints": [
+                      "Volle Transparenz"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-wartungsfenster",
+                    "label": "Zurückhaltende Sprache: „Wartungsfenster, voraussichtlich 2–3 h\"",
+                    "consequence": "Customer-Trust-Risiko bei Verlängerung der Ausfall-Zeit, kann später als Vertuschung interpretiert werden. Schwächer.",
+                    "evaluationHints": [
+                      "Zurückhaltende Sprache"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-communication-customer-trust"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-marisk",
+                "title": "Krisenstab konstituiert + MaRisk-AT-7.2-Notfallplan aktiviert",
+                "description": "Krisenstab konstituiert (Vorstand, IT-Ops, CFO, BaFin-Liaison, Pressesprecher, Compliance). MaRisk-AT-7.2-Notfallplan aktiviert: Manuelle Filial-Buchungs-Verfahren angewiesen (Papier-Beleg + nachträgliche Buchung), ATM-Lokal-Cache-Limits dokumentiert, Bundesbank-Liaison vor-informiert über mögliche Settlement-Verzögerung. Settlement-Schluss-Frist 18:00 MEZ ist 3,5 Stunden entfernt.",
+                "roleId": "role-vorstand"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-settlement-vorabmeldung",
+                "question": "Wann wird die Bundesbank über die Settlement-Verzögerung informiert?",
+                "roleId": "role-cfo",
+                "guidance": "Bundesbank-Hauptverwaltung erwartet bei drohenden Settlement-Verzögerungen rechtzeitige Vorabmeldung — keine Überraschung um 17:55. Trade-off: Sofort-Vorabmeldung (transparent, aber mögliche Reputations-Implikation) versus Wait-and-see (Wiederanlauf-Hoffnung, aber Eskalations-Risiko).",
+                "options": [
+                  {
+                    "id": "opt-sofortige-vorabmeldung",
+                    "label": "Sofortige Vorabmeldung an Bundesbank-Hauptverwaltung: Settlement-Verzögerung möglich, ICT-Drittanbieter-Vorfall, geschätzte Wiederanlauf-Zeit, Liquiditäts-Vorausplanung",
+                    "consequence": "Bundesbank vorbereitet, Settlement-Nachholungs-Plan koordiniert. EZB-/SSM-Liaison rechtzeitig. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofortige Bundesbank-Vorabmeldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-vorabmeldung-bei-eskalation",
+                    "label": "Vorabmeldung erst bei Wiederanlauf-Verzögerung > 90 min",
+                    "consequence": "Bundesbank überrascht bei eskalierender Lage. Reputations-Risiko, aber bei kurzem Vorfall (< 90 min) akzeptabel. Schwächer.",
+                    "evaluationHints": [
+                      "Verzögerte Bundesbank-Information"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-cross-sector-bundesbank",
+                  "crit-fin-operations-settlement"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-atruvia-update",
+                "title": "Atruvia/FI-Update: 4–6 h Wiederanlauf",
+                "description": "Atruvia/FI-Vorstand meldet: Hardware-Vorfall ist komplexer als zunächst angenommen — Storage-Cluster im Karlsruhe-RZ ausgefallen, Failover auf Sekundär-RZ in Münster läuft. Geschätzte Wiederanlauf-Zeit jetzt 4–6 Stunden, also frühestens 18:30 Uhr. Settlement-Schluss-Frist 18:00 MEZ wird mit hoher Wahrscheinlichkeit verfehlt. ICBC-LockBit-Schablone November 2023: USB-Stick-Boten-Lösung war damals der Workaround — manueller Settlement-Workaround ist eine Option.",
+                "roleId": "role-it-ops-lead"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-settlement-workaround",
+                "question": "Wird ein manueller Settlement-Workaround aktiviert?",
+                "roleId": "role-cfo",
+                "guidance": "ICBC-LockBit-Schablone: Bei Storage-Cluster-Ausfall können Settlement-Anweisungen via USB-Stick-Boten oder dedizierte Bundesbank-Notfall-Schnittstellen physisch übermittelt werden. Trade-off: Manueller Workaround (Komplex, Compliance-Risiko bei AML-Filterung) versus Settlement-Verschiebung auf T+1 (Standard-Bundesbank-Verfahren bei ICT-Vorfällen).",
+                "options": [
+                  {
+                    "id": "opt-settlement-t1",
+                    "label": "Settlement auf T+1 verschieben mit Bundesbank-koordinierter Verzugsmeldung — Standard-Verfahren bei ICT-Vorfällen",
+                    "consequence": "Saubere Compliance, dokumentierte Verzögerung, keine GwG-/AML-Risiken. Zinsstrafe akzeptabel als „force majeure\". Empfohlen. Gleichwertig zu opt-marisk-notfall-batch.",
+                    "evaluationHints": [
+                      "T+1-Verschiebung mit Bundesbank-Koordination"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-marisk-notfall-batch",
+                    "label": "MaRisk-AT-7.2-Notfall-Batch aktivieren: Manuelle Settlement-Anweisung über Bundesbank-Notfall-Schnittstelle, AML-Filterung manuell durch Compliance-Team",
+                    "consequence": "Settlement-Frist gehalten, aber hoher manueller Aufwand und GwG-Compliance-Risiko. Bei systemrelevanten Tenants vertretbar. Gleichwertig zu opt-settlement-t1 als alternativer Pfad.",
+                    "evaluationHints": [
+                      "Notfall-Batch mit manueller AML-Filterung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-warten-ohne-vorbereitung",
+                    "label": "Auf Wiederanlauf warten ohne Workaround-Vorbereitung",
+                    "consequence": "Bei verfehlter 18:00-Frist Bundesbank-Verzugsmeldung ohne Vorbereitung. Reputations-Risiko, BaFin-Audit-Punkt. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Keine Workaround-Vorbereitung"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-operations-settlement",
+                  "crit-fin-reporting-marisk-at72"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-dora-art19-major",
+                "title": "DORA Art. 19 Klassifikation als „major\" + Erstmeldungs-Frist",
+                "description": "BaFin-Liaison meldet: Vorfall ist als „major ICT-related incident\" einzustufen (Core-Banking-Ausfall > 60 min mit Customer-Reichweite > 100 % der Online-Banking-Customer + Settlement-Implikation). DORA Art. 19 Erstmeldungs-Frist (4 h ab Klassifikation) tickt seit Minute 30. Verbleibende Zeit: 60 min. ICT-Drittanbieter-Bezug (Atruvia/FI) ist explizit zu kennzeichnen nach Art. 28 — der Vorfall ist beim Drittanbieter, aber die Meldepflicht liegt bei der Bank.",
+                "roleId": "role-bafin-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-dora-erstmeldung-ict-drittanbieter",
+                "question": "Wie wird die DORA-Erstmeldung mit ICT-Drittanbieter-Bezug strukturiert?",
+                "roleId": "role-bafin-liaison",
+                "guidance": "DORA Art. 19 + Art. 28 erfordern: Vorfalls-Beschreibung, Klassifikation als „major\", ICT-Drittanbieter-Identifikation (Atruvia/FI), Vertrags- und Eskalations-Pfade aus dem ICT-Drittanbieter-Register, Customer-Impact-Schätzung, geplante Mitigation. Atruvia/FI als „kritischer ICT-Drittanbieter\" nach Art. 31 ist BaFin/SSM bekannt — saubere Kennzeichnung beschleunigt das Reporting.",
+                "options": [
+                  {
+                    "id": "opt-erstmeldung-mit-art28",
+                    "label": "Vollständige Erstmeldung mit explizitem Art.-28-ICT-Drittanbieter-Bezug, Atruvia/FI als kritischer Drittanbieter (Art. 31), Vertrags-Eskalations-Status, Customer-Reichweite — innerhalb 4-h-Frist",
+                    "consequence": "BaFin-konform, signalisiert DORA-Disziplin, koordiniert mit Atruvia/FI-eigener Meldung. Empfohlen.",
+                    "evaluationHints": [
+                      "DORA-Erstmeldung mit Art.-28-Bezug"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-erstmeldung-ohne-art28",
+                    "label": "Erstmeldung ohne expliziten Art.-28-Bezug (Drittanbieter wird in Folgemeldung ergänzt)",
+                    "consequence": "BaFin-Nachfragen wahrscheinlich, da Art.-28-Pflicht klar. Schwächer.",
+                    "evaluationHints": [
+                      "Art.-28-Bezug nachgereicht"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-dora-art19",
+                  "crit-fin-reporting-bafin-bait"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-wiederanlauf-stabil",
+                "title": "Wiederanlauf um 18:25 Uhr — Settlement-Frist verfehlt",
+                "description": "Atruvia/FI meldet Wiederanlauf um 18:25 Uhr. Core-Banking-System wieder verfügbar. Aber: Settlement-Schluss-Frist 18:00 MEZ ist verfehlt. Bundesbank-Verzugsmeldung läuft. Settlement-Workaround: T+1-Verschiebung wurde aktiviert (siehe Entscheidung t=60), 47 Mio. € werden morgen früh gebucht. Filialen melden Schalter-Customer-Welle aufgelöst. Online-Banking wird stufenweise wieder freigegeben, App-Push „Unser ICT-Dienstleister hat den Vorfall behoben, Banking wieder verfügbar\".",
+                "roleId": "role-it-ops-lead"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bundesbank-verzugsmeldung",
+                "question": "Wie wird die Bundesbank-Verzugsmeldung formuliert?",
+                "roleId": "role-cfo",
+                "guidance": "Bundesbank erwartet strukturierte Verzugsmeldung mit: Vorfalls-Beschreibung, ICT-Drittanbieter-Bezug, Liquiditäts-Auswirkung, T+1-Plan, Lessons-Learned-Vorausschau. Bundesbank-Hauptverwaltung war seit t=30 vor-informiert — Verzugsmeldung ist Bestätigung, kein Überraschungs-Schlag.",
+                "options": [
+                  {
+                    "id": "opt-verzugsmeldung-strukturiert",
+                    "label": "Strukturierte Bundesbank-Verzugsmeldung mit ICT-Drittanbieter-Bezug, T+1-Plan, Liquiditäts-Vorausplanung, Verbindung zu DORA-Erstmeldung an BaFin",
+                    "consequence": "Bundesbank-konform, koordiniert mit BaFin-Reporting. Empfohlen.",
+                    "evaluationHints": [
+                      "Strukturierte Bundesbank-Verzugsmeldung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-verzugsmeldung-knapp",
+                    "label": "Knappe Verzugsmeldung mit Pflichtfeldern, ergänzende Details auf Bundesbank-Nachfrage",
+                    "consequence": "Bundesbank-Nachfragen wahrscheinlich. Akzeptabel bei kleineren Verzügen.",
+                    "evaluationHints": [
+                      "Knappe Verzugsmeldung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-cross-sector-bundesbank",
+                  "crit-fin-operations-settlement"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-bafin-update",
+                "title": "BaFin-Update + Verbands-Schnittstelle",
+                "description": "BaFin-IT-Aufsicht meldet: DORA-Erstmeldung in Frist eingegangen, Art.-28-Bezug korrekt gekennzeichnet, Vorfall ist im BaFin-Sektor-Lagebild aufgenommen. BVR/DSGV-Verbandsschnittstelle meldet: Atruvia/FI-Vorfall betrifft mehrere hundert Genossenschaftsbanken/Sparkassen — Verbands-Pressekonferenz für morgen 10:00 Uhr in Vorbereitung mit gemeinsamer Lessons-Learned-Position.",
+                "roleId": "role-bafin-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-marisk-dokumentation",
+                "question": "Wie wird die MaRisk-AT-7.2-Notfallplan-Dokumentation gepflegt?",
+                "roleId": "role-compliance",
+                "guidance": "MaRisk-AT-7.2 verlangt: Aktivierungs-Zeitpunkt, beteiligte Personen, manuelle Verfahren, Wiederanlauf-Zeit, Lessons-Learned. Dokumentation ist BaFin-Audit-relevant. Trade-off: Echtzeit-Dokumentation während Vorfall (ressourcen-aufwändig, aber lückenlos) versus retrospektive Rekonstruktion (effizienter, aber Lücken-Risiko).",
+                "options": [
+                  {
+                    "id": "opt-marisk-echtzeit",
+                    "label": "Echtzeit-Dokumentation während Vorfall mit dediziertem Compliance-Mitarbeiter im Krisenstab + retrospektive Vervollständigung in 24 h",
+                    "consequence": "Lückenlose Dokumentation, BaFin-Audit-Vorbereitung sauber. Empfohlen.",
+                    "evaluationHints": [
+                      "Echtzeit-MaRisk-Dokumentation"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-marisk-retrospektiv",
+                    "label": "Retrospektive Rekonstruktion in den 24 h nach Wiederanlauf, basierend auf Krisenstabs-Protokoll",
+                    "consequence": "Effizienter, aber Lücken-Risiko bei BaFin-Audit. Akzeptabel bei kleineren Vorfällen.",
+                    "evaluationHints": [
+                      "Retrospektive Dokumentation"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-marisk-at72",
+                  "crit-fin-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 149,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein: Atruvia/FI-Vorfall hat 4 Stunden gedauert, Settlement-Frist verfehlt, T+1-Verschiebung sauber abgewickelt, Customer-Komm hat Customer-Trust gewahrt. Verbesserungspunkte: ICT-Drittanbieter-Eskalations-Vertrag mit Atruvia/FI auf 30-min-SLA verkürzen (war 60 min), MaRisk-AT-7.2-Notfall-Batch-Verfahren als Standard etablieren, Bundesbank-Vorabmeldung-Pattern dokumentieren.",
+                "roleId": "role-vorstand"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-dora-folgemeldung-marisk",
+                "question": "Wie wird die DORA-Folgemeldung (72 h) und der MaRisk-Lessons-Learned-Bericht koordiniert?",
+                "roleId": "role-bafin-liaison",
+                "guidance": "DORA-Folgemeldung und MaRisk-AT-7.2-Lessons-Learned-Bericht sollten koordiniert sein — gleicher Vorfall, gleiche Fakten, unterschiedliche Adressaten (BaFin vs. interne Risiko-Funktion). Trade-off: Getrennte Dokumente (Spezifität, aber Doppelaufwand) versus integriertes Dokument (Effizienz, aber Adressaten-Spezifika weniger sichtbar).",
+                "options": [
+                  {
+                    "id": "opt-koordinierte-folgemeldung",
+                    "label": "Koordinierte Dokumente mit gemeinsamem Faktenteil + adressaten-spezifischen Überleitungen (BaFin: DORA-Compliance-Fokus, intern: MaRisk-Verbesserungs-Roadmap)",
+                    "consequence": "Effizient, BaFin-konform, MaRisk-konform. Empfohlen.",
+                    "evaluationHints": [
+                      "Koordinierte Folgemeldung mit MaRisk-Integration"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-getrennte-dokumente",
+                    "label": "Getrennte Dokumente, jeweils adressaten-spezifisch erstellt",
+                    "consequence": "Vollständig spezifisch, aber Doppelaufwand. Akzeptabel bei klaren Trennungen.",
+                    "evaluationHints": [
+                      "Getrennte adressaten-spezifische Dokumente"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-fin-reporting-dora-art19",
+                  "crit-fin-reporting-marisk-at72"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 150,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 6 evaluationCriteria-Achsen. Settlement-Frist verfehlt aber sauber abgewickelt (T+1), Customer-Trust gehalten, DORA-Erstmeldung in Frist mit Art.-28-Bezug, MaRisk-AT-7.2-Notfallplan dokumentiert, Bundesbank-Verzugsmeldung koordiniert. Lessons-Learned: ICT-Drittanbieter-Eskalations-SLA verkürzen, Notfall-Batch-Verfahren standardisieren, Bundesbank-Vorabmeldung-Pattern als MaRisk-Anhang.",
+                "roleId": "role-vorstand"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-fin-reporting-dora-art19",
+            "description": "DORA Art. 19 Erstmeldung (4 h) mit Art.-28-ICT-Drittanbieter-Bezug",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-reporting-bafin-bait",
+            "description": "BaFin-/BAIT/VAIT-Reporting koordiniert",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-reporting-marisk-at72",
+            "description": "MaRisk-AT-7.2-Notfallplan-Aktivierung und Dokumentation",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-fin-operations-core-banking",
+            "description": "Core-Banking-Wiederherstellung über ICT-Drittanbieter-Eskalation",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-fin-operations-settlement",
+            "description": "Settlement-Disziplin: T+1-Verschiebung oder Notfall-Batch, Bundesbank-Koordination",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-fin-governance-krisenstab",
+            "description": "Krisenstabs-Konstituierung, Vorstands-Verantwortung nach DORA Art. 5 / KWG § 25a",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-fin-cross-sector-bundesbank",
+            "description": "Bundesbank-Hauptverwaltung-Vorabmeldung und Settlement-Verzugs-Koordination",
+            "weight": 2,
+            "category": "cross_sector"
+          }
+        ]
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience-template-finance-dora-marisk-1.0",
+      "templateNote": "Demo-Entwurf als Starter für einen Resilienzplan im Sektor Finanz- und Versicherungswesen, ausgerichtet auf die regulatorische Stapelung: DORA (in Kraft 17.01.2025, Art. 5 Vorstandsverantwortung, Art. 6/7 ICT-Risiko-Rahmenwerk, Art. 19 Vorfalls-Meldewesen, Art. 28 ICT-Drittanbieter-Register, Art. 31 kritische ICT-Drittanbieter), parallel BaFin-Sektor-Anforderungen (BAIT für Banken, VAIT für Versicherer, KAIT für Kapitalverwaltung, ZAIT für Zahlungsdienste), MaRisk AT 7.2 Notfallmanagement, KWG § 25a Vorstandsverantwortung, GwG-AML-Pflichten, PSD2 für Zahlungsdienste, DSGVO Art. 33/34, BSI-KritisV § 7 Anhang 6 für KRITIS-pflichtige Schwellen-Betreiber, NIS2 § 8d BSIG-Umsetzung als doppelte Schicht. Sektor-spezifische Performance-Dimension ist Customer-Trust und transaktionelle Verfügbarkeit — die zwei harten Finanz-Achsen, parallel zu Healthcare „Patientensicherheit\", Energy „Netzstabilität\", Industry „Produktionsfähigkeit\", Logistics „Dispositionsfähigkeit\", Water „Versorgungssicherheit + Trinkwasser-Qualität\", IT/Telekom „Verfügbarkeit + Datenintegrität\". Demo-Argument: Finanz ist die Vertrauens-Branche mit Mikrosekunden-Verfügbarkeitsdruck und Insider-Risiko-Schwerpunkt — ein Vorfall hier kann in 48 h zu einem Twitter-fueled Bank-Run eskalieren (SVB-März-2023-Schablone, 42 Mrd. $/Tag). Die durchgängige Frage des Plans lautet: Bleibt das Banking erreichbar mit unverletzten Kundengeldern und unverletzten Settlement-Pfaden, auch bei Online-Banking-DDoS, Customer-Data-Exfiltration mit SCHUFA-Sensitivität, Core-Banking-Ausfall via Atruvia/FI-Drittanbieter, SWIFT-/SEPA-Manipulation, Insider-mit-Trading-Access oder Bundesbank-Settlement-Disruption — und können wir den Customer-Trust durch koordinierte Verbands-/BaFin-/Bundesbank-Pressekommunikation halten? Vor Go-Live anzupassen: Operator-Name, Sub-Profil-Zuordnung (Bank/Sparkasse/Versicherung/Zahlungsdienstleister/Wertpapier-Dienstleister), Customer-/Vertrags-Zahlen, ICT-Drittanbieter-Liste (Atruvia, Finanz Informatik, Cloud-Provider, sonstige), Kontaktdaten, Programm-Owner, Board-Review-Kadenz. Cross-Referenzen (topRisks[].riskId, measuresByGoal[*][].linkedActionItemId) bleiben im Pack leer — der Operator verknüpft nach Übernahme manuell. Review-Zyklus 1 Jahr voreingestellt (DORA Art. 6 jährlich) — bei Genossenschaftsbanken und Sparkassen kann der Verbund-Review-Rhythmus parallel laufen.",
+      "content": {
+        "scope": {
+          "operatorName": "Volksbank Donau-Ries eG",
+          "sector": "Finanz- und Versicherungswesen",
+          "criticalService": "Privatkunden-Banking (Online-Banking, Mobile-Banking, ATM-Netz, Filial-Service), B2B-Firmenkunden-Banking (Zahlungsverkehr, Kredit-Verwaltung), Wertpapier-Depot-Verwaltung (~12.000 Depots), Versicherungs-Vermittlung über Tochter-Agentur, Atruvia-Drittanbieter-RZ als Kernbankensystem-Plattform.",
+          "locations": "Hauptstelle Donauwörth (Vorstand, Customer-Service-Hub, IT-Operations-Liaison, Compliance), 4 Niederlassungen (Augsburg, Nördlingen, Dillingen, Ingolstadt), 18 ATM-Standorte im Donau-Ries-Donau-Gebiet, Atruvia-Rechenzentrum Karlsruhe als ausgelagertes Kernbankensystem (DORA-Art.-28-Drittanbieter-Register dokumentiert), Backup-RZ Münster.",
+          "employees": "Ca. 600 Vollzeitäquivalente, davon 45 in IT-Operations / ICT-Drittanbieter-Liaison, 25 in Compliance / Risikomanagement / GwG-Funktion, 70 in Customer-Service / Filialen-Hotline, 320 in Beratung / Filialen-Service, 80 in Backoffice / Settlement / Wertpapier-Service, 60 in Verwaltung / Personal / Recht.",
+          "personsServed": "Ca. 200.000 Privatkunden im Donau-Ries-Donau-Augsburg-Gebiet, ca. 30.000 B2B-Firmenkunden (Mittelstand, Landwirtschaft, lokales Handwerk), ca. 12.000 Wertpapier-Depot-Inhaber, ca. 8.000 Versicherungs-Verträge (über Tochter-Agentur).",
+          "scopeNote": "Genossenschaftsbank in Donau-Ries-Region mit doppelter regulatorischer Schicht: KRITIS-pflichtig nach BSI-KritisV § 7 Anhang 6 (Schwellenwert: > 100 Mio. bargeldlose Transaktionen pro Jahr — erreicht), parallel DORA-Pflicht nach EU-Verordnung 2022/2554 (in Kraft 17.01.2025), MaRisk-AT-7.2-Notfallmanagement, BAIT, KWG-§-25a-Vorstandsverantwortung, GwG, PSD2 (für Zahlungsverkehr), DSGVO Art. 33/34. ICT-Drittanbieter-Bezug: Atruvia AG ist nach DORA Art. 31 als „kritischer ICT-Drittanbieter\" eingestuft — Vertrags- und Eskalations-Pfade im Art.-28-Register dokumentiert. Sub-Tenant-Profil-Hinweis: Diese Vorlage ist primär auf Bank/Sparkasse zugeschnitten — Versicherer adaptieren VAIT, Zahlungsdienstleister ZAIT, Wertpapier-Dienstleister entsprechende WAITs / DWA-Anforderungen. Demo-Operator ist fiktiv, kein realer Bezug zur tatsächlichen Volksbank Donau-Ries eG."
+        },
+        "riskBasis": {
+          "methodology": "BSI-Standard 200-2 Risikoanalyse + DORA Art. 6/7 ICT-Risiko-Rahmenwerk + MaRisk-AT-7.2-Risikoanalyse als zusammengeführtes Verfahren. Bewertungs-Skala 1–5 für Eintrittswahrscheinlichkeit und Auswirkung; Score = EW × AW. Top-Risiken werden quartalsweise im Risikomanagement-Komitee überprüft (Vorstand + CISO + Compliance + IT-Operations). DORA-Art.-28-ICT-Drittanbieter-Register fließt direkt in die Risikobewertung ein.",
+          "riskAnalysisReference": "Internes Risiko-Register (Verweis vor Go-Live zu setzen). Cross-Referenzen zur Risiko-Katalog-Vorlage des Pack (riskCatalogTemplates) bleiben im Pack leer — der Operator verknüpft nach Adoption manuell.",
+          "topRisks": [
+            {
+              "title": "Online-Banking-DDoS mit Bank-Run-Risiko",
+              "category": "Cyber-physische Bedrohung mit Customer-Trust-Hebel",
+              "initialScore": 20,
+              "residualScore": 9,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Customer-Data-Exfiltration mit SCHUFA-Sensitivität",
+              "category": "Cyber-physische Bedrohung mit DSGVO-Pflicht",
+              "initialScore": 20,
+              "residualScore": 8,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Core-Banking-Ausfall via Atruvia/Finanz-Informatik-Drittanbieter",
+              "category": "Technische Verfügbarkeit + Interdependenz-Kaskade",
+              "initialScore": 15,
+              "residualScore": 8,
+              "criticality": "hoch"
+            },
+            {
+              "title": "SWIFT-/SEPA-Settlement-Manipulation",
+              "category": "Cyber-physische Bedrohung mit Settlement-Hebel",
+              "initialScore": 15,
+              "residualScore": 7,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Insider mit Trading-/Settlement-Access",
+              "category": "Human Intentional mit Insider-Hebel",
+              "initialScore": 15,
+              "residualScore": 7,
+              "criticality": "hoch"
+            },
+            {
+              "title": "TARGET2/T2/TIPS-Bundesbank-Settlement-Disruption",
+              "category": "Interdependenz auf systemischer Ebene",
+              "initialScore": 10,
+              "residualScore": 6,
+              "criticality": "mittel"
+            }
+          ],
+          "riskBasisNote": "Top-6-Risiken decken die fünf finanzspezifischen Hebel ab: (1) Customer-Trust mit Bank-Run-Eskalation, (2) DSGVO-Pflicht mit SCHUFA-Sensitivität, (3) ICT-Drittanbieter-Konzentration (Atruvia/FI als systemrelevante Konzentration nach DORA Art. 31), (4) Settlement-Manipulation mit irreversibler Wirkung, (5) Insider-mit-Trading-Access als finanz-typischer Erpressungs- und Marktmanipulations-Hebel. Sechstes Risiko (Bundesbank-Settlement-Disruption) ist seltener aber existenziell und gehört zur Krisenstabs-Vorbereitungspflicht."
+        },
+        "measuresByGoal": {
+          "prevent": [
+            {
+              "id": "m-fin-prevent-ddos-mitigation-vertrag",
+              "title": "Vertraglich gebundener DDoS-Mitigation-Provider mit BGP-Anycast-Mitigation",
+              "description": "Strukturelle Antwort auf Online-Banking-DDoS-Risiko (Top-1). Vertrag mit Akamai Prolexic / Cloudflare Magic Transit / Link11 (oder gleichwertig) mit BGP-Anycast-Umroutung, Trigger-Zeit < 5 min (Ziel < 3 min), Kapazität ≥ 1 Tbit/s, vor-konfigurierte Profile für Online-Banking-Frontend, Mobile-API, ATM-Backend. Halbjährliche Übung mit Mitigation-Provider und Customer-Service-Team. SVB-März-2023-Lehre integriert: parallel zur Mitigation-Aktivierung läuft Customer-Komm-Pre-Trigger-Workflow.",
+              "goal": "prevent",
+              "owner": "CISO / IT-Operations",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-prevent-ict-drittanbieter-register-art28",
+              "title": "DORA-Art.-28-ICT-Drittanbieter-Register mit Atruvia/FI-Schwerpunkt",
+              "description": "Strukturelle Antwort auf ICT-Drittanbieter-Konzentrations-Risiko (Top-3) und SWIFT-/SEPA-Manipulation (Top-4). DORA-Art.-28-konformes Register mit allen ICT-Drittanbietern (Atruvia, Finanz Informatik, Cloud-Provider, Mitigation-Provider, externe Forensik-Firma, BaFin-Liaison-Anwalts-Kanzlei). Pro Drittanbieter: Vertrags-Eckdaten, Eskalations-Pfade (24/7-Hotline), SLA-Werte, Substitutions-Plan bei Anbieter-Ausfall, kritische Drittanbieter-Kennzeichnung nach Art. 31. Quartalsweiser Review im Risikomanagement-Komitee.",
+              "goal": "prevent",
+              "owner": "CISO / IT-Operations / Compliance",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-prevent-mfa-customer-auth-hardening",
+              "title": "MFA-Hardening + Customer-Authentifizierung-Modernisierung",
+              "description": "Strukturelle Antwort auf Customer-Data-Exfiltration (Top-2) und Online-Banking-Account-Takeover. PSD2-konforme Strong Customer Authentication (SCA) für alle Online-Banking-Sessions, FIDO2/WebAuthn als Standard für Customer-Authentifizierung, MFA für alle Mitarbeiter*innen mit Customer-Daten-Zugriff (KMU-Beratung, Wertpapier-Berater, Compliance), Phishing-resistente FIDO2-Token für privilegierte Insider (Trading-Access, Settlement-Access, Vorstand). Halbjährliche Phishing-Simulation.",
+              "goal": "prevent",
+              "owner": "CISO / IT-Operations",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-prevent-insider-threat-trading-access",
+              "title": "Insider-Threat-Programm mit Trading-/Settlement-Access-Monitoring",
+              "description": "Strukturelle Antwort auf Insider-Risiko (Top-5). User-and-Entity-Behavior-Analytics (UEBA) für privilegierte Insider mit Trading-Access oder Settlement-Access. Vier-Augen-Prinzip für Settlement > 100 T€. Job-Rotation alle 24 Monate für Trading-Desks. Cooling-off-Period 6 Monate bei Vorstands-Wechseln. Whistleblower-Hotline mit anonymer Meldung. GwG-AML-Filter integriert mit Insider-Threat-Telemetrie. Halbjährliche Tabletop „Insider-Detection\".",
+              "goal": "prevent",
+              "owner": "Compliance / CISO / Personalabteilung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "protect": [
+            {
+              "id": "m-fin-protect-customer-komm-vor-textiert",
+              "title": "Vor-textierte Customer-Komm-Templates mit BVR/DSGV-Verbandsabstimmung",
+              "description": "Strukturelle Antwort auf Customer-Trust-Erosion (zentrale Performance-Dimension). Krisen-Botschaften vor-textiert für die fünf Tabletop-Hauptszenarien (Online-Banking-DDoS, Core-Banking-Ausfall, Customer-Data-Exfiltration, ATM-Netz-Angriff, Settlement-Disruption) — Multi-Channel (Status-Page, App-Push, SMS, Pressemitteilung, Filial-Aushang, lokale Presse). Verbands-Abstimmung mit BVR/DSGV-Pressestelle für gemeinsame Sprachregelung. Vorstands-Statement-Templates mit Foto-Vorbereitung. SVB-März-2023-Lessons-Learned integriert: Vorstands-Pressemitteilung bei t=60 statt t=120.",
+              "goal": "protect",
+              "owner": "Pressesprecher / Vorstand",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-protect-filialen-mitarbeiter-briefing-drehbuch",
+              "title": "Filialen-Mitarbeiter-Briefing-Drehbuch (Frage-Antwort-Pattern)",
+              "description": "Strukturelle Antwort auf Customer-Service-Welle in Filialen während Vorfällen. Schriftliches Frage-Antwort-Drehbuch für die fünf Tabletop-Hauptszenarien, Verteilung via Intranet + WhatsApp-Mitarbeiter-Gruppe, kurze Videoschalte des CISO bei Aktivierung. Halbjährliche Filial-Übung mit simuliertem Customer-Sturm. Integration mit MaRisk-AT-7.2-Notfallplan als Pflicht-Anhang.",
+              "goal": "protect",
+              "owner": "Pressesprecher / Filial-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-protect-multi-region-failover",
+              "title": "Multi-Region-Failover für Online-Banking + ATM-Backend",
+              "description": "Strukturelle Antwort auf RZ-/Region-Ausfall-Risiken (Cloud-Region-Outage, RZ-Hochwasser). Online-Banking-Frontend in Multi-Region-Aktiv-Aktiv-Konfiguration (z. B. AWS Frankfurt + Ireland mit Sync-Replikation), ATM-Backend in Multi-RZ-Konfiguration (Atruvia-Karlsruhe + Münster), DNS-/CDN-Failover automatisch. Halbjährlicher DR-Test (Disaster-Recovery), RTO < 30 min für Online-Banking-Frontend, RPO ≤ 5 min für transaktionelle Daten.",
+              "goal": "protect",
+              "owner": "IT-Operations / SRE",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "respond": [
+            {
+              "id": "m-fin-respond-dora-art19-workflow",
+              "title": "DORA Art. 19 Reporting-Workflow mit BaFin-Meldeportal-Integration",
+              "description": "Strukturelle Antwort auf DORA-Art.-19-Pflichten (4-h-Erstmeldung, 72-h-Folgemeldung, 1-Monat-Abschlussbericht für „major ICT-related incidents\"). Workflow-Tool integriert mit BaFin-Meldeportal, vor-strukturierte Templates für Erstmeldung mit allen Pflichtfeldern (Vorfalls-Kategorie, Customer-Reichweite, ICT-Drittanbieter-Bezug nach Art. 28, Mitigation-Status), automatische Frist-Erinnerung. Parallele Pfade für BSI-§-8d-Doppelmeldung bei KRITIS-Schnittmenge und DSGVO Art. 33/34.",
+              "goal": "respond",
+              "owner": "BaFin-Liaison / Compliance",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-respond-marisk-at72-notfallplan",
+              "title": "MaRisk-AT-7.2-Notfallplan mit allen Tabletop-Szenarien",
+              "description": "Strukturelle Antwort auf MaRisk-AT-7.2-Pflichten. Notfallplan mit Aktivierungs-Verfahren, Krisenstabs-Konstituierung, manuellen Filial-Buchungs-Verfahren (Papier-Beleg + nachträgliche Buchung), ATM-Lokal-Cache-Limits, MaRisk-Notfall-Batch für Settlement-Workaround, Customer-Komm-Aktivierung. Pro Tabletop-Szenario ein Notfallplan-Anhang. Jährlicher Review im Risikomanagement-Komitee, anlassbezogene Updates nach jedem realen oder Tabletop-Vorfall.",
+              "goal": "respond",
+              "owner": "CISO / IT-Operations / Compliance",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-respond-bafin-bundesbank-liaison",
+              "title": "BaFin- + Bundesbank-Liaison-Personen mit 24/7-Erreichbarkeit",
+              "description": "Strukturelle Antwort auf Reporting- und Settlement-Koordinations-Pflichten. Benannte Liaison-Personen für BaFin-IT-Aufsicht (DORA, BAIT) und Bundesbank-Hauptverwaltung (TARGET2/T2/TIPS-Settlement, ELA-Notfallfazilität), 24/7-Erreichbarkeit mit Backup-Person. Vor-vereinbarte Eskalations-Pfade. Quartalsweiser Liaison-Call zur Beziehungspflege. EZB-/SSM-Liaison falls systemrelevant.",
+              "goal": "respond",
+              "owner": "Vorstand / CFO / BaFin-Liaison",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-respond-bank-run-liquiditaets-vereinbarung",
+              "title": "Bank-Run-Liquiditäts-Vereinbarung mit Bundesbank/Verbund (ELA-Vorprüfung)",
+              "description": "Strukturelle Antwort auf SVB-März-2023-Bank-Run-Risiko. Vor-vereinbarte ELA-Notfallfazilität (Emergency Liquidity Assistance) mit Bundesbank, Verbund-interne Liquiditäts-Hilfe (DZ Bank für Genossenschaftsbanken, Landesbank für Sparkassen), Bargeld-Logistik-Vereinbarung mit Geld-Transport-Dienstleister auf 4-h-Bereitstellung. Halbjährliche Tabletop-Bank-Run-Übung mit BVR/DSGV-Verband.",
+              "goal": "respond",
+              "owner": "Vorstand / CFO",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "recover": [
+            {
+              "id": "m-fin-recover-settlement-nachholung",
+              "title": "Settlement-Nachholungs-Plan für T+1-Verschiebung und Notfall-Batch",
+              "description": "Strukturelle Antwort auf Settlement-Verzögerungs-Risiken (Top-6 Bundesbank-Disruption, sowie Core-Banking-Ausfall mit Settlement-Cascade). T+1-Verschiebungs-Verfahren standardisiert mit Bundesbank-Verzugsmeldung-Template, MaRisk-Notfall-Batch für manuelle Settlement-Anweisung über Bundesbank-Notfall-Schnittstelle (USB-Stick-Boten-Lösung als Fallback nach ICBC-LockBit-November-2023-Schablone), AML-Filterung manuell durch Compliance-Team. Quartalsweiser Drill.",
+              "goal": "recover",
+              "owner": "CFO / Compliance",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-recover-customer-trust-wiederaufbau",
+              "title": "Customer-Trust-Wiederaufbau-Programm nach Vorfällen",
+              "description": "Strukturelle Antwort auf Customer-Trust-Erosion-Folgewirkung. Strukturiertes Programm: Vorstands-Statement (Foto, persönlich, Lessons-Learned), Verbands-Pressekonferenz mit BVR/DSGV, Filial-Mitarbeiter-Reflexion, Customer-Loyality-Geste (z. B. Gebühren-Erlass für 30 Tage), 3-Monats-Follow-up-Customer-Survey. Wirksamkeit gemessen über Twitter-/X-Sentiment-Analyse, Filialen-Kunden-Frequenz, Customer-Service-Anrufs-Volumen.",
+              "goal": "recover",
+              "owner": "Vorstand / Pressesprecher",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-fin-recover-dora-folgemeldung-disziplin",
+              "title": "DORA-Folgemeldung- und Abschlussbericht-Disziplin",
+              "description": "Strukturelle Antwort auf DORA-Art.-19-Folgemeldungs-Pflichten (72 h und 1 Monat). Vor-strukturierte Templates für Folgemeldung (Vollständige Vorfalls-Beschreibung, Root-Cause, Mitigation-Wirksamkeit, Customer-Impact-Schätzung, ICT-Drittanbieter-Bezug, Verbesserungs-Maßnahmen) und Abschlussbericht (forensische Tiefe, Lessons-Learned, Maßnahmen-Roadmap mit Owner und Due-Date). Integration mit MaRisk-Lessons-Learned-Bericht. Externe Forensik-Firma vor-vertraglich gebunden mit 4-h-SLA für finanz-spezialisierte Forensik.",
+              "goal": "recover",
+              "owner": "BaFin-Liaison / CISO / Compliance",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ]
+        },
+        "governance": {
+          "managementBoardContact": "Vorstand der Volksbank Donau-Ries eG (vor Go-Live zu setzen: Name, Bestellungs-Datum, Stellvertreter*in). Bei Genossenschaftsbanken Doppel-Verantwortung Vorstand + Aufsichtsrat — Aufsichtsrats-Vorsitz mit eigenem DORA-/KRITIS-/MaRisk-Briefing. KWG § 25a überträgt den Vorständen die persönliche Compliance-Verantwortung.",
+          "programOwner": "CISO in Personalunion mit DORA-Verantwortliche*r nach EU 2022/2554 Art. 5; Stellvertretung durch Leitung IT-Operations. Compliance/Risikomanagement-Lead ist als zweite operative Säule mit eigener Berichtslinie zur Vorstandsspitze und zum Aufsichtsrat verankert (parallel zum CISO, weil die Finanz-Resilienz-Achillesferse Customer-Trust und Settlement-Disziplin ist, nicht nur Cyber-Verteidigung — analog zur IT/Telekom-Pack-Doppel-Säule NOC + CISO bzw. zur Logistics-Pack-Struktur Leitstellen-Verantwortliche*r + CISO).",
+          "escalationPath": "Stufe 1: IT-Operations-Bereitschaft (24/7, Atruvia/FI-Hotline-Aktivierung innerhalb 5 min). Stufe 2: CISO und Compliance (24/7-Bereitschaft, einsatzbereit innerhalb 30 min). Stufe 3: Krisenstabs-Leitung (Vorstand), Einberufung des Krisenstabs innerhalb 60 min. Stufe 4: Vorstand Gesamt + Aufsichtsrats-Vorsitz + ggf. BVR/DSGV-Verbandsspitze + externe Krisenkommunikation und Incident-Response-Firma (4-h-Response-SLA für finanz-spezialisierte IR). Bei Bank-Run-Symptomen: zusätzlich Bundesbank-Hauptverwaltung-Liaison binnen 30 min. Bei systemrelevanten Tenants zusätzlich EZB/SSM.",
+          "boardReviewCadence": "DORA Art. 6 verlangt jährlichen Vorstands-Review des ICT-Risiko-Rahmenwerks. Plus quartalsweiser Risikomanagement-Komitee-Review (Vorstand + CISO + Compliance + IT-Operations) mit Top-Risiken, ICT-Drittanbieter-Status und MaRisk-AT-7.2-Notfallplan-Bereitschaft. Anlassbezogene Reviews nach realen Vorfällen oder Tabletops innerhalb 30 Tagen.",
+          "governanceNote": "Genossenschaftsbanken-Spezifika: Aufsichtsrat hat eigene Verantwortung, Verbands-Revision (BVR-Revision) prüft jährlich. Sparkassen-Spezifika: Verwaltungsrat statt Aufsichtsrat, Verbands-Revision durch DSGV-Prüfungsstelle. Versicherer-Spezifika: VAIT-Pflichten parallel zu BAIT, Solvency-II-Reporting integriert."
+        },
+        "reporting": {
+          "incidentContact": "BaFin-Meldeportal für DORA Art. 19 (Erstmeldung 4 h, Folgemeldung 72 h, Abschlussbericht 1 Monat) und BAIT/VAIT/KAIT/ZAIT-Reporting. Parallel BSI-Meldeportal für § 8d BSIG-KRITIS-Schnittmenge (24-h-Erstmeldung). DSGVO Art. 33 BfDI bzw. Landesdatenschutzbehörde (72 h), Art. 34 unverzüglich bei hohem Risiko für Betroffene.",
+          "incidentBackupContact": "Bundesbank-Hauptverwaltung-Liaison für Settlement-Verzugsmeldung und ELA-Notfallfazilität. EZB-/SSM-Liaison falls systemrelevant. BVR/DSGV-Verbandsschnittstelle für Genossenschaftsbanken/Sparkassen-Verbund-Koordination. BaFin-Krisen-Hotline 24/7 für Eskalations-Fälle.",
+          "bsiPortalNote": "BSI nimmt Meldungen für KRITIS-Schnittmenge nach § 8d BSIG entgegen (24-h-Frist), BaFin nimmt DORA-Art.-19-Meldungen entgegen (4-h-Frist für „major\"). Doppel-Meldung bei Schnittmenge ist Pflicht. Bei DORA-Art.-28-ICT-Drittanbieter-Vorfällen ist die Bank meldepflichtig, der Drittanbieter (z. B. Atruvia/FI als kritischer Drittanbieter nach Art. 31) hat parallele Meldepflichten gegenüber BaFin.",
+          "firstReportingTimeline": "DORA Art. 19: Erstmeldung 4 h ab Klassifikation als „major ICT-related incident\", Folgemeldung 72 h, Abschlussbericht 1 Monat. BSI § 8d (KRITIS): Erstmeldung 24 h, Folgemeldung 72 h, Abschlussbericht 4 Wochen. DSGVO Art. 33: 72 h. DSGVO Art. 34: unverzüglich. MaRisk AT 7.2: Lessons-Learned-Bericht im Risikomanagement-Komitee binnen 30 Tagen.",
+          "reportingNote": "Vor-strukturierte Reporting-Templates für DORA, BSI, DSGVO sind im MaRisk-AT-7.2-Notfallplan-Anhang abgelegt. Quartalsweiser Test der Meldewege durch Compliance-Lead. BaFin- und BSI-Meldeportal-Logins liegen bei zwei benannten Personen mit Vier-Augen-Prinzip."
+        },
+        "evidence": {
+          "evidenceReferences": [
+            "DORA Art. 6 ICT-Risiko-Rahmenwerk-Dokument (Volksbank Donau-Ries eG)",
+            "DORA Art. 28 ICT-Drittanbieter-Register (Atruvia, Finanz Informatik, Cloud-Provider, Mitigation-Provider, externe Forensik)",
+            "MaRisk-AT-7.2-Notfallplan inkl. Tabletop-Szenarien-Anhänge",
+            "BAIT-Compliance-Dokumentation",
+            "Krisenstabs-Protokolle der letzten 12 Monate",
+            "Tabletop-Übungs-Protokolle (Online-Banking-DDoS, Core-Banking-Ausfall)",
+            "BVR/DSGV-Verbands-Pressekonferenz-Templates",
+            "BaFin-/Bundesbank-Liaison-Personen-Liste",
+            "Customer-Komm-Templates (vor-textiert, BVR/DSGV-abgestimmt)",
+            "Filialen-Mitarbeiter-Briefing-Drehbuch"
+          ],
+          "reviewCycleYears": 1,
+          "equivalentProofsNote": "DORA Art. 6 verlangt jährlichen Review — bei Genossenschaftsbanken/Sparkassen ergänzt durch Verbands-Revision (BVR/DSGV). Anlassbezogene Reviews nach realen Vorfällen oder Tabletops binnen 30 Tagen. MaRisk-AT-7.2-Notfallplan wird nach jedem realen Vorfall oder Tabletop überarbeitet. ICT-Drittanbieter-Register quartalsweise im Risikomanagement-Komitee überprüft.",
+          "evidenceNote": "Ergänzend zu den hier gelisteten Evidenz-Referenzen sind alle relevanten BaFin-/Bundesbank-/Verbands-Korrespondenzen, externe Forensik-Berichte und ICT-Drittanbieter-Vertrags-Updates im Compliance-Aktenraum dokumentiert. Integration mit dem zentralen GRC-Tool (vor Go-Live zu setzen)."
+        }
+      }
+    }
+  }
+}
