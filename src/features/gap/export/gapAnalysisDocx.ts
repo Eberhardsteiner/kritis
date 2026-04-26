@@ -13,6 +13,8 @@ import {
 import { getConfidenceLabel } from '../gapAnalysis';
 import type {
   CompanyProfile,
+  ConsultingRateSettings,
+  GapAnalysisEntry,
   GapAnalysisSummary,
   RequirementDefinition,
 } from '../../../types';
@@ -21,7 +23,54 @@ export interface GapAnalysisDocxInput {
   companyProfile: CompanyProfile;
   gapAnalysisSummary: GapAnalysisSummary;
   requirements: RequirementDefinition[];
+  /**
+   * Optionaler Tagessatz für Euro-Bandbreite. Wenn nicht gesetzt,
+   * blendet das Dokument die Euro-Spalten aus und zeigt nur PT.
+   */
+  consultingRate?: ConsultingRateSettings | null;
   generatedAt?: Date;
+}
+
+const CURRENCY_LABELS: Record<ConsultingRateSettings['currency'], string> = {
+  EUR: '€',
+  CHF: 'CHF',
+};
+
+function formatEuro(value: number, currency: ConsultingRateSettings['currency']): string {
+  const formatted = value.toLocaleString('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return `${formatted} ${CURRENCY_LABELS[currency]}`;
+}
+
+function formatEuroRange(
+  min: number,
+  max: number,
+  currency: ConsultingRateSettings['currency'],
+): string {
+  if (Math.abs(min - max) < 1) {
+    return formatEuro(min, currency);
+  }
+  return `${formatEuro(min, currency)} – ${formatEuro(max, currency)}`;
+}
+
+function formatPersonDaysRange(min: number, max: number): string {
+  if (Math.abs(min - max) < 0.01) {
+    return formatPersonDays(min);
+  }
+  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  return `${minStr} – ${maxStr} PT`;
+}
+
+function formatHoursRange(min: number, max: number): string {
+  if (Math.abs(min - max) < 0.01) {
+    return `${min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 })} h`;
+  }
+  const minStr = min.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  const maxStr = max.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  return `${minStr} – ${maxStr} h`;
 }
 
 function formatDate(date: Date): string {
@@ -68,65 +117,189 @@ function tableCell(text: string, bold = false): TableCell {
   });
 }
 
-function buildRegimeTable(summary: GapAnalysisSummary): Table {
+function buildRegimeTable(
+  summary: GapAnalysisSummary,
+  rate: ConsultingRateSettings | null | undefined,
+): Table {
   const header = new TableRow({
     tableHeader: true,
     children: [
       tableCell('Regime', true),
-      tableCell('Summe PT', true),
+      tableCell('PT-Bandbreite', true),
+      ...(rate ? [tableCell(`${CURRENCY_LABELS[rate.currency]}-Bandbreite`, true)] : []),
       tableCell('Anzahl Pflichten', true),
       tableCell('Kategorien-Breakdown', true),
     ],
   });
-  const rows = summary.byRegime.map((regime) => new TableRow({
-    children: [
+  const rows = summary.byRegime.map((regime) => {
+    const cells = [
       tableCell(regime.regimeLabel),
-      tableCell(formatPersonDays(regime.totalPersonDays)),
+      tableCell(formatPersonDaysRange(regime.minPersonDays, regime.maxPersonDays)),
+    ];
+    if (rate && rate.ratePerPersonDay > 0) {
+      cells.push(
+        tableCell(
+          formatEuroRange(
+            regime.minPersonDays * rate.ratePerPersonDay,
+            regime.maxPersonDays * rate.ratePerPersonDay,
+            rate.currency,
+          ),
+        ),
+      );
+    }
+    cells.push(
       tableCell(String(regime.entries.length)),
       tableCell(
         Object.entries(regime.byCategory)
           .map(([category, pt]) => `${category}: ${formatPersonDays(pt)}`)
           .join(', ') || '–',
       ),
-    ],
-  }));
+    );
+    return new TableRow({ children: cells });
+  });
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [header, ...rows],
   });
 }
 
+/**
+ * Tätigkeits-Tabelle pro Anforderung mit effortBreakdown. Spalten:
+ * Tätigkeit | Min-h | Max-h | (Min-€ | Max-€ wenn Tagessatz gesetzt).
+ */
+function buildActivityTable(
+  entry: GapAnalysisEntry,
+  rate: ConsultingRateSettings | null | undefined,
+): Table {
+  const headerCells = [tableCell('Tätigkeit', true), tableCell('Min-h', true), tableCell('Max-h', true)];
+  if (rate && rate.ratePerPersonDay > 0) {
+    headerCells.push(tableCell(`Min-${CURRENCY_LABELS[rate.currency]}`, true));
+    headerCells.push(tableCell(`Max-${CURRENCY_LABELS[rate.currency]}`, true));
+  }
+  const header = new TableRow({ tableHeader: true, children: headerCells });
+  const activities = entry.effortEstimate.activities ?? [];
+  const rows = activities.map((activity) => {
+    const cells = [
+      tableCell(activity.note ? `${activity.label} — ${activity.note}` : activity.label),
+      tableCell(`${activity.minHours}`),
+      tableCell(`${activity.maxHours}`),
+    ];
+    if (rate && rate.ratePerPersonDay > 0) {
+      const minEuro = (activity.minHours / 8) * rate.ratePerPersonDay;
+      const maxEuro = (activity.maxHours / 8) * rate.ratePerPersonDay;
+      cells.push(tableCell(formatEuro(minEuro, rate.currency)));
+      cells.push(tableCell(formatEuro(maxEuro, rate.currency)));
+    }
+    return new TableRow({ children: cells });
+  });
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [header, ...rows],
+  });
+}
+
+function buildRequirementBreakdownBlocks(
+  summary: GapAnalysisSummary,
+  requirementLookup: Map<string, RequirementDefinition>,
+  rate: ConsultingRateSettings | null | undefined,
+): Array<Paragraph | Table> {
+  const blocks: Array<Paragraph | Table> = [];
+  for (const regime of summary.byRegime) {
+    for (const entry of regime.entries) {
+      const requirement = requirementLookup.get(entry.requirementId);
+      const minPT = entry.effortEstimate.minPersonDays ?? entry.effortEstimate.personDays;
+      const maxPT = entry.effortEstimate.maxPersonDays ?? entry.effortEstimate.personDays;
+      const ptLabel = formatPersonDaysRange(minPT, maxPT);
+      const euroLabel =
+        rate && rate.ratePerPersonDay > 0
+          ? formatEuroRange(
+              minPT * rate.ratePerPersonDay,
+              maxPT * rate.ratePerPersonDay,
+              rate.currency,
+            )
+          : '';
+      const title = requirement?.title
+        ? `${requirement.title}${requirement.lawRef ? ` (${requirement.lawRef})` : ''}`
+        : entry.requirementId;
+      blocks.push(headingParagraph(title, HeadingLevel.HEADING_2));
+      blocks.push(labelValueParagraph('Aufwand', `${ptLabel}${euroLabel ? ` | ${euroLabel}` : ''}`));
+      blocks.push(labelValueParagraph('Status', entry.currentStatus));
+      blocks.push(
+        labelValueParagraph(
+          'Confidence',
+          getConfidenceLabel(entry.effortEstimate.confidence),
+        ),
+      );
+      const activities = entry.effortEstimate.activities ?? [];
+      if (activities.length > 0) {
+        blocks.push(buildActivityTable(entry, rate));
+      }
+      const drivers = entry.effortEstimate.drivers ?? [];
+      if (drivers.length > 0) {
+        blocks.push(labelValueParagraph('Treiber für die Bandbreite', drivers.join(', ')));
+      }
+      if (entry.effortEstimate.assumptions.length > 0) {
+        blocks.push(
+          labelValueParagraph(
+            'Annahmen',
+            entry.effortEstimate.assumptions.join(' · '),
+          ),
+        );
+      }
+    }
+  }
+  return blocks;
+}
+
+/**
+ * Heuristik-Übersicht als Kompakt-Tabelle, primär für Anforderungen
+ * ohne Breakdown (Pack-Adoptionen). Bleibt zur Schnell-Orientierung
+ * im Dokument unterhalb der Detail-Blöcke.
+ */
 function buildRequirementTable(
   summary: GapAnalysisSummary,
   requirementLookup: Map<string, RequirementDefinition>,
+  rate: ConsultingRateSettings | null | undefined,
 ): Table {
-  const header = new TableRow({
-    tableHeader: true,
-    children: [
-      tableCell('Pflichtbaustein', true),
-      tableCell('Kategorie', true),
-      tableCell('Status', true),
-      tableCell('PT', true),
-      tableCell('Confidence', true),
-    ],
-  });
+  const headerCells = [
+    tableCell('Pflichtbaustein', true),
+    tableCell('Kategorie', true),
+    tableCell('Status', true),
+    tableCell('PT-Bandbreite', true),
+  ];
+  if (rate && rate.ratePerPersonDay > 0) {
+    headerCells.push(tableCell(`${CURRENCY_LABELS[rate.currency]}-Bandbreite`, true));
+  }
+  headerCells.push(tableCell('Confidence', true));
+  const header = new TableRow({ tableHeader: true, children: headerCells });
   const rows: TableRow[] = [];
   for (const regime of summary.byRegime) {
     for (const entry of regime.entries) {
       const requirement = requirementLookup.get(entry.requirementId);
-      rows.push(
-        new TableRow({
-          children: [
-            tableCell(
-              requirement?.title ? `${requirement.title} (${requirement.lawRef ?? ''})` : entry.requirementId,
+      const minPT = entry.effortEstimate.minPersonDays ?? entry.effortEstimate.personDays;
+      const maxPT = entry.effortEstimate.maxPersonDays ?? entry.effortEstimate.personDays;
+      const ptLabel = formatPersonDaysRange(minPT, maxPT);
+      const cells = [
+        tableCell(
+          requirement?.title ? `${requirement.title} (${requirement.lawRef ?? ''})` : entry.requirementId,
+        ),
+        tableCell(entry.category),
+        tableCell(entry.currentStatus),
+        tableCell(ptLabel),
+      ];
+      if (rate && rate.ratePerPersonDay > 0) {
+        cells.push(
+          tableCell(
+            formatEuroRange(
+              minPT * rate.ratePerPersonDay,
+              maxPT * rate.ratePerPersonDay,
+              rate.currency,
             ),
-            tableCell(entry.category),
-            tableCell(entry.currentStatus),
-            tableCell(formatPersonDays(entry.effortEstimate.personDays)),
-            tableCell(getConfidenceLabel(entry.effortEstimate.confidence)),
-          ],
-        }),
-      );
+          ),
+        );
+      }
+      cells.push(tableCell(getConfidenceLabel(entry.effortEstimate.confidence)));
+      rows.push(new TableRow({ children: cells }));
     }
   }
   return new Table({
@@ -136,11 +309,28 @@ function buildRequirementTable(
 }
 
 export function buildGapAnalysisDocument(input: GapAnalysisDocxInput): Document {
-  const { companyProfile, gapAnalysisSummary, requirements } = input;
+  const { companyProfile, gapAnalysisSummary, requirements, consultingRate } = input;
   const generatedAt = input.generatedAt ?? new Date();
   const requirementLookup = new Map(requirements.map((requirement) => [requirement.id, requirement]));
+  const hasRate = consultingRate && consultingRate.ratePerPersonDay > 0;
+  const totalPtLabel = formatPersonDaysRange(
+    gapAnalysisSummary.minPersonDays,
+    gapAnalysisSummary.maxPersonDays,
+  );
+  const totalEuroLabel = hasRate
+    ? formatEuroRange(
+        gapAnalysisSummary.minPersonDays * consultingRate!.ratePerPersonDay,
+        gapAnalysisSummary.maxPersonDays * consultingRate!.ratePerPersonDay,
+        consultingRate!.currency,
+      )
+    : '';
+  const breakdownBlocks = buildRequirementBreakdownBlocks(
+    gapAnalysisSummary,
+    requirementLookup,
+    consultingRate,
+  );
 
-  const childrenElements: Array<Paragraph | Table> = [
+  const headerElements: Array<Paragraph | Table> = [
     new Paragraph({
       children: [new TextRun({ text: 'Angebotsgrundlage KRITIS-Readiness', bold: true, size: 32 })],
       alignment: AlignmentType.LEFT,
@@ -149,9 +339,26 @@ export function buildGapAnalysisDocument(input: GapAnalysisDocxInput): Document 
     bodyParagraph(
       `Erstellt am ${formatDate(generatedAt)} — UVM Consulting Group / UVM-Institut.`,
     ),
+  ];
+  if (hasRate) {
+    const effectiveLabel = consultingRate!.effectiveFrom
+      ? `, gültig ab ${consultingRate!.effectiveFrom}`
+      : '';
+    headerElements.push(
+      bodyParagraph(
+        `Kalkulation auf Basis Tagessatz: ${formatEuro(consultingRate!.ratePerPersonDay, consultingRate!.currency)} pro Personentag${effectiveLabel}.`,
+        true,
+      ),
+    );
+  }
+  headerElements.push(
     bodyParagraph(
-      'Diese Angebotsgrundlage ist eine heuristische Aufwandsschätzung auf Basis des aktuellen Mandantenbilds und der hinterlegten Standard-Mappings. Die Zahlen sind konservativ gewählt; sie ersetzen keine detaillierte Projektplanung.',
+      'Diese Angebotsgrundlage ist eine quantifizierte Aufwandsschätzung auf Basis des aktuellen Mandantenbilds. Anforderungen mit ausgearbeitetem Tätigkeits-Breakdown zeigen verteidigbare Min/Max-Bandbreiten; Anforderungen mit Heuristik-Schätzung zeigen einen Mittelwert. Die Zahlen ersetzen keine detaillierte Projektplanung.',
     ),
+  );
+
+  const childrenElements: Array<Paragraph | Table> = [
+    ...headerElements,
 
     headingParagraph('Mandant', HeadingLevel.HEADING_1),
     labelValueParagraph('Unternehmen', companyProfile.companyName || '—'),
@@ -162,22 +369,27 @@ export function buildGapAnalysisDocument(input: GapAnalysisDocxInput): Document 
     labelValueParagraph('Versorgte Personen', companyProfile.personsServed || '—'),
 
     headingParagraph('Gesamtabschätzung', HeadingLevel.HEADING_1),
-    labelValueParagraph('Restaufwand gesamt', formatPersonDays(gapAnalysisSummary.totalPersonDays)),
+    labelValueParagraph('Restaufwand gesamt (PT-Bandbreite)', totalPtLabel),
+    ...(hasRate ? [labelValueParagraph(`Restaufwand gesamt (${CURRENCY_LABELS[consultingRate!.currency]}-Bandbreite)`, totalEuroLabel)] : []),
     labelValueParagraph(
-      'Kalenderwochen',
-      gapAnalysisSummary.totalPersonDays > 0
-        ? `${gapAnalysisSummary.calendarWeeks} (ein Consultant in Vollauslastung)`
-        : '0',
+      'Mittelwert',
+      `${formatPersonDays(gapAnalysisSummary.totalPersonDays)} (Kalenderwochen: ${gapAnalysisSummary.totalPersonDays > 0 ? `${gapAnalysisSummary.calendarWeeks}, ein Consultant in Vollauslastung` : '0'})`,
     ),
     labelValueParagraph('Anzahl Pflichtbausteine', String(gapAnalysisSummary.entryCount)),
 
     headingParagraph('Restaufwand je Regime', HeadingLevel.HEADING_1),
-    buildRegimeTable(gapAnalysisSummary),
+    buildRegimeTable(gapAnalysisSummary, consultingRate),
 
-    headingParagraph('Einzelbausteine', HeadingLevel.HEADING_1),
-    buildRequirementTable(gapAnalysisSummary, requirementLookup),
+    headingParagraph('Detail-Aufschlüsselung pro Anforderung', HeadingLevel.HEADING_1),
+    bodyParagraph(
+      'Pro Anforderung Tätigkeits-Tabelle mit Stunden- und Euro-Bandbreite (sofern Breakdown ausgearbeitet). Anforderungen mit reiner Heuristik-Schätzung erscheinen ohne Tätigkeits-Tabelle in der Übersicht weiter unten.',
+    ),
+    ...breakdownBlocks,
 
-    headingParagraph('Heuristik', HeadingLevel.HEADING_1),
+    headingParagraph('Übersicht aller Pflichtbausteine', HeadingLevel.HEADING_1),
+    buildRequirementTable(gapAnalysisSummary, requirementLookup, consultingRate),
+
+    headingParagraph('Heuristik (für Anforderungen ohne Breakdown)', HeadingLevel.HEADING_1),
     bodyParagraph(
       'Basis-Aufwand je Kategorie: scope/registration/governance = 2 PT, risk/plan/evidence/incident/reporting_channel/special_measures = 5 PT, measures = 10 PT.',
     ),
@@ -186,6 +398,9 @@ export function buildGapAnalysisDocument(input: GapAnalysisDocxInput): Document 
     ),
     bodyParagraph(
       'Reduktionen: -0,1 pro primary-Mapping (max -0,3), -0,05 pro verknüpfter Evidenz (max -0,2). Mindest-Gap-Faktor 0,1 bei offenen Pflichten zur Sicherung der Integrations- und Nachweispflege.',
+    ),
+    bodyParagraph(
+      'Domain-Score-Modulator: bei Domain-Score < 100 % aus der Grundanalyse wird der Gap-Faktor um bis zu 50 % erhöht (linearer Aufschlag). Damit haben Grundanalyse-Antworten einen sichtbaren Effekt auf den Restaufwand.',
     ),
 
     headingParagraph('Nutzung', HeadingLevel.HEADING_1),

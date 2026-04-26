@@ -291,8 +291,15 @@ export function useAppDerivedState({ state, moduleRegistryEntries }: UseAppDeriv
       requirementStates: effectiveRequirementStates,
       evidenceItems: currentEvidenceItems,
       regimeDefinitions,
+      domainScores: scoreSnapshot.domainScores,
     }),
-    [activeRequirements, effectiveRequirementStates, currentEvidenceItems, regimeDefinitions],
+    [
+      activeRequirements,
+      effectiveRequirementStates,
+      currentEvidenceItems,
+      regimeDefinitions,
+      scoreSnapshot.domainScores,
+    ],
   );
   const effectiveKritisSector = useMemo(() => {
     const sectorHints: string[] = [
