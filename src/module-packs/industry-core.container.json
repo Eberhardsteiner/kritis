@@ -6,7 +6,7 @@
     "moduleId": "manufacturing",
     "name": "Industrie-Basismodul",
     "version": "1.2.0",
-    "description": "Branchenmodul für Industrie- und Produktionsunternehmen mit Fokus auf Anlagenverfügbarkeit, OT, Materialfluss, Lieferfähigkeit und kontrollierten Wiederanlauf. Pack umfasst seit C5.3c zusätzlich 16 Risiko-Templates mit Schwerpunkt cyber_physical und interdependency, zwei Tabletop-Szenarien (MES-Ransomware mit Produktionsstopp, JIT-Lieferanten-Kaskade) und einen NIS2-orientierten Resilienzplan-Template-Entwurf mit 14 Maßnahmen.",
+    "description": "Branchenmodul für Industrie- und Produktionsunternehmen mit Fokus auf Produktionsfähigkeit, OT-Resilienz und NIS2-Disziplin.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Industrie",
@@ -33,14 +33,20 @@
       "minAppVersion": "1.8.0",
       "minEngineVersion": "1.0.0"
     },
-    "releaseChannel": "sector"
+    "releaseChannel": "sector",
+    "versionHistory": [
+      {
+        "version": "1.2.0",
+        "note": "Verbose pre-cleanup module description (preserved 2026-04-26 during the cross-pack description cleanup): Branchenmodul für Industrie- und Produktionsunternehmen mit Fokus auf Anlagenverfügbarkeit, OT, Materialfluss, Lieferfähigkeit und kontrollierten Wiederanlauf. Pack umfasst seit C5.3c zusätzlich Risiko-Templates nach NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz nach Vorbild § 12 KRITIS-Dachgesetz), zwei Tabletop-Szenarien (MES-Ransomware mit OFAC-/§89c-StGB-Kalibrierung der Lösegeld-Decision, JIT-Lieferanten-Kaskade mit Kunde-als-Partner-Option) und einen NIS2-orientierten Resilienzplan-Template-Entwurf. Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Vertragspflicht, Produktionsfähigkeit, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Industry-Decisions zur Lösegeld-Frage und zur Tier-1-Kunden-Kommunikation sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können."
+      }
+    ]
   },
   "module": {
     "schemaVersion": 1,
     "id": "manufacturing",
     "name": "Industrie & Produktion",
     "version": "1.2.0",
-    "description": "Branchenmodul für Industrie- und Produktionsunternehmen mit Fokus auf Anlagenverfügbarkeit, OT, Materialfluss, Lieferfähigkeit und kontrollierten Wiederanlauf. Pack umfasst seit C5.3c zusätzlich Risiko-Templates nach NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz nach Vorbild § 12 KRITIS-Dachgesetz), zwei Tabletop-Szenarien (MES-Ransomware mit OFAC-/§89c-StGB-Kalibrierung der Lösegeld-Decision, JIT-Lieferanten-Kaskade mit Kunde-als-Partner-Option) und einen NIS2-orientierten Resilienzplan-Template-Entwurf. Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Vertragspflicht, Produktionsfähigkeit, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Industry-Decisions zur Lösegeld-Frage und zur Tier-1-Kunden-Kommunikation sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können.",
+    "description": "Branchenmodul für Industrie- und Produktionsunternehmen mit Fokus auf Produktionsfähigkeit, OT-Resilienz und NIS2-Disziplin.",
     "sectorCategory": "Industrie",
     "domainWeightAdjustments": {
       "operations": 1.25,
@@ -1064,24 +1070,62 @@
         "version": "1.0.0",
         "title": "Ransomware-Angriff auf MES mit Produktionsstopp",
         "summary": "Eine Ransomware-Gruppe verschlüsselt das zentrale Manufacturing Execution System (MES) eines mittelständischen Maschinenbau-Standorts (ca. 600 Mitarbeitende, drei Fertigungslinien, JIT-Belieferung an Automotive-Tier-1-Kunden). Das Szenario simuliert die ersten 3 Stunden mit Fokus auf Produktions-Sofortstop, NIS2-/§8d-BSIG-Meldewege, Kunden-Lieferpflichten, manuellen Notbetrieb und die Lösegeldentscheidung im Industriekontext. Realitätsbezug: Kaspersky/VDC-Erhebung Q1–Q3 2025 — durchschnittliche Angriffsdauer 13 Tage, allein in Europa 3,8 Mrd. € Stillstandskosten in der Fertigung; verarbeitendes Gewerbe DE 22,9 % aller Ransomware-Angriffe. Das Szenario komprimiert die entscheidenden Weichenstellungen auf 180 Minuten.",
-        "sectors": ["Industrie"],
-        "applicableRegimes": ["BSIG", "DSGVO"],
+        "sectors": [
+          "Industrie"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "DSGVO"
+        ],
         "durationMinutes": 180,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Produktionsstop, Lösegeldentscheidung, Kundenkommunikation, Pressemitteilung). NIS2 verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung — der Krisenstabs-Leitung obliegt sie hier persönlich. Bei mittelständischen Tenants typisch besetzt mit Geschäftsführung oder Werkleitung mit Geschäftsführer-Vollmacht." },
-          { "id": "role-ciso", "title": "CISO / IT-Sicherheitsverantwortung", "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, NIS2-/§8d-BSIG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister und LKA Cybercrime. Bei Mittelständlern oft Personalunion mit IT-Leitung — Briefing geht davon aus, dass beide Hüte unterschiedlich getragen werden." },
-          { "id": "role-it-leitung", "title": "IT-Leitung / IT-Betrieb", "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Prüfung, Wiederanlaufplanung. Stellt die technische Faktenbasis für Krisenstab und CISO. Verantwortlich für die ERP-/MES-/PLM-Schnittstellen und die Frage, welche Linien isoliert weitergefahren werden können." },
-          { "id": "role-ot-sicherheit", "title": "OT-Sicherheit / Automatisierung", "briefing": "Mappt Befallsreichweite ins OT-Segment, prüft SCADA/SPS-Integrität, koordiniert mit Anlagen-OEMs und Integrator-Hotlines. Entscheidet operativ, ob einzelne Linien autonom (ohne MES-Anbindung) weiterlaufen können." },
-          { "id": "role-werkleitung", "title": "Werkleitung / Produktion", "briefing": "Operative Linien-Verantwortung. Trifft Detail-Entscheidungen zu Schichtplänen, manueller Auftragssteuerung (Papier-Laufkarten), Materialfluss und Übergabe-Disziplin. Schnittstelle zur Pflicht-Belegschaft und zu Schichtleitungen." },
-          { "id": "role-einkauf-scm", "title": "Einkauf / Supply-Chain-Management", "briefing": "Kundenseite und Lieferantenseite gleichzeitig: muss Schlüsselkunden über mögliche Lieferverzögerungen vorwarnen, JIT-Anlieferungen umplanen, Vertragsstrafen-Klauseln gegen die Geschäftsführung kommunizieren. Hat die Vertrags-Eskalations-Matrix in der Hand." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG-Umsetzung), DSGVO Art. 33/34 bei Mitarbeiter- und Kundendaten-Exfiltration, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung bei sanktionierten Gruppen), Vertragsstrafen-Klauseln gegen Kunden, GeschGehG-Spurensicherung bei Konstruktions-IP-Abfluss." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Produktionsstop, Lösegeldentscheidung, Kundenkommunikation, Pressemitteilung). NIS2 verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung — der Krisenstabs-Leitung obliegt sie hier persönlich. Bei mittelständischen Tenants typisch besetzt mit Geschäftsführung oder Werkleitung mit Geschäftsführer-Vollmacht."
+          },
+          {
+            "id": "role-ciso",
+            "title": "CISO / IT-Sicherheitsverantwortung",
+            "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, NIS2-/§8d-BSIG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister und LKA Cybercrime. Bei Mittelständlern oft Personalunion mit IT-Leitung — Briefing geht davon aus, dass beide Hüte unterschiedlich getragen werden."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung / IT-Betrieb",
+            "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Prüfung, Wiederanlaufplanung. Stellt die technische Faktenbasis für Krisenstab und CISO. Verantwortlich für die ERP-/MES-/PLM-Schnittstellen und die Frage, welche Linien isoliert weitergefahren werden können."
+          },
+          {
+            "id": "role-ot-sicherheit",
+            "title": "OT-Sicherheit / Automatisierung",
+            "briefing": "Mappt Befallsreichweite ins OT-Segment, prüft SCADA/SPS-Integrität, koordiniert mit Anlagen-OEMs und Integrator-Hotlines. Entscheidet operativ, ob einzelne Linien autonom (ohne MES-Anbindung) weiterlaufen können."
+          },
+          {
+            "id": "role-werkleitung",
+            "title": "Werkleitung / Produktion",
+            "briefing": "Operative Linien-Verantwortung. Trifft Detail-Entscheidungen zu Schichtplänen, manueller Auftragssteuerung (Papier-Laufkarten), Materialfluss und Übergabe-Disziplin. Schnittstelle zur Pflicht-Belegschaft und zu Schichtleitungen."
+          },
+          {
+            "id": "role-einkauf-scm",
+            "title": "Einkauf / Supply-Chain-Management",
+            "briefing": "Kundenseite und Lieferantenseite gleichzeitig: muss Schlüsselkunden über mögliche Lieferverzögerungen vorwarnen, JIT-Anlieferungen umplanen, Vertragsstrafen-Klauseln gegen die Geschäftsführung kommunizieren. Hat die Vertrags-Eskalations-Matrix in der Hand."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG-Umsetzung), DSGVO Art. 33/34 bei Mitarbeiter- und Kundendaten-Exfiltration, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung bei sanktionierten Gruppen), Vertragsstrafen-Klauseln gegen Kunden, GeschGehG-Spurensicherung bei Konstruktions-IP-Abfluss."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-mes-anomaly", "title": "Erste Anomalie aus dem IT-Betrieb", "description": "IT-Betriebsleiter meldet ungewöhnlich hohe CPU-Last auf den MES-Datenbank-Servern, parallel Schreibfehler bei Auftragsbuchungen aus zwei Linien. PLM-Fileserver zeigt fehlgeschlagene Datei-Zugriffe. Erstindikatoren deuten auf Schadsoftware, aber noch keine Verschlüsselung sichtbar.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-mes-anomaly",
+                "title": "Erste Anomalie aus dem IT-Betrieb",
+                "description": "IT-Betriebsleiter meldet ungewöhnlich hohe CPU-Last auf den MES-Datenbank-Servern, parallel Schreibfehler bei Auftragsbuchungen aus zwei Linien. PLM-Fileserver zeigt fehlgeschlagene Datei-Zugriffe. Erstindikatoren deuten auf Schadsoftware, aber noch keine Verschlüsselung sichtbar.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1090,10 +1134,28 @@
                 "roleId": "role-ciso",
                 "guidance": "NIS2 verlangt für besonders wichtige Einrichtungen einen dokumentierten Reaktionsprozess. Frühe Eskalation (hoher False-Positive-Anteil, aber schnelle Reaktion) vs. Eigen-Diagnose (Ressourcen-schonend, aber Verzögerung). Bei Industrie-Tenants mit OT-Anbindung ist frühe Eskalation explizit empfohlen — Übergriff auf SPS-Ebene wäre ein Anlagen-Schadensszenario.",
                 "options": [
-                  { "id": "opt-early-escalate", "label": "Sofort Krisenstab aktivieren und Forensik einleiten", "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, Personal gebunden. OT-Sicherheit prüft parallel die SPS-Integrität.", "evaluationHints": ["Krisenstab-Alarmierungskette getestet"], "scoreContribution": 3 },
-                  { "id": "opt-initial-diagnostics", "label": "Erst eigene Triage ohne Krisenstab-Eskalation", "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung Richtung OT-Segment.", "evaluationHints": ["Zeitverlust durch Eigen-Diagnose"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-early-escalate",
+                    "label": "Sofort Krisenstab aktivieren und Forensik einleiten",
+                    "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, Personal gebunden. OT-Sicherheit prüft parallel die SPS-Integrität.",
+                    "evaluationHints": [
+                      "Krisenstab-Alarmierungskette getestet"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-initial-diagnostics",
+                    "label": "Erst eigene Triage ohne Krisenstab-Eskalation",
+                    "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung Richtung OT-Segment.",
+                    "evaluationHints": [
+                      "Zeitverlust durch Eigen-Diagnose"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1101,7 +1163,12 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-mes-encrypted", "title": "Bestätigung: MES-Ransomware mit Verschlüsselung", "description": "Erste Auftragsdatensätze sind nicht mehr lesbar, Lösegeld-Datei auf MES-Servern und PLM-Fileshare platziert. Gruppe identifiziert sich als Black-Basta-Nachfolger, typische Industrie-TTP nach BSI-Lagebild 2025 (950 registrierte Ransomware-Vorfälle DE, 80 % gegen KMU).", "roleId": "role-ciso" }
+              {
+                "id": "inj-mes-encrypted",
+                "title": "Bestätigung: MES-Ransomware mit Verschlüsselung",
+                "description": "Erste Auftragsdatensätze sind nicht mehr lesbar, Lösegeld-Datei auf MES-Servern und PLM-Fileshare platziert. Gruppe identifiziert sich als Black-Basta-Nachfolger, typische Industrie-TTP nach BSI-Lagebild 2025 (950 registrierte Ransomware-Vorfälle DE, 80 % gegen KMU).",
+                "roleId": "role-ciso"
+              }
             ],
             "decisions": [
               {
@@ -1110,11 +1177,37 @@
                 "roleId": "role-it-leitung",
                 "guidance": "Klassischer Trade-off Containment vs. Forensik plus industrielle Sonderfrage: OT-Segment mitnehmen oder retten? Bei sofortigem OT-Cut stoppen Maschinen ungeplant — mechanische Schäden möglich (Spritzguss, Druckguss, Schmelzbetrieb). Bei OT-Erhalt droht Übergriff auf SPS-Ebene mit potenziellem Anlagen-Schaden à la Industroyer-Schablone.",
                 "options": [
-                  { "id": "opt-hard-decouple-it", "label": "IT-Netz hart abkoppeln, OT-Segment in kontrollierten Stop fahren (geordnetes Auslaufen der Linien)", "consequence": "Beste Mischung aus Containment und Anlagen-Schutz. Linien laufen 15–30 min kontrolliert aus, dann Stillstand. Forensik-Telemetrie verloren, dafür kein OT-Übergriffs-Risiko.", "evaluationHints": ["Containment + kontrolliertes OT-Auslaufen"], "scoreContribution": 3 },
-                  { "id": "opt-hard-decouple-all", "label": "Komplette Sofort-Entkopplung IT und OT inklusive Notabschaltung Linien", "consequence": "Maximales Containment, aber ungeplante Notabschaltung kann mechanische Schäden verursachen (Spritzguss-Werkzeuge, Schmelzbäder). Wiederanlauf wird teurer.", "evaluationHints": ["Maximales Containment, Anlagenrisiko nicht abgewogen"], "scoreContribution": 1 },
-                  { "id": "opt-segmented-isolation", "label": "Segmentierte Isolation mit laufender Forensik, OT bleibt produktiv", "consequence": "Live-Telemetrie erhalten, aber Risiko OT-Übergriff. Nur realistisch mit eingespieltem IR-Team und EDR-Coverage in OT.", "evaluationHints": ["Risiko/Nutzen abgewogen, OT-Schutz-Strategie diskutiert"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-hard-decouple-it",
+                    "label": "IT-Netz hart abkoppeln, OT-Segment in kontrollierten Stop fahren (geordnetes Auslaufen der Linien)",
+                    "consequence": "Beste Mischung aus Containment und Anlagen-Schutz. Linien laufen 15–30 min kontrolliert aus, dann Stillstand. Forensik-Telemetrie verloren, dafür kein OT-Übergriffs-Risiko.",
+                    "evaluationHints": [
+                      "Containment + kontrolliertes OT-Auslaufen"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-hard-decouple-all",
+                    "label": "Komplette Sofort-Entkopplung IT und OT inklusive Notabschaltung Linien",
+                    "consequence": "Maximales Containment, aber ungeplante Notabschaltung kann mechanische Schäden verursachen (Spritzguss-Werkzeuge, Schmelzbäder). Wiederanlauf wird teurer.",
+                    "evaluationHints": [
+                      "Maximales Containment, Anlagenrisiko nicht abgewogen"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-segmented-isolation",
+                    "label": "Segmentierte Isolation mit laufender Forensik, OT bleibt produktiv",
+                    "consequence": "Live-Telemetrie erhalten, aber Risiko OT-Übergriff. Nur realistisch mit eingespieltem IR-Team und EDR-Coverage in OT.",
+                    "evaluationHints": [
+                      "Risiko/Nutzen abgewogen, OT-Schutz-Strategie diskutiert"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-anlagensicherheit"]
+                "relatedCriteria": [
+                  "crit-operations-anlagensicherheit"
+                ]
               }
             ]
           },
@@ -1122,8 +1215,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, CISO, IT-Leitung, OT-Sicherheit, Werkleitung, Einkauf/SCM, Rechtsabteilung einberufen. Lageraum eingerichtet, Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe geprüft.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-line-status", "title": "Linien-Status: 2 von 3 Linien gestoppt, Linie 3 autonom weiter", "description": "Werkleitung meldet: Linie 1 (Großserien-Spritzguss) und Linie 2 (CNC-Bearbeitung) sind gestoppt. Linie 3 (Endmontage) läuft autonom mit lokaler SPS-Steuerung weiter, sofern Materialfluss aus Vor-Stationen vorhält. Vorrat reicht 4–6 Stunden.", "roleId": "role-werkleitung" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, CISO, IT-Leitung, OT-Sicherheit, Werkleitung, Einkauf/SCM, Rechtsabteilung einberufen. Lageraum eingerichtet, Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe geprüft.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-line-status",
+                "title": "Linien-Status: 2 von 3 Linien gestoppt, Linie 3 autonom weiter",
+                "description": "Werkleitung meldet: Linie 1 (Großserien-Spritzguss) und Linie 2 (CNC-Bearbeitung) sind gestoppt. Linie 3 (Endmontage) läuft autonom mit lokaler SPS-Steuerung weiter, sofern Materialfluss aus Vor-Stationen vorhält. Vorrat reicht 4–6 Stunden.",
+                "roleId": "role-werkleitung"
+              }
             ],
             "decisions": [
               {
@@ -1132,11 +1235,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Manueller Notbetrieb (Papier-Laufkarten, Schichtbuch, Übergabe-Disziplin per Sprechfunk) sollte vorab dokumentiert sein. Bei vollem Rollout: Personal-Belastung steigt, Fehlerrate steigt, Nachverfolgbarkeit für Qualität und Audit erschwert. Teil-Rollout möglich, wenn einzelne Linien isoliert weiterlaufen können.",
                 "options": [
-                  { "id": "opt-full-manual", "label": "Vollständiger manueller Notbetrieb für alle laufenden Linien", "consequence": "Klares einheitliches Verfahren. Personal stark belastet, Nachdokumentations-Aufwand für Charge/Qualität nach Rückkehr. Schlüsselaufträge laufen weiter.", "evaluationHints": ["Manueller Notbetrieb angewendet, Dokumentationspflicht eingehalten"], "scoreContribution": 3 },
-                  { "id": "opt-partial-manual", "label": "Selektiver Notbetrieb nur für höchste Priorität (Linie 3)", "consequence": "Linie 3 produziert weiter mit Notbetrieb-Belegschaft, Linien 1+2 bleiben aus. Fokus auf Schlüsselkunden-Auftrag.", "evaluationHints": ["Risikobasiert priorisierter Notbetrieb"], "scoreContribution": 2 },
-                  { "id": "opt-full-stop", "label": "Vollständiger Stop aller Linien bis Wiederanlauf bestätigt", "consequence": "Klare, sichere Lage. Alle Schlüsselkunden müssen sofort informiert werden, Vertragsstrafen-Risiko greift.", "evaluationHints": ["Voller Stop, Lagestandort sicher"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-manual",
+                    "label": "Vollständiger manueller Notbetrieb für alle laufenden Linien",
+                    "consequence": "Klares einheitliches Verfahren. Personal stark belastet, Nachdokumentations-Aufwand für Charge/Qualität nach Rückkehr. Schlüsselaufträge laufen weiter.",
+                    "evaluationHints": [
+                      "Manueller Notbetrieb angewendet, Dokumentationspflicht eingehalten"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-partial-manual",
+                    "label": "Selektiver Notbetrieb nur für höchste Priorität (Linie 3)",
+                    "consequence": "Linie 3 produziert weiter mit Notbetrieb-Belegschaft, Linien 1+2 bleiben aus. Fokus auf Schlüsselkunden-Auftrag.",
+                    "evaluationHints": [
+                      "Risikobasiert priorisierter Notbetrieb"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-full-stop",
+                    "label": "Vollständiger Stop aller Linien bis Wiederanlauf bestätigt",
+                    "consequence": "Klare, sichere Lage. Alle Schlüsselkunden müssen sofort informiert werden, Vertragsstrafen-Risiko greift.",
+                    "evaluationHints": [
+                      "Voller Stop, Lagestandort sicher"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-produktionsfähigkeit"]
+                "relatedCriteria": [
+                  "crit-operations-produktionsfähigkeit"
+                ]
               }
             ]
           },
@@ -1144,7 +1273,12 @@
             "t": 60,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-key-customer-call", "title": "Schlüsselkunde fragt JIT-Lieferung ab", "description": "Automotive-Tier-1-Kunde (40 % des Quartalsumsatzes) meldet sich: heute 14:00 Uhr ist die nächste JIT-Anlieferung im Bandwerk fällig. Sein eigenes Band steht ohne unsere Lieferung still. Vertragsstrafe ist 25.000 € pro angefangener Stunde Bandstillstand bei seinem Werk. Bei Verzug > 4 h Eskalation zur OEM-Konzern-Einkaufsleitung.", "roleId": "role-einkauf-scm" }
+              {
+                "id": "inj-key-customer-call",
+                "title": "Schlüsselkunde fragt JIT-Lieferung ab",
+                "description": "Automotive-Tier-1-Kunde (40 % des Quartalsumsatzes) meldet sich: heute 14:00 Uhr ist die nächste JIT-Anlieferung im Bandwerk fällig. Sein eigenes Band steht ohne unsere Lieferung still. Vertragsstrafe ist 25.000 € pro angefangener Stunde Bandstillstand bei seinem Werk. Bei Verzug > 4 h Eskalation zur OEM-Konzern-Einkaufsleitung.",
+                "roleId": "role-einkauf-scm"
+              }
             ],
             "decisions": [
               {
@@ -1153,10 +1287,29 @@
                 "roleId": "role-einkauf-scm",
                 "guidance": "Vertragspflicht zur unverzüglichen Information bei Lieferunfähigkeit ist in OEM-Liefer-RVs Standard. Vollständige Offenheit reduziert Vertrauensschaden, kann aber Verhandlungsposition bei Pönale schwächen. Verzögerte Information riskiert verschärfte Vertragsstrafe und Eskalation zur OEM-Konzernebene.",
                 "options": [
-                  { "id": "opt-customer-full", "label": "Sofortige offene Information: Cyber-Vorfall, Wiederanlauf voraussichtlich 24–72 h, alternative Logistik aus Sicherheitsbestand wird geprüft", "consequence": "Vertrauenserhaltung, Vertragsstrafe greift aber sofort. Kunde kann eigenen Krisenstab aktivieren und Alternativen suchen.", "evaluationHints": ["Frühe Offenheit gegenüber Schlüsselkunde, Vertragspflicht erfüllt"], "scoreContribution": 3 },
-                  { "id": "opt-customer-delayed", "label": "Erst Sicherheitsbestand mobilisieren, dann mit Lösungsvorschlag informieren", "consequence": "1–2 h Verzögerung, Vertragsstrafe-Klausel ggf. greift härter, aber Kunde erhält gleich einen Plan. Risiko: Wenn Sicherheitsbestand nicht reicht, ist die spätere Offenheit ein doppelter Vertrauensverlust.", "evaluationHints": ["Verzögerte aber lösungsorientierte Information"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-customer-full",
+                    "label": "Sofortige offene Information: Cyber-Vorfall, Wiederanlauf voraussichtlich 24–72 h, alternative Logistik aus Sicherheitsbestand wird geprüft",
+                    "consequence": "Vertrauenserhaltung, Vertragsstrafe greift aber sofort. Kunde kann eigenen Krisenstab aktivieren und Alternativen suchen.",
+                    "evaluationHints": [
+                      "Frühe Offenheit gegenüber Schlüsselkunde, Vertragspflicht erfüllt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-customer-delayed",
+                    "label": "Erst Sicherheitsbestand mobilisieren, dann mit Lösungsvorschlag informieren",
+                    "consequence": "1–2 h Verzögerung, Vertragsstrafe-Klausel ggf. greift härter, aber Kunde erhält gleich einen Plan. Risiko: Wenn Sicherheitsbestand nicht reicht, ist die spätere Offenheit ein doppelter Vertrauensverlust.",
+                    "evaluationHints": [
+                      "Verzögerte aber lösungsorientierte Information"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunde", "crit-governance-vertragspflicht"]
+                "relatedCriteria": [
+                  "crit-communication-kunde",
+                  "crit-governance-vertragspflicht"
+                ]
               }
             ]
           },
@@ -1164,8 +1317,18 @@
             "t": 90,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-bsi-portal", "title": "BSI-Meldeportal-Erstmeldung erstellt", "description": "CISO hat über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG erstellt (24-h-Pflicht eingehalten). BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung mit Schadensbild. Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG 2025 eingestuft (verarbeitendes Gewerbe, > 250 Mitarbeitende, > 50 Mio. € Umsatz).", "roleId": "role-ciso" },
-              { "id": "inj-dsb-assessment", "title": "DSGVO-Bewertung: Mitarbeiter- und Kundendaten betroffen", "description": "Datenschutzbeauftragte*r (Personalunion mit Rechtsabteilung) bewertet: Im PLM-Fileshare lagen Personalakten-Auszüge und Kundenkonditionen mit personenbezogenen Daten. Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h verpflichtend.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-bsi-portal",
+                "title": "BSI-Meldeportal-Erstmeldung erstellt",
+                "description": "CISO hat über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG erstellt (24-h-Pflicht eingehalten). BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung mit Schadensbild. Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG 2025 eingestuft (verarbeitendes Gewerbe, > 250 Mitarbeitende, > 50 Mio. € Umsatz).",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-dsb-assessment",
+                "title": "DSGVO-Bewertung: Mitarbeiter- und Kundendaten betroffen",
+                "description": "Datenschutzbeauftragte*r (Personalunion mit Rechtsabteilung) bewertet: Im PLM-Fileshare lagen Personalakten-Auszüge und Kundenkonditionen mit personenbezogenen Daten. Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h verpflichtend.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1174,10 +1337,29 @@
                 "roleId": "role-ciso",
                 "guidance": "Vollständige Offenlegung unterstützt das BSI-Lagebild und schützt vor späterer Vorwurfshaltung. Zurückhaltende Meldung reduziert Leak-Risiko, erhöht aber Risiko der Nachforderung und Bußgeld nach NIS2UmsuCG (besonders wichtige Einrichtungen bis 10 Mio. € oder 2 % Weltumsatz, wichtige Einrichtungen bis 7 Mio. € oder 1,4 %).",
                 "options": [
-                  { "id": "opt-full-disclosure", "label": "Vollständige Offenlegung: TTPs, IOCs, Ransomware-Gruppe, lateral-movement-Pfad, OT-Befallsreichweite", "consequence": "BSI hat vollständiges Bild, kann Lageeinschätzung an andere Industrie-Betriebe weitergeben (Sektor-CERT-Funktion).", "evaluationHints": ["Vollständige Meldeinhalte"], "scoreContribution": 3 },
-                  { "id": "opt-minimal-disclosure", "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)", "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei Folgemeldung nach 72 h.", "evaluationHints": ["Minimalmeldung fristgerecht"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-disclosure",
+                    "label": "Vollständige Offenlegung: TTPs, IOCs, Ransomware-Gruppe, lateral-movement-Pfad, OT-Befallsreichweite",
+                    "consequence": "BSI hat vollständiges Bild, kann Lageeinschätzung an andere Industrie-Betriebe weitergeben (Sektor-CERT-Funktion).",
+                    "evaluationHints": [
+                      "Vollständige Meldeinhalte"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-minimal-disclosure",
+                    "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)",
+                    "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei Folgemeldung nach 72 h.",
+                    "evaluationHints": [
+                      "Minimalmeldung fristgerecht"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist", "crit-reporting-dsb-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist",
+                  "crit-reporting-dsb-frist"
+                ]
               }
             ]
           },
@@ -1185,8 +1367,18 @@
             "t": 120,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-forensik", "title": "Externer Incident-Response-Dienstleister vor Ort", "description": "Vorvertraglich beauftragter IR-Dienstleister (2-h-Response-SLA) ist vor Ort. Erste Analyse: Eindringen vor 9 Tagen über Phishing-Mail an die Konstruktionsabteilung (CAD-Konvertier-Tool angeblich), dann laterale Ausbreitung über VPN-Zugang eines Service-Technikers eines Anlagen-Integrators (gestohlene Credentials).", "roleId": "role-ciso" },
-              { "id": "inj-backup-status", "title": "Offline-Backup verfügbar, 36 h alt, OT-Konfigurationen separat", "description": "IT-Leitung meldet: MES-Datenbank-Backup auf Offline-Speicher ist sauber, Stand vor 36 Stunden. Auftragsdaten der letzten 36 h müssten aus Schicht-Logbüchern und Sprecherfunk-Dokumentation rekonstruiert werden. SPS-Konfigurationen liegen separat bei OT-Sicherheit, ebenfalls offline gehalten — diese sind sauber und aktuell.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-forensik",
+                "title": "Externer Incident-Response-Dienstleister vor Ort",
+                "description": "Vorvertraglich beauftragter IR-Dienstleister (2-h-Response-SLA) ist vor Ort. Erste Analyse: Eindringen vor 9 Tagen über Phishing-Mail an die Konstruktionsabteilung (CAD-Konvertier-Tool angeblich), dann laterale Ausbreitung über VPN-Zugang eines Service-Technikers eines Anlagen-Integrators (gestohlene Credentials).",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-backup-status",
+                "title": "Offline-Backup verfügbar, 36 h alt, OT-Konfigurationen separat",
+                "description": "IT-Leitung meldet: MES-Datenbank-Backup auf Offline-Speicher ist sauber, Stand vor 36 Stunden. Auftragsdaten der letzten 36 h müssten aus Schicht-Logbüchern und Sprecherfunk-Dokumentation rekonstruiert werden. SPS-Konfigurationen liegen separat bei OT-Sicherheit, ebenfalls offline gehalten — diese sind sauber und aktuell.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1195,10 +1387,28 @@
                 "roleId": "role-werkleitung",
                 "guidance": "Mitarbeitende sind gleichzeitig Helfer und potenzielle Leaks (Soziale Medien, Familienangehörige). Frühe transparente Kommunikation reduziert Gerüchte. Zu viel Detail liefert Angreifern Informationen über Wiederanlauf-Strategien.",
                 "options": [
-                  { "id": "opt-full-internal", "label": "Komplette interne Transparenz inkl. Angriffsvektor und Wiederanlauf-Erwartung", "consequence": "Vertrauen der Belegschaft hoch, Mitwirkungsbereitschaft steigt. Leak-Risiko zu Social Media; Konkurrenz / Angreifer können Wiederanlauf-Plan ausspionieren.", "evaluationHints": ["Hohe interne Transparenz"], "scoreContribution": 2 },
-                  { "id": "opt-focused-internal", "label": "Fokussierte Information: Verhalten, Schicht-Plan, manueller Notbetrieb — keine Angriffsdetails", "consequence": "Angriffsdetails bleiben intern beschränkt. Mitarbeitende wissen, wie sie arbeiten sollen. Vertrauen tendenziell etwas niedriger, aber operative Klarheit hoch.", "evaluationHints": ["Operative interne Kommunikation"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-full-internal",
+                    "label": "Komplette interne Transparenz inkl. Angriffsvektor und Wiederanlauf-Erwartung",
+                    "consequence": "Vertrauen der Belegschaft hoch, Mitwirkungsbereitschaft steigt. Leak-Risiko zu Social Media; Konkurrenz / Angreifer können Wiederanlauf-Plan ausspionieren.",
+                    "evaluationHints": [
+                      "Hohe interne Transparenz"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-focused-internal",
+                    "label": "Fokussierte Information: Verhalten, Schicht-Plan, manueller Notbetrieb — keine Angriffsdetails",
+                    "consequence": "Angriffsdetails bleiben intern beschränkt. Mitarbeitende wissen, wie sie arbeiten sollen. Vertrauen tendenziell etwas niedriger, aber operative Klarheit hoch.",
+                    "evaluationHints": [
+                      "Operative interne Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-mitarbeiter"]
+                "relatedCriteria": [
+                  "crit-communication-mitarbeiter"
+                ]
               }
             ]
           },
@@ -1206,9 +1416,24 @@
             "t": 140,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-ransom-demand", "title": "Lösegeldforderung konkretisiert", "description": "Angreifer melden sich über Tor-Chat: 1,8 Mio. Euro in Bitcoin für Entschlüsselung und Nicht-Veröffentlichung der exfiltrierten Daten. Frist 72 Stunden, danach Verdopplung. Sample-Leaks zeigen Konstruktionsdaten zweier Hauptprodukte und Kundenkonditionen-Listen mit Tier-1-Preisen.", "roleId": "role-ciso" },
-              { "id": "inj-lka-advice", "title": "LKA Cybercrime: Nicht zahlen, plus OFAC-Risiko erklärt", "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, keine Garantie auf funktionierenden Schlüssel. Zwei rechtliche Risiken werden konkret benannt: (a) § 89c StGB Terrorismusfinanzierung — bei Zahlung an Gruppen mit Terrorismus-Bezug strafbar für Geschäftsführung. (b) OFAC-Sanktionsrisiko — das Office of Foreign Assets Control des US-Finanzministeriums führt eine Liste sanktionierter Cyber-Akteure (SDN-Liste, ergänzt um Cybercriminal-Designations); Zahlungen an gelistete Gruppen können auch für nicht-amerikanische Unternehmen Sanktionsstrafen auslösen, sobald eine US-Verbindung besteht (US-Niederlassung, US-Kunden, USD-Zahlungsabwicklung über US-Banken, US-Cloud-Hosting). OFAC-Strafen gegen Nicht-US-Unternehmen wurden 2023–2025 mehrfach verhängt; die OFAC-Advisory zu Ransomware-Zahlungen (zuletzt aktualisiert 2024) verlangt Sanctions-Screening vor jeder Zahlungsentscheidung.", "roleId": "role-rechtsabteilung" },
-              { "id": "inj-ip-leak-risk", "title": "IP-Leak-Risiko: Konstruktions-Know-how", "description": "Rechtsabteilung weist hin: Bei tatsächlicher Veröffentlichung der Konstruktionsdaten geht jahrelanger Entwicklungsvorsprung verloren. § 23 GeschGehG bietet zivilrechtliche Optionen gegen Verbreitung, aber Beweisführung gegen anonyme Tor-Akteure praktisch unmöglich. Patentrechtliche Sperrwirkung gegen geleakte Designs muss separat geprüft werden.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-ransom-demand",
+                "title": "Lösegeldforderung konkretisiert",
+                "description": "Angreifer melden sich über Tor-Chat: 1,8 Mio. Euro in Bitcoin für Entschlüsselung und Nicht-Veröffentlichung der exfiltrierten Daten. Frist 72 Stunden, danach Verdopplung. Sample-Leaks zeigen Konstruktionsdaten zweier Hauptprodukte und Kundenkonditionen-Listen mit Tier-1-Preisen.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-lka-advice",
+                "title": "LKA Cybercrime: Nicht zahlen, plus OFAC-Risiko erklärt",
+                "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, keine Garantie auf funktionierenden Schlüssel. Zwei rechtliche Risiken werden konkret benannt: (a) § 89c StGB Terrorismusfinanzierung — bei Zahlung an Gruppen mit Terrorismus-Bezug strafbar für Geschäftsführung. (b) OFAC-Sanktionsrisiko — das Office of Foreign Assets Control des US-Finanzministeriums führt eine Liste sanktionierter Cyber-Akteure (SDN-Liste, ergänzt um Cybercriminal-Designations); Zahlungen an gelistete Gruppen können auch für nicht-amerikanische Unternehmen Sanktionsstrafen auslösen, sobald eine US-Verbindung besteht (US-Niederlassung, US-Kunden, USD-Zahlungsabwicklung über US-Banken, US-Cloud-Hosting). OFAC-Strafen gegen Nicht-US-Unternehmen wurden 2023–2025 mehrfach verhängt; die OFAC-Advisory zu Ransomware-Zahlungen (zuletzt aktualisiert 2024) verlangt Sanctions-Screening vor jeder Zahlungsentscheidung.",
+                "roleId": "role-rechtsabteilung"
+              },
+              {
+                "id": "inj-ip-leak-risk",
+                "title": "IP-Leak-Risiko: Konstruktions-Know-how",
+                "description": "Rechtsabteilung weist hin: Bei tatsächlicher Veröffentlichung der Konstruktionsdaten geht jahrelanger Entwicklungsvorsprung verloren. § 23 GeschGehG bietet zivilrechtliche Optionen gegen Verbreitung, aber Beweisführung gegen anonyme Tor-Akteure praktisch unmöglich. Patentrechtliche Sperrwirkung gegen geleakte Designs muss separat geprüft werden.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1217,11 +1442,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Im Industriekontext anders gewichtet als im Gesundheitssektor: Keine unmittelbare Patientensicherheits-Gefährdung, aber existenzielles IP-Risiko und Vertragsstrafen-Lawine. Zwei pragmatische Optionen sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von Backup-Reife, IP-Sensitivität und Verhandlungs-Disziplin ab: (a) Kein Zahlung, Neuaufbau aus Backup, IP-Leak akzeptieren — konformitätsstark, langsamer Wiederanlauf, IP-Schaden trägt das Unternehmen. (b) Verhandlung nur über Entschlüsselungs-Schlüssel — schneller Wiederanlauf, IP-Schaden bleibt ebenfalls, Zahlung aber kleiner und gezielt. Die volle Zahlung mit Anti-Leak-Versprechen bleibt als dritte Option diskutierbar wegen operativer Dringlichkeit, ist aber durch § 89c StGB und OFAC-Sanktionsrecht (siehe LKA-Inject) deutlich riskanter und erhält daher eine niedrigere Bewertung. Sanctions-Screening vor jeder Zahlungs-Variante ist Pflicht.",
                 "options": [
-                  { "id": "opt-no-pay", "label": "Keine Zahlung, Neuaufbau aus Backup, IP-Leak akzeptieren, parallele rechtliche Verfolgung", "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 1–3 Wochen, hohe Personalkosten, 36 h Auftragsdaten manuell rekonstruieren. Konstruktionsdaten werden geleakt, langfristiger Wettbewerbsnachteil.", "evaluationHints": ["Keine Zahlung, regelkonform"], "scoreContribution": 2 },
-                  { "id": "opt-negotiate-only-decryption", "label": "Verhandlung nur über Entschlüsselungs-Schlüssel, IP-Leak akzeptieren", "consequence": "Reduziert die Zahlungssumme, beschleunigt Wiederanlauf. IP-Risiko bleibt. Sanktionsrecht weiter relevant — Sanctions-Screening und Rechtsmemo bleiben Voraussetzung. Komplexer Verhandlungs-Prozess durch externen IR-Dienstleister.", "evaluationHints": ["Pragmatisch, Risiko-getrennte Verhandlung — gleichwertig zu opt-no-pay"], "scoreContribution": 2 },
-                  { "id": "opt-pay", "label": "Volle Zahlung (inkl. Anti-Leak-Versprechen) nach Sanktionsrecht-Prüfung", "consequence": "Schnellster Wiederanlauf-Pfad, aber keine Garantie auf Schlüsselfunktion oder echtes Anti-Leak. Strafrechtliches und sanktionsrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN), NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Reputationsrisiko maximal.", "evaluationHints": ["Vollzahlung diskutierbar wegen operativer Dringlichkeit, rechtlich riskant"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-no-pay",
+                    "label": "Keine Zahlung, Neuaufbau aus Backup, IP-Leak akzeptieren, parallele rechtliche Verfolgung",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 1–3 Wochen, hohe Personalkosten, 36 h Auftragsdaten manuell rekonstruieren. Konstruktionsdaten werden geleakt, langfristiger Wettbewerbsnachteil.",
+                    "evaluationHints": [
+                      "Keine Zahlung, regelkonform"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-negotiate-only-decryption",
+                    "label": "Verhandlung nur über Entschlüsselungs-Schlüssel, IP-Leak akzeptieren",
+                    "consequence": "Reduziert die Zahlungssumme, beschleunigt Wiederanlauf. IP-Risiko bleibt. Sanktionsrecht weiter relevant — Sanctions-Screening und Rechtsmemo bleiben Voraussetzung. Komplexer Verhandlungs-Prozess durch externen IR-Dienstleister.",
+                    "evaluationHints": [
+                      "Pragmatisch, Risiko-getrennte Verhandlung — gleichwertig zu opt-no-pay"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-pay",
+                    "label": "Volle Zahlung (inkl. Anti-Leak-Versprechen) nach Sanktionsrecht-Prüfung",
+                    "consequence": "Schnellster Wiederanlauf-Pfad, aber keine Garantie auf Schlüsselfunktion oder echtes Anti-Leak. Strafrechtliches und sanktionsrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN), NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Reputationsrisiko maximal.",
+                    "evaluationHints": [
+                      "Vollzahlung diskutierbar wegen operativer Dringlichkeit, rechtlich riskant"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1229,7 +1480,12 @@
             "t": 160,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-presseanfragen", "title": "Externe Presseanfragen", "description": "Lokalpresse, Branchenmagazin Produktion und Heise Security fragen nach. Ein OEM-Monteur hat bei einem Tier-1-Kunden gepostet, dass die Bandanlieferung wegen IT-Ausfall des Lieferanten ausbleibt. Das Thema geht in die regionale Wirtschaftspresse.", "roleId": "role-einkauf-scm" }
+              {
+                "id": "inj-presseanfragen",
+                "title": "Externe Presseanfragen",
+                "description": "Lokalpresse, Branchenmagazin Produktion und Heise Security fragen nach. Ein OEM-Monteur hat bei einem Tier-1-Kunden gepostet, dass die Bandanlieferung wegen IT-Ausfall des Lieferanten ausbleibt. Das Thema geht in die regionale Wirtschaftspresse.",
+                "roleId": "role-einkauf-scm"
+              }
             ],
             "decisions": [
               {
@@ -1238,11 +1494,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Frühe Kommunikation kontrolliert Narrativ und reduziert Spekulationen. Späte Kommunikation wartet auf abgesicherte Faktenbasis, überlässt aber Deutung anderen. Im Industriekontext ist die OEM-Branchenpresse besonders sensitiv — schlechte Berichterstattung kann zu De-Listings auf Zulieferer-Seiten führen.",
                 "options": [
-                  { "id": "opt-press-early", "label": "Pressemitteilung sofort mit klaren Kernaussagen (Cybervorfall, Wiederanlauf läuft, Kundenversorgung priorisiert)", "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss. Aktionärsmäßige Wirkung beachten (bei börsennotierten Tenants ad-hoc-Pflicht prüfen).", "evaluationHints": ["Frühe kontrollierte Kommunikation"], "scoreContribution": 2 },
-                  { "id": "opt-press-after-analysis", "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)", "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Branchenpresse überlagert.", "evaluationHints": ["Späte, faktenbasierte Kommunikation"], "scoreContribution": 1 },
-                  { "id": "opt-press-coordinated", "label": "Koordiniert mit BSI und Schlüsselkunden — gemeinsame Sprachregelung", "consequence": "Höchste Botschafts-Disziplin. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung in Branche und Aufsicht.", "evaluationHints": ["Koordinierte externe Kommunikation, Best Practice"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-press-early",
+                    "label": "Pressemitteilung sofort mit klaren Kernaussagen (Cybervorfall, Wiederanlauf läuft, Kundenversorgung priorisiert)",
+                    "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss. Aktionärsmäßige Wirkung beachten (bei börsennotierten Tenants ad-hoc-Pflicht prüfen).",
+                    "evaluationHints": [
+                      "Frühe kontrollierte Kommunikation"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-press-after-analysis",
+                    "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)",
+                    "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Branchenpresse überlagert.",
+                    "evaluationHints": [
+                      "Späte, faktenbasierte Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-press-coordinated",
+                    "label": "Koordiniert mit BSI und Schlüsselkunden — gemeinsame Sprachregelung",
+                    "consequence": "Höchste Botschafts-Disziplin. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung in Branche und Aufsicht.",
+                    "evaluationHints": [
+                      "Koordinierte externe Kommunikation, Best Practice"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-extern"]
+                "relatedCriteria": [
+                  "crit-communication-extern"
+                ]
               }
             ]
           },
@@ -1250,7 +1532,12 @@
             "t": 175,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-recovery-prio", "title": "Wiederanlauf-Priorisierung", "description": "IT-Leitung schlägt Reihenfolge vor: (1) MES-Auftragssteuerung für Linie 3 (höchster Schlüsselkunden-Druck), (2) PLM-Read-Only für Konstruktion (damit Engineering weiterarbeiten kann), (3) MES-Vollbetrieb Linie 1, (4) MES-Vollbetrieb Linie 2 inkl. ERP-Schnittstelle. Geschätzte Zeiten: 8 h / 16 h / 36 h / 60 h.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-recovery-prio",
+                "title": "Wiederanlauf-Priorisierung",
+                "description": "IT-Leitung schlägt Reihenfolge vor: (1) MES-Auftragssteuerung für Linie 3 (höchster Schlüsselkunden-Druck), (2) PLM-Read-Only für Konstruktion (damit Engineering weiterarbeiten kann), (3) MES-Vollbetrieb Linie 1, (4) MES-Vollbetrieb Linie 2 inkl. ERP-Schnittstelle. Geschätzte Zeiten: 8 h / 16 h / 36 h / 60 h.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1259,11 +1546,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "IT-Empfehlung folgt Schlüsselkunden-Druck (Linie 3 erster). Alternativen: Linie 1 zuerst (höchster Marge-Beitrag) oder PLM zuerst (Engineering-Output für ganze Pipeline). Trade-off: Kunden-SLA (Pönale) vs. Marge vs. Engineering-Pipeline.",
                 "options": [
-                  { "id": "opt-follow-it", "label": "IT-Reihenfolge freigegeben (Linie 3 → PLM → Linie 1 → Linie 2)", "consequence": "Schlüsselkunden-Druck-getriebene Priorisierung. Vertragsstrafe minimiert.", "evaluationHints": ["Kunden-SLA-basierte Priorisierung"], "scoreContribution": 3 },
-                  { "id": "opt-margin-first", "label": "Linie 1 zuerst (höchste Marge), dann Linie 3 nach Schlüsselkunde-Verhandlung mit Pönale-Streckung", "consequence": "Marge-getrieben, Pönale-Risiko verschoben. Verhandlungs-Belastung beim Schlüsselkunden, mögliche Beziehungsbeschädigung.", "evaluationHints": ["Marge-basierte Priorisierung"], "scoreContribution": 1 },
-                  { "id": "opt-plm-first", "label": "PLM zuerst, damit Engineering parallel arbeitet, dann Linien", "consequence": "Engineering-Pipeline geschützt. Kunden-Pönale läuft länger, aber Konstruktions-Output bleibt verfügbar (Auftragsbearbeitung vorbereitet, neue Aufträge können kalkuliert werden).", "evaluationHints": ["Engineering-priorisierte Priorisierung"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-follow-it",
+                    "label": "IT-Reihenfolge freigegeben (Linie 3 → PLM → Linie 1 → Linie 2)",
+                    "consequence": "Schlüsselkunden-Druck-getriebene Priorisierung. Vertragsstrafe minimiert.",
+                    "evaluationHints": [
+                      "Kunden-SLA-basierte Priorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-margin-first",
+                    "label": "Linie 1 zuerst (höchste Marge), dann Linie 3 nach Schlüsselkunde-Verhandlung mit Pönale-Streckung",
+                    "consequence": "Marge-getrieben, Pönale-Risiko verschoben. Verhandlungs-Belastung beim Schlüsselkunden, mögliche Beziehungsbeschädigung.",
+                    "evaluationHints": [
+                      "Marge-basierte Priorisierung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-plm-first",
+                    "label": "PLM zuerst, damit Engineering parallel arbeitet, dann Linien",
+                    "consequence": "Engineering-Pipeline geschützt. Kunden-Pönale läuft länger, aber Konstruktions-Output bleibt verfügbar (Auftragsbearbeitung vorbereitet, neue Aufträge können kalkuliert werden).",
+                    "evaluationHints": [
+                      "Engineering-priorisierte Priorisierung"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-produktionsfähigkeit", "crit-governance-vertragspflicht"]
+                "relatedCriteria": [
+                  "crit-operations-produktionsfähigkeit",
+                  "crit-governance-vertragspflicht"
+                ]
               }
             ]
           },
@@ -1271,21 +1585,71 @@
             "t": 180,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro-start", "title": "Retro-Kickoff für Lessons Learned", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Industriekontext besonders relevant: OT-Härtung, Lieferanten-Fernwartungsdisziplin, Backup-Frequenz für MES, Krisenkommunikation mit OEM-Schlüsselkunden, Sanktionsrecht-Vorab-Klärung für Lösegeldfälle.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro-start",
+                "title": "Retro-Kickoff für Lessons Learned",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Industriekontext besonders relevant: OT-Härtung, Lieferanten-Fernwartungsdisziplin, Backup-Frequenz für MES, Krisenkommunikation mit OEM-Schlüsselkunden, Sanktionsrecht-Vorab-Klärung für Lösegeldfälle.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-dsb-frist", "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h", "weight": 2, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Entscheidung mit Sanktionsrecht-Bewertung)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-governance-vertragspflicht", "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Pönale-Verhandlung, Eskalations-Disziplin)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-operations-produktionsfähigkeit", "description": "Aufrechterhaltung der Produktion (manueller Notbetrieb, Linien-Priorisierung, Wiederanlauf-Reihenfolge)", "weight": 2, "category": "operations" },
-          { "id": "crit-operations-anlagensicherheit", "description": "Anlagen-/Personensicherheit beim Containment-Cut (kontrolliertes Auslaufen vs. Notabschaltung)", "weight": 1.5, "category": "operations" },
-          { "id": "crit-communication-mitarbeiter", "description": "Transparente, zweckmäßige Mitarbeiterkommunikation", "weight": 1, "category": "communication" },
-          { "id": "crit-communication-extern", "description": "Externe Kommunikation (Branchenpresse, BSI, Aufsichtsbehörden)", "weight": 1, "category": "communication" },
-          { "id": "crit-communication-kunde", "description": "Schlüsselkunden-Kommunikation (Tier-1, Pönale-Streckung, OEM-Eskalation)", "weight": 1.5, "category": "communication" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-dsb-frist",
+            "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Entscheidung mit Sanktionsrecht-Bewertung)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-governance-vertragspflicht",
+            "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Pönale-Verhandlung, Eskalations-Disziplin)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-produktionsfähigkeit",
+            "description": "Aufrechterhaltung der Produktion (manueller Notbetrieb, Linien-Priorisierung, Wiederanlauf-Reihenfolge)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-operations-anlagensicherheit",
+            "description": "Anlagen-/Personensicherheit beim Containment-Cut (kontrolliertes Auslaufen vs. Notabschaltung)",
+            "weight": 1.5,
+            "category": "operations"
+          },
+          {
+            "id": "crit-communication-mitarbeiter",
+            "description": "Transparente, zweckmäßige Mitarbeiterkommunikation",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-extern",
+            "description": "Externe Kommunikation (Branchenpresse, BSI, Aufsichtsbehörden)",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-kunde",
+            "description": "Schlüsselkunden-Kommunikation (Tier-1, Pönale-Streckung, OEM-Eskalation)",
+            "weight": 1.5,
+            "category": "communication"
+          }
         ]
       },
       {
@@ -1293,24 +1657,61 @@
         "version": "1.0.0",
         "title": "Lieferanten-Kaskade mit Just-in-Time-Stop",
         "summary": "Ein Schlüssellieferant für eine kritische Komponente fällt durch Brand am Werksstandort plötzlich aus; alternative Quellen sind nicht qualifiziert, der eigene Materialpuffer reicht 36 h. Das Szenario simuliert die ersten 2,5 Stunden Krisenstabsarbeit mit Fokus auf Pufferbestand-Mobilisierung, Zweitlieferanten-Sondierung mit Eil-Qualifizierung, Schlüsselkunden-Information und Vertragsstrafen-Verhandlung. Realitätsbezug: VDA Lieferketten-Monitor und mehrere öffentliche Halbleiter-, Magnesium- und Automotive-Tier-2-Insolvenzen 2024–2026 zeigen das Pattern. Das Szenario komprimiert auf 150 Minuten.",
-        "sectors": ["Industrie"],
-        "applicableRegimes": ["BSIG"],
+        "sectors": [
+          "Industrie"
+        ],
+        "applicableRegimes": [
+          "BSIG"
+        ],
         "durationMinutes": 150,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Notbevorratungs-Entscheidung, Eil-Qualifizierungs-Ausnahme, Pönale-Verhandlung, Werksauslastung). Bei Lieferketten-Vorfällen ist die Geschäftsführung primär verantwortlich für Vertragspflichten und Stakeholder-Kommunikation." },
-          { "id": "role-einkauf-scm", "title": "Einkauf / Supply-Chain-Management", "briefing": "Operative Lieferketten-Verantwortung. Pflegt Zweitquellen-Register, kennt Werkzeug- und Qualifizierungs-Status, hat Spotmarkt-Kontakte. Schnittstelle zu Schlüsselkunden bei Lieferpflichten und Vertragsstrafen-Verhandlungen." },
-          { "id": "role-werkleitung", "title": "Werkleitung / Produktion", "briefing": "Operative Linien-Verantwortung. Trifft Entscheidungen zu Produktions-Priorisierung (welcher Auftrag zuerst), Schichtplanung bei Auftrags-Streckung, Lager-Räumung und Übergabe-Disziplin." },
-          { "id": "role-qualität", "title": "Qualität / Werkstoff-Freigabe", "briefing": "Verantwortlich für Material-Freigaben und Werkzeug-Qualifizierung bei Lieferanten-Wechsel. Kennt die regulatorischen Anforderungen (z. B. IATF 16949 für Automotive, EN 9100 für Luftfahrt), in denen Eil-Qualifizierungen besondere Risiken bergen." },
-          { "id": "role-logistik", "title": "Logistik / Versand", "briefing": "Operative Lager- und Versand-Verantwortung. Kennt Sicherheitsbestände, kann Spot-Logistik (Express-Speditionen, Luftfracht) mobilisieren, koordiniert mit Carriern." },
-          { "id": "role-vertrieb", "title": "Vertrieb / Key-Account-Management", "briefing": "Schnittstelle zu Schlüsselkunden. Verhandelt Lieferpläne, Pönalen, mögliche Auftragsverschiebungen oder Substitutionen. Bei JIT-/JIS-Lieferungen direkter Kontakt zu OEM-Disposition." },
-          { "id": "role-finanzen", "title": "Finanzen / Treasury", "briefing": "Liquiditäts-Bewertung der Spot-Beschaffung und der Pönale-Lawine. Bei Magnitudens-Beträgen rechtzeitig D&O-Versicherung, Bank-Linien und Working-Capital-Reserve in den Blick nehmen." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Notbevorratungs-Entscheidung, Eil-Qualifizierungs-Ausnahme, Pönale-Verhandlung, Werksauslastung). Bei Lieferketten-Vorfällen ist die Geschäftsführung primär verantwortlich für Vertragspflichten und Stakeholder-Kommunikation."
+          },
+          {
+            "id": "role-einkauf-scm",
+            "title": "Einkauf / Supply-Chain-Management",
+            "briefing": "Operative Lieferketten-Verantwortung. Pflegt Zweitquellen-Register, kennt Werkzeug- und Qualifizierungs-Status, hat Spotmarkt-Kontakte. Schnittstelle zu Schlüsselkunden bei Lieferpflichten und Vertragsstrafen-Verhandlungen."
+          },
+          {
+            "id": "role-werkleitung",
+            "title": "Werkleitung / Produktion",
+            "briefing": "Operative Linien-Verantwortung. Trifft Entscheidungen zu Produktions-Priorisierung (welcher Auftrag zuerst), Schichtplanung bei Auftrags-Streckung, Lager-Räumung und Übergabe-Disziplin."
+          },
+          {
+            "id": "role-qualität",
+            "title": "Qualität / Werkstoff-Freigabe",
+            "briefing": "Verantwortlich für Material-Freigaben und Werkzeug-Qualifizierung bei Lieferanten-Wechsel. Kennt die regulatorischen Anforderungen (z. B. IATF 16949 für Automotive, EN 9100 für Luftfahrt), in denen Eil-Qualifizierungen besondere Risiken bergen."
+          },
+          {
+            "id": "role-logistik",
+            "title": "Logistik / Versand",
+            "briefing": "Operative Lager- und Versand-Verantwortung. Kennt Sicherheitsbestände, kann Spot-Logistik (Express-Speditionen, Luftfracht) mobilisieren, koordiniert mit Carriern."
+          },
+          {
+            "id": "role-vertrieb",
+            "title": "Vertrieb / Key-Account-Management",
+            "briefing": "Schnittstelle zu Schlüsselkunden. Verhandelt Lieferpläne, Pönalen, mögliche Auftragsverschiebungen oder Substitutionen. Bei JIT-/JIS-Lieferungen direkter Kontakt zu OEM-Disposition."
+          },
+          {
+            "id": "role-finanzen",
+            "title": "Finanzen / Treasury",
+            "briefing": "Liquiditäts-Bewertung der Spot-Beschaffung und der Pönale-Lawine. Bei Magnitudens-Beträgen rechtzeitig D&O-Versicherung, Bank-Linien und Working-Capital-Reserve in den Blick nehmen."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-supplier-fire", "title": "Schlüssellieferant meldet Werksbrand", "description": "Geschäftsführung des Schlüssellieferanten Mueller-Komponenten GmbH (Single-Source für ein Stahl-Druckguss-Bauteil, Anteil 100 % an unserem Gesamtbedarf) meldet: Heute Nacht 03:14 Uhr Werksbrand im Hauptproduktionsgebäude. Lösch-Schäden umfangreich, Wiederanlauf frühestens in 8 Wochen, vermutlich 12 Wochen.", "roleId": "role-einkauf-scm" }
+              {
+                "id": "inj-supplier-fire",
+                "title": "Schlüssellieferant meldet Werksbrand",
+                "description": "Geschäftsführung des Schlüssellieferanten Mueller-Komponenten GmbH (Single-Source für ein Stahl-Druckguss-Bauteil, Anteil 100 % an unserem Gesamtbedarf) meldet: Heute Nacht 03:14 Uhr Werksbrand im Hauptproduktionsgebäude. Lösch-Schäden umfangreich, Wiederanlauf frühestens in 8 Wochen, vermutlich 12 Wochen.",
+                "roleId": "role-einkauf-scm"
+              }
             ],
             "decisions": [
               {
@@ -1319,10 +1720,28 @@
                 "roleId": "role-einkauf-scm",
                 "guidance": "Sofortige Eskalation aktiviert Krisenstab und Cross-Funktionalität. Eigen-Bewertung verzögert die Reaktion, kann aber unnötige Krisenstab-Aktivierung vermeiden. Bei Single-Source-Vorfall mit 100 %-Bedarfsdeckung ist die Eskalation rechtfertigungsfähig.",
                 "options": [
-                  { "id": "opt-immediate-escalation", "label": "Sofort-Eskalation an Krisenstabs-Leitung und parallel an Werkleitung", "consequence": "Krisenstab innerhalb 30 min einsatzbereit. Cross-funktionale Bewertung beginnt sofort.", "evaluationHints": ["Schnelle Eskalation bei Single-Source-Vorfall"], "scoreContribution": 3 },
-                  { "id": "opt-self-assess", "label": "Erst eigene Pufferbestand-Analyse, dann ggf. Eskalation", "consequence": "30–60 min Verzögerung. Wenn Puffer reicht, vertretbar; wenn nicht, kostbar verlorene Zeit.", "evaluationHints": ["Eigen-Bewertung mit Verzögerungsrisiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-immediate-escalation",
+                    "label": "Sofort-Eskalation an Krisenstabs-Leitung und parallel an Werkleitung",
+                    "consequence": "Krisenstab innerhalb 30 min einsatzbereit. Cross-funktionale Bewertung beginnt sofort.",
+                    "evaluationHints": [
+                      "Schnelle Eskalation bei Single-Source-Vorfall"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-self-assess",
+                    "label": "Erst eigene Pufferbestand-Analyse, dann ggf. Eskalation",
+                    "consequence": "30–60 min Verzögerung. Wenn Puffer reicht, vertretbar; wenn nicht, kostbar verlorene Zeit.",
+                    "evaluationHints": [
+                      "Eigen-Bewertung mit Verzögerungsrisiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1330,7 +1749,12 @@
             "t": 10,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-buffer-analysis", "title": "Pufferbestand-Analyse: 36 h Reichweite bei Standard-Verbrauch", "description": "Logistik meldet: Eigener Sicherheitsbestand des Druckguss-Bauteils ist 480 Einheiten. Standard-Tagesverbrauch über drei Linien zusammen ist 320 Einheiten — also etwa 36 h Reichweite. Bei Streckung der Schicht- und Auftragspriorität auf Schlüsselkunden-Lieferungen reichen 480 Einheiten für etwa 60 h.", "roleId": "role-logistik" }
+              {
+                "id": "inj-buffer-analysis",
+                "title": "Pufferbestand-Analyse: 36 h Reichweite bei Standard-Verbrauch",
+                "description": "Logistik meldet: Eigener Sicherheitsbestand des Druckguss-Bauteils ist 480 Einheiten. Standard-Tagesverbrauch über drei Linien zusammen ist 320 Einheiten — also etwa 36 h Reichweite. Bei Streckung der Schicht- und Auftragspriorität auf Schlüsselkunden-Lieferungen reichen 480 Einheiten für etwa 60 h.",
+                "roleId": "role-logistik"
+              }
             ],
             "decisions": [
               {
@@ -1339,11 +1763,37 @@
                 "roleId": "role-werkleitung",
                 "guidance": "Voller Standard-Verbrauch nutzt den Puffer maximal aus, hilft aber nicht wenn Wiederbeschaffung > 36 h dauert. Streckung der Auftragspriorität schafft Zeit, aber erst Pönale-Risiko bei nicht-priorisierten Aufträgen. Sofort-Stop ist die sicherste, aber teuerste Option.",
                 "options": [
-                  { "id": "opt-buffer-stretch", "label": "Streckung: Auftragspriorisierung nach Schlüsselkunden, niedrigere Aufträge gestoppt — Puffer 60 h", "consequence": "Mehr Zeit für Zweitquellen-Sondierung. Sekundäre Aufträge (B-/C-Kunden) gehen in Verzug, kleinere Pönalen, aber mehr Verhandlungs-Spielraum.", "evaluationHints": ["Pufferstreckung mit Priorisierung"], "scoreContribution": 3 },
-                  { "id": "opt-buffer-full-consume", "label": "Voller Standard-Verbrauch, alle Aufträge wie geplant", "consequence": "Maximale Auslastung, 36 h Zeit-Hebel. Bei Wiederbeschaffung > 36 h voller Stop ohne Vorlauf.", "evaluationHints": ["Volle Auslastung ohne Streckung"], "scoreContribution": 1 },
-                  { "id": "opt-buffer-stop", "label": "Sofortiger Stop aller Linien, Puffer für Wiederanlauf-Phase reservieren", "consequence": "Sicherste Option, aber Pönale-Lawine sofort. Verhandlungsposition gegenüber Kunden schwach.", "evaluationHints": ["Sofort-Stop als Risiko-Minimum"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-buffer-stretch",
+                    "label": "Streckung: Auftragspriorisierung nach Schlüsselkunden, niedrigere Aufträge gestoppt — Puffer 60 h",
+                    "consequence": "Mehr Zeit für Zweitquellen-Sondierung. Sekundäre Aufträge (B-/C-Kunden) gehen in Verzug, kleinere Pönalen, aber mehr Verhandlungs-Spielraum.",
+                    "evaluationHints": [
+                      "Pufferstreckung mit Priorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-buffer-full-consume",
+                    "label": "Voller Standard-Verbrauch, alle Aufträge wie geplant",
+                    "consequence": "Maximale Auslastung, 36 h Zeit-Hebel. Bei Wiederbeschaffung > 36 h voller Stop ohne Vorlauf.",
+                    "evaluationHints": [
+                      "Volle Auslastung ohne Streckung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-buffer-stop",
+                    "label": "Sofortiger Stop aller Linien, Puffer für Wiederanlauf-Phase reservieren",
+                    "consequence": "Sicherste Option, aber Pönale-Lawine sofort. Verhandlungsposition gegenüber Kunden schwach.",
+                    "evaluationHints": [
+                      "Sofort-Stop als Risiko-Minimum"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-produktionsfähigkeit"]
+                "relatedCriteria": [
+                  "crit-operations-produktionsfähigkeit"
+                ]
               }
             ]
           },
@@ -1351,8 +1801,18 @@
             "t": 25,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, Einkauf/SCM, Werkleitung, Qualität, Logistik, Vertrieb, Finanzen einberufen. Lageraum eingerichtet, Branchen-Ratschläge (VDA, IHK) auf Speed-Dial.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-zweitquelle-register", "title": "Zweitquellen-Register-Auswertung", "description": "Einkauf zieht Zweitquellen-Register: Drei potenzielle Alternativen identifiziert. Lieferant A (Schweiz) qualifiziert, aber Lieferzeit 6 Wochen, hoher Preis-Aufschlag (+45 %). Lieferant B (Polen) nicht qualifiziert, Werkzeug-Anpassung nötig, theoretische Lieferzeit 3 Wochen. Lieferant C (China) nicht qualifiziert, RoHS-/REACH-Konformität ungeprüft, Lieferzeit 8 Wochen plus Logistik.", "roleId": "role-einkauf-scm" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, Einkauf/SCM, Werkleitung, Qualität, Logistik, Vertrieb, Finanzen einberufen. Lageraum eingerichtet, Branchen-Ratschläge (VDA, IHK) auf Speed-Dial.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-zweitquelle-register",
+                "title": "Zweitquellen-Register-Auswertung",
+                "description": "Einkauf zieht Zweitquellen-Register: Drei potenzielle Alternativen identifiziert. Lieferant A (Schweiz) qualifiziert, aber Lieferzeit 6 Wochen, hoher Preis-Aufschlag (+45 %). Lieferant B (Polen) nicht qualifiziert, Werkzeug-Anpassung nötig, theoretische Lieferzeit 3 Wochen. Lieferant C (China) nicht qualifiziert, RoHS-/REACH-Konformität ungeprüft, Lieferzeit 8 Wochen plus Logistik.",
+                "roleId": "role-einkauf-scm"
+              }
             ],
             "decisions": [
               {
@@ -1361,11 +1821,38 @@
                 "roleId": "role-einkauf-scm",
                 "guidance": "Trade-off Geschwindigkeit vs. Qualifizierungsrisiko vs. Marge. Lieferant A ist sicher aber teuer und langsam; B ist mittel mit Werkzeug-Risiko; C ist langsam mit Compliance-Risiko (REACH-Anhang XVII, RoHS-Beschränkungen). IATF-/EN-9100-Anforderungen verlangen normalerweise volle Re-Qualifizierung, aber Krisen-Klauseln in Kundenverträgen können Eil-Pfad eröffnen.",
                 "options": [
-                  { "id": "opt-source-a-only", "label": "Nur Lieferant A — sichere Qualifikation, hoher Preis", "consequence": "Niedrigstes Risiko, aber 6 Wochen Lieferzeit. Pönale-Lawine läuft 3–4 Wochen lang, Marge in der Periode negativ.", "evaluationHints": ["Sichere Quelle, lange Versorgungslücke"], "scoreContribution": 2 },
-                  { "id": "opt-source-b-fast", "label": "Lieferant B mit Eil-Qualifizierung und Werkzeug-Sofort-Anpassung", "consequence": "Mittlere Lieferzeit (3 Wochen), Qualifizierungs-Risiko (Erstmuster-Prüfung verkürzt). Werkzeug-Bau parallel zur Qualifikation. IATF-Audit-Risiko bei OEM bewertet werden.", "evaluationHints": ["Mittlere Risikomischung mit Tempo"], "scoreContribution": 3 },
-                  { "id": "opt-multi-source", "label": "Hybrid: Lieferant A für gesicherte Versorgung, Lieferant B parallel als Eil-Pfad, Lieferant C ausgeschlossen", "consequence": "Versorgungssicherung schon in Woche 1 durch A, ab Woche 3 ergänzt durch B. Höchste Materialkosten, aber Pönale-Risiko minimiert. Komplexere Steuerung.", "evaluationHints": ["Hybrid-Strategie, Best Practice für Single-Source-Verlust"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-source-a-only",
+                    "label": "Nur Lieferant A — sichere Qualifikation, hoher Preis",
+                    "consequence": "Niedrigstes Risiko, aber 6 Wochen Lieferzeit. Pönale-Lawine läuft 3–4 Wochen lang, Marge in der Periode negativ.",
+                    "evaluationHints": [
+                      "Sichere Quelle, lange Versorgungslücke"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-source-b-fast",
+                    "label": "Lieferant B mit Eil-Qualifizierung und Werkzeug-Sofort-Anpassung",
+                    "consequence": "Mittlere Lieferzeit (3 Wochen), Qualifizierungs-Risiko (Erstmuster-Prüfung verkürzt). Werkzeug-Bau parallel zur Qualifikation. IATF-Audit-Risiko bei OEM bewertet werden.",
+                    "evaluationHints": [
+                      "Mittlere Risikomischung mit Tempo"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-multi-source",
+                    "label": "Hybrid: Lieferant A für gesicherte Versorgung, Lieferant B parallel als Eil-Pfad, Lieferant C ausgeschlossen",
+                    "consequence": "Versorgungssicherung schon in Woche 1 durch A, ab Woche 3 ergänzt durch B. Höchste Materialkosten, aber Pönale-Risiko minimiert. Komplexere Steuerung.",
+                    "evaluationHints": [
+                      "Hybrid-Strategie, Best Practice für Single-Source-Verlust"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-supply-zweitquelle", "crit-quality-eilqualifizierung"]
+                "relatedCriteria": [
+                  "crit-supply-zweitquelle",
+                  "crit-quality-eilqualifizierung"
+                ]
               }
             ]
           },
@@ -1373,7 +1860,12 @@
             "t": 45,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-spot-market", "title": "Spot-Markt-Sondierung", "description": "Einkauf hat Spot-Markt-Anfragen gestreut: Drei Lager-Restbestände bei Wettbewerbs-Distribution gefunden, zusammen 200 Einheiten, Aufpreis +120 % gegenüber Listenpreis. Verfügbarkeit binnen 48 h via Express-Spedition.", "roleId": "role-einkauf-scm" }
+              {
+                "id": "inj-spot-market",
+                "title": "Spot-Markt-Sondierung",
+                "description": "Einkauf hat Spot-Markt-Anfragen gestreut: Drei Lager-Restbestände bei Wettbewerbs-Distribution gefunden, zusammen 200 Einheiten, Aufpreis +120 % gegenüber Listenpreis. Verfügbarkeit binnen 48 h via Express-Spedition.",
+                "roleId": "role-einkauf-scm"
+              }
             ],
             "decisions": [
               {
@@ -1382,11 +1874,38 @@
                 "roleId": "role-finanzen",
                 "guidance": "Spot-Beschaffung erweitert den Puffer um etwa 18 h, aber zu erheblichen Mehrkosten. Bei 200 Einheiten × 120 % Aufpreis × Standard-Stückkosten = je nach Bauteil-Wert 50–200 T€ Kosten. Liquiditäts-Bewertung notwendig. Pönale-Vergleich: Kosten der Spot-Beschaffung vs. erwartete Pönale-Zahlungen bei Lieferverzug.",
                 "options": [
-                  { "id": "opt-spot-buy-all", "label": "Alle 200 Einheiten kaufen", "consequence": "Puffer um 18 h erweitert, Wiederbeschaffungs-Druck reduziert. Treasury muss 50–200 T€ kurzfristig stellen. Steuerliche Behandlung als außergewöhnliche Belastung möglich.", "evaluationHints": ["Spot-Beschaffung als Liquiditäts-Investition"], "scoreContribution": 2 },
-                  { "id": "opt-spot-partial", "label": "Selektive Spot-Beschaffung nur für Schlüsselkunden-Aufträge", "consequence": "Geringerer Spot-Aufwand, aber niedrigere Pufferwirkung. Risiko inkonsistenter Liefertreue.", "evaluationHints": ["Selektive Spot-Beschaffung, ROI-orientiert"], "scoreContribution": 3 },
-                  { "id": "opt-spot-skip", "label": "Keine Spot-Beschaffung, volle Konzentration auf Zweitquellen", "consequence": "Niedrigere Soforkosten, aber Versorgungslücke ohne Pufferwirkung. Pönale-Risiko maximal.", "evaluationHints": ["Verzicht auf Spot-Markt"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-spot-buy-all",
+                    "label": "Alle 200 Einheiten kaufen",
+                    "consequence": "Puffer um 18 h erweitert, Wiederbeschaffungs-Druck reduziert. Treasury muss 50–200 T€ kurzfristig stellen. Steuerliche Behandlung als außergewöhnliche Belastung möglich.",
+                    "evaluationHints": [
+                      "Spot-Beschaffung als Liquiditäts-Investition"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-spot-partial",
+                    "label": "Selektive Spot-Beschaffung nur für Schlüsselkunden-Aufträge",
+                    "consequence": "Geringerer Spot-Aufwand, aber niedrigere Pufferwirkung. Risiko inkonsistenter Liefertreue.",
+                    "evaluationHints": [
+                      "Selektive Spot-Beschaffung, ROI-orientiert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-spot-skip",
+                    "label": "Keine Spot-Beschaffung, volle Konzentration auf Zweitquellen",
+                    "consequence": "Niedrigere Soforkosten, aber Versorgungslücke ohne Pufferwirkung. Pönale-Risiko maximal.",
+                    "evaluationHints": [
+                      "Verzicht auf Spot-Markt"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-supply-zweitquelle", "crit-finance-liquidität"]
+                "relatedCriteria": [
+                  "crit-supply-zweitquelle",
+                  "crit-finance-liquidität"
+                ]
               }
             ]
           },
@@ -1394,7 +1913,12 @@
             "t": 70,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-customer-tier1", "title": "Tier-1-Kunde meldet sich", "description": "Automotive-Tier-1-Kunde (40 % Quartalsumsatz) hat den VDA-Lieferanten-Risikomonitor gezogen, sieht Mueller-Komponenten als Single-Source und fragt explizit nach unserer Versorgungsstrategie. Schreibt: Bei nicht-belastbarem Versorgungsplan binnen 14 Tagen droht Lieferanten-De-Listing, mindestens aber Verschiebung neuer Aufträge zu Wettbewerbern.", "roleId": "role-vertrieb" }
+              {
+                "id": "inj-customer-tier1",
+                "title": "Tier-1-Kunde meldet sich",
+                "description": "Automotive-Tier-1-Kunde (40 % Quartalsumsatz) hat den VDA-Lieferanten-Risikomonitor gezogen, sieht Mueller-Komponenten als Single-Source und fragt explizit nach unserer Versorgungsstrategie. Schreibt: Bei nicht-belastbarem Versorgungsplan binnen 14 Tagen droht Lieferanten-De-Listing, mindestens aber Verschiebung neuer Aufträge zu Wettbewerbern.",
+                "roleId": "role-vertrieb"
+              }
             ],
             "decisions": [
               {
@@ -1403,11 +1927,38 @@
                 "roleId": "role-vertrieb",
                 "guidance": "Vertragspflicht zur unverzüglichen Information bei drohender Lieferunfähigkeit ist im Tier-1-RV typisch. Zwei pragmatische Optionen sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von Beziehungs-Tiefe, Werkzeug-Eigentumsverhältnissen und gemeinsamer Audit-Kultur ab: (a) Vollständige Offenheit mit transparenter Versorgungsstrategie — neutral-professionell, gibt dem Kunden Faktenbasis, robust auch bei oberflächlicher Beziehung. (b) Kunden-als-Partner-Modus mit gemeinsamer Versorgungsstrategie — politisch stark bei reifer Tier-1-Beziehung, ermöglicht Kosten-Sharing und gemeinsame Audit-Termine, operativ aufwändig. Defensive Beschwichtigung mit Zusammenfassung ohne Detail bleibt diskutierbar wenn keine sofortige Detail-Tiefe möglich ist, ist aber spätrisikobehaftet — daher niedrigere Bewertung.",
                 "options": [
-                  { "id": "opt-customer-full-plan", "label": "Vollständige Offenheit: Lieferant A in Woche 1–6, B parallel ab Woche 3, Spot-Beschaffung als Pufferschluss, Eil-Qualifizierungs-Risiken transparent benennen", "consequence": "Vertrauenserhaltung. Kunde hat Faktenbasis für Bewertung. De-Listing-Risiko reduziert. Pönale-Verhandlung läuft transparent.", "evaluationHints": ["Vollständige Versorgungsstrategie offengelegt — gleichwertig zu opt-customer-co-strategy"], "scoreContribution": 2 },
-                  { "id": "opt-customer-co-strategy", "label": "Gemeinsame Versorgungsstrategie mit Tier-1: Werkzeug-Mitfinanzierung, Eil-Qualifizierungs-Audit gemeinsam", "consequence": "Tier-1 wird Partner statt Gegner. Kosten-Sharing möglich, gemeinsame Audit-Termine. Politisch starke Variante bei reifer Beziehung, operativ aufwändig.", "evaluationHints": ["Kunde als Partner gewonnen — gleichwertig zu opt-customer-full-plan, situativ wählen"], "scoreContribution": 2 },
-                  { "id": "opt-customer-summary", "label": "Zusammenfassende Information mit Versorgungs-Garantie ohne Detail (defensive Beschwichtigung)", "consequence": "Kunde erhält Sicherheits-Signal, aber kann später kritisch werden, wenn Versprechen nicht halten. Kürzere Verhandlung jetzt, höheres Spätrisiko.", "evaluationHints": ["Zusammenfassende Info ohne Detail — schwächere Option"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-customer-full-plan",
+                    "label": "Vollständige Offenheit: Lieferant A in Woche 1–6, B parallel ab Woche 3, Spot-Beschaffung als Pufferschluss, Eil-Qualifizierungs-Risiken transparent benennen",
+                    "consequence": "Vertrauenserhaltung. Kunde hat Faktenbasis für Bewertung. De-Listing-Risiko reduziert. Pönale-Verhandlung läuft transparent.",
+                    "evaluationHints": [
+                      "Vollständige Versorgungsstrategie offengelegt — gleichwertig zu opt-customer-co-strategy"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-co-strategy",
+                    "label": "Gemeinsame Versorgungsstrategie mit Tier-1: Werkzeug-Mitfinanzierung, Eil-Qualifizierungs-Audit gemeinsam",
+                    "consequence": "Tier-1 wird Partner statt Gegner. Kosten-Sharing möglich, gemeinsame Audit-Termine. Politisch starke Variante bei reifer Beziehung, operativ aufwändig.",
+                    "evaluationHints": [
+                      "Kunde als Partner gewonnen — gleichwertig zu opt-customer-full-plan, situativ wählen"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-summary",
+                    "label": "Zusammenfassende Information mit Versorgungs-Garantie ohne Detail (defensive Beschwichtigung)",
+                    "consequence": "Kunde erhält Sicherheits-Signal, aber kann später kritisch werden, wenn Versprechen nicht halten. Kürzere Verhandlung jetzt, höheres Spätrisiko.",
+                    "evaluationHints": [
+                      "Zusammenfassende Info ohne Detail — schwächere Option"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunde", "crit-supply-zweitquelle"]
+                "relatedCriteria": [
+                  "crit-communication-kunde",
+                  "crit-supply-zweitquelle"
+                ]
               }
             ]
           },
@@ -1415,7 +1966,12 @@
             "t": 95,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-quality-fast-track", "title": "Eil-Qualifizierung Lieferant B — Werkstoff-Befund erwartet 7 Tage", "description": "Qualität meldet: Eil-Qualifizierung Lieferant B läuft an. Werkstoff-Befunde aus externem Labor in 7 Tagen, Erstmuster-Prüfung kann parallel beginnen. Risiko: bei Werkstoff-Abweichung muss Werkzeug umgebaut werden, weitere 3 Wochen. IATF-Audit beim OEM in 8 Wochen, das wird die Eil-Qualifizierung als Audit-Punkt aufgreifen.", "roleId": "role-qualität" }
+              {
+                "id": "inj-quality-fast-track",
+                "title": "Eil-Qualifizierung Lieferant B — Werkstoff-Befund erwartet 7 Tage",
+                "description": "Qualität meldet: Eil-Qualifizierung Lieferant B läuft an. Werkstoff-Befunde aus externem Labor in 7 Tagen, Erstmuster-Prüfung kann parallel beginnen. Risiko: bei Werkstoff-Abweichung muss Werkzeug umgebaut werden, weitere 3 Wochen. IATF-Audit beim OEM in 8 Wochen, das wird die Eil-Qualifizierung als Audit-Punkt aufgreifen.",
+                "roleId": "role-qualität"
+              }
             ],
             "decisions": [
               {
@@ -1424,11 +1980,37 @@
                 "roleId": "role-qualität",
                 "guidance": "IATF 16949 verlangt normalerweise volle Erstmuster-Prüfung mit dokumentierter PPAP-Freigabe (Production Part Approval Process). Eil-Pfade existieren in Krisensituationen, aber müssen dokumentiert und bei OEM-Audit verteidigbar sein. Risiko bei Abkürzung: Reklamationsrisiko in der Produktion und bei späteren Audits Beanstandungen.",
                 "options": [
-                  { "id": "opt-quality-full-ppap", "label": "Volle PPAP-Freigabe inkl. allen Prüfschritten, Dauer 14 Tage", "consequence": "Audit-sichere Lösung. Versorgungslücke 3+ Wochen, Pönale-Lawine voll wirksam.", "evaluationHints": ["Volle PPAP, Audit-konform"], "scoreContribution": 2 },
-                  { "id": "opt-quality-fast-track-documented", "label": "Eil-Freigabe mit dokumentierter Krisen-Klausel, parallele PPAP-Nachholung", "consequence": "Versorgung in 7–10 Tagen, PPAP-Nachholung in 8 Wochen vor OEM-Audit. Klare Kommunikation an Tier-1-Kunde notwendig.", "evaluationHints": ["Pragmatische Eil-Qualifizierung mit Audit-Plan"], "scoreContribution": 3 },
-                  { "id": "opt-quality-skip-no-doc", "label": "Lieferung freigeben ohne dokumentierte Krisen-Klausel, Risiko in Kauf nehmen", "consequence": "Schnellste Versorgung, aber bei OEM-Audit massive Beanstandung wahrscheinlich. De-Listing-Risiko erhöht.", "evaluationHints": ["Eil-Freigabe ohne Audit-Sicherung — problematisch"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-quality-full-ppap",
+                    "label": "Volle PPAP-Freigabe inkl. allen Prüfschritten, Dauer 14 Tage",
+                    "consequence": "Audit-sichere Lösung. Versorgungslücke 3+ Wochen, Pönale-Lawine voll wirksam.",
+                    "evaluationHints": [
+                      "Volle PPAP, Audit-konform"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-quality-fast-track-documented",
+                    "label": "Eil-Freigabe mit dokumentierter Krisen-Klausel, parallele PPAP-Nachholung",
+                    "consequence": "Versorgung in 7–10 Tagen, PPAP-Nachholung in 8 Wochen vor OEM-Audit. Klare Kommunikation an Tier-1-Kunde notwendig.",
+                    "evaluationHints": [
+                      "Pragmatische Eil-Qualifizierung mit Audit-Plan"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-quality-skip-no-doc",
+                    "label": "Lieferung freigeben ohne dokumentierte Krisen-Klausel, Risiko in Kauf nehmen",
+                    "consequence": "Schnellste Versorgung, aber bei OEM-Audit massive Beanstandung wahrscheinlich. De-Listing-Risiko erhöht.",
+                    "evaluationHints": [
+                      "Eil-Freigabe ohne Audit-Sicherung — problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-quality-eilqualifizierung"]
+                "relatedCriteria": [
+                  "crit-quality-eilqualifizierung"
+                ]
               }
             ]
           },
@@ -1436,7 +2018,12 @@
             "t": 120,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-finance-impact", "title": "Liquiditäts- und Pönale-Bild", "description": "Finanzen rechnet hoch: Erwarteter Pönale-Aufwand bei aktueller Versorgungsstrategie ist 280–420 T€ über die nächsten 4 Wochen, dazu Spot-Beschaffung 120 T€ und Eil-Qualifizierung 60 T€. Working-Capital-Reserve ist 800 T€, Bank-Linie zusätzlich 500 T€. Gefahr bei verzögerter Wiederherstellung: Liquiditäts-Engpass in Woche 5–6.", "roleId": "role-finanzen" }
+              {
+                "id": "inj-finance-impact",
+                "title": "Liquiditäts- und Pönale-Bild",
+                "description": "Finanzen rechnet hoch: Erwarteter Pönale-Aufwand bei aktueller Versorgungsstrategie ist 280–420 T€ über die nächsten 4 Wochen, dazu Spot-Beschaffung 120 T€ und Eil-Qualifizierung 60 T€. Working-Capital-Reserve ist 800 T€, Bank-Linie zusätzlich 500 T€. Gefahr bei verzögerter Wiederherstellung: Liquiditäts-Engpass in Woche 5–6.",
+                "roleId": "role-finanzen"
+              }
             ],
             "decisions": [
               {
@@ -1445,10 +2032,28 @@
                 "roleId": "role-finanzen",
                 "guidance": "Working-Capital-Reserve plus Bank-Linie reichen rechnerisch, aber bei Verzögerungen kritisch. Frühzeitige Bank-Information (Hausbank, Konsortialführer) signalisiert Souveränität, riskiert aber Linien-Kürzung. D&O-Versicherung sollte bei Magnitudens-Entscheidungen einbezogen werden. Versicherung Mueller-Komponenten könnte später Regress nehmen.",
                 "options": [
-                  { "id": "opt-finance-proactive-bank", "label": "Hausbank vorab informieren, ggf. zusätzliche Bridge-Linie verhandeln, D&O-Versicherer einbeziehen", "consequence": "Liquiditäts-Sicherheit, aber Bank kann Linie überprüfen — bei sauberer Liquidität kein Risiko.", "evaluationHints": ["Proaktive Bank- und Versicherungs-Kommunikation"], "scoreContribution": 3 },
-                  { "id": "opt-finance-wait", "label": "Erst Wiederherstellungs-Pfad sichern, dann ggf. Bank-Information", "consequence": "Risiko, dass Bank über Branchengerüchte erst spät informiert wird und kritisch reagiert.", "evaluationHints": ["Reaktive Bank-Kommunikation"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-finance-proactive-bank",
+                    "label": "Hausbank vorab informieren, ggf. zusätzliche Bridge-Linie verhandeln, D&O-Versicherer einbeziehen",
+                    "consequence": "Liquiditäts-Sicherheit, aber Bank kann Linie überprüfen — bei sauberer Liquidität kein Risiko.",
+                    "evaluationHints": [
+                      "Proaktive Bank- und Versicherungs-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-finance-wait",
+                    "label": "Erst Wiederherstellungs-Pfad sichern, dann ggf. Bank-Information",
+                    "consequence": "Risiko, dass Bank über Branchengerüchte erst spät informiert wird und kritisch reagiert.",
+                    "evaluationHints": [
+                      "Reaktive Bank-Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-finance-liquidität"]
+                "relatedCriteria": [
+                  "crit-finance-liquidität"
+                ]
               }
             ]
           },
@@ -1456,7 +2061,12 @@
             "t": 140,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-priority-allocation", "title": "Priorisierungs-Entscheidung der knappen Versorgung", "description": "Werkleitung schlägt vor: Verfügbare Bauteile (Puffer + Spot + Lieferant A erste Welle) reichen für 75 % des Tier-1-Bedarfs und 100 % des Tier-2-Bedarfs für 4 Wochen. Tier-3-/B-Kunden müssten verschoben werden. Alternative: Tier-1 voll, Tier-2 zu 50 %, Tier-3 ganz aus.", "roleId": "role-werkleitung" }
+              {
+                "id": "inj-priority-allocation",
+                "title": "Priorisierungs-Entscheidung der knappen Versorgung",
+                "description": "Werkleitung schlägt vor: Verfügbare Bauteile (Puffer + Spot + Lieferant A erste Welle) reichen für 75 % des Tier-1-Bedarfs und 100 % des Tier-2-Bedarfs für 4 Wochen. Tier-3-/B-Kunden müssten verschoben werden. Alternative: Tier-1 voll, Tier-2 zu 50 %, Tier-3 ganz aus.",
+                "roleId": "role-werkleitung"
+              }
             ],
             "decisions": [
               {
@@ -1465,11 +2075,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen Vertragspflichten (Schlüsselkunde priorisieren), Marge (Tier-2 oft margenstärker), Beziehungs-Pflege (B-Kunden langfristig wichtig) und juristischem Risiko (alle Verträge vergleichbar bedienen vs. selektiv). Allokations-Politik muss konsistent zu Standard-Allokations-Klauseln sein.",
                 "options": [
-                  { "id": "opt-allocation-tier1-full", "label": "Tier-1 voll bedienen, Tier-2 zu 50 %, Tier-3 verschoben", "consequence": "Schlüsselkunden-Beziehung gesichert. Tier-2-Pönalen aber höher als bei selektiver 75/100/0-Variante. B-Kunden-Beziehung leidet.", "evaluationHints": ["Tier-1-Priorität klar"], "scoreContribution": 3 },
-                  { "id": "opt-allocation-prorate", "label": "Pro-rata-Allokation: jeder Kunde 75 % seiner Lieferung", "consequence": "Juristisch sicherste Variante (gleichmäßige Behandlung). Tier-1 leidet aber, möglicher De-Listing-Druck.", "evaluationHints": ["Pro-rata, juristisch konservativ"], "scoreContribution": 2 },
-                  { "id": "opt-allocation-margin-first", "label": "Marge-basiert: höchstmargige Aufträge zuerst, andere nach Restkapazität", "consequence": "Quartalsergebnis geschützt, Beziehungen leiden, juristisches Risiko bei nicht-konsistenter Allokation.", "evaluationHints": ["Marge-Priorisierung mit Folgeproblemen"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-allocation-tier1-full",
+                    "label": "Tier-1 voll bedienen, Tier-2 zu 50 %, Tier-3 verschoben",
+                    "consequence": "Schlüsselkunden-Beziehung gesichert. Tier-2-Pönalen aber höher als bei selektiver 75/100/0-Variante. B-Kunden-Beziehung leidet.",
+                    "evaluationHints": [
+                      "Tier-1-Priorität klar"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-allocation-prorate",
+                    "label": "Pro-rata-Allokation: jeder Kunde 75 % seiner Lieferung",
+                    "consequence": "Juristisch sicherste Variante (gleichmäßige Behandlung). Tier-1 leidet aber, möglicher De-Listing-Druck.",
+                    "evaluationHints": [
+                      "Pro-rata, juristisch konservativ"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-allocation-margin-first",
+                    "label": "Marge-basiert: höchstmargige Aufträge zuerst, andere nach Restkapazität",
+                    "consequence": "Quartalsergebnis geschützt, Beziehungen leiden, juristisches Risiko bei nicht-konsistenter Allokation.",
+                    "evaluationHints": [
+                      "Marge-Priorisierung mit Folgeproblemen"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-vertragspflicht", "crit-communication-kunde"]
+                "relatedCriteria": [
+                  "crit-governance-vertragspflicht",
+                  "crit-communication-kunde"
+                ]
               }
             ]
           },
@@ -1477,19 +2114,59 @@
             "t": 150,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro-start", "title": "Retro-Kickoff für Lessons Learned", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Industriekontext besonders relevant: Single-Source-Eliminierung wo möglich, Zweitquellen-Register-Pflege mit dokumentierter Werkzeug- und Qualifikations-Status, Eil-Qualifizierungs-SOP, Working-Capital-Reserve-Sizing.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro-start",
+                "title": "Retro-Kickoff für Lessons Learned",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Industriekontext besonders relevant: Single-Source-Eliminierung wo möglich, Zweitquellen-Register-Pflege mit dokumentierter Werkzeug- und Qualifikations-Status, Eil-Qualifizierungs-SOP, Working-Capital-Reserve-Sizing.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Lieferketten-Vorfall", "weight": 1.5, "category": "governance" },
-          { "id": "crit-governance-vertragspflicht", "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Allokations-Konsistenz, Pönale-Verhandlung)", "weight": 2, "category": "governance" },
-          { "id": "crit-supply-zweitquelle", "description": "Zweitquellen-Aktivierung (Register-Pflege, Eil-Pfad, Hybrid-Strategie)", "weight": 2, "category": "supply" },
-          { "id": "crit-quality-eilqualifizierung", "description": "Qualitäts-Konformität bei Eil-Qualifizierung (PPAP-Disziplin, IATF-/EN-9100-Audit-Sicherung)", "weight": 1.5, "category": "quality" },
-          { "id": "crit-operations-produktionsfähigkeit", "description": "Aufrechterhaltung der Produktion (Puffer-Strategie, Linien-Streckung, Wiederanlauf-Reihenfolge)", "weight": 1.5, "category": "operations" },
-          { "id": "crit-finance-liquidität", "description": "Liquiditäts-Sicherung (Spot-Beschaffung, Bank-Information, Working-Capital-Disziplin)", "weight": 1, "category": "finance" },
-          { "id": "crit-communication-kunde", "description": "Schlüsselkunden-Kommunikation (Tier-1-Vertrauenserhaltung, gemeinsame Versorgungsstrategie)", "weight": 1.5, "category": "communication" }
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Lieferketten-Vorfall",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-governance-vertragspflicht",
+            "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Allokations-Konsistenz, Pönale-Verhandlung)",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-supply-zweitquelle",
+            "description": "Zweitquellen-Aktivierung (Register-Pflege, Eil-Pfad, Hybrid-Strategie)",
+            "weight": 2,
+            "category": "supply"
+          },
+          {
+            "id": "crit-quality-eilqualifizierung",
+            "description": "Qualitäts-Konformität bei Eil-Qualifizierung (PPAP-Disziplin, IATF-/EN-9100-Audit-Sicherung)",
+            "weight": 1.5,
+            "category": "quality"
+          },
+          {
+            "id": "crit-operations-produktionsfähigkeit",
+            "description": "Aufrechterhaltung der Produktion (Puffer-Strategie, Linien-Streckung, Wiederanlauf-Reihenfolge)",
+            "weight": 1.5,
+            "category": "operations"
+          },
+          {
+            "id": "crit-finance-liquidität",
+            "description": "Liquiditäts-Sicherung (Spot-Beschaffung, Bank-Information, Working-Capital-Disziplin)",
+            "weight": 1,
+            "category": "finance"
+          },
+          {
+            "id": "crit-communication-kunde",
+            "description": "Schlüsselkunden-Kommunikation (Tier-1-Vertrauenserhaltung, gemeinsame Versorgungsstrategie)",
+            "weight": 1.5,
+            "category": "communication"
+          }
         ]
       }
     ]

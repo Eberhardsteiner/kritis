@@ -6,7 +6,7 @@
     "moduleId": "it-telecom",
     "name": "IT/Telekom-Basismodul",
     "version": "1.0.0",
-    "description": "Branchenmodul für Telekommunikations-Anbieter, Rechenzentrums-Betreiber, Cloud-Provider, Internet-Service-Provider und Managed-Service-Provider mit Fokus auf Verfügbarkeit, Datenintegrität, Backbone-Hardening, Endkunden-Datenschutz und Sektor-Kaskaden-Verantwortung. Pack adressiert KRITIS-pflichtige Tenants nach § 5 BSI-KritisV (Telekommunikation ab 100.000 versorgten Endkunden, Rechenzentren ab 5.000 m² IT-Fläche, Cloud-Dienste ab 3,7 Mio. aktiven vertraglichen Endkunden) sowie NIS2-erfasste Anbieter (NIS2UmsuCG, in Kraft seit 6.12.2025; Sektor 'digitale Infrastruktur' ab 50 MA / 10 Mio. €). Vier Sub-Tenant-Profile sind in den Risiko-Beschreibungen differenziert: Telekom-Carrier, Rechenzentrums-Betreiber, Cloud-Provider, Internet-Service-Provider — jedes Profil hat eigenes Risiko-Profil.",
+    "description": "Branchenmodul für Telekommunikations-Anbieter, Rechenzentren und Cloud-Provider mit Fokus auf Verfügbarkeit, Datenintegrität und Sektor-Kaskaden-Resilienz.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Informationstechnik und Telekommunikation",
@@ -37,14 +37,20 @@
       "minAppVersion": "1.8.0",
       "minEngineVersion": "1.0.0"
     },
-    "releaseChannel": "sector"
+    "releaseChannel": "sector",
+    "versionHistory": [
+      {
+        "version": "1.0.0",
+        "note": "Verbose pre-cleanup module description (preserved 2026-04-26 during the cross-pack description cleanup): Branchenmodul für Telekommunikations-Anbieter, Rechenzentrums-Betreiber, Cloud-Provider und Internet-Service-Provider. Pack umfasst seit C5.3f Risiko-Templates nach KRITIS-/NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz, technical+cyber_physical-stark wegen doppelter Angriffsfläche), zwei Tabletop-Szenarien (BGP-Hijacking mit Endkunden-Datenexfiltration, Rechenzentrums-Stromausfall mit Multi-Region-Cascade) und einen KRITIS-/NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist Verfügbarkeit und Datenintegrität (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“, Logistics „Dispositionsfähigkeit“, Water „Versorgungssicherheit + Trinkwasser-Qualität“). Demo-Argument für IT/Telekom: die Querschnitts-Branche, von der alle anderen abhängen — Ausfälle hier kaskadieren in alle übrigen Sektor-Packs. Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: kritische Kriterien (BNetzA-Frist, BSI-Frist, Backbone-Verfügbarkeit, Endkunden-Daten-Schutz) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den IT/Telekom-Decisions zur BGP-Filter-Aktivierungs-Strategie, zur Endkunden-DSGVO-Art.-34-Benachrichtigung, zur Sektor-Kaskaden-Priorisierung und zur Wiederanlauf-Reihenfolge sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können."
+      }
+    ]
   },
   "module": {
     "schemaVersion": 1,
     "id": "it-telecom",
     "name": "IT & Telekommunikation",
     "version": "1.0.0",
-    "description": "Branchenmodul für Telekommunikations-Anbieter, Rechenzentrums-Betreiber, Cloud-Provider und Internet-Service-Provider. Pack umfasst seit C5.3f Risiko-Templates nach KRITIS-/NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz, technical+cyber_physical-stark wegen doppelter Angriffsfläche), zwei Tabletop-Szenarien (BGP-Hijacking mit Endkunden-Datenexfiltration, Rechenzentrums-Stromausfall mit Multi-Region-Cascade) und einen KRITIS-/NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist Verfügbarkeit und Datenintegrität (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“, Logistics „Dispositionsfähigkeit“, Water „Versorgungssicherheit + Trinkwasser-Qualität“). Demo-Argument für IT/Telekom: die Querschnitts-Branche, von der alle anderen abhängen — Ausfälle hier kaskadieren in alle übrigen Sektor-Packs. Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: kritische Kriterien (BNetzA-Frist, BSI-Frist, Backbone-Verfügbarkeit, Endkunden-Daten-Schutz) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den IT/Telekom-Decisions zur BGP-Filter-Aktivierungs-Strategie, zur Endkunden-DSGVO-Art.-34-Benachrichtigung, zur Sektor-Kaskaden-Priorisierung und zur Wiederanlauf-Reihenfolge sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können.",
+    "description": "Branchenmodul für Telekommunikations-Anbieter, Rechenzentren und Cloud-Provider mit Fokus auf Verfügbarkeit, Datenintegrität und Sektor-Kaskaden-Resilienz.",
     "sectorCategory": "Informationstechnik und Telekommunikation",
     "domainWeightAdjustments": {
       "cyber": 1.3,
@@ -1005,24 +1011,63 @@
         "version": "1.0.0",
         "title": "BGP-Hijacking mit Endkunden-Datenexfiltration",
         "summary": "Ein fremder ASN kündigt Präfixe eines deutschen Telekommunikations-Carriers (Festnetz + Mobilfunk + Internet, ca. 1,8 Mio. Endkunden, NIS2-„wichtige Einrichtung“ und KRITIS-pflichtig) an. Während des etwa 40-minütigen Hijack-Fensters wird Endkunden-Traffic über fremde Infrastruktur geleitet — mutmaßlich für gezielte Datenexfiltration. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf Notfall-BGP-Filter-Aktivierung, Sektor-CERT-Koordination, NIS2-/§ 8d BSIG- und TKG-Meldungen, DSGVO Art. 33/34-Bewertung mit potenziell hunderttausenden Betroffenen, Sektor-Kaskaden-Priorisierung (welche KRITIS-Sektor-Kunden bekommen Wiederherstellungs-Priorität — Krankenhäuser? Stadtwerke? Logistik-Tier-1?) und der Lösegeld-Frage mit telekom-spezifischer Schärfe (Verschlüsselungs-Schlüssel des Routings als Erpressungs-Hebel). Realitätsbezug: Cloudflare 1.1.1.1 am 27.6.2024 (300 Netze in 70 Ländern), Salt-Typhoon-Pattern bei AT&T/Verizon/Lumen 2024–2025 (Lawful-Interception-Mitschnitte). Das Szenario komprimiert auf 180 Minuten.",
-        "sectors": ["Informationstechnik und Telekommunikation"],
-        "applicableRegimes": ["BSIG", "TKG", "DSGVO"],
+        "sectors": [
+          "Informationstechnik und Telekommunikation"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "TKG",
+          "DSGVO"
+        ],
         "durationMinutes": 180,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Notfall-BGP-Filter, Endkunden-Information, Sektor-Kunden-Priorisierung, Lösegeld-Entscheidung, Pressemitteilung). NIS2 § 8a BSIG-Umsetzung verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung. Schnittstelle zu Bundeskanzleramt-Kontakten bei Vorfällen mit nationaler Tragweite." },
-          { "id": "role-noc", "title": "NOC / Network Operations Center", "briefing": "24/7-Backbone-Verantwortung. Hat das BGP-Anomalie-Monitoring beobachtet, kennt die Routing-Topologie. Trifft operative Entscheidungen zu Notfall-BGP-Filtern, Carrier-Eskalationen, RPKI-Override. Erste Eskalationsstufe und entscheidender Fakten-Lieferer." },
-          { "id": "role-soc", "title": "SOC / Security Operations Center", "briefing": "Cyber-Incident-Response-Lead. Koordiniert Forensik des Hijack-Fensters, prüft, ob Endkunden-Daten exfiltriert wurden, schätzt DSGVO-Betroffenheit ab, BSI-/§ 8d-BSIG- und TKG-Meldewege. Schnittstelle zu CERT-Bund, Sektor-CERT (vergleichbar Wasser-CyberSec@Wasser, hier auf Telekom-Sektor-CERT-Ebene über BNetzA und BSI), und zu internationalem CERT-Verbund (FIRST, Trusted Introducer)." },
-          { "id": "role-ciso", "title": "CISO", "briefing": "Strategische Cyber-Verantwortung. Bewertet Reichweite des Vorfalls, koordiniert externe IR-Firma, NIS2-Meldepflichten, TKÜV-Implikationen falls Lawful-Interception-Schnittstellen betroffen, Salt-Typhoon-Schablonen-Vergleich." },
-          { "id": "role-bnetza-liaison", "title": "BNetzA-Schnittstelle / TKG-Compliance", "briefing": "Koordiniert TKG-Meldewege gegenüber der Bundesnetzagentur (§ 109 Sicherheits-Konzept-Pflichten, Beeinträchtigung des Telekommunikations-Netzes meldepflichtig). Bei DSGVO-Aspekten zusätzlich Schnittstelle zur BfDI bei TK-spezifischer Datenverarbeitung." },
-          { "id": "role-press-endkunden", "title": "Pressesprecher / Endkunden-Kommunikation", "briefing": "Externe Kommunikation, Endkunden-Information bei DSGVO Art. 34-Pflicht (potenziell hunderttausende Betroffene). Multi-Channel-Optionen: Stamm-Kunden-Portal-Notification, Push-Benachrichtigung der Service-App, E-Mail-Massenmailing, Pressemitteilung, Lokal- und Branchenpresse." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG), TKG-Anzeige-Pflichten gegenüber BNetzA, DSGVO Art. 33 (72 h) und Art. 34 (unverzüglich bei hohem Risiko), Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung, OFAC-SDN), TKÜV-Sicherheits-Implikationen falls die Hijack-Telemetrie nahelegt, dass Lawful-Interception-Daten betroffen waren." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Notfall-BGP-Filter, Endkunden-Information, Sektor-Kunden-Priorisierung, Lösegeld-Entscheidung, Pressemitteilung). NIS2 § 8a BSIG-Umsetzung verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung. Schnittstelle zu Bundeskanzleramt-Kontakten bei Vorfällen mit nationaler Tragweite."
+          },
+          {
+            "id": "role-noc",
+            "title": "NOC / Network Operations Center",
+            "briefing": "24/7-Backbone-Verantwortung. Hat das BGP-Anomalie-Monitoring beobachtet, kennt die Routing-Topologie. Trifft operative Entscheidungen zu Notfall-BGP-Filtern, Carrier-Eskalationen, RPKI-Override. Erste Eskalationsstufe und entscheidender Fakten-Lieferer."
+          },
+          {
+            "id": "role-soc",
+            "title": "SOC / Security Operations Center",
+            "briefing": "Cyber-Incident-Response-Lead. Koordiniert Forensik des Hijack-Fensters, prüft, ob Endkunden-Daten exfiltriert wurden, schätzt DSGVO-Betroffenheit ab, BSI-/§ 8d-BSIG- und TKG-Meldewege. Schnittstelle zu CERT-Bund, Sektor-CERT (vergleichbar Wasser-CyberSec@Wasser, hier auf Telekom-Sektor-CERT-Ebene über BNetzA und BSI), und zu internationalem CERT-Verbund (FIRST, Trusted Introducer)."
+          },
+          {
+            "id": "role-ciso",
+            "title": "CISO",
+            "briefing": "Strategische Cyber-Verantwortung. Bewertet Reichweite des Vorfalls, koordiniert externe IR-Firma, NIS2-Meldepflichten, TKÜV-Implikationen falls Lawful-Interception-Schnittstellen betroffen, Salt-Typhoon-Schablonen-Vergleich."
+          },
+          {
+            "id": "role-bnetza-liaison",
+            "title": "BNetzA-Schnittstelle / TKG-Compliance",
+            "briefing": "Koordiniert TKG-Meldewege gegenüber der Bundesnetzagentur (§ 109 Sicherheits-Konzept-Pflichten, Beeinträchtigung des Telekommunikations-Netzes meldepflichtig). Bei DSGVO-Aspekten zusätzlich Schnittstelle zur BfDI bei TK-spezifischer Datenverarbeitung."
+          },
+          {
+            "id": "role-press-endkunden",
+            "title": "Pressesprecher / Endkunden-Kommunikation",
+            "briefing": "Externe Kommunikation, Endkunden-Information bei DSGVO Art. 34-Pflicht (potenziell hunderttausende Betroffene). Multi-Channel-Optionen: Stamm-Kunden-Portal-Notification, Push-Benachrichtigung der Service-App, E-Mail-Massenmailing, Pressemitteilung, Lokal- und Branchenpresse."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG), TKG-Anzeige-Pflichten gegenüber BNetzA, DSGVO Art. 33 (72 h) und Art. 34 (unverzüglich bei hohem Risiko), Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung, OFAC-SDN), TKÜV-Sicherheits-Implikationen falls die Hijack-Telemetrie nahelegt, dass Lawful-Interception-Daten betroffen waren."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-bgp-anomaly", "title": "BGP-Anomalie-Alarm", "description": "NOC meldet: BGP-Monitoring zeigt seit etwa 40 Minuten unregelmäßige Path-Updates für mehrere unserer /22-Präfixe — ein fremder ASN aus dem Asien-Pazifik-Bereich propagiert spezifischere Präfixe (/24) und zieht Traffic zu sich. RPKI-ROV ist nur teilweise aktiv (etwa 60 % unserer Präfixe gesigned), die fehlenden 40 % sind die, die jetzt gehijackt sind. Sample-Capture zeigt: Traffic wurde während des Hijack-Fensters offenbar mitgeschnitten und über fremde Infrastruktur weitergeleitet.", "roleId": "role-noc" }
+              {
+                "id": "inj-bgp-anomaly",
+                "title": "BGP-Anomalie-Alarm",
+                "description": "NOC meldet: BGP-Monitoring zeigt seit etwa 40 Minuten unregelmäßige Path-Updates für mehrere unserer /22-Präfixe — ein fremder ASN aus dem Asien-Pazifik-Bereich propagiert spezifischere Präfixe (/24) und zieht Traffic zu sich. RPKI-ROV ist nur teilweise aktiv (etwa 60 % unserer Präfixe gesigned), die fehlenden 40 % sind die, die jetzt gehijackt sind. Sample-Capture zeigt: Traffic wurde während des Hijack-Fensters offenbar mitgeschnitten und über fremde Infrastruktur weitergeleitet.",
+                "roleId": "role-noc"
+              }
             ],
             "decisions": [
               {
@@ -1031,11 +1076,38 @@
                 "roleId": "role-noc",
                 "guidance": "Trade-off zwischen Sofort-Notfall-Filter (BGP-Communities setzen, RPKI-Override aktivieren, fremde Präfixe blackholen) und Carrier-Koordination (Upstream-Provider eskalieren, RIPE/ARIN-Notification, koordinierte Filter-Anpassung). Cloudflare-1.1.1.1-Lehre: schnelle Eigen-Aktion verkürzt das Hijack-Fenster, aber unkoordinierte Filter können legitimen Traffic mit-blockieren.",
                 "options": [
-                  { "id": "opt-immediate-filter", "label": "Sofort eigene Notfall-BGP-Filter setzen, RPKI-Override aktivieren, fremde Präfixe blackholen — parallel Upstream-Provider und CERT-Bund informieren", "consequence": "Hijack-Fenster geschlossen binnen 5–10 Minuten. Kleines Risiko, dass legitime Routen mit-blockiert werden, aber durch Out-of-Band-Monitoring schnell erkennbar. Empfohlene Variante.", "evaluationHints": ["Schnelle Eigen-Aktion mit Carrier-Koordination"], "scoreContribution": 3 },
-                  { "id": "opt-coordinated-filter", "label": "Erst Upstream-Provider und Sektor-CERT informieren, dann koordinierte Filter-Aktion über alle Carrier hinweg", "consequence": "Saubere Koordination, aber 30–60 Minuten Verzögerung — Hijack-Fenster bleibt offen, weitere Datenexfiltration möglich. Akzeptabel nur bei kleinen Hijacks ohne Daten-Risiko.", "evaluationHints": ["Koordinierte Reaktion mit Verzögerungsrisiko"], "scoreContribution": 1 },
-                  { "id": "opt-watch-and-document", "label": "Beobachten und dokumentieren, keine Sofort-Aktion bis Faktenlage klar", "consequence": "Hijack-Fenster bleibt offen, jede Minute weitere Datenexfiltration. Kontraindiziert, schwächste Option.", "evaluationHints": ["Reine Beobachtung, gefährlich"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-immediate-filter",
+                    "label": "Sofort eigene Notfall-BGP-Filter setzen, RPKI-Override aktivieren, fremde Präfixe blackholen — parallel Upstream-Provider und CERT-Bund informieren",
+                    "consequence": "Hijack-Fenster geschlossen binnen 5–10 Minuten. Kleines Risiko, dass legitime Routen mit-blockiert werden, aber durch Out-of-Band-Monitoring schnell erkennbar. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Schnelle Eigen-Aktion mit Carrier-Koordination"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-coordinated-filter",
+                    "label": "Erst Upstream-Provider und Sektor-CERT informieren, dann koordinierte Filter-Aktion über alle Carrier hinweg",
+                    "consequence": "Saubere Koordination, aber 30–60 Minuten Verzögerung — Hijack-Fenster bleibt offen, weitere Datenexfiltration möglich. Akzeptabel nur bei kleinen Hijacks ohne Daten-Risiko.",
+                    "evaluationHints": [
+                      "Koordinierte Reaktion mit Verzögerungsrisiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-watch-and-document",
+                    "label": "Beobachten und dokumentieren, keine Sofort-Aktion bis Faktenlage klar",
+                    "consequence": "Hijack-Fenster bleibt offen, jede Minute weitere Datenexfiltration. Kontraindiziert, schwächste Option.",
+                    "evaluationHints": [
+                      "Reine Beobachtung, gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-backbone-availability", "crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-operations-backbone-availability",
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1043,7 +1115,12 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-data-impact", "title": "Daten-Impact-Analyse: HTTPS-Traffic geschützt, DNS und unverschlüsselt verwundbar", "description": "SOC meldet: Erstanalyse des Hijack-Fensters: Schätzung 8–14 % des betroffenen Endkunden-Traffics war HTTP-unverschlüsselt (E-Mail-POP3, alte Web-Seiten, IoT-Devices ohne TLS). DNS-Anfragen waren komplett im Klartext, was Surfverhalten und besuchte Domains für die Angreifer sichtbar macht. HTTPS-Traffic ist durch TLS-Verschlüsselung weitgehend geschützt — aber Metadaten (Ziel-IP, SNI, Volumen, Timing) sind sichtbar. Erste Schätzung: zwischen 80.000 und 240.000 Endkunden hatten während des Hijack-Fensters aktiven Internet-Traffic.", "roleId": "role-soc" }
+              {
+                "id": "inj-data-impact",
+                "title": "Daten-Impact-Analyse: HTTPS-Traffic geschützt, DNS und unverschlüsselt verwundbar",
+                "description": "SOC meldet: Erstanalyse des Hijack-Fensters: Schätzung 8–14 % des betroffenen Endkunden-Traffics war HTTP-unverschlüsselt (E-Mail-POP3, alte Web-Seiten, IoT-Devices ohne TLS). DNS-Anfragen waren komplett im Klartext, was Surfverhalten und besuchte Domains für die Angreifer sichtbar macht. HTTPS-Traffic ist durch TLS-Verschlüsselung weitgehend geschützt — aber Metadaten (Ziel-IP, SNI, Volumen, Timing) sind sichtbar. Erste Schätzung: zwischen 80.000 und 240.000 Endkunden hatten während des Hijack-Fensters aktiven Internet-Traffic.",
+                "roleId": "role-soc"
+              }
             ],
             "decisions": [
               {
@@ -1052,11 +1129,38 @@
                 "roleId": "role-rechtsabteilung",
                 "guidance": "DSGVO Art. 33-Meldung an BfDI (72 h) ist hier unstrittig erforderlich — Verletzung des Schutzes personenbezogener Daten ist gegeben. Art. 34 (direkte Benachrichtigung der Betroffenen) hängt am 'hohen Risiko'-Kriterium. Bei DNS-Klartext-Exfiltration, Surfprofilen und unverschlüsselten Inhalten ist das hohe Risiko gut argumentierbar. Tenant-Profil-Hinweis: bei 80.000–240.000 Betroffenen ist die Direktbenachrichtigung aufwendig, aber erfahrungsgemäß die rechtssicherere Variante.",
                 "options": [
-                  { "id": "opt-art34-direct-affected", "label": "Art. 34-Direktbenachrichtigung an alle nachweislich betroffenen Endkunden via Kunden-Portal-Notification + E-Mail + Postversand für Adress-Validierte; öffentliche Information parallel", "consequence": "Voll-Konformität mit Art. 34. Hoher operativer Aufwand (Adressdaten validieren, Druck, Versand), Kosten-Schätzung 600 K–1,2 M €. Beste Wirkung gegenüber BfDI-Aufsichtsverfahren.", "evaluationHints": ["Direktbenachrichtigung gemäß Art. 34 — gleichwertig zu opt-art34-hybrid"], "scoreContribution": 2 },
-                  { "id": "opt-art34-hybrid", "label": "Hybrid-Modell: Direktbenachrichtigung für Hochrisiko-Gruppe (Geschäftskunden, Behörden-Anschlüsse, Personen mit auffälligem Traffic-Volumen), öffentliche Information für Restgruppe nach Art. 34 Abs. 3 lit. c (unverhältnismäßiger Aufwand)", "consequence": "Pragmatisch, risikobasiert. Begründung 'unverhältnismäßiger Aufwand' für Restgruppe gegenüber BfDI argumentierbar. Kosten-Schätzung 250–400 K €. Gleichwertige Best-Practice-Variante.", "evaluationHints": ["Risikobasierte Hybrid-Strategie — gleichwertig zu opt-art34-direct-affected"], "scoreContribution": 2 },
-                  { "id": "opt-art34-public-only", "label": "Nur öffentliche Information (Pressemitteilung, Stamm-Kunden-Portal-Banner), keine Direktbenachrichtigung", "consequence": "Niedriger Aufwand, aber 'unverhältnismäßiger Aufwand' nicht überzeugend argumentierbar wenn Kundenadressen aus dem Vertragsverhältnis ohnehin vorliegen. Spätrisiko: BfDI-Aufsichtsverfahren mit Bußgeld bis 4 % Konzern-Umsatz.", "evaluationHints": ["Öffentliche Info ohne Direktbenachrichtigung — schwächer"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-art34-direct-affected",
+                    "label": "Art. 34-Direktbenachrichtigung an alle nachweislich betroffenen Endkunden via Kunden-Portal-Notification + E-Mail + Postversand für Adress-Validierte; öffentliche Information parallel",
+                    "consequence": "Voll-Konformität mit Art. 34. Hoher operativer Aufwand (Adressdaten validieren, Druck, Versand), Kosten-Schätzung 600 K–1,2 M €. Beste Wirkung gegenüber BfDI-Aufsichtsverfahren.",
+                    "evaluationHints": [
+                      "Direktbenachrichtigung gemäß Art. 34 — gleichwertig zu opt-art34-hybrid"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-art34-hybrid",
+                    "label": "Hybrid-Modell: Direktbenachrichtigung für Hochrisiko-Gruppe (Geschäftskunden, Behörden-Anschlüsse, Personen mit auffälligem Traffic-Volumen), öffentliche Information für Restgruppe nach Art. 34 Abs. 3 lit. c (unverhältnismäßiger Aufwand)",
+                    "consequence": "Pragmatisch, risikobasiert. Begründung 'unverhältnismäßiger Aufwand' für Restgruppe gegenüber BfDI argumentierbar. Kosten-Schätzung 250–400 K €. Gleichwertige Best-Practice-Variante.",
+                    "evaluationHints": [
+                      "Risikobasierte Hybrid-Strategie — gleichwertig zu opt-art34-direct-affected"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-art34-public-only",
+                    "label": "Nur öffentliche Information (Pressemitteilung, Stamm-Kunden-Portal-Banner), keine Direktbenachrichtigung",
+                    "consequence": "Niedriger Aufwand, aber 'unverhältnismäßiger Aufwand' nicht überzeugend argumentierbar wenn Kundenadressen aus dem Vertragsverhältnis ohnehin vorliegen. Spätrisiko: BfDI-Aufsichtsverfahren mit Bußgeld bis 4 % Konzern-Umsatz.",
+                    "evaluationHints": [
+                      "Öffentliche Info ohne Direktbenachrichtigung — schwächer"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-dsgvo-frist", "crit-communication-endkunden"]
+                "relatedCriteria": [
+                  "crit-reporting-dsgvo-frist",
+                  "crit-communication-endkunden"
+                ]
               }
             ]
           },
@@ -1064,8 +1168,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, NOC, SOC, CISO, BNetzA-Schnittstelle, Pressesprecher, Rechtsabteilung einberufen. BSI-CERT als Erst-Adressat informiert (institutioneller Eskalations-Pfad: BSI vermittelt bei Salt-Typhoon-Verdacht über das Nationale Cyber-Abwehrzentrum an das Bundesinnenministerium und gegebenenfalls das Bundeskanzleramt — der Tenant ruft NICHT direkt zentrale Politik-Stationen an, sondern liefert die Sachverhaltsbasis und überlässt die politische Eskalation den Bundesbehörden). Sektor-CERT informiert. Out-of-Band-Mobilfunk-Gruppe geprüft.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-sector-cascade", "title": "Sektor-Kaskade beobachtet: KRITIS-Kunden melden sich", "description": "Customer-Service meldet: drei Großkunden mit KRITIS-Status haben Eskalations-Hotline genutzt — ein Klinikverbund (60.000 Patientenfälle/Jahr) meldet KIS-Connectivity-Probleme während des Hijack-Fensters; ein Stadtwerk (Energie und Wasser) meldet SCADA-Telemetrie-Lücken; ein Tier-1-Logistik-Carrier meldet TMS-Sync-Probleme. Die Sektor-Kaskade ist real — unsere Endkunden-Telekoms sind die Lebensader anderer KRITIS-Sektoren.", "roleId": "role-noc" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, NOC, SOC, CISO, BNetzA-Schnittstelle, Pressesprecher, Rechtsabteilung einberufen. BSI-CERT als Erst-Adressat informiert (institutioneller Eskalations-Pfad: BSI vermittelt bei Salt-Typhoon-Verdacht über das Nationale Cyber-Abwehrzentrum an das Bundesinnenministerium und gegebenenfalls das Bundeskanzleramt — der Tenant ruft NICHT direkt zentrale Politik-Stationen an, sondern liefert die Sachverhaltsbasis und überlässt die politische Eskalation den Bundesbehörden). Sektor-CERT informiert. Out-of-Band-Mobilfunk-Gruppe geprüft.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-sector-cascade",
+                "title": "Sektor-Kaskade beobachtet: KRITIS-Kunden melden sich",
+                "description": "Customer-Service meldet: drei Großkunden mit KRITIS-Status haben Eskalations-Hotline genutzt — ein Klinikverbund (60.000 Patientenfälle/Jahr) meldet KIS-Connectivity-Probleme während des Hijack-Fensters; ein Stadtwerk (Energie und Wasser) meldet SCADA-Telemetrie-Lücken; ein Tier-1-Logistik-Carrier meldet TMS-Sync-Probleme. Die Sektor-Kaskade ist real — unsere Endkunden-Telekoms sind die Lebensader anderer KRITIS-Sektoren.",
+                "roleId": "role-noc"
+              }
             ],
             "decisions": [
               {
@@ -1074,11 +1188,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "KRITIS-Querschnitts-Politik in der Praxis. Trade-off zwischen Patientensicherheits-Logik (Krankenhäuser zuerst — analog zur Healthcare-Pack-Performance-Dimension), Versorgungs-Logik (Stadtwerke zuerst — Wasser/Energie für Bevölkerung), Wirtschafts-Logik (Tier-1-Logistik zuerst wegen JIT-Pönalen). Es gibt keine klare Best-Practice — Sektor-CERT-Gespräche und Bundeskanzleramt-Konsultation sind übliche Eskalations-Pfade.",
                 "options": [
-                  { "id": "opt-sector-priority-life-safety", "label": "Lebenssicherheits-Priorität: Krankenhäuser und Notrufketten (112) zuerst, dann Stadtwerke (Wasser/Energie), dann Logistik und Industrie", "consequence": "Patientensicherheits-Kohärenz mit Healthcare-Pack-Logik. Bundesregierung übliche Position. Tier-1-Logistik-Pönalen sind im Vergleich zu Patientensicherheit sekundär. Empfohlene Variante. Gleichwertig zu opt-sector-priority-coordinated.", "evaluationHints": ["Lebenssicherheits-Priorisierung — gleichwertig zu opt-sector-priority-coordinated"], "scoreContribution": 2 },
-                  { "id": "opt-sector-priority-coordinated", "label": "Koordinierte Priorisierung mit BSI-/Sektor-CERT-Konsultation und Bundeskanzleramt-Beratung — gemeinsame Sprachregelung über alle Telekoms hinweg, einheitliche Reihenfolge", "consequence": "Politische Disziplin maximal. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung gegenüber Aufsichtsbehörden und Sektor-Kunden. Empfohlene Variante in komplexen Multi-Sektor-Lagen. Gleichwertig zu opt-sector-priority-life-safety.", "evaluationHints": ["Koordinierte Multi-Stakeholder-Priorisierung — gleichwertig zu opt-sector-priority-life-safety"], "scoreContribution": 2 },
-                  { "id": "opt-sector-priority-sla", "label": "SLA-Priorität: Kunden mit höchsten vertraglichen Pönalen zuerst, KRITIS-Status nachrangig", "consequence": "Kommerzielles Logik-Modell. Kollidiert mit KRITIS-Politik (Krankenhäuser haben oft niedrigere SLA-Pönalen als Tier-1-Logistik). Bundeskanzleramt-Konsultation würde diese Entscheidung kritisch sehen. Schwächere Option.", "evaluationHints": ["SLA-Priorisierung mit politischem Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-sector-priority-life-safety",
+                    "label": "Lebenssicherheits-Priorität: Krankenhäuser und Notrufketten (112) zuerst, dann Stadtwerke (Wasser/Energie), dann Logistik und Industrie",
+                    "consequence": "Patientensicherheits-Kohärenz mit Healthcare-Pack-Logik. Bundesregierung übliche Position. Tier-1-Logistik-Pönalen sind im Vergleich zu Patientensicherheit sekundär. Empfohlene Variante. Gleichwertig zu opt-sector-priority-coordinated.",
+                    "evaluationHints": [
+                      "Lebenssicherheits-Priorisierung — gleichwertig zu opt-sector-priority-coordinated"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-sector-priority-coordinated",
+                    "label": "Koordinierte Priorisierung mit BSI-/Sektor-CERT-Konsultation und Bundeskanzleramt-Beratung — gemeinsame Sprachregelung über alle Telekoms hinweg, einheitliche Reihenfolge",
+                    "consequence": "Politische Disziplin maximal. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung gegenüber Aufsichtsbehörden und Sektor-Kunden. Empfohlene Variante in komplexen Multi-Sektor-Lagen. Gleichwertig zu opt-sector-priority-life-safety.",
+                    "evaluationHints": [
+                      "Koordinierte Multi-Stakeholder-Priorisierung — gleichwertig zu opt-sector-priority-life-safety"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-sector-priority-sla",
+                    "label": "SLA-Priorität: Kunden mit höchsten vertraglichen Pönalen zuerst, KRITIS-Status nachrangig",
+                    "consequence": "Kommerzielles Logik-Modell. Kollidiert mit KRITIS-Politik (Krankenhäuser haben oft niedrigere SLA-Pönalen als Tier-1-Logistik). Bundeskanzleramt-Konsultation würde diese Entscheidung kritisch sehen. Schwächere Option.",
+                    "evaluationHints": [
+                      "SLA-Priorisierung mit politischem Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-cross-sector-coordination", "crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-cross-sector-coordination",
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1086,7 +1227,12 @@
             "t": 60,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-bnetza-tkg", "title": "BNetzA-Anzeige nach TKG § 109", "description": "BNetzA-Schnittstelle hat unverzügliche Anzeige nach TKG § 168/§ 169 (Beeinträchtigung des Telekommunikations-Netzes mit Auswirkung auf Endkunden) und § 109 (Sicherheits-Konzept-Verstoß) erstellt. BNetzA fordert 72-h-Folgemeldung mit Schadensbild und Bestätigung der ergriffenen Sofortmaßnahmen. Parallel ist NIS2 § 8d BSIG-Meldung an BSI gegangen.", "roleId": "role-bnetza-liaison" }
+              {
+                "id": "inj-bnetza-tkg",
+                "title": "BNetzA-Anzeige nach TKG § 109",
+                "description": "BNetzA-Schnittstelle hat unverzügliche Anzeige nach TKG § 168/§ 169 (Beeinträchtigung des Telekommunikations-Netzes mit Auswirkung auf Endkunden) und § 109 (Sicherheits-Konzept-Verstoß) erstellt. BNetzA fordert 72-h-Folgemeldung mit Schadensbild und Bestätigung der ergriffenen Sofortmaßnahmen. Parallel ist NIS2 § 8d BSIG-Meldung an BSI gegangen.",
+                "roleId": "role-bnetza-liaison"
+              }
             ],
             "decisions": [
               {
@@ -1095,10 +1241,29 @@
                 "roleId": "role-rechtsabteilung",
                 "guidance": "BSI (Cybersicherheits-Aufsicht) und BNetzA (Telekommunikations-Aufsicht) haben überlappende Meldepflichten — das gleiche Ereignis ist an beide Stellen mit teilweise unterschiedlichen Inhalts-Schwerpunkten zu melden. Saubere Koordinations-Disziplin verhindert widersprüchliche Aussagen, die später als Compliance-Verstoß bewertet werden könnten. Gemeinsame Pressemitteilung mit beiden Behörden ist möglich.",
                 "options": [
-                  { "id": "opt-bsi-bnetza-aligned", "label": "Inhaltlich identische Sachverhalts-Meldung an beide Behörden, mit jeweils ausgewähltem Schwerpunkt (BSI: TTPs, IOCs; BNetzA: Service-Beeinträchtigung, Endkunden-Auswirkung)", "consequence": "Koordinations-Disziplin. Beide Behörden haben konsistente Faktenbasis. Empfohlene Variante.", "evaluationHints": ["Konsistente Multi-Behörden-Meldung"], "scoreContribution": 3 },
-                  { "id": "opt-bsi-bnetza-separate", "label": "Getrennte Meldungen mit jeweils nur Pflicht-Inhalten, keine Cross-Referenzierung", "consequence": "Risiko widersprüchlicher Aussagen, beide Behörden müssen Nachfragen stellen. Mehraufwand, mögliche Compliance-Beanstandung. Schwächere Option.", "evaluationHints": ["Getrennte Meldungen mit Inkonsistenz-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-bsi-bnetza-aligned",
+                    "label": "Inhaltlich identische Sachverhalts-Meldung an beide Behörden, mit jeweils ausgewähltem Schwerpunkt (BSI: TTPs, IOCs; BNetzA: Service-Beeinträchtigung, Endkunden-Auswirkung)",
+                    "consequence": "Koordinations-Disziplin. Beide Behörden haben konsistente Faktenbasis. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Konsistente Multi-Behörden-Meldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bsi-bnetza-separate",
+                    "label": "Getrennte Meldungen mit jeweils nur Pflicht-Inhalten, keine Cross-Referenzierung",
+                    "consequence": "Risiko widersprüchlicher Aussagen, beide Behörden müssen Nachfragen stellen. Mehraufwand, mögliche Compliance-Beanstandung. Schwächere Option.",
+                    "evaluationHints": [
+                      "Getrennte Meldungen mit Inkonsistenz-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist", "crit-reporting-bnetza-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist",
+                  "crit-reporting-bnetza-frist"
+                ]
               }
             ]
           },
@@ -1106,7 +1271,12 @@
             "t": 90,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-attribution-hint", "title": "IR-Forensik-Erstanalyse: TTPs zeigen Salt-Typhoon-Verwandtschaft", "description": "Externe IR-Firma meldet: Erste Analyse der Hijack-Telemetrie zeigt TTPs, die mit Salt-Typhoon-Aktivitäten 2024–2025 vergleichbar sind — gleiches Schema bei der ASN-Wahl, ähnliche Path-Manipulationen, Hinweise auf staatlich gelenkte Akteure mit hoher Wahrscheinlichkeit aus China-Pazifik-Bereich. CERT-Bund und Verfassungsschutz sind benachrichtigt. Dies ist nicht der erste BGP-Hijack mit dieser Signatur in Deutschland; CERT-Bund führt seit Mai 2025 eine Watchlist.", "roleId": "role-soc" }
+              {
+                "id": "inj-attribution-hint",
+                "title": "IR-Forensik-Erstanalyse: TTPs zeigen Salt-Typhoon-Verwandtschaft",
+                "description": "Externe IR-Firma meldet: Erste Analyse der Hijack-Telemetrie zeigt TTPs, die mit Salt-Typhoon-Aktivitäten 2024–2025 vergleichbar sind — gleiches Schema bei der ASN-Wahl, ähnliche Path-Manipulationen, Hinweise auf staatlich gelenkte Akteure mit hoher Wahrscheinlichkeit aus China-Pazifik-Bereich. CERT-Bund und Verfassungsschutz sind benachrichtigt. Dies ist nicht der erste BGP-Hijack mit dieser Signatur in Deutschland; CERT-Bund führt seit Mai 2025 eine Watchlist.",
+                "roleId": "role-soc"
+              }
             ],
             "decisions": [
               {
@@ -1115,10 +1285,29 @@
                 "roleId": "role-press-endkunden",
                 "guidance": "Staatliche Attribution ist heikel. Trade-off zwischen Transparenz (Bürger und Endkunden haben Recht auf Information über staatliche Akteure als Bedrohung — politische Klarheit) und Diplomatie (offizielle Attribution ist Sache der Bundesregierung, nicht des einzelnen Tenants). Bundeskanzleramt-Konsultation ist hier Pflicht.",
                 "options": [
-                  { "id": "opt-attribution-via-bundesregierung", "label": "Keine Eigen-Attribution; in Kommunikation auf 'staatlich gelenkte Akteure mit hoher Wahrscheinlichkeit' verweisen, formelle Attribution der Bundesregierung überlassen", "consequence": "Diplomatisch korrekt. Bundeskanzleramt und Verfassungsschutz haben Einordnung; Endkunden bekommen klare aber nicht-diplomatische-Risiko-Aussage. Empfohlene Variante.", "evaluationHints": ["Attribution-Diplomatie eingehalten"], "scoreContribution": 3 },
-                  { "id": "opt-attribution-explicit", "label": "Explizite Eigen-Attribution: 'der Angriff stammt mit hoher Wahrscheinlichkeit von chinesischen staatlichen Akteuren'", "consequence": "Politische Klarheit, aber diplomatisch riskant. Bundesregierung könnte intervenieren; bei späterer Korrektur Reputations-Schaden. Schwächer.", "evaluationHints": ["Eigen-Attribution mit politischem Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-attribution-via-bundesregierung",
+                    "label": "Keine Eigen-Attribution; in Kommunikation auf 'staatlich gelenkte Akteure mit hoher Wahrscheinlichkeit' verweisen, formelle Attribution der Bundesregierung überlassen",
+                    "consequence": "Diplomatisch korrekt. Bundeskanzleramt und Verfassungsschutz haben Einordnung; Endkunden bekommen klare aber nicht-diplomatische-Risiko-Aussage. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Attribution-Diplomatie eingehalten"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-attribution-explicit",
+                    "label": "Explizite Eigen-Attribution: 'der Angriff stammt mit hoher Wahrscheinlichkeit von chinesischen staatlichen Akteuren'",
+                    "consequence": "Politische Klarheit, aber diplomatisch riskant. Bundesregierung könnte intervenieren; bei späterer Korrektur Reputations-Schaden. Schwächer.",
+                    "evaluationHints": [
+                      "Eigen-Attribution mit politischem Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-endkunden", "crit-cross-sector-coordination"]
+                "relatedCriteria": [
+                  "crit-communication-endkunden",
+                  "crit-cross-sector-coordination"
+                ]
               }
             ]
           },
@@ -1126,8 +1315,18 @@
             "t": 120,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-ransom-note", "title": "Ransomware-Lösegeldforderung", "description": "Angreifer melden sich über Tor-Chat: 4,8 Mio. € in Bitcoin für die 'Verschlüsselungs-Schlüssel des Routings' und Nicht-Veröffentlichung der exfiltrierten DNS-/Metadaten-Sammlungen. Drohung: 'Wir wissen, welche RPKI-Präfixe ihr nicht abgesichert habt. Wir können das jederzeit wiederholen.' Sample-Leak: 14 Tage DNS-Telemetrie-Auszug, kein Inhalts-Leak.", "roleId": "role-soc" },
-              { "id": "inj-lka-advice", "title": "LKA Cybercrime + OFAC-Risiko", "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlung an staatlich-gelenkte Akteure ist § 89c StGB-Terrorismusfinanzierung-relevant; OFAC-SDN-Listen-Screening ist Pflicht (US-Telekommunikations-Touch-Points sind real bei jedem internationalen Carrier). Bei Salt-Typhoon-Schablonen-Akteuren ist die OFAC-Listung sehr wahrscheinlich.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-ransom-note",
+                "title": "Ransomware-Lösegeldforderung",
+                "description": "Angreifer melden sich über Tor-Chat: 4,8 Mio. € in Bitcoin für die 'Verschlüsselungs-Schlüssel des Routings' und Nicht-Veröffentlichung der exfiltrierten DNS-/Metadaten-Sammlungen. Drohung: 'Wir wissen, welche RPKI-Präfixe ihr nicht abgesichert habt. Wir können das jederzeit wiederholen.' Sample-Leak: 14 Tage DNS-Telemetrie-Auszug, kein Inhalts-Leak.",
+                "roleId": "role-soc"
+              },
+              {
+                "id": "inj-lka-advice",
+                "title": "LKA Cybercrime + OFAC-Risiko",
+                "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlung an staatlich-gelenkte Akteure ist § 89c StGB-Terrorismusfinanzierung-relevant; OFAC-SDN-Listen-Screening ist Pflicht (US-Telekommunikations-Touch-Points sind real bei jedem internationalen Carrier). Bei Salt-Typhoon-Schablonen-Akteuren ist die OFAC-Listung sehr wahrscheinlich.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1136,11 +1335,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Im Telekom-Kontext besonders heikel: 'Verschlüsselungs-Schlüssel des Routings' ist eine sinnlose Erpressungs-Behauptung (BGP-Routing hat keine Verschlüsselungs-Schlüssel im klassischen Sinne) — der Erpressungs-Hebel ist die Drohung mit Wiederholung. BSI/LKA raten generell ab. Politisch: Telekommunikations-KRITIS-Betreiber, der Lösegeld an mutmaßlich staatlich-gelenkte Akteure zahlt, ist Bundeskanzleramt-Skandal-Material. Sanctions-Screening und Strafrecht-Risiko sehr hoch.",
                 "options": [
-                  { "id": "opt-no-pay", "label": "Keine Zahlung, RPKI-Vollausbau auf alle Präfixe binnen 30 Tagen, BGP-Anomalie-Monitoring strukturell erweitern, Wiederholungs-Drohung über strukturelle Härtung adressieren", "consequence": "Konformität mit BSI-/LKA-Empfehlung. Bundeskanzleramt-Linie eingehalten. Strukturelle Härtung ist die richtige Antwort, nicht die finanzielle. Empfohlene Variante.", "evaluationHints": ["Keine Zahlung, strukturelle Härtung"], "scoreContribution": 3 },
-                  { "id": "opt-no-pay-public", "label": "Keine Zahlung plus öffentliche Bekanntmachung der Erpressung als Abschreckung gegen Nachahmer und als Beitrag zur Sektor-CERT-Aufklärung", "consequence": "Konformität plus politische Klarheit. Risiko: andere Cyber-Akteure könnten den öffentlichen Vorfall als Ziel-Präzedenz lesen; CERT-Bund-Konsultation vor öffentlicher Aussage Pflicht.", "evaluationHints": ["Keine Zahlung, öffentliche politische Klarheit"], "scoreContribution": 2 },
-                  { "id": "opt-pay", "label": "Zahlung nach Sanktionsrecht-Prüfung", "consequence": "Schnellster Pfad. Strafrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN). NIS2-Aufsicht wird kritisch bewerten. Bundeskanzleramt-Skandal sehr wahrscheinlich. Politisch nicht haltbar bei mutmaßlich staatlichen Akteuren.", "evaluationHints": ["Zahlung diskutierbar wegen Wiederholungs-Drohung, politisch und rechtlich stark riskant"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-no-pay",
+                    "label": "Keine Zahlung, RPKI-Vollausbau auf alle Präfixe binnen 30 Tagen, BGP-Anomalie-Monitoring strukturell erweitern, Wiederholungs-Drohung über strukturelle Härtung adressieren",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Bundeskanzleramt-Linie eingehalten. Strukturelle Härtung ist die richtige Antwort, nicht die finanzielle. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Keine Zahlung, strukturelle Härtung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-no-pay-public",
+                    "label": "Keine Zahlung plus öffentliche Bekanntmachung der Erpressung als Abschreckung gegen Nachahmer und als Beitrag zur Sektor-CERT-Aufklärung",
+                    "consequence": "Konformität plus politische Klarheit. Risiko: andere Cyber-Akteure könnten den öffentlichen Vorfall als Ziel-Präzedenz lesen; CERT-Bund-Konsultation vor öffentlicher Aussage Pflicht.",
+                    "evaluationHints": [
+                      "Keine Zahlung, öffentliche politische Klarheit"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-pay",
+                    "label": "Zahlung nach Sanktionsrecht-Prüfung",
+                    "consequence": "Schnellster Pfad. Strafrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN). NIS2-Aufsicht wird kritisch bewerten. Bundeskanzleramt-Skandal sehr wahrscheinlich. Politisch nicht haltbar bei mutmaßlich staatlichen Akteuren.",
+                    "evaluationHints": [
+                      "Zahlung diskutierbar wegen Wiederholungs-Drohung, politisch und rechtlich stark riskant"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1148,7 +1373,12 @@
             "t": 140,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-mitarbeiter-frage", "title": "Mitarbeiter-Information Pflicht", "description": "Customer-Service meldet hohes Anruf-Aufkommen, Mitarbeitende fragen, was sie sagen sollen. Belegschaft braucht klare Sprachregelung — sonst kommen widersprüchliche Aussagen über Soziale Medien an die Öffentlichkeit. Vorab-Texte aus dem Krisen-Handbuch stehen bereit, aber müssen an die konkrete Lage angepasst werden.", "roleId": "role-press-endkunden" }
+              {
+                "id": "inj-mitarbeiter-frage",
+                "title": "Mitarbeiter-Information Pflicht",
+                "description": "Customer-Service meldet hohes Anruf-Aufkommen, Mitarbeitende fragen, was sie sagen sollen. Belegschaft braucht klare Sprachregelung — sonst kommen widersprüchliche Aussagen über Soziale Medien an die Öffentlichkeit. Vorab-Texte aus dem Krisen-Handbuch stehen bereit, aber müssen an die konkrete Lage angepasst werden.",
+                "roleId": "role-press-endkunden"
+              }
             ],
             "decisions": [
               {
@@ -1157,10 +1387,28 @@
                 "roleId": "role-press-endkunden",
                 "guidance": "Belegschafts-Information bei NIS2-Vorfällen mit politischer Tragweite ist eine eigene Disziplin. Trade-off zwischen Transparenz (Mitarbeitende fühlen sich respektiert, geben konsistente Auskünfte) und Geheimhaltung (Angriffsdetails dürfen nicht über Sozialen-Medien-Leaks an Angreifer zurückkommen).",
                 "options": [
-                  { "id": "opt-mitarbeiter-focused", "label": "Fokussierte interne Information: Sachverhalt-Zusammenfassung, Sprachregelung für Außen-Auskünfte (Verweis auf Pressemitteilung), keine Angriffsdetails, keine Attribution-Spekulation", "consequence": "Angriffsdetails geschützt, Belegschaft handlungsfähig. Empfohlene Variante.", "evaluationHints": ["Operative interne Kommunikation"], "scoreContribution": 3 },
-                  { "id": "opt-mitarbeiter-detail", "label": "Vollständige interne Transparenz inkl. TTPs und Attribution-Hinweise", "consequence": "Vertrauen hoch, aber Leak-Risiko erheblich. Schwächer in NIS2-Vorfällen mit politischer Tragweite.", "evaluationHints": ["Volle Transparenz, Leak-Risiko"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-mitarbeiter-focused",
+                    "label": "Fokussierte interne Information: Sachverhalt-Zusammenfassung, Sprachregelung für Außen-Auskünfte (Verweis auf Pressemitteilung), keine Angriffsdetails, keine Attribution-Spekulation",
+                    "consequence": "Angriffsdetails geschützt, Belegschaft handlungsfähig. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Operative interne Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-mitarbeiter-detail",
+                    "label": "Vollständige interne Transparenz inkl. TTPs und Attribution-Hinweise",
+                    "consequence": "Vertrauen hoch, aber Leak-Risiko erheblich. Schwächer in NIS2-Vorfällen mit politischer Tragweite.",
+                    "evaluationHints": [
+                      "Volle Transparenz, Leak-Risiko"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-mitarbeiter"]
+                "relatedCriteria": [
+                  "crit-communication-mitarbeiter"
+                ]
               }
             ]
           },
@@ -1168,7 +1416,12 @@
             "t": 160,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-press", "title": "Pressemitteilung 18:00 Uhr", "description": "Pressesprecher legt Pressemitteilung vor: 'BGP-Routing-Anomalie wurde binnen 50 Minuten erkannt und durch unsere Notfall-Filter geschlossen. Eine kleinere Zahl von Endkunden-Daten könnte während des Hijack-Fensters durch fremde Infrastruktur geleitet worden sein. Die Aufklärung läuft, BSI und BNetzA sind informiert. Direktbenachrichtigung der nachweislich betroffenen Endkunden läuft an. Hinweise auf staatlich gelenkte Akteure werden den zuständigen Bundesbehörden überlassen.' Veröffentlichung 18:00 Uhr, koordiniert mit BSI-Pressestelle und Bundeskanzleramt.", "roleId": "role-press-endkunden" }
+              {
+                "id": "inj-press",
+                "title": "Pressemitteilung 18:00 Uhr",
+                "description": "Pressesprecher legt Pressemitteilung vor: 'BGP-Routing-Anomalie wurde binnen 50 Minuten erkannt und durch unsere Notfall-Filter geschlossen. Eine kleinere Zahl von Endkunden-Daten könnte während des Hijack-Fensters durch fremde Infrastruktur geleitet worden sein. Die Aufklärung läuft, BSI und BNetzA sind informiert. Direktbenachrichtigung der nachweislich betroffenen Endkunden läuft an. Hinweise auf staatlich gelenkte Akteure werden den zuständigen Bundesbehörden überlassen.' Veröffentlichung 18:00 Uhr, koordiniert mit BSI-Pressestelle und Bundeskanzleramt.",
+                "roleId": "role-press-endkunden"
+              }
             ],
             "decisions": [
               {
@@ -1177,10 +1430,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Multi-Stakeholder-Koordination: BSI (Cyber), BNetzA (TK), Bundeskanzleramt (Politik), Sektor-CERT (Branche). Volle Koordination mit allen vier Stellen schafft Sprachregelungs-Kohärenz, kostet aber 60–90 Minuten Abstimmung.",
                 "options": [
-                  { "id": "opt-press-fully-coordinated", "label": "Voll koordiniert mit BSI, BNetzA, Bundeskanzleramt, Sektor-CERT — gemeinsame Sprachregelung, einheitlicher Veröffentlichungs-Zeitpunkt", "consequence": "Kohärenz maximal. Kein Widerspruch zwischen Aufsichtsbehörden und Tenant. Empfohlene Variante.", "evaluationHints": ["Voll koordinierte Kommunikation, Best Practice"], "scoreContribution": 3 },
-                  { "id": "opt-press-bsi-only", "label": "Nur mit BSI koordiniert, BNetzA und Bundeskanzleramt nachträglich informiert", "consequence": "Pragmatisch schneller, aber Risiko widersprüchlicher Behörden-Aussagen. Akzeptabel bei Zeitdruck.", "evaluationHints": ["Teilkoordinierte Kommunikation"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-press-fully-coordinated",
+                    "label": "Voll koordiniert mit BSI, BNetzA, Bundeskanzleramt, Sektor-CERT — gemeinsame Sprachregelung, einheitlicher Veröffentlichungs-Zeitpunkt",
+                    "consequence": "Kohärenz maximal. Kein Widerspruch zwischen Aufsichtsbehörden und Tenant. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Voll koordinierte Kommunikation, Best Practice"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-press-bsi-only",
+                    "label": "Nur mit BSI koordiniert, BNetzA und Bundeskanzleramt nachträglich informiert",
+                    "consequence": "Pragmatisch schneller, aber Risiko widersprüchlicher Behörden-Aussagen. Akzeptabel bei Zeitdruck.",
+                    "evaluationHints": [
+                      "Teilkoordinierte Kommunikation"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-endkunden"]
+                "relatedCriteria": [
+                  "crit-communication-endkunden"
+                ]
               }
             ]
           },
@@ -1188,7 +1459,12 @@
             "t": 175,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-rpki-roadmap", "title": "RPKI-Vollausbau-Roadmap", "description": "CISO und NOC legen Roadmap vor: (1) Innerhalb 14 Tagen: alle restlichen 40 % der Präfixe RPKI-signen. (2) Innerhalb 30 Tagen: Out-of-Band-BGP-Anomalie-Monitoring mit Sektor-CERT-Anbindung erweitern. (3) Innerhalb 90 Tagen: Cross-Sektor-Übung mit Healthcare-, Energy-, Logistics-Tenants zur Sektor-Kaskaden-Disziplin durchführen. Bundeskanzleramt hat Sondermittel-Antrag für Stufe 2 zugesagt.", "roleId": "role-ciso" }
+              {
+                "id": "inj-rpki-roadmap",
+                "title": "RPKI-Vollausbau-Roadmap",
+                "description": "CISO und NOC legen Roadmap vor: (1) Innerhalb 14 Tagen: alle restlichen 40 % der Präfixe RPKI-signen. (2) Innerhalb 30 Tagen: Out-of-Band-BGP-Anomalie-Monitoring mit Sektor-CERT-Anbindung erweitern. (3) Innerhalb 90 Tagen: Cross-Sektor-Übung mit Healthcare-, Energy-, Logistics-Tenants zur Sektor-Kaskaden-Disziplin durchführen. Bundeskanzleramt hat Sondermittel-Antrag für Stufe 2 zugesagt.",
+                "roleId": "role-ciso"
+              }
             ],
             "decisions": [
               {
@@ -1197,10 +1473,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "RPKI-Vollausbau ist die direkte Antwort auf den Vorfall (60 % vorher → 100 %), Out-of-Band-Monitoring schließt Erkennungs-Lücke, Cross-Sektor-Übung adressiert die Sektor-Kaskaden-Realität. Reihenfolge fest oder gestaffelt?",
                 "options": [
-                  { "id": "opt-recovery-staged", "label": "Gestaffelt nach Roadmap: RPKI sofort, Monitoring nach 30 Tagen, Cross-Sektor nach 90 Tagen", "consequence": "Geordneter Aufbau, Lessons-Learned aus jeder Stufe können in die nächste einfließen. Empfohlene Variante.", "evaluationHints": ["Gestaffelte Härtung, Best Practice"], "scoreContribution": 3 },
-                  { "id": "opt-recovery-parallel", "label": "Parallel: alle drei Stufen gleichzeitig starten", "consequence": "Schneller, aber Personal-Kapazität als Bottleneck. Risiko, dass keine Stufe sauber abgeschlossen wird.", "evaluationHints": ["Parallel-Härtung mit Bottleneck-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-recovery-staged",
+                    "label": "Gestaffelt nach Roadmap: RPKI sofort, Monitoring nach 30 Tagen, Cross-Sektor nach 90 Tagen",
+                    "consequence": "Geordneter Aufbau, Lessons-Learned aus jeder Stufe können in die nächste einfließen. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Gestaffelte Härtung, Best Practice"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-recovery-parallel",
+                    "label": "Parallel: alle drei Stufen gleichzeitig starten",
+                    "consequence": "Schneller, aber Personal-Kapazität als Bottleneck. Risiko, dass keine Stufe sauber abgeschlossen wird.",
+                    "evaluationHints": [
+                      "Parallel-Härtung mit Bottleneck-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-backbone-availability"]
+                "relatedCriteria": [
+                  "crit-operations-backbone-availability"
+                ]
               }
             ]
           },
@@ -1208,20 +1502,65 @@
             "t": 180,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro", "title": "Retro-Kickoff", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im IT/Telekom-Kontext besonders relevant: RPKI-Vollausbau, BGP-Anomalie-Monitoring-Erweiterung, Sektor-CERT-Disziplin, Cross-Sektor-Übungs-Plan, Salt-Typhoon-Watchlist-Anbindung an CERT-Bund.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro",
+                "title": "Retro-Kickoff",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im IT/Telekom-Kontext besonders relevant: RPKI-Vollausbau, BGP-Anomalie-Monitoring-Erweiterung, Sektor-CERT-Disziplin, Cross-Sektor-Übungs-Plan, Salt-Typhoon-Watchlist-Anbindung an CERT-Bund.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-bnetza-frist", "description": "BNetzA-Anzeige nach TKG § 109 / § 168 / § 169 unverzüglich bei Beeinträchtigung des Telekommunikations-Netzes", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-dsgvo-frist", "description": "DSGVO Art. 33 (72 h, BfDI) und Art. 34 (unverzüglich Direktbenachrichtigung bei hohem Risiko)", "weight": 2, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Decision mit politischer Tragweite)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-operations-backbone-availability", "description": "Backbone-Verfügbarkeit (BGP-Notfall-Filter, RPKI-Härtung, Hijack-Fenster-Verkürzung)", "weight": 2, "category": "operations" },
-          { "id": "crit-communication-endkunden", "description": "Endkunden- und Pressemitteilungs-Kommunikation (Multi-Channel, koordiniert mit BSI/BNetzA/Bundeskanzleramt, Attribution-Diplomatie)", "weight": 2, "category": "communication" },
-          { "id": "crit-communication-mitarbeiter", "description": "Belegschaft-Information mit Sprachregelung", "weight": 1, "category": "communication" },
-          { "id": "crit-cross-sector-coordination", "description": "Sektor-Kaskaden-Priorisierung und Sektor-CERT-Mitarbeit (KRITIS-Querschnitts-Politik)", "weight": 1.5, "category": "coordination" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-bnetza-frist",
+            "description": "BNetzA-Anzeige nach TKG § 109 / § 168 / § 169 unverzüglich bei Beeinträchtigung des Telekommunikations-Netzes",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-dsgvo-frist",
+            "description": "DSGVO Art. 33 (72 h, BfDI) und Art. 34 (unverzüglich Direktbenachrichtigung bei hohem Risiko)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Decision mit politischer Tragweite)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-backbone-availability",
+            "description": "Backbone-Verfügbarkeit (BGP-Notfall-Filter, RPKI-Härtung, Hijack-Fenster-Verkürzung)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-communication-endkunden",
+            "description": "Endkunden- und Pressemitteilungs-Kommunikation (Multi-Channel, koordiniert mit BSI/BNetzA/Bundeskanzleramt, Attribution-Diplomatie)",
+            "weight": 2,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-mitarbeiter",
+            "description": "Belegschaft-Information mit Sprachregelung",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-cross-sector-coordination",
+            "description": "Sektor-Kaskaden-Priorisierung und Sektor-CERT-Mitarbeit (KRITIS-Querschnitts-Politik)",
+            "weight": 1.5,
+            "category": "coordination"
+          }
         ]
       },
       {
@@ -1229,23 +1568,57 @@
         "version": "1.0.0",
         "title": "Rechenzentrums-Stromausfall mit Multi-Region-Cascade",
         "summary": "Stromversorgung des Hauptrechenzentrums eines mittelständischen Cloud-/Hosting-Providers (ca. 800 B2B-Kunden + 50.000 Endkunden, NIS2-„wichtige Einrichtung“, KRITIS-pflichtig nach 5.000 m² IT-Fläche) fällt durch externen Trafo-Defekt aus. USV überbrückt 15 Minuten, Notstromaggregat startet nicht (Wartungs-Versäumnis: Diesel-Filter nicht gewechselt). Cloud-Workloads müssen in Backup-Region migriert werden. Das Szenario simuliert die Krisenstabsarbeit über 2,5 Stunden mit Fokus auf Sofort-Migration, SLA-Kommunikation, Wiederanlauf-Priorität und Versicherungs-Aktivierung. Realitätsbezug: OVHcloud Brand Strasbourg März 2021, mehrere AWS-Region-Outages 2024–2025. Das Szenario komprimiert auf 150 Minuten.",
-        "sectors": ["Informationstechnik und Telekommunikation"],
-        "applicableRegimes": ["BSIG", "TKG"],
+        "sectors": [
+          "Informationstechnik und Telekommunikation"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "TKG"
+        ],
         "durationMinutes": 150,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination, strategische Freigaben (Multi-Region-Migration, SLA-Pönale-Verhandlung, Versicherungs-Aktivierung). Bei Cloud-/Hosting-Tenants typisch CTO oder CEO mit operativem Mandat." },
-          { "id": "role-rz-leitung", "title": "RZ-Leitung", "briefing": "Operative RZ-Verantwortung. Bewertet Strom-Lage, Notstrom-Status, Wiederanlauf-Aussichten. Schnittstelle zu EVU und Notstrom-Dienstleister." },
-          { "id": "role-cloud-ops", "title": "Cloud-Operations / SRE", "briefing": "Operative Cloud-Verantwortung. Steuert Multi-Region-Failover, Workload-Migration, Service-Wiederanlauf in Backup-Region." },
-          { "id": "role-key-account", "title": "Key-Account-Management / B2B-Vertrieb", "briefing": "Schnittstelle zu B2B-Schlüsselkunden (KRITIS-Tenants, Tier-1-Industrie, Pharma-/Healthcare-Cloud-Konsumenten). Verhandelt SLA-Pönalen, Service-Verschiebungen." },
-          { "id": "role-finanzen", "title": "Finanzen / Treasury", "briefing": "Liquiditäts-Bewertung der SLA-Pönale-Lawine und Versicherungs-Aktivierung. Cloud-/Hosting-Tenants haben oft Cyber-Versicherung mit Strom-/Outage-Komponente." },
-          { "id": "role-bnetza-liaison", "title": "BNetzA-Schnittstelle / TKG-Compliance", "briefing": "Bei Beeinträchtigung des Telekommunikations-Anteils der Dienste (z. B. VoIP, hosted Mobilfunk, B2B-Festnetz-Services) zusätzlich TKG-Anzeige-Pflicht. Bei reinen Cloud-Diensten ohne TK-Anteil entfällt die TKG-Komponente." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination, strategische Freigaben (Multi-Region-Migration, SLA-Pönale-Verhandlung, Versicherungs-Aktivierung). Bei Cloud-/Hosting-Tenants typisch CTO oder CEO mit operativem Mandat."
+          },
+          {
+            "id": "role-rz-leitung",
+            "title": "RZ-Leitung",
+            "briefing": "Operative RZ-Verantwortung. Bewertet Strom-Lage, Notstrom-Status, Wiederanlauf-Aussichten. Schnittstelle zu EVU und Notstrom-Dienstleister."
+          },
+          {
+            "id": "role-cloud-ops",
+            "title": "Cloud-Operations / SRE",
+            "briefing": "Operative Cloud-Verantwortung. Steuert Multi-Region-Failover, Workload-Migration, Service-Wiederanlauf in Backup-Region."
+          },
+          {
+            "id": "role-key-account",
+            "title": "Key-Account-Management / B2B-Vertrieb",
+            "briefing": "Schnittstelle zu B2B-Schlüsselkunden (KRITIS-Tenants, Tier-1-Industrie, Pharma-/Healthcare-Cloud-Konsumenten). Verhandelt SLA-Pönalen, Service-Verschiebungen."
+          },
+          {
+            "id": "role-finanzen",
+            "title": "Finanzen / Treasury",
+            "briefing": "Liquiditäts-Bewertung der SLA-Pönale-Lawine und Versicherungs-Aktivierung. Cloud-/Hosting-Tenants haben oft Cyber-Versicherung mit Strom-/Outage-Komponente."
+          },
+          {
+            "id": "role-bnetza-liaison",
+            "title": "BNetzA-Schnittstelle / TKG-Compliance",
+            "briefing": "Bei Beeinträchtigung des Telekommunikations-Anteils der Dienste (z. B. VoIP, hosted Mobilfunk, B2B-Festnetz-Services) zusätzlich TKG-Anzeige-Pflicht. Bei reinen Cloud-Diensten ohne TK-Anteil entfällt die TKG-Komponente."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-power-loss", "title": "Stromausfall + Notstrom-Versagen", "description": "RZ-Leitung meldet: Externer Stromausfall durch Trafo-Defekt im Umspannwerk, EVU-Wiederherstellungs-Schätzung 4–8 h. USV überbrückt aktuell, aber Notstromaggregat startet nicht — Diesel-Filter-Defekt durch versäumte Wartung. USV-Reichweite 15 Minuten. 800 B2B-Kunden und 50.000 Endkunden im Risiko-Pfad.", "roleId": "role-rz-leitung" }
+              {
+                "id": "inj-power-loss",
+                "title": "Stromausfall + Notstrom-Versagen",
+                "description": "RZ-Leitung meldet: Externer Stromausfall durch Trafo-Defekt im Umspannwerk, EVU-Wiederherstellungs-Schätzung 4–8 h. USV überbrückt aktuell, aber Notstromaggregat startet nicht — Diesel-Filter-Defekt durch versäumte Wartung. USV-Reichweite 15 Minuten. 800 B2B-Kunden und 50.000 Endkunden im Risiko-Pfad.",
+                "roleId": "role-rz-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1254,10 +1627,28 @@
                 "roleId": "role-rz-leitung",
                 "guidance": "USV-Reichweite 15 Minuten ist kritisch. Sofort-Eskalation und parallele Multi-Region-Migration ist die einzige Option, die operativ Sinn macht. Eigen-Diagnose-Pfad ist hier kontraindiziert.",
                 "options": [
-                  { "id": "opt-immediate-escalation", "label": "Sofort-Eskalation an Krisenstab, parallel Multi-Region-Migration einleiten, EVU-Eskalation und externe Notstrom-Anbieter alarmieren", "consequence": "Migration startet binnen 5 Minuten, Krisenstab innerhalb 15 Minuten einsatzbereit. Empfohlene Variante.", "evaluationHints": ["Sofort-Eskalation mit paralleler Migration"], "scoreContribution": 3 },
-                  { "id": "opt-diagnose-first", "label": "Erst Notstrom-Diagnose, dann ggf. Migration", "consequence": "USV läuft in 15 Minuten leer, Migration kommt zu spät. Schwächste Option.", "evaluationHints": ["Verzögerte Reaktion"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-immediate-escalation",
+                    "label": "Sofort-Eskalation an Krisenstab, parallel Multi-Region-Migration einleiten, EVU-Eskalation und externe Notstrom-Anbieter alarmieren",
+                    "consequence": "Migration startet binnen 5 Minuten, Krisenstab innerhalb 15 Minuten einsatzbereit. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Sofort-Eskalation mit paralleler Migration"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-diagnose-first",
+                    "label": "Erst Notstrom-Diagnose, dann ggf. Migration",
+                    "consequence": "USV läuft in 15 Minuten leer, Migration kommt zu spät. Schwächste Option.",
+                    "evaluationHints": [
+                      "Verzögerte Reaktion"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-availability"]
+                "relatedCriteria": [
+                  "crit-operations-availability"
+                ]
               }
             ]
           },
@@ -1265,7 +1656,12 @@
             "t": 10,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-migration-status", "title": "Multi-Region-Migration läuft", "description": "Cloud-Operations meldet: Migration zu Backup-Region läuft. Stateful-Workloads (Datenbanken, persistent Storage) brauchen 30–60 Minuten für saubere Failover. Stateless-Workloads (Web-Front-Ends, API-Gateways) sind in 5 Minuten in Backup-Region. RTO-Plan: 4 h für Voll-Service, aktuell auf Plan-Linie.", "roleId": "role-cloud-ops" }
+              {
+                "id": "inj-migration-status",
+                "title": "Multi-Region-Migration läuft",
+                "description": "Cloud-Operations meldet: Migration zu Backup-Region läuft. Stateful-Workloads (Datenbanken, persistent Storage) brauchen 30–60 Minuten für saubere Failover. Stateless-Workloads (Web-Front-Ends, API-Gateways) sind in 5 Minuten in Backup-Region. RTO-Plan: 4 h für Voll-Service, aktuell auf Plan-Linie.",
+                "roleId": "role-cloud-ops"
+              }
             ],
             "decisions": [
               {
@@ -1274,10 +1670,28 @@
                 "roleId": "role-cloud-ops",
                 "guidance": "Trade-off zwischen Schnell-Migration (Stateless zuerst, Stateful später) und Voll-Migration (alles gleichzeitig, höhere Backup-Region-Last). Voll-Migration kann Backup-Region überfordern, Schnell-Migration lässt Stateful-Kunden länger ohne Service.",
                 "options": [
-                  { "id": "opt-staged-migration", "label": "Gestaffelt: Stateless zuerst (5 min), dann Stateful nach Priorität (KRITIS-Kunden zuerst, dann Tier-1, dann Standard-B2B, dann Endkunden)", "consequence": "Backup-Region wird kontrolliert ausgelastet. KRITIS-Kunden zuerst online. Empfohlene Variante.", "evaluationHints": ["Gestaffelte Migration mit KRITIS-Priorität"], "scoreContribution": 3 },
-                  { "id": "opt-full-migration", "label": "Voll-Migration aller Workloads gleichzeitig", "consequence": "Backup-Region wird überlastet, Performance-Probleme für alle Kunden. Schwächere Option.", "evaluationHints": ["Voll-Migration mit Überlast-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-staged-migration",
+                    "label": "Gestaffelt: Stateless zuerst (5 min), dann Stateful nach Priorität (KRITIS-Kunden zuerst, dann Tier-1, dann Standard-B2B, dann Endkunden)",
+                    "consequence": "Backup-Region wird kontrolliert ausgelastet. KRITIS-Kunden zuerst online. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Gestaffelte Migration mit KRITIS-Priorität"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-full-migration",
+                    "label": "Voll-Migration aller Workloads gleichzeitig",
+                    "consequence": "Backup-Region wird überlastet, Performance-Probleme für alle Kunden. Schwächere Option.",
+                    "evaluationHints": [
+                      "Voll-Migration mit Überlast-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-availability"]
+                "relatedCriteria": [
+                  "crit-operations-availability"
+                ]
               }
             ]
           },
@@ -1285,8 +1699,18 @@
             "t": 25,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstab einberufen: Geschäftsführung, RZ-Leitung, Cloud-Operations, Key-Account-Management, Finanzen, BNetzA-Schnittstelle, externe Notstrom-Anbieter zugeschaltet (mobiler Notstrom-Container in 4–6 h vor Ort).", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-kunden-eskalation", "title": "B2B-Schlüsselkunden eskalieren", "description": "Key-Account-Management meldet: 12 KRITIS-Großkunden (Krankenhausverbund, Stadtwerke, Tier-1-Logistik-Carrier) eskalieren über Service-Hotline. SLA-Pönalen kumulieren bei längerer Unterbrechung — Schätzung 80–150 K € pro Stunde bei vollem Ausfall, 30–60 K € pro Stunde bei eingeschränktem Service in Backup-Region.", "roleId": "role-key-account" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstab einberufen: Geschäftsführung, RZ-Leitung, Cloud-Operations, Key-Account-Management, Finanzen, BNetzA-Schnittstelle, externe Notstrom-Anbieter zugeschaltet (mobiler Notstrom-Container in 4–6 h vor Ort).",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-kunden-eskalation",
+                "title": "B2B-Schlüsselkunden eskalieren",
+                "description": "Key-Account-Management meldet: 12 KRITIS-Großkunden (Krankenhausverbund, Stadtwerke, Tier-1-Logistik-Carrier) eskalieren über Service-Hotline. SLA-Pönalen kumulieren bei längerer Unterbrechung — Schätzung 80–150 K € pro Stunde bei vollem Ausfall, 30–60 K € pro Stunde bei eingeschränktem Service in Backup-Region.",
+                "roleId": "role-key-account"
+              }
             ],
             "decisions": [
               {
@@ -1295,11 +1719,38 @@
                 "roleId": "role-key-account",
                 "guidance": "Trade-off zwischen voller Offenheit (Migration läuft, Stateful-Workloads in 30–60 min, voller Service in 4 h, mit konkreten SLA-Verschiebungs-Vorschlägen) und beschwichtigender Zusammenfassung. Vertragspflicht zur unverzüglichen Information ist im Tier-1-RV typisch.",
                 "options": [
-                  { "id": "opt-kunden-full", "label": "Vollständige Offenheit mit Wiederanlauf-Plan und SLA-Verschiebungs-Vorschlag pro Kunde", "consequence": "Vertrauen erhalten. Kunde kann eigenen Krisenstab koordinieren. Empfohlene Variante. Gleichwertig zu opt-kunden-co-coordinated.", "evaluationHints": ["Vollständige Offenheit — gleichwertig zu opt-kunden-co-coordinated"], "scoreContribution": 2 },
-                  { "id": "opt-kunden-co-coordinated", "label": "Aktive Mit-Steuerung mit KRITIS-Kunden: gemeinsame Krisenstabs-Telefonkonferenz, abgestimmte Migration der Workloads des Kunden in dessen eigene Backup-Region", "consequence": "KRITIS-Kunden werden Partner statt Gegner. Politisch und operativ stark, aber aufwendig. Gleichwertige Best-Practice-Variante.", "evaluationHints": ["Kunde-als-Partner-Modus — gleichwertig zu opt-kunden-full"], "scoreContribution": 2 },
-                  { "id": "opt-kunden-summary", "label": "Beschwichtigende Zusammenfassung: 'technisches Problem, voller Service in einigen Stunden zurück, Details folgen'", "consequence": "Kurz-Beruhigung. Bei längerer Verzögerung doppelter Vertrauensverlust. Schwächer.", "evaluationHints": ["Defensive Beschwichtigung"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-kunden-full",
+                    "label": "Vollständige Offenheit mit Wiederanlauf-Plan und SLA-Verschiebungs-Vorschlag pro Kunde",
+                    "consequence": "Vertrauen erhalten. Kunde kann eigenen Krisenstab koordinieren. Empfohlene Variante. Gleichwertig zu opt-kunden-co-coordinated.",
+                    "evaluationHints": [
+                      "Vollständige Offenheit — gleichwertig zu opt-kunden-co-coordinated"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-kunden-co-coordinated",
+                    "label": "Aktive Mit-Steuerung mit KRITIS-Kunden: gemeinsame Krisenstabs-Telefonkonferenz, abgestimmte Migration der Workloads des Kunden in dessen eigene Backup-Region",
+                    "consequence": "KRITIS-Kunden werden Partner statt Gegner. Politisch und operativ stark, aber aufwendig. Gleichwertige Best-Practice-Variante.",
+                    "evaluationHints": [
+                      "Kunde-als-Partner-Modus — gleichwertig zu opt-kunden-full"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-kunden-summary",
+                    "label": "Beschwichtigende Zusammenfassung: 'technisches Problem, voller Service in einigen Stunden zurück, Details folgen'",
+                    "consequence": "Kurz-Beruhigung. Bei längerer Verzögerung doppelter Vertrauensverlust. Schwächer.",
+                    "evaluationHints": [
+                      "Defensive Beschwichtigung"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunden", "crit-governance-vertragspflicht"]
+                "relatedCriteria": [
+                  "crit-communication-kunden",
+                  "crit-governance-vertragspflicht"
+                ]
               }
             ]
           },
@@ -1307,7 +1758,12 @@
             "t": 50,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-bnetza-anzeige", "title": "BNetzA-Anzeige für TK-Anteil", "description": "BNetzA-Schnittstelle meldet: bei Service-Beeinträchtigung der hosted-Telekommunikations-Dienste (VoIP, B2B-Festnetz-Services für 60 unserer Kunden) greift TKG § 109 und § 168 — Anzeige bei BNetzA unverzüglich. Die reinen Cloud-Workloads (ca. 90 % der Kunden) fallen dagegen unter NIS2-/§ 8d BSIG, nicht unter TKG.", "roleId": "role-bnetza-liaison" }
+              {
+                "id": "inj-bnetza-anzeige",
+                "title": "BNetzA-Anzeige für TK-Anteil",
+                "description": "BNetzA-Schnittstelle meldet: bei Service-Beeinträchtigung der hosted-Telekommunikations-Dienste (VoIP, B2B-Festnetz-Services für 60 unserer Kunden) greift TKG § 109 und § 168 — Anzeige bei BNetzA unverzüglich. Die reinen Cloud-Workloads (ca. 90 % der Kunden) fallen dagegen unter NIS2-/§ 8d BSIG, nicht unter TKG.",
+                "roleId": "role-bnetza-liaison"
+              }
             ],
             "decisions": [
               {
@@ -1316,10 +1772,29 @@
                 "roleId": "role-rechtsabteilung",
                 "guidance": "Inhaltliche Konsistenz zwischen BSI- und BNetzA-Meldung verhindert widersprüchliche Aussagen.",
                 "options": [
-                  { "id": "opt-meldung-aligned", "label": "Inhaltlich identische Sachverhalts-Meldung an BSI und BNetzA, jeweils mit angepasstem Schwerpunkt", "consequence": "Konsistenz, keine Compliance-Beanstandungen. Empfohlene Variante.", "evaluationHints": ["Konsistente Multi-Behörden-Meldung"], "scoreContribution": 3 },
-                  { "id": "opt-meldung-separate", "label": "Getrennte Meldungen ohne Cross-Referenzierung", "consequence": "Risiko widersprüchlicher Aussagen.", "evaluationHints": ["Getrennte Meldungen mit Inkonsistenz-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-meldung-aligned",
+                    "label": "Inhaltlich identische Sachverhalts-Meldung an BSI und BNetzA, jeweils mit angepasstem Schwerpunkt",
+                    "consequence": "Konsistenz, keine Compliance-Beanstandungen. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Konsistente Multi-Behörden-Meldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-meldung-separate",
+                    "label": "Getrennte Meldungen ohne Cross-Referenzierung",
+                    "consequence": "Risiko widersprüchlicher Aussagen.",
+                    "evaluationHints": [
+                      "Getrennte Meldungen mit Inkonsistenz-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist", "crit-reporting-bnetza-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist",
+                  "crit-reporting-bnetza-frist"
+                ]
               }
             ]
           },
@@ -1327,7 +1802,12 @@
             "t": 75,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-versicherung", "title": "Versicherungs-Aktivierung", "description": "Finanzen meldet: Cyber-Versicherung mit Outage-Komponente und Sach-Versicherung mit Betriebsunterbrechungs-Komponente sind beide aktivierbar. Cyber-Versicherung greift für SLA-Pönale-Anteile (bis 1,5 Mio. € pro Vorfall), Sach-Versicherung für Notstrom-Mietkosten und Wiederherstellungs-Aufwand. Anzeigepflicht binnen 14 Tagen, mit detaillierter Sachverhalts-Dokumentation.", "roleId": "role-finanzen" }
+              {
+                "id": "inj-versicherung",
+                "title": "Versicherungs-Aktivierung",
+                "description": "Finanzen meldet: Cyber-Versicherung mit Outage-Komponente und Sach-Versicherung mit Betriebsunterbrechungs-Komponente sind beide aktivierbar. Cyber-Versicherung greift für SLA-Pönale-Anteile (bis 1,5 Mio. € pro Vorfall), Sach-Versicherung für Notstrom-Mietkosten und Wiederherstellungs-Aufwand. Anzeigepflicht binnen 14 Tagen, mit detaillierter Sachverhalts-Dokumentation.",
+                "roleId": "role-finanzen"
+              }
             ],
             "decisions": [
               {
@@ -1336,10 +1816,28 @@
                 "roleId": "role-finanzen",
                 "guidance": "Trade-off zwischen früher Anzeige (transparente Schadens-Dokumentation, Versicherer kann mit-koordinieren) und später Anzeige (Schaden-Volumen sicherer abschätzbar, aber Versicherungs-Frist wird knapp).",
                 "options": [
-                  { "id": "opt-versicherung-fruh", "label": "Sofortige vorläufige Anzeige bei beiden Versicherern, detaillierte Schadens-Dokumentation parallel zur Krisenstabsarbeit", "consequence": "Versicherer kann mit-koordinieren, Anzeige-Frist sicher gewahrt. Empfohlene Variante.", "evaluationHints": ["Frühe Versicherungs-Anzeige"], "scoreContribution": 3 },
-                  { "id": "opt-versicherung-spaet", "label": "Anzeige nach Vorfalls-Ende mit konsolidierter Schadens-Dokumentation", "consequence": "Schaden-Volumen genauer, aber Anzeige-Frist 14 Tage knapp bei länger andauernden Recovery-Phasen. Akzeptabel.", "evaluationHints": ["Spätere Versicherungs-Anzeige"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-versicherung-fruh",
+                    "label": "Sofortige vorläufige Anzeige bei beiden Versicherern, detaillierte Schadens-Dokumentation parallel zur Krisenstabsarbeit",
+                    "consequence": "Versicherer kann mit-koordinieren, Anzeige-Frist sicher gewahrt. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Frühe Versicherungs-Anzeige"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-versicherung-spaet",
+                    "label": "Anzeige nach Vorfalls-Ende mit konsolidierter Schadens-Dokumentation",
+                    "consequence": "Schaden-Volumen genauer, aber Anzeige-Frist 14 Tage knapp bei länger andauernden Recovery-Phasen. Akzeptabel.",
+                    "evaluationHints": [
+                      "Spätere Versicherungs-Anzeige"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-finance-liquidität"]
+                "relatedCriteria": [
+                  "crit-finance-liquidität"
+                ]
               }
             ]
           },
@@ -1347,7 +1845,12 @@
             "t": 95,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-stateful-online", "title": "Stateful-Workloads online", "description": "Cloud-Operations meldet: alle Stateful-Workloads sind in Backup-Region online, Datenbank-Replikations-Lag aufgeholt. KRITIS-Kunden-Workloads (12 Tenants) sind voll funktional. Tier-1-B2B (180 Kunden) sind mit reduzierter Performance funktional. Standard-B2B und Endkunden sind teilweise online. Voll-Service-Wiederanlauf in Schätzung 90 Minuten.", "roleId": "role-cloud-ops" }
+              {
+                "id": "inj-stateful-online",
+                "title": "Stateful-Workloads online",
+                "description": "Cloud-Operations meldet: alle Stateful-Workloads sind in Backup-Region online, Datenbank-Replikations-Lag aufgeholt. KRITIS-Kunden-Workloads (12 Tenants) sind voll funktional. Tier-1-B2B (180 Kunden) sind mit reduzierter Performance funktional. Standard-B2B und Endkunden sind teilweise online. Voll-Service-Wiederanlauf in Schätzung 90 Minuten.",
+                "roleId": "role-cloud-ops"
+              }
             ],
             "decisions": [
               {
@@ -1356,10 +1859,28 @@
                 "roleId": "role-key-account",
                 "guidance": "Multi-Channel-Update an Kunden, koordiniert mit Pressesprecher. Trade-off zwischen Vollständigkeit (alle Kundenkohorten informiert) und Effizienz (nur KRITIS-Kunden persönlich, andere via Status-Page).",
                 "options": [
-                  { "id": "opt-comm-multichannel", "label": "Multi-Channel-Update: Status-Page mit Live-Update, persönliche Telefonate mit KRITIS-Kunden, Massen-E-Mail an Tier-1-B2B, Service-App-Push für Endkunden", "consequence": "Alle Kundengruppen erreicht, Vertrauensaufbau in der Stabilisierungs-Phase. Empfohlene Variante.", "evaluationHints": ["Multi-Channel-Recovery-Kommunikation"], "scoreContribution": 3 },
-                  { "id": "opt-comm-status-page", "label": "Nur Status-Page-Update, keine proaktive Kommunikation", "consequence": "Kunden müssen aktiv prüfen, schwächer.", "evaluationHints": ["Passive Status-Kommunikation"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-comm-multichannel",
+                    "label": "Multi-Channel-Update: Status-Page mit Live-Update, persönliche Telefonate mit KRITIS-Kunden, Massen-E-Mail an Tier-1-B2B, Service-App-Push für Endkunden",
+                    "consequence": "Alle Kundengruppen erreicht, Vertrauensaufbau in der Stabilisierungs-Phase. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Multi-Channel-Recovery-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-comm-status-page",
+                    "label": "Nur Status-Page-Update, keine proaktive Kommunikation",
+                    "consequence": "Kunden müssen aktiv prüfen, schwächer.",
+                    "evaluationHints": [
+                      "Passive Status-Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunden"]
+                "relatedCriteria": [
+                  "crit-communication-kunden"
+                ]
               }
             ]
           },
@@ -1367,7 +1888,12 @@
             "t": 120,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-power-restored", "title": "EVU: Strom in 90 Minuten zurück", "description": "EVU meldet: Trafo-Reparatur abgeschlossen, Strom in 90 Minuten zurück. Mobiler Notstrom-Container ist vor Ort und einsatzbereit als Backup falls EVU-Schätzung nicht hält. Frage: Workloads zurück-migrieren oder in Backup-Region belassen?", "roleId": "role-rz-leitung" }
+              {
+                "id": "inj-power-restored",
+                "title": "EVU: Strom in 90 Minuten zurück",
+                "description": "EVU meldet: Trafo-Reparatur abgeschlossen, Strom in 90 Minuten zurück. Mobiler Notstrom-Container ist vor Ort und einsatzbereit als Backup falls EVU-Schätzung nicht hält. Frage: Workloads zurück-migrieren oder in Backup-Region belassen?",
+                "roleId": "role-rz-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1376,11 +1902,37 @@
                 "roleId": "role-cloud-ops",
                 "guidance": "Trade-off entlang zwei Achsen: (Achse A · Migrations-Aufwand) Gestaffelte Zurück-Migration kostet zusätzliche Migrations-Stunden mit kontrollierter Datenverkehrs-Ableitung; jede Stateful-Workload braucht erneut 30–60 min Failover-Disziplin, Performance-Hicksaufs während des Schwenks. Backup-Region-Verbleib spart diese Migrations-Stunden komplett. (Achse B · laufende Kosten + Latenz) Zurück-Migration in das Hauptrechenzentrum bedeutet Standard-Architektur mit gewohnter Latenz und niedrigeren laufenden Kosten. Backup-Region-Verbleib bedeutet laufende Mehrkosten (Backup-Regionen sind in der Regel teurer pro Compute-Stunde) und Distanz-Performance-Verluste für Endkunden, deren Tenant-Region nicht für Hauptlast-Verkehr ausgelegt ist. Entscheidungs-Heuristik: bei sicherheitskritischen Tenants und ungeklärter Notstrom-Wartungs-Disziplin lohnt der Verbleib; bei reinen Standard-Workloads lohnt die Zurück-Migration.",
                 "options": [
-                  { "id": "opt-fallback-staged", "label": "Gestaffelte Zurück-Migration: erst Standard-B2B und Endkunden zurück, KRITIS-/Tier-1-Workloads in Backup-Region belassen bis nächstes Wartungsfenster", "consequence": "Risiko-Reduzierung für kritische Workloads, kontrolliertes Migrations-Tempo. Empfohlene Variante. Gleichwertig zu opt-fallback-stay.", "evaluationHints": ["Gestaffelte Zurück-Migration — gleichwertig zu opt-fallback-stay"], "scoreContribution": 2 },
-                  { "id": "opt-fallback-stay", "label": "Alle Workloads in Backup-Region belassen bis Notstrom-Wartung im Hauptrechenzentrum strukturell behoben ist", "consequence": "Risiko-Reduzierung maximal, Backup-Region-Kosten höher. Gleichwertige Variante bei sicherheitskritischen Tenants.", "evaluationHints": ["Backup-Region-Verbleib — gleichwertig zu opt-fallback-staged"], "scoreContribution": 2 },
-                  { "id": "opt-fallback-immediate", "label": "Sofortige Voll-Zurück-Migration aller Workloads sobald EVU bestätigt", "consequence": "Schnellste Rückkehr zur Standard-Architektur, aber zweiter Migrations-Aufwand und Risiko bei erneutem Strom-Problem. Schwächer.", "evaluationHints": ["Sofortige Zurück-Migration"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-fallback-staged",
+                    "label": "Gestaffelte Zurück-Migration: erst Standard-B2B und Endkunden zurück, KRITIS-/Tier-1-Workloads in Backup-Region belassen bis nächstes Wartungsfenster",
+                    "consequence": "Risiko-Reduzierung für kritische Workloads, kontrolliertes Migrations-Tempo. Empfohlene Variante. Gleichwertig zu opt-fallback-stay.",
+                    "evaluationHints": [
+                      "Gestaffelte Zurück-Migration — gleichwertig zu opt-fallback-stay"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-fallback-stay",
+                    "label": "Alle Workloads in Backup-Region belassen bis Notstrom-Wartung im Hauptrechenzentrum strukturell behoben ist",
+                    "consequence": "Risiko-Reduzierung maximal, Backup-Region-Kosten höher. Gleichwertige Variante bei sicherheitskritischen Tenants.",
+                    "evaluationHints": [
+                      "Backup-Region-Verbleib — gleichwertig zu opt-fallback-staged"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-fallback-immediate",
+                    "label": "Sofortige Voll-Zurück-Migration aller Workloads sobald EVU bestätigt",
+                    "consequence": "Schnellste Rückkehr zur Standard-Architektur, aber zweiter Migrations-Aufwand und Risiko bei erneutem Strom-Problem. Schwächer.",
+                    "evaluationHints": [
+                      "Sofortige Zurück-Migration"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-availability"]
+                "relatedCriteria": [
+                  "crit-operations-availability"
+                ]
               }
             ]
           },
@@ -1388,7 +1940,12 @@
             "t": 145,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-postmortem-prep", "title": "Post-Mortem-Vorbereitung", "description": "Krisenstabs-Leitung legt Lessons-Learned-Themen fest: (1) Notstrom-Wartungs-Disziplin (Diesel-Filter-Versäumnis war Root-Cause), (2) Multi-Region-Failover-Übung halbjährlich (statt jährlich), (3) Cyber-/Sach-Versicherungs-Deckungs-Review, (4) KRITIS-Kunden-Cross-Sektor-Übung, (5) Notstrom-Container-Vorab-Vertrag mit 2-h-Aktivierungs-SLA.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-postmortem-prep",
+                "title": "Post-Mortem-Vorbereitung",
+                "description": "Krisenstabs-Leitung legt Lessons-Learned-Themen fest: (1) Notstrom-Wartungs-Disziplin (Diesel-Filter-Versäumnis war Root-Cause), (2) Multi-Region-Failover-Übung halbjährlich (statt jährlich), (3) Cyber-/Sach-Versicherungs-Deckungs-Review, (4) KRITIS-Kunden-Cross-Sektor-Übung, (5) Notstrom-Container-Vorab-Vertrag mit 2-h-Aktivierungs-SLA.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           },
@@ -1396,19 +1953,59 @@
             "t": 150,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro", "title": "Retro-Kickoff", "description": "Szenario-Ende. Im IT/Telekom-Cloud-Kontext besonders relevant: Notstrom-Wartungs-Disziplin als Root-Cause-Lehre, Multi-Region-Architektur als strukturelle Resilienz, KRITIS-Kunden-Priorisierung in Krisensituationen, Versicherungs-Deckungs-Review.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro",
+                "title": "Retro-Kickoff",
+                "description": "Szenario-Ende. Im IT/Telekom-Cloud-Kontext besonders relevant: Notstrom-Wartungs-Disziplin als Root-Cause-Lehre, Multi-Region-Architektur als strukturelle Resilienz, KRITIS-Kunden-Priorisierung in Krisensituationen, Versicherungs-Deckungs-Review.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung", "weight": 1.5, "category": "reporting" },
-          { "id": "crit-reporting-bnetza-frist", "description": "BNetzA-Anzeige nach TKG § 109 / § 168 unverzüglich bei Beeinträchtigung des TK-Service-Anteils", "weight": 1.5, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Aktivierung und Entscheidungsqualität (Migrations-Strategie, Versicherungs-Aktivierung)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-governance-vertragspflicht", "description": "Vertragspflichten gegenüber B2B-Kunden (rechtzeitige Information, SLA-Pönale-Verhandlung)", "weight": 2, "category": "governance" },
-          { "id": "crit-operations-availability", "description": "Verfügbarkeit (Multi-Region-Failover, Wiederanlauf-Reihenfolge, Zurück-Migration)", "weight": 2, "category": "operations" },
-          { "id": "crit-finance-liquidität", "description": "Liquiditäts-Sicherung (Versicherungs-Aktivierung, SLA-Pönale-Bewertung)", "weight": 1, "category": "finance" },
-          { "id": "crit-communication-kunden", "description": "B2B-Kunden-Kommunikation (KRITIS-Priorität, Multi-Channel, Kunde-als-Partner-Aktivierung)", "weight": 1.5, "category": "communication" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung",
+            "weight": 1.5,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-bnetza-frist",
+            "description": "BNetzA-Anzeige nach TKG § 109 / § 168 unverzüglich bei Beeinträchtigung des TK-Service-Anteils",
+            "weight": 1.5,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Aktivierung und Entscheidungsqualität (Migrations-Strategie, Versicherungs-Aktivierung)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-governance-vertragspflicht",
+            "description": "Vertragspflichten gegenüber B2B-Kunden (rechtzeitige Information, SLA-Pönale-Verhandlung)",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-availability",
+            "description": "Verfügbarkeit (Multi-Region-Failover, Wiederanlauf-Reihenfolge, Zurück-Migration)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-finance-liquidität",
+            "description": "Liquiditäts-Sicherung (Versicherungs-Aktivierung, SLA-Pönale-Bewertung)",
+            "weight": 1,
+            "category": "finance"
+          },
+          {
+            "id": "crit-communication-kunden",
+            "description": "B2B-Kunden-Kommunikation (KRITIS-Priorität, Multi-Channel, Kunde-als-Partner-Aktivierung)",
+            "weight": 1.5,
+            "category": "communication"
+          }
         ]
       }
     ]

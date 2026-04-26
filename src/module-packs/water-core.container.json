@@ -6,7 +6,7 @@
     "moduleId": "water",
     "name": "Wasser-Basismodul",
     "version": "1.0.0",
-    "description": "Branchenmodul für Trinkwasserversorger und Abwasserentsorger mit Fokus auf Versorgungssicherheit, Trinkwasser-Qualität, Wasserwerks-OT, Notwasserversorgung und Bevölkerungs-Kommunikation. Pack adressiert Trinkwasserversorger mit KRITIS-Pflicht (> 500.000 versorgte Personen nach § 3 BSI-KritisV, entspricht 22 Mio. m³/Jahr) sowie NIS2-erfasste Versorger (> 50 MA / > 10 Mio. € Umsatz oder Bilanz nach NIS2UmsuCG, in Kraft seit 6.12.2025). Die Risiken gelten sektorübergreifend; Pflicht-Tiefe und Meldepflichten unterscheiden sich nach Regulierungs-Status. Pack-Fokus ist Trinkwasserversorgung; Abwasser ist nur soweit abgedeckt, wie es Trinkwasser sekundär betrifft (Mischwasser-Überlauf bei Hochwasser, gemeinsame Klärwerk-Infrastruktur, WHG-Konsequenzen bei Klärwerk-Ausfall).",
+    "description": "Branchenmodul für Trinkwasserversorger mit Fokus auf Versorgungssicherheit, Trinkwasser-Qualität, Wasserwerks-OT und Bevölkerungs-Kommunikation.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Wasser",
@@ -35,14 +35,20 @@
       "minAppVersion": "1.8.0",
       "minEngineVersion": "1.0.0"
     },
-    "releaseChannel": "sector"
+    "releaseChannel": "sector",
+    "versionHistory": [
+      {
+        "version": "1.0.0",
+        "note": "Verbose pre-cleanup module description (preserved 2026-04-26 during the cross-pack description cleanup): Branchenmodul für Trinkwasserversorger und Abwasserentsorger mit Fokus auf Versorgungssicherheit, Trinkwasser-Qualität, Wasserwerks-OT, Notwasserversorgung und Bevölkerungs-Kommunikation. Pack adressiert Trinkwasserversorger mit KRITIS-Pflicht (> 500.000 versorgte Personen nach § 3 BSI-KritisV, entspricht 22 Mio. m³/Jahr) sowie NIS2-erfasste Versorger (> 50 MA / > 10 Mio. € Umsatz oder Bilanz nach NIS2UmsuCG, in Kraft seit 6.12.2025). Die Risiken gelten sektorübergreifend; Pflicht-Tiefe und Meldepflichten unterscheiden sich nach Regulierungs-Status. Pack-Fokus ist Trinkwasserversorgung; Abwasser ist nur soweit abgedeckt, wie es Trinkwasser sekundär betrifft (Mischwasser-Überlauf bei Hochwasser, gemeinsame Klärwerk-Infrastruktur, WHG-Konsequenzen bei Klärwerk-Ausfall). Pack umfasst seit C5.3e Risiko-Templates nach NIS2-/KRITIS-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz, nature-gewichtiger als die anderen Sektor-Packs wegen klimatischer Abhängigkeit), zwei Tabletop-Szenarien (SCADA-Kompromittierung mit Dosierungs-Manipulation, Hochwasser mit Wasserwerk-Überflutung und Klärwerk-Überlauf) und einen KRITIS-/NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist „Versorgungssicherheit und Trinkwasser-Qualität“ (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“, Logistics „Dispositionsfähigkeit“). Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: kritische Kriterien (Bevölkerungs-Warnung, TrinkwV-Anzeigepflicht, Trinkwasser-Qualität) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Wasser-Decisions zur Bevölkerungs-Warnung, zur Sofort-Sperre vs. Verifizieren und zur Klärwerk-Notabschaltung sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können."
+      }
+    ]
   },
   "module": {
     "schemaVersion": 1,
     "id": "water",
     "name": "Wasser & Trinkwasserversorgung",
     "version": "1.0.0",
-    "description": "Branchenmodul für Trinkwasserversorger und Abwasserentsorger mit Fokus auf Versorgungssicherheit, Trinkwasser-Qualität, Wasserwerks-OT, Notwasserversorgung und Bevölkerungs-Kommunikation. Pack adressiert Trinkwasserversorger mit KRITIS-Pflicht (> 500.000 versorgte Personen nach § 3 BSI-KritisV, entspricht 22 Mio. m³/Jahr) sowie NIS2-erfasste Versorger (> 50 MA / > 10 Mio. € Umsatz oder Bilanz nach NIS2UmsuCG, in Kraft seit 6.12.2025). Die Risiken gelten sektorübergreifend; Pflicht-Tiefe und Meldepflichten unterscheiden sich nach Regulierungs-Status. Pack-Fokus ist Trinkwasserversorgung; Abwasser ist nur soweit abgedeckt, wie es Trinkwasser sekundär betrifft (Mischwasser-Überlauf bei Hochwasser, gemeinsame Klärwerk-Infrastruktur, WHG-Konsequenzen bei Klärwerk-Ausfall). Pack umfasst seit C5.3e Risiko-Templates nach NIS2-/KRITIS-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz, nature-gewichtiger als die anderen Sektor-Packs wegen klimatischer Abhängigkeit), zwei Tabletop-Szenarien (SCADA-Kompromittierung mit Dosierungs-Manipulation, Hochwasser mit Wasserwerk-Überflutung und Klärwerk-Überlauf) und einen KRITIS-/NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist „Versorgungssicherheit und Trinkwasser-Qualität“ (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“, Logistics „Dispositionsfähigkeit“). Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: kritische Kriterien (Bevölkerungs-Warnung, TrinkwV-Anzeigepflicht, Trinkwasser-Qualität) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Wasser-Decisions zur Bevölkerungs-Warnung, zur Sofort-Sperre vs. Verifizieren und zur Klärwerk-Notabschaltung sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können.",
+    "description": "Branchenmodul für Trinkwasserversorger mit Fokus auf Versorgungssicherheit, Trinkwasser-Qualität, Wasserwerks-OT und Bevölkerungs-Kommunikation.",
     "sectorCategory": "Wasser",
     "domainWeightAdjustments": {
       "operations": 1.25,
@@ -1004,24 +1010,63 @@
         "version": "1.0.0",
         "title": "SCADA-Kompromittierung mit Dosierungs-Manipulation",
         "summary": "Eine Cyber-Akteur-Gruppe erlangt über einen kompromittierten Fernwartungs-Zugang Kontrolle über das SCADA-Leitsystem eines kommunalen Wasserwerks (ca. 380.000 versorgte Personen, knapp unterhalb der KRITIS-Schwelle, aber NIS2-„wichtige Einrichtung“). Der Angreifer manipuliert die Natronlauge-Soll-Dosierung in der pH-Anhebungs-Stufe; die Plausibilitäts-Sperre alarmiert den Wassermeister, aber der Angriff zeigt, dass auch andere Dosier-Pfade kompromittiert sein könnten. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf Sofortmaßnahmen (Trinkwasser-Sperre vs. Verifizieren), Bevölkerungs-Warnung als didaktische Spitze, TrinkwV-Anzeigepflicht beim Gesundheitsamt, NIS2-Meldung und Notwasserversorgung. Realitätsbezug: Oldsmar Florida 5.2.2021 — Bruce T. Haddock Water Treatment Plant, Natronlauge von 100 ppm auf 11.100 ppm via TeamViewer-Fernzugriff; nur Operator-Beobachtung verhinderte den Schaden. Tureby-Alkestrup Dänemark 2024 und Muleshoe Texas 2024 als weitere Wasser-OT-Schablonen. Das Szenario komprimiert die entscheidenden Weichenstellungen auf 180 Minuten.",
-        "sectors": ["Wasser"],
-        "applicableRegimes": ["BSIG", "TrinkwV", "DSGVO"],
+        "sectors": [
+          "Wasser"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "TrinkwV",
+          "DSGVO"
+        ],
         "durationMinutes": 180,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Trinkwasser-Sperre, Notwasser-Aktivierung, Bevölkerungs-Warnung, Lösegeld-Entscheidung, Pressemitteilung). Bei kommunalen Versorgern üblich besetzt mit Geschäftsführer*in oder Werksleitung mit Vorstands-Mandat. Schnittstelle zu Bürgermeister*in und Landrat-Ebene." },
-          { "id": "role-wassermeister", "title": "Wassermeister*in", "briefing": "Operative Aufbereitungs-Verantwortung. Hat den Angriff am Plausibilitäts-Alarm bemerkt, kennt die Dosier-Pfade, beurteilt die Sicherheit des aktuellen Wassers. Erste Eskalationsstufe und entscheidender Fakten-Lieferer für alle anderen Rollen." },
-          { "id": "role-ot-security", "title": "OT-Sicherheits-Beauftragte*r", "briefing": "Cyber-Incident-Response-Lead für die OT-Seite. Koordiniert SCADA-Forensik, prüft die Reichweite des Angriffs (welche Dosier-Pfade waren betroffen, sind weitere Wasserwerke betroffen), entscheidet über OT-Containment. Schnittstelle zu CyberSec@Wasser-Lagezentrum." },
-          { "id": "role-it-leitung", "title": "IT-Leitung", "briefing": "Operative IT-Maßnahmen — Sperrung kompromittierter Accounts, Forensik, Backup-Prüfung. Bei kommunalen Versorgern oft Personalunion mit OT-Sicherheit; das Briefing geht davon aus, dass beide Hüte unterschiedlich getragen werden." },
-          { "id": "role-gesundheitsamt-liaison", "title": "Gesundheitsamt-Schnittstelle / Compliance", "briefing": "Verantwortet die TrinkwV-Anzeigepflicht (§ 11/§ 13) gegenüber dem örtlichen Gesundheitsamt, koordiniert Probennahme nach IfSG, bewertet bei akuter Gefahr die Trinkwasser-Sperre und Bevölkerungs-Warnung. Direkter Draht zu Amtsärzt*in." },
-          { "id": "role-press", "title": "Pressesprecher / Bevölkerungs-Kommunikation", "briefing": "Externe Kommunikation, Multi-Channel-Bevölkerungs-Warnung (NINA, Sirenen, Lautsprecher-Wagen, Lokalradio, Aushänge, SMS), Schnittstelle zu Lokalmedien. Muss eng mit Krisenstabs-Leitung und Gesundheitsamt-Schnittstelle abgestimmt sein — voreilige oder zu späte Aussagen erhöhen Gesundheits- und Reputationsrisiken." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu NIS2-Meldepflichten (§ 8d BSIG-Umsetzung, 24 h / 72 h / 1 Monat), TrinkwV-Anzeigepflicht (§ 11/§ 13 unverzüglich, § 45/§ 46 jährliche Information), DSGVO Art. 33 bei Personaldaten-Exfiltration, Strafrechts-Implikationen (§ 314 StGB Gemeingefährliche Vergiftung bei vorsätzlicher Trinkwasser-Manipulation), Lösegeld-Strafrecht (§ 89c StGB, OFAC-SDN bei sanktionierten Akteuren)." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Trinkwasser-Sperre, Notwasser-Aktivierung, Bevölkerungs-Warnung, Lösegeld-Entscheidung, Pressemitteilung). Bei kommunalen Versorgern üblich besetzt mit Geschäftsführer*in oder Werksleitung mit Vorstands-Mandat. Schnittstelle zu Bürgermeister*in und Landrat-Ebene."
+          },
+          {
+            "id": "role-wassermeister",
+            "title": "Wassermeister*in",
+            "briefing": "Operative Aufbereitungs-Verantwortung. Hat den Angriff am Plausibilitäts-Alarm bemerkt, kennt die Dosier-Pfade, beurteilt die Sicherheit des aktuellen Wassers. Erste Eskalationsstufe und entscheidender Fakten-Lieferer für alle anderen Rollen."
+          },
+          {
+            "id": "role-ot-security",
+            "title": "OT-Sicherheits-Beauftragte*r",
+            "briefing": "Cyber-Incident-Response-Lead für die OT-Seite. Koordiniert SCADA-Forensik, prüft die Reichweite des Angriffs (welche Dosier-Pfade waren betroffen, sind weitere Wasserwerke betroffen), entscheidet über OT-Containment. Schnittstelle zu CyberSec@Wasser-Lagezentrum."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung",
+            "briefing": "Operative IT-Maßnahmen — Sperrung kompromittierter Accounts, Forensik, Backup-Prüfung. Bei kommunalen Versorgern oft Personalunion mit OT-Sicherheit; das Briefing geht davon aus, dass beide Hüte unterschiedlich getragen werden."
+          },
+          {
+            "id": "role-gesundheitsamt-liaison",
+            "title": "Gesundheitsamt-Schnittstelle / Compliance",
+            "briefing": "Verantwortet die TrinkwV-Anzeigepflicht (§ 11/§ 13) gegenüber dem örtlichen Gesundheitsamt, koordiniert Probennahme nach IfSG, bewertet bei akuter Gefahr die Trinkwasser-Sperre und Bevölkerungs-Warnung. Direkter Draht zu Amtsärzt*in."
+          },
+          {
+            "id": "role-press",
+            "title": "Pressesprecher / Bevölkerungs-Kommunikation",
+            "briefing": "Externe Kommunikation, Multi-Channel-Bevölkerungs-Warnung (NINA, Sirenen, Lautsprecher-Wagen, Lokalradio, Aushänge, SMS), Schnittstelle zu Lokalmedien. Muss eng mit Krisenstabs-Leitung und Gesundheitsamt-Schnittstelle abgestimmt sein — voreilige oder zu späte Aussagen erhöhen Gesundheits- und Reputationsrisiken."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu NIS2-Meldepflichten (§ 8d BSIG-Umsetzung, 24 h / 72 h / 1 Monat), TrinkwV-Anzeigepflicht (§ 11/§ 13 unverzüglich, § 45/§ 46 jährliche Information), DSGVO Art. 33 bei Personaldaten-Exfiltration, Strafrechts-Implikationen (§ 314 StGB Gemeingefährliche Vergiftung bei vorsätzlicher Trinkwasser-Manipulation), Lösegeld-Strafrecht (§ 89c StGB, OFAC-SDN bei sanktionierten Akteuren)."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-plausibility-alarm", "title": "Plausibilitäts-Alarm im Leitsystem", "description": "Wassermeister*in meldet: Plausibilitäts-Alarm im SCADA-Leitsystem für die Natronlauge-Dosierung in der pH-Anhebungs-Stufe. Sollwert sprang von 8 mg/l auf 240 mg/l in einem Schritt — Sperr-Schwelle hat zugegriffen, Dosierung blieb auf altem Wert, aber der Alarm ist eindeutig: jemand hat versucht, eine 30-fache Erhöhung zu setzen. Vor 4 Minuten auch ein fehlgeschlagener Login-Versuch über den Fernwartungs-Zugang des SCADA-Integrators registriert.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-plausibility-alarm",
+                "title": "Plausibilitäts-Alarm im Leitsystem",
+                "description": "Wassermeister*in meldet: Plausibilitäts-Alarm im SCADA-Leitsystem für die Natronlauge-Dosierung in der pH-Anhebungs-Stufe. Sollwert sprang von 8 mg/l auf 240 mg/l in einem Schritt — Sperr-Schwelle hat zugegriffen, Dosierung blieb auf altem Wert, aber der Alarm ist eindeutig: jemand hat versucht, eine 30-fache Erhöhung zu setzen. Vor 4 Minuten auch ein fehlgeschlagener Login-Versuch über den Fernwartungs-Zugang des SCADA-Integrators registriert.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1030,11 +1075,38 @@
                 "roleId": "role-wassermeister",
                 "guidance": "Trade-off zwischen Sofort-Trinkwasser-Sperre (sicher, aber 380.000 Menschen betroffen) und Beobachten-und-Verifizieren (TrinkwV § 11/§ 13 erlaubt das nur bei kontrollierter Lage). Die Plausibilitäts-Sperre hat gegriffen, die Dosierung lief nicht durch — die Frage ist, ob weitere Pfade kompromittiert sind. Oldsmar-Lehre: Operator-Beobachtung war der einzige Schutz, und das war Glück. Hier hat die Plausibilitäts-Sperre gewirkt, aber die Sicherheits-Annahme wackelt.",
                 "options": [
-                  { "id": "opt-immediate-isolate-and-verify", "label": "Sofort SCADA-Fernzugriff sperren, Out-of-Band-Stichproben (Hand-Probennahme + Vor-Ort-Verifikation der Dosierwerte) starten, OT-Sicherheit eskalieren — KEINE Trinkwasser-Sperre solange Werte sauber sind", "consequence": "Schnelle technische Eindämmung. Bevölkerung bleibt ungestört solange Probennahme grün. Risiko: Wenn ein anderer Dosier-Pfad subtil manipuliert ist, wird das in der nächsten Schicht bemerkt — Reaktionsfenster knapp. Empfohlene Variante bei klar gesperrter Manipulation und intaktem Alarm-Pfad.", "evaluationHints": ["Containment ohne übermäßige Bevölkerungs-Belastung — gleichwertig zu opt-precautionary-stop"], "scoreContribution": 2 },
-                  { "id": "opt-precautionary-stop", "label": "Trinkwasser-Sperre für betroffenen Versorgungsbereich, Notwasser aktivieren, dann verifizieren", "consequence": "Maximaler Bevölkerungs-Schutz. Bevölkerungs-Warnung muss sofort raus, 380.000 Menschen sind eingeschränkt, Notwasser-Logistik wird mobilisiert. Empfohlene Variante bei Unsicherheit über die Reichweite der Manipulation — Vorsorge-Prinzip nach TrinkwV.", "evaluationHints": ["Vorsorge-Sperre, Bevölkerungs-Schutz priorisiert — gleichwertig zu opt-immediate-isolate-and-verify"], "scoreContribution": 2 },
-                  { "id": "opt-watch-and-wait", "label": "Beobachten ohne Sperre der Fernzugänge, weitere Plausibilitäts-Alarme abwarten, dann entscheiden", "consequence": "Defensive Beobachtung gibt dem Angreifer Zeit, andere Pfade zu testen. Oldsmar-Anti-Lehre — wenn der Operator sich nicht aktiv eingeschaltet hätte, wäre das Wasser kontaminiert worden. Schwächere Option.", "evaluationHints": ["Reine Beobachtung, gefährlich"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-immediate-isolate-and-verify",
+                    "label": "Sofort SCADA-Fernzugriff sperren, Out-of-Band-Stichproben (Hand-Probennahme + Vor-Ort-Verifikation der Dosierwerte) starten, OT-Sicherheit eskalieren — KEINE Trinkwasser-Sperre solange Werte sauber sind",
+                    "consequence": "Schnelle technische Eindämmung. Bevölkerung bleibt ungestört solange Probennahme grün. Risiko: Wenn ein anderer Dosier-Pfad subtil manipuliert ist, wird das in der nächsten Schicht bemerkt — Reaktionsfenster knapp. Empfohlene Variante bei klar gesperrter Manipulation und intaktem Alarm-Pfad.",
+                    "evaluationHints": [
+                      "Containment ohne übermäßige Bevölkerungs-Belastung — gleichwertig zu opt-precautionary-stop"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-precautionary-stop",
+                    "label": "Trinkwasser-Sperre für betroffenen Versorgungsbereich, Notwasser aktivieren, dann verifizieren",
+                    "consequence": "Maximaler Bevölkerungs-Schutz. Bevölkerungs-Warnung muss sofort raus, 380.000 Menschen sind eingeschränkt, Notwasser-Logistik wird mobilisiert. Empfohlene Variante bei Unsicherheit über die Reichweite der Manipulation — Vorsorge-Prinzip nach TrinkwV.",
+                    "evaluationHints": [
+                      "Vorsorge-Sperre, Bevölkerungs-Schutz priorisiert — gleichwertig zu opt-immediate-isolate-and-verify"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-watch-and-wait",
+                    "label": "Beobachten ohne Sperre der Fernzugänge, weitere Plausibilitäts-Alarme abwarten, dann entscheiden",
+                    "consequence": "Defensive Beobachtung gibt dem Angreifer Zeit, andere Pfade zu testen. Oldsmar-Anti-Lehre — wenn der Operator sich nicht aktiv eingeschaltet hätte, wäre das Wasser kontaminiert worden. Schwächere Option.",
+                    "evaluationHints": [
+                      "Reine Beobachtung, gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität", "crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität",
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1042,7 +1114,12 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-vendor-vpn-compromise", "title": "Bestätigung: Fernzugriff über SCADA-Integrator kompromittiert", "description": "OT-Sicherheits-Beauftragte*r meldet: Erstanalyse des Fernzugriffs zeigt: gestohlener Account des SCADA-Integrators wurde über kompromittiertes VPN des Integrators benutzt. Der Angreifer war in den letzten 8 Tagen wiederholt im Leitsystem, hat mindestens drei Wasserwerks-Anlagen exploriert (Aufbereitung, Pumpwerk Hochbehälter, eine Klärstufe). Erst beim 240-mg/l-Sprung zog die Plausibilitäts-Sperre. Cyber-Sec@Wasser-Lagezentrum ist informiert.", "roleId": "role-ot-security" }
+              {
+                "id": "inj-vendor-vpn-compromise",
+                "title": "Bestätigung: Fernzugriff über SCADA-Integrator kompromittiert",
+                "description": "OT-Sicherheits-Beauftragte*r meldet: Erstanalyse des Fernzugriffs zeigt: gestohlener Account des SCADA-Integrators wurde über kompromittiertes VPN des Integrators benutzt. Der Angreifer war in den letzten 8 Tagen wiederholt im Leitsystem, hat mindestens drei Wasserwerks-Anlagen exploriert (Aufbereitung, Pumpwerk Hochbehälter, eine Klärstufe). Erst beim 240-mg/l-Sprung zog die Plausibilitäts-Sperre. Cyber-Sec@Wasser-Lagezentrum ist informiert.",
+                "roleId": "role-ot-security"
+              }
             ],
             "decisions": [
               {
@@ -1051,11 +1128,37 @@
                 "roleId": "role-ot-security",
                 "guidance": "Reichweite-Frage: Wenn der Angreifer drei Anlagen exploriert hat, sind möglicherweise auch dort Schreibzugriffe versucht oder durchgeführt worden. Hard-Cut aller Fernzugänge stoppt jeden weiteren Versuch, aber lähmt auch legitime Wartung. Segmentierte Analyse erhält Forensik-Telemetrie.",
                 "options": [
-                  { "id": "opt-hard-cut-all-remote", "label": "Hard-Cut aller Fernzugänge zu allen Anlagen, Lokal-Operator-Modus überall, Forensik vor Ort", "consequence": "Maximales Containment. Wartung steht, Diagnose vor Ort dauert länger. SCADA-Integrator und alle anderen Service-Provider müssen physisch zum Wasserwerk fahren. Sicherheits-Disziplin maximal.", "evaluationHints": ["Maximales Containment, Service-Aufwand"], "scoreContribution": 3 },
-                  { "id": "opt-segmented-analysis", "label": "Segmentierte Analyse: nur den kompromittierten Account sperren, andere Fernzugänge aktiv lassen für Live-Forensik", "consequence": "Live-Telemetrie erhalten, aber Risiko, dass Angreifer mit anderen Credentials nachzieht. Nur realistisch mit eingespieltem IR-Team und aktivem CyberSec@Wasser-Monitoring.", "evaluationHints": ["Segmentierte Forensik, Risiko abgewogen"], "scoreContribution": 1 },
-                  { "id": "opt-cut-then-staged-reentry", "label": "Hard-Cut sofort, danach gestaffelte Wieder-Aktivierung einzelner Service-Pfade nach Forensik-Ergebnis", "consequence": "Containment plus operationelle Wieder-Aufnahme. Aufwendiger zu koordinieren, aber ausgewogen. Empfohlene Variante in vielen IR-Spielbüchern.", "evaluationHints": ["Containment mit gestaffelter Wieder-Aktivierung"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-hard-cut-all-remote",
+                    "label": "Hard-Cut aller Fernzugänge zu allen Anlagen, Lokal-Operator-Modus überall, Forensik vor Ort",
+                    "consequence": "Maximales Containment. Wartung steht, Diagnose vor Ort dauert länger. SCADA-Integrator und alle anderen Service-Provider müssen physisch zum Wasserwerk fahren. Sicherheits-Disziplin maximal.",
+                    "evaluationHints": [
+                      "Maximales Containment, Service-Aufwand"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-segmented-analysis",
+                    "label": "Segmentierte Analyse: nur den kompromittierten Account sperren, andere Fernzugänge aktiv lassen für Live-Forensik",
+                    "consequence": "Live-Telemetrie erhalten, aber Risiko, dass Angreifer mit anderen Credentials nachzieht. Nur realistisch mit eingespieltem IR-Team und aktivem CyberSec@Wasser-Monitoring.",
+                    "evaluationHints": [
+                      "Segmentierte Forensik, Risiko abgewogen"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-cut-then-staged-reentry",
+                    "label": "Hard-Cut sofort, danach gestaffelte Wieder-Aktivierung einzelner Service-Pfade nach Forensik-Ergebnis",
+                    "consequence": "Containment plus operationelle Wieder-Aufnahme. Aufwendiger zu koordinieren, aber ausgewogen. Empfohlene Variante in vielen IR-Spielbüchern.",
+                    "evaluationHints": [
+                      "Containment mit gestaffelter Wieder-Aktivierung"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität"
+                ]
               }
             ]
           },
@@ -1063,8 +1166,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, Wassermeister*in, OT-Sicherheit, IT-Leitung, Gesundheitsamt-Schnittstelle, Pressesprecher, Rechtsabteilung einberufen. Bürgermeister*in der größten betroffenen Stadt ist informiert und in Stand-by. Out-of-Band-Mobilfunk-Gruppe geprüft.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-sample-results", "title": "Erste Out-of-Band-Probennahme: alle Werte im Korridor", "description": "Wassermeister*in meldet: Drei Hand-Stichproben aus Hauptverteilnetz und Hochbehälter zeigen pH, Chlor-Rückstand, Trübung, mikrobiologisch alles im Soll-Korridor. Aufbereitungs-Sicherheit für die laufende Charge bestätigt; nächste Charge in 2 h, vorher kann nichts kontaminiert werden, da Containment greift. Aber: Voll-akkreditierte Labor-Bestätigung dauert 24–48 h.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, Wassermeister*in, OT-Sicherheit, IT-Leitung, Gesundheitsamt-Schnittstelle, Pressesprecher, Rechtsabteilung einberufen. Bürgermeister*in der größten betroffenen Stadt ist informiert und in Stand-by. Out-of-Band-Mobilfunk-Gruppe geprüft.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-sample-results",
+                "title": "Erste Out-of-Band-Probennahme: alle Werte im Korridor",
+                "description": "Wassermeister*in meldet: Drei Hand-Stichproben aus Hauptverteilnetz und Hochbehälter zeigen pH, Chlor-Rückstand, Trübung, mikrobiologisch alles im Soll-Korridor. Aufbereitungs-Sicherheit für die laufende Charge bestätigt; nächste Charge in 2 h, vorher kann nichts kontaminiert werden, da Containment greift. Aber: Voll-akkreditierte Labor-Bestätigung dauert 24–48 h.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1073,10 +1186,29 @@
                 "roleId": "role-gesundheitsamt-liaison",
                 "guidance": "TrinkwV § 11/§ 13 verlangt Anzeige beim Gesundheitsamt 'unverzüglich' bei Beeinträchtigungen, die die Trinkwasser-Qualität betreffen können. Auch wenn die Werte aktuell sauber sind, ist der Cyber-Vorfall ein anzeigepflichtiges Ereignis im Sinne der risikobasierten Hygienemanagement-Pflicht (TrinkwV 2023). Frage ist: Wird gleich angezeigt mit dem Vermerk 'Werte aktuell im Soll', oder erst nach Voll-Bestätigung durch akkreditiertes Labor?",
                 "options": [
-                  { "id": "opt-anzeige-immediate", "label": "Sofortige Anzeige beim Gesundheitsamt mit Sachverhalts-Bericht: Cyber-Manipulation versucht, Plausibilitäts-Sperre hat gegriffen, aktuelle Werte im Soll, Voll-Bestätigung folgt in 24–48 h", "consequence": "Voll-Konformität mit § 11/§ 13. Gesundheitsamt kann eigene Maßnahmen koordinieren. Politische Wirkung: zeigt aktive Krisenkultur. Interne Disziplin gestärkt.", "evaluationHints": ["TrinkwV-Anzeigepflicht unverzüglich erfüllt"], "scoreContribution": 3 },
-                  { "id": "opt-anzeige-after-lab", "label": "Anzeige erst nach Voll-Labor-Bestätigung in 24–48 h", "consequence": "Anzeige formal verzögert. Bei späterer Bewertung durch Aufsichts- oder Strafverfolgungsbehörde Risiko, dass die Verzögerung als Verstoß gegen 'unverzüglich' gewertet wird. Schwächere Option.", "evaluationHints": ["Anzeige verzögert, formal kritisch"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-anzeige-immediate",
+                    "label": "Sofortige Anzeige beim Gesundheitsamt mit Sachverhalts-Bericht: Cyber-Manipulation versucht, Plausibilitäts-Sperre hat gegriffen, aktuelle Werte im Soll, Voll-Bestätigung folgt in 24–48 h",
+                    "consequence": "Voll-Konformität mit § 11/§ 13. Gesundheitsamt kann eigene Maßnahmen koordinieren. Politische Wirkung: zeigt aktive Krisenkultur. Interne Disziplin gestärkt.",
+                    "evaluationHints": [
+                      "TrinkwV-Anzeigepflicht unverzüglich erfüllt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-anzeige-after-lab",
+                    "label": "Anzeige erst nach Voll-Labor-Bestätigung in 24–48 h",
+                    "consequence": "Anzeige formal verzögert. Bei späterer Bewertung durch Aufsichts- oder Strafverfolgungsbehörde Risiko, dass die Verzögerung als Verstoß gegen 'unverzüglich' gewertet wird. Schwächere Option.",
+                    "evaluationHints": [
+                      "Anzeige verzögert, formal kritisch"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-trinkwv-frist", "crit-reporting-bsi-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-trinkwv-frist",
+                  "crit-reporting-bsi-frist"
+                ]
               }
             ]
           },
@@ -1084,7 +1216,12 @@
             "t": 60,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-population-warning-question", "title": "Bürgermeister-Schnittstelle drängt auf Bevölkerungs-Information", "description": "Krisenstabs-Leitung wird vom Bürgermeister-Büro angerufen: Lokalpresse hat Wind bekommen (vermutlich über das Lagezentrum CyberSec@Wasser, das andere kommunale Versorger benachrichtigt hat). Stadtrats-Sitzung läuft, Stadtrat fragt nach. Bürgermeister: Wenn die Bevölkerung erst über Twitter erfährt, dass beim Wasserwerk ein Cyber-Vorfall war, ist das politisch nicht haltbar. Empfehlung: gemeinsame Pressemitteilung jetzt, Multi-Channel-Warnung als Vorsorge auch wenn Werte sauber sind.", "roleId": "role-press" }
+              {
+                "id": "inj-population-warning-question",
+                "title": "Bürgermeister-Schnittstelle drängt auf Bevölkerungs-Information",
+                "description": "Krisenstabs-Leitung wird vom Bürgermeister-Büro angerufen: Lokalpresse hat Wind bekommen (vermutlich über das Lagezentrum CyberSec@Wasser, das andere kommunale Versorger benachrichtigt hat). Stadtrats-Sitzung läuft, Stadtrat fragt nach. Bürgermeister: Wenn die Bevölkerung erst über Twitter erfährt, dass beim Wasserwerk ein Cyber-Vorfall war, ist das politisch nicht haltbar. Empfehlung: gemeinsame Pressemitteilung jetzt, Multi-Channel-Warnung als Vorsorge auch wenn Werte sauber sind.",
+                "roleId": "role-press"
+              }
             ],
             "decisions": [
               {
@@ -1093,11 +1230,38 @@
                 "roleId": "role-press",
                 "guidance": "Wasser-spezifische Härte: 380.000 Menschen sind betroffen. TrinkwV § 45/§ 46 verlangt Information der Verbraucher. Multi-Channel-Optionen: NINA-Warn-App + Lokalradio + Aushänge + Lautsprecher-Wagen + Pressemitteilung sind verfügbar. Trade-off zwischen Vorsorge-Information (zeigt Krisenkultur, schützt vor 'aus Twitter erfahren') und Über-Alarm (Vorräte-Hamster, Tankwagen-Lawine, Reputations-Schaden bei späterem 'alles okay'). Werte sind aktuell sauber — daher KEINE akute Gesundheitsgefahr-Warnung, sondern Sachverhalts-Information.",
                 "options": [
-                  { "id": "opt-warning-multichannel-info", "label": "Multi-Channel-Sachverhalts-Information (Pressemitteilung + NINA-Push + Lokalradio + Stadt-Website + Social Media): Cyber-Vorfall, Plausibilitäts-Sperre hat gegriffen, Werte aktuell sauber, vorsorgliche Probennahme läuft, keine Sofort-Maßnahme für Bevölkerung nötig", "consequence": "Krisenkultur sichtbar, Vertrauen erhalten, Vorsorge gegen Falsch-Narrative. Aufwand mittel (Texte vorab im Warnplan vorhanden). Bei späterer Lage-Verschlechterung kann nachgeschärft werden.", "evaluationHints": ["Multi-Channel-Vorsorge-Information — gleichwertig zu opt-warning-coordinated-with-mayor"], "scoreContribution": 2 },
-                  { "id": "opt-warning-coordinated-with-mayor", "label": "Koordinierte Pressemitteilung mit Bürgermeister-Büro: gemeinsamer Auftritt von Versorger, Stadt und Gesundheitsamt — Sachverhalt + aktuelle Wert-Lage + nächste Schritte, kein Multi-Channel-Push", "consequence": "Politische Disziplin maximal, Aufwand höher (Abstimmungsschleifen mit Stadt und Gesundheitsamt), aber stabilste Wirkung in Bevölkerung und Medien. Gleichwertige Best-Practice-Variante.", "evaluationHints": ["Koordinierte politische Kommunikation — gleichwertig zu opt-warning-multichannel-info"], "scoreContribution": 2 },
-                  { "id": "opt-warning-internal-only", "label": "Keine externe Information, abwarten bis Voll-Labor-Bestätigung — interne Vorbereitung für Pressemitteilung falls nötig", "consequence": "Bevölkerung erfährt aus Twitter / Lokalpresse / Stadtrats-Leak. Vertrauensschaden hoch, Bürgermeister-Beziehung belastet. Schwächere Option.", "evaluationHints": ["Keine externe Information, kommunikative Risiken hoch"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-warning-multichannel-info",
+                    "label": "Multi-Channel-Sachverhalts-Information (Pressemitteilung + NINA-Push + Lokalradio + Stadt-Website + Social Media): Cyber-Vorfall, Plausibilitäts-Sperre hat gegriffen, Werte aktuell sauber, vorsorgliche Probennahme läuft, keine Sofort-Maßnahme für Bevölkerung nötig",
+                    "consequence": "Krisenkultur sichtbar, Vertrauen erhalten, Vorsorge gegen Falsch-Narrative. Aufwand mittel (Texte vorab im Warnplan vorhanden). Bei späterer Lage-Verschlechterung kann nachgeschärft werden.",
+                    "evaluationHints": [
+                      "Multi-Channel-Vorsorge-Information — gleichwertig zu opt-warning-coordinated-with-mayor"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-warning-coordinated-with-mayor",
+                    "label": "Koordinierte Pressemitteilung mit Bürgermeister-Büro: gemeinsamer Auftritt von Versorger, Stadt und Gesundheitsamt — Sachverhalt + aktuelle Wert-Lage + nächste Schritte, kein Multi-Channel-Push",
+                    "consequence": "Politische Disziplin maximal, Aufwand höher (Abstimmungsschleifen mit Stadt und Gesundheitsamt), aber stabilste Wirkung in Bevölkerung und Medien. Gleichwertige Best-Practice-Variante.",
+                    "evaluationHints": [
+                      "Koordinierte politische Kommunikation — gleichwertig zu opt-warning-multichannel-info"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-warning-internal-only",
+                    "label": "Keine externe Information, abwarten bis Voll-Labor-Bestätigung — interne Vorbereitung für Pressemitteilung falls nötig",
+                    "consequence": "Bevölkerung erfährt aus Twitter / Lokalpresse / Stadtrats-Leak. Vertrauensschaden hoch, Bürgermeister-Beziehung belastet. Schwächere Option.",
+                    "evaluationHints": [
+                      "Keine externe Information, kommunikative Risiken hoch"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-bevoelkerung", "crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-communication-bevoelkerung",
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1105,8 +1269,18 @@
             "t": 90,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-bsi-portal", "title": "BSI-Meldeportal-Erstmeldung", "description": "OT-Sicherheits-Beauftragte*r erstellt über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG-Umsetzung (24-h-Pflicht eingehalten). Wichtige Klarstellung: Auch wenn die KRITIS-Schwelle nach § 3 BSI-KritisV (500.000 versorgte Personen / 22 Mio. m³) nicht erreicht ist, greift die NIS2-Meldepflicht — der Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG eingestuft (Sektor Wasser, > 50 MA, > 10 Mio. € Umsatz oder Bilanz). NIS2 ersetzt nicht die KRITIS-Logik, sondern erweitert die Cybersicherheits-Regulierung auf den Mittelstand unterhalb der KRITIS-Schwellen. BSI-CERT meldet sich zurück mit Koordinationsangebot, Bitte um 72-h-Folgemeldung mit Schadensbild und vor allem mit Reichweite-Bestätigung gegenüber anderen Wasserversorgern (Sektor-CERT-Funktion via CyberSec@Wasser).", "roleId": "role-ot-security" },
-              { "id": "inj-dsb-personal-data", "title": "DSGVO-Bewertung: keine personenbezogenen Daten betroffen", "description": "Datenschutzbeauftragte*r (Personalunion mit Compliance) bewertet: SCADA-Leitsystem führt nur Anlagen-Daten und Operator-Logs, keine Kundendaten. DSGVO Art. 33-Meldepflicht greift nicht. Personalakten lagen nicht im Befallsbereich.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-bsi-portal",
+                "title": "BSI-Meldeportal-Erstmeldung",
+                "description": "OT-Sicherheits-Beauftragte*r erstellt über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG-Umsetzung (24-h-Pflicht eingehalten). Wichtige Klarstellung: Auch wenn die KRITIS-Schwelle nach § 3 BSI-KritisV (500.000 versorgte Personen / 22 Mio. m³) nicht erreicht ist, greift die NIS2-Meldepflicht — der Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG eingestuft (Sektor Wasser, > 50 MA, > 10 Mio. € Umsatz oder Bilanz). NIS2 ersetzt nicht die KRITIS-Logik, sondern erweitert die Cybersicherheits-Regulierung auf den Mittelstand unterhalb der KRITIS-Schwellen. BSI-CERT meldet sich zurück mit Koordinationsangebot, Bitte um 72-h-Folgemeldung mit Schadensbild und vor allem mit Reichweite-Bestätigung gegenüber anderen Wasserversorgern (Sektor-CERT-Funktion via CyberSec@Wasser).",
+                "roleId": "role-ot-security"
+              },
+              {
+                "id": "inj-dsb-personal-data",
+                "title": "DSGVO-Bewertung: keine personenbezogenen Daten betroffen",
+                "description": "Datenschutzbeauftragte*r (Personalunion mit Compliance) bewertet: SCADA-Leitsystem führt nur Anlagen-Daten und Operator-Logs, keine Kundendaten. DSGVO Art. 33-Meldepflicht greift nicht. Personalakten lagen nicht im Befallsbereich.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1115,10 +1289,28 @@
                 "roleId": "role-ot-security",
                 "guidance": "Vollständige Offenlegung unterstützt das BSI-Lagebild, ermöglicht CyberSec@Wasser-Lagezentrum die Warnung anderer Wasserversorger (Sektor-CERT-Funktion). Zurückhaltende Meldung reduziert Leak-Risiko. NIS2UmsuCG-Bußgelder bei Meldeversäumnis bis 7 Mio. € oder 1,4 % des weltweiten Jahresumsatzes für 'wichtige Einrichtungen'. Wasser-Sektor-Spezifik: das CyberSec@Wasser-Lagezentrum profitiert direkt von vollständiger Offenlegung — die TTPs des Angreifers können andere Versorger schützen.",
                 "options": [
-                  { "id": "opt-bsi-full-disclosure", "label": "Vollständige Offenlegung: TTPs, IOCs, kompromittierter Integrator, betroffene Anlagen, Plausibilitäts-Sperr-Logik", "consequence": "BSI und CyberSec@Wasser-Lagezentrum haben vollständiges Bild, können andere Wasserversorger warnen. Sektor-CERT-Wirkung. Konformitäts-Stärke gegenüber späterer Aufsichtsprüfung.", "evaluationHints": ["Vollständige Meldeinhalte, Sektor-CERT-Beitrag"], "scoreContribution": 3 },
-                  { "id": "opt-bsi-minimal", "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)", "consequence": "Meldung fristgerecht, aber Nachfragen wahrscheinlich. CyberSec@Wasser-Wirkung verloren. Schwächere Option.", "evaluationHints": ["Minimalmeldung fristgerecht"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-bsi-full-disclosure",
+                    "label": "Vollständige Offenlegung: TTPs, IOCs, kompromittierter Integrator, betroffene Anlagen, Plausibilitäts-Sperr-Logik",
+                    "consequence": "BSI und CyberSec@Wasser-Lagezentrum haben vollständiges Bild, können andere Wasserversorger warnen. Sektor-CERT-Wirkung. Konformitäts-Stärke gegenüber späterer Aufsichtsprüfung.",
+                    "evaluationHints": [
+                      "Vollständige Meldeinhalte, Sektor-CERT-Beitrag"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bsi-minimal",
+                    "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)",
+                    "consequence": "Meldung fristgerecht, aber Nachfragen wahrscheinlich. CyberSec@Wasser-Wirkung verloren. Schwächere Option.",
+                    "evaluationHints": [
+                      "Minimalmeldung fristgerecht"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist"
+                ]
               }
             ]
           },
@@ -1126,8 +1318,18 @@
             "t": 120,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-forensik", "title": "Externer Incident-Response-Dienstleister vor Ort, IOCs aus dem Integrator-Netz", "description": "Vorvertraglich beauftragter IR-Dienstleister (4-h-Response-SLA für KRITIS-/NIS2-Wasser-Tenants) ist vor Ort. Erstanalyse: Eindringen vor 11 Tagen über kompromittierte VPN-Appliance des SCADA-Integrators (gestohlene Credentials von Integrator-Mitarbeiter*in), dann laterale Ausbreitung über das Service-Netz in das Leitsystem. Sample-Telemetrie zeigt: Angreifer hat in den 8 Tagen vor dem 240-mg/l-Sprung mehrere Anlagen exploriert, aber nirgends Schreibzugriffe getätigt — der Sprung war der erste tatsächliche Manipulations-Versuch.", "roleId": "role-ot-security" },
-              { "id": "inj-ransom-note", "title": "Lösegeldforderung", "description": "Angreifer melden sich über Tor-Chat an die Geschäftsführung: 800.000 Euro in Bitcoin. Drohung: 'Wir wissen, wo eure Plausibilitäts-Sperren sind. Wir wissen, wie man sie umgeht. 380.000 Menschen trinken euer Wasser. Zahlt, oder wir machen weiter, bis ihr es nicht mehr bemerkt.' Sample-Daten: drei Anlagen-Topologie-Dokumente exfiltriert, kein Personal-Daten-Leak.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-forensik",
+                "title": "Externer Incident-Response-Dienstleister vor Ort, IOCs aus dem Integrator-Netz",
+                "description": "Vorvertraglich beauftragter IR-Dienstleister (4-h-Response-SLA für KRITIS-/NIS2-Wasser-Tenants) ist vor Ort. Erstanalyse: Eindringen vor 11 Tagen über kompromittierte VPN-Appliance des SCADA-Integrators (gestohlene Credentials von Integrator-Mitarbeiter*in), dann laterale Ausbreitung über das Service-Netz in das Leitsystem. Sample-Telemetrie zeigt: Angreifer hat in den 8 Tagen vor dem 240-mg/l-Sprung mehrere Anlagen exploriert, aber nirgends Schreibzugriffe getätigt — der Sprung war der erste tatsächliche Manipulations-Versuch.",
+                "roleId": "role-ot-security"
+              },
+              {
+                "id": "inj-ransom-note",
+                "title": "Lösegeldforderung",
+                "description": "Angreifer melden sich über Tor-Chat an die Geschäftsführung: 800.000 Euro in Bitcoin. Drohung: 'Wir wissen, wo eure Plausibilitäts-Sperren sind. Wir wissen, wie man sie umgeht. 380.000 Menschen trinken euer Wasser. Zahlt, oder wir machen weiter, bis ihr es nicht mehr bemerkt.' Sample-Daten: drei Anlagen-Topologie-Dokumente exfiltriert, kein Personal-Daten-Leak.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1136,11 +1338,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Wasser-spezifische Härte: Im Gegensatz zu Healthcare oder Industry steht hier die unmittelbare Gesundheits-Gefährdung der Bevölkerung als Erpressungs-Hebel — der Angreifer droht direkt mit weiterer Manipulation. Trotzdem gilt: BSI/LKA raten generell ab. § 89c StGB Terrorismusfinanzierung greift bei Zahlung an gelistete Gruppen; OFAC-SDN-Listen-Screening Pflicht; § 314 StGB Gemeingefährliche Vergiftung greift gegen den Angreifer, Zahlung kann als Beihilfe-/Begünstigungs-Risiko diskutiert werden. Politische Optik: Kommunaler Versorger zahlt Lösegeld an Angreifer, der Bevölkerung gefährden wollte — kommunalpolitisch nicht haltbar.",
                 "options": [
-                  { "id": "opt-no-pay", "label": "Keine Zahlung, OT-Härtung beschleunigen (Plausibilitäts-Korridore enger, Fernzugänge nur über Jump-Host mit MFA + Vier-Augen-Freigabe), CyberSec@Wasser-Monitoring intensivieren, IR-Dienstleister auf Dauer-Beobachtung", "consequence": "Konformität mit BSI-/LKA-Empfehlung. Operative Härtung adressiert die Drohung strukturell statt finanziell. Bevölkerungs-Schutz über Technik, nicht über Geld. Empfohlene Variante.", "evaluationHints": ["Keine Zahlung, strukturelle Härtung"], "scoreContribution": 3 },
-                  { "id": "opt-no-pay-and-public", "label": "Keine Zahlung, OT-Härtung wie oben, plus öffentliche Bekanntmachung der Erpressung als Abschreckung gegen Nachahmer", "consequence": "Konformität plus politische Klarheit. Risiko: andere Cyber-Akteure könnten den öffentlichen Vorfall als Ziel-Präzedenz lesen. CyberSec@Wasser-Konsultation vor öffentlicher Aussage empfohlen.", "evaluationHints": ["Keine Zahlung, öffentliche Politische Klarheit"], "scoreContribution": 2 },
-                  { "id": "opt-pay", "label": "Zahlung nach Sanktionsrecht-Prüfung (OFAC, EU-Sanktionen, § 89c StGB)", "consequence": "Schnellster Pfad, aber keine Garantie. Strafrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN, Beihilfe-Risiko zu § 314 StGB). NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Kommunalpolitisch nicht haltbar — Bürgermeister-Beziehung würde brechen. Schwächere Option.", "evaluationHints": ["Vollzahlung diskutierbar wegen unmittelbarer Gesundheits-Gefährdungs-Drohung, rechtlich und politisch stark riskant"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-no-pay",
+                    "label": "Keine Zahlung, OT-Härtung beschleunigen (Plausibilitäts-Korridore enger, Fernzugänge nur über Jump-Host mit MFA + Vier-Augen-Freigabe), CyberSec@Wasser-Monitoring intensivieren, IR-Dienstleister auf Dauer-Beobachtung",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Operative Härtung adressiert die Drohung strukturell statt finanziell. Bevölkerungs-Schutz über Technik, nicht über Geld. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Keine Zahlung, strukturelle Härtung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-no-pay-and-public",
+                    "label": "Keine Zahlung, OT-Härtung wie oben, plus öffentliche Bekanntmachung der Erpressung als Abschreckung gegen Nachahmer",
+                    "consequence": "Konformität plus politische Klarheit. Risiko: andere Cyber-Akteure könnten den öffentlichen Vorfall als Ziel-Präzedenz lesen. CyberSec@Wasser-Konsultation vor öffentlicher Aussage empfohlen.",
+                    "evaluationHints": [
+                      "Keine Zahlung, öffentliche Politische Klarheit"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-pay",
+                    "label": "Zahlung nach Sanktionsrecht-Prüfung (OFAC, EU-Sanktionen, § 89c StGB)",
+                    "consequence": "Schnellster Pfad, aber keine Garantie. Strafrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN, Beihilfe-Risiko zu § 314 StGB). NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Kommunalpolitisch nicht haltbar — Bürgermeister-Beziehung würde brechen. Schwächere Option.",
+                    "evaluationHints": [
+                      "Vollzahlung diskutierbar wegen unmittelbarer Gesundheits-Gefährdungs-Drohung, rechtlich und politisch stark riskant"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1148,8 +1376,18 @@
             "t": 140,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-lab-confirmation", "title": "Akkreditiertes Labor: alle Werte im Soll, freigabefähig", "description": "Voll-akkreditierte Labor-Bestätigung der Out-of-Band-Stichproben liegt vor: pH, Chlor-Rückstand, Trübung, mikrobiologisch alle im Soll. Trinkwasser ist sicher, keine Bevölkerungs-Sofortmaßnahmen erforderlich. Wassermeister*in stuft die laufende Charge als freigabefähig ein.", "roleId": "role-wassermeister" },
-              { "id": "inj-press-coordination", "title": "Pressemitteilung-Koordination", "description": "Pressesprecher hat Pressemitteilung mit Bürgermeister-Büro und Gesundheitsamt abgestimmt: Cyber-Vorfall, Plausibilitäts-Sperre hat gegriffen, vorsorgliche Probennahme grün, keine akute Bevölkerungs-Maßnahme. Veröffentlichung 18:00 Uhr koordiniert mit BSI-Pressestelle und CyberSec@Wasser-Statement.", "roleId": "role-press" }
+              {
+                "id": "inj-lab-confirmation",
+                "title": "Akkreditiertes Labor: alle Werte im Soll, freigabefähig",
+                "description": "Voll-akkreditierte Labor-Bestätigung der Out-of-Band-Stichproben liegt vor: pH, Chlor-Rückstand, Trübung, mikrobiologisch alle im Soll. Trinkwasser ist sicher, keine Bevölkerungs-Sofortmaßnahmen erforderlich. Wassermeister*in stuft die laufende Charge als freigabefähig ein.",
+                "roleId": "role-wassermeister"
+              },
+              {
+                "id": "inj-press-coordination",
+                "title": "Pressemitteilung-Koordination",
+                "description": "Pressesprecher hat Pressemitteilung mit Bürgermeister-Büro und Gesundheitsamt abgestimmt: Cyber-Vorfall, Plausibilitäts-Sperre hat gegriffen, vorsorgliche Probennahme grün, keine akute Bevölkerungs-Maßnahme. Veröffentlichung 18:00 Uhr koordiniert mit BSI-Pressestelle und CyberSec@Wasser-Statement.",
+                "roleId": "role-press"
+              }
             ],
             "decisions": [
               {
@@ -1158,10 +1396,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Belegschaft wird Anrufe von Familienmitgliedern, Nachbarn, Kunden bekommen — wer 'aus Twitter' erfährt, dass beim eigenen Arbeitgeber ein Cyber-Vorfall war, gerät unter Erklärungsdruck. Frühe interne Information schützt das Vertrauen. Zu viel Detail liefert Angreifern aber Informationen über die Plausibilitäts-Sperr-Logik.",
                 "options": [
-                  { "id": "opt-internal-focused", "label": "Fokussierte interne Information: Vorfall passiert, Werte sauber, keine Sofortmaßnahmen nötig — Verhaltens-Empfehlung für Auskünfte an Externe (Verweis auf Pressemitteilung)", "consequence": "Belegschaft hat Klarheit für Außen-Auskünfte. Angriffsdetails bleiben intern beschränkt. Empfohlene Variante.", "evaluationHints": ["Operative interne Kommunikation"], "scoreContribution": 3 },
-                  { "id": "opt-internal-full", "label": "Vollständige interne Transparenz inkl. Plausibilitäts-Sperr-Schwellen und Forensik-Stand", "consequence": "Vertrauen hoch, aber Leak-Risiko zu Angreifern (über Belegschafts-Soziale-Medien) erhöht.", "evaluationHints": ["Volle Transparenz, Leak-Risiko"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-internal-focused",
+                    "label": "Fokussierte interne Information: Vorfall passiert, Werte sauber, keine Sofortmaßnahmen nötig — Verhaltens-Empfehlung für Auskünfte an Externe (Verweis auf Pressemitteilung)",
+                    "consequence": "Belegschaft hat Klarheit für Außen-Auskünfte. Angriffsdetails bleiben intern beschränkt. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Operative interne Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-internal-full",
+                    "label": "Vollständige interne Transparenz inkl. Plausibilitäts-Sperr-Schwellen und Forensik-Stand",
+                    "consequence": "Vertrauen hoch, aber Leak-Risiko zu Angreifern (über Belegschafts-Soziale-Medien) erhöht.",
+                    "evaluationHints": [
+                      "Volle Transparenz, Leak-Risiko"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-mitarbeiter"]
+                "relatedCriteria": [
+                  "crit-communication-mitarbeiter"
+                ]
               }
             ]
           },
@@ -1169,7 +1425,12 @@
             "t": 160,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-cybersec-wasser-feedback", "title": "CyberSec@Wasser-Lagezentrum: drei weitere Versorger gewarnt", "description": "CyberSec@Wasser-Lagezentrum meldet zurück: drei weitere kommunale Versorger nutzten denselben SCADA-Integrator und wurden auf Basis der von uns gemeldeten IOCs vorsorglich überprüft. Bei einem davon hat das Lagezentrum verdächtige Login-Versuche entdeckt — vermutlich derselbe Angreifer. Sektor-Schutz hat funktioniert.", "roleId": "role-ot-security" }
+              {
+                "id": "inj-cybersec-wasser-feedback",
+                "title": "CyberSec@Wasser-Lagezentrum: drei weitere Versorger gewarnt",
+                "description": "CyberSec@Wasser-Lagezentrum meldet zurück: drei weitere kommunale Versorger nutzten denselben SCADA-Integrator und wurden auf Basis der von uns gemeldeten IOCs vorsorglich überprüft. Bei einem davon hat das Lagezentrum verdächtige Login-Versuche entdeckt — vermutlich derselbe Angreifer. Sektor-Schutz hat funktioniert.",
+                "roleId": "role-ot-security"
+              }
             ],
             "decisions": [
               {
@@ -1178,10 +1439,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Aktive Mitarbeit an CyberSec@Wasser-Lagezentrum stärkt den ganzen Sektor und erhöht die eigene Glaubwürdigkeit. Passive Mitarbeit reduziert eigenen Aufwand, gibt aber das Sektor-Schutz-Potenzial nicht voll.",
                 "options": [
-                  { "id": "opt-cross-sector-active", "label": "Aktiv: Vollständige Sample-Telemetrie an CyberSec@Wasser, Telefonkonferenz-Teilnahme, gegebenenfalls anonymisiertes Lessons-Learned-Briefing für andere Versorger", "consequence": "Sektor-Schutz maximal. Eigene Reputation als Vorbild-Versorger gestärkt. Zeit-Aufwand für Krisenstab erhöht.", "evaluationHints": ["Aktive Sektor-CERT-Mitarbeit"], "scoreContribution": 3 },
-                  { "id": "opt-cross-sector-passive", "label": "Passiv: Pflicht-Meldung an BSI gemäß NIS2, keine zusätzliche Sektor-Mitarbeit", "consequence": "Aufwand niedriger. Sektor-Schutz-Potenzial nicht voll realisiert. Keine zusätzliche Reputation-Wirkung.", "evaluationHints": ["Pflicht erfüllt, kein Sektor-Mehrwert"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-cross-sector-active",
+                    "label": "Aktiv: Vollständige Sample-Telemetrie an CyberSec@Wasser, Telefonkonferenz-Teilnahme, gegebenenfalls anonymisiertes Lessons-Learned-Briefing für andere Versorger",
+                    "consequence": "Sektor-Schutz maximal. Eigene Reputation als Vorbild-Versorger gestärkt. Zeit-Aufwand für Krisenstab erhöht.",
+                    "evaluationHints": [
+                      "Aktive Sektor-CERT-Mitarbeit"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-cross-sector-passive",
+                    "label": "Passiv: Pflicht-Meldung an BSI gemäß NIS2, keine zusätzliche Sektor-Mitarbeit",
+                    "consequence": "Aufwand niedriger. Sektor-Schutz-Potenzial nicht voll realisiert. Keine zusätzliche Reputation-Wirkung.",
+                    "evaluationHints": [
+                      "Pflicht erfüllt, kein Sektor-Mehrwert"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-cross-sector-coordination"]
+                "relatedCriteria": [
+                  "crit-cross-sector-coordination"
+                ]
               }
             ]
           },
@@ -1189,7 +1468,12 @@
             "t": 175,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-ot-hardening-roadmap", "title": "OT-Härtungs-Roadmap entworfen", "description": "OT-Sicherheits-Beauftragte*r legt Roadmap vor: (1) Innerhalb 14 Tagen: Plausibilitäts-Korridore enger setzen, Sprung-Begrenzung pro Operator-Eingabe verschärfen, alle Service-Provider-VPN-Zugänge auf Jump-Host umstellen mit MFA + Vier-Augen-Freigabe. (2) Innerhalb 90 Tagen: Out-of-Band-SIEM für SCADA-Events ausbauen, Operator-Eingaben-Stichproben-Programm einführen. (3) Innerhalb 12 Monaten: Migration auf neueres Leitsystem mit modernem Authentifizierungs-Stack.", "roleId": "role-ot-security" }
+              {
+                "id": "inj-ot-hardening-roadmap",
+                "title": "OT-Härtungs-Roadmap entworfen",
+                "description": "OT-Sicherheits-Beauftragte*r legt Roadmap vor: (1) Innerhalb 14 Tagen: Plausibilitäts-Korridore enger setzen, Sprung-Begrenzung pro Operator-Eingabe verschärfen, alle Service-Provider-VPN-Zugänge auf Jump-Host umstellen mit MFA + Vier-Augen-Freigabe. (2) Innerhalb 90 Tagen: Out-of-Band-SIEM für SCADA-Events ausbauen, Operator-Eingaben-Stichproben-Programm einführen. (3) Innerhalb 12 Monaten: Migration auf neueres Leitsystem mit modernem Authentifizierungs-Stack.",
+                "roleId": "role-ot-security"
+              }
             ],
             "decisions": [
               {
@@ -1198,10 +1482,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen Geschwindigkeit (alle drei Stufen sofort, Budget-Umschichtung) und gestaffelter Umsetzung (Stufe 1 sofort, Stufe 2/3 in der nächsten Haushaltsplanung). Die kommunale Haushalts-Disziplin macht den Sofort-Pfad oft schwierig.",
                 "options": [
-                  { "id": "opt-hardening-fast", "label": "Sofort-Pfad: Stufe 1 in 14 Tagen, Stufe 2 in 90 Tagen, Stufe 3 mit Sondermittel-Antrag an Stadtrat", "consequence": "Maximale Risiko-Reduktion, kommunalpolitisch verteidigbar wegen aktuellem Vorfall. Empfohlene Variante.", "evaluationHints": ["Sofort-Härtung priorisiert"], "scoreContribution": 3 },
-                  { "id": "opt-hardening-staged", "label": "Gestaffelt: Stufe 1 in 14 Tagen, Stufe 2/3 in nächster regulärer Haushaltsplanung", "consequence": "Budget-konformer Pfad. Risiko bleibt teilweise offen für 6–12 Monate. Akzeptabel wenn Stufe 1 ausreichend stark ist.", "evaluationHints": ["Gestaffelte Härtung"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-hardening-fast",
+                    "label": "Sofort-Pfad: Stufe 1 in 14 Tagen, Stufe 2 in 90 Tagen, Stufe 3 mit Sondermittel-Antrag an Stadtrat",
+                    "consequence": "Maximale Risiko-Reduktion, kommunalpolitisch verteidigbar wegen aktuellem Vorfall. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Sofort-Härtung priorisiert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-hardening-staged",
+                    "label": "Gestaffelt: Stufe 1 in 14 Tagen, Stufe 2/3 in nächster regulärer Haushaltsplanung",
+                    "consequence": "Budget-konformer Pfad. Risiko bleibt teilweise offen für 6–12 Monate. Akzeptabel wenn Stufe 1 ausreichend stark ist.",
+                    "evaluationHints": [
+                      "Gestaffelte Härtung"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität"
+                ]
               }
             ]
           },
@@ -1209,19 +1511,59 @@
             "t": 180,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro", "title": "Retro-Kickoff", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im Wasser-Kontext besonders relevant: Plausibilitäts-Sperr-Schwellen, SCADA-Integrator-Sicherheit, CyberSec@Wasser-Anbindungs-Disziplin, Bevölkerungs-Warn-Plan-Aktualität, gemeinsame Übung mit Bürgermeister-Büro und Gesundheitsamt.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro",
+                "title": "Retro-Kickoff",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im Wasser-Kontext besonders relevant: Plausibilitäts-Sperr-Schwellen, SCADA-Integrator-Sicherheit, CyberSec@Wasser-Anbindungs-Disziplin, Bevölkerungs-Warn-Plan-Aktualität, gemeinsame Übung mit Bürgermeister-Büro und Gesundheitsamt.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-trinkwv-frist", "description": "TrinkwV-Anzeige beim Gesundheitsamt unverzüglich (§ 11/§ 13 TrinkwV 2023)", "weight": 2, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld, Bevölkerungs-Warnung, OT-Härtungs-Investition)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-operations-trinkwasser-qualität", "description": "Trinkwasser-Qualität gewahrt (Plausibilitäts-Sperre, Out-of-Band-Probennahme, OT-Härtung)", "weight": 2, "category": "operations" },
-          { "id": "crit-communication-bevoelkerung", "description": "Bevölkerungs-Information (Multi-Channel, Vorsorge-Information vs. Akut-Warnung, koordiniert mit Bürgermeister und Gesundheitsamt)", "weight": 2, "category": "communication" },
-          { "id": "crit-communication-mitarbeiter", "description": "Belegschaft-Information mit klarer Verhaltens-Empfehlung", "weight": 1, "category": "communication" },
-          { "id": "crit-cross-sector-coordination", "description": "Sektor-CERT-Mitarbeit (CyberSec@Wasser-Lagezentrum, Sektor-Schutz-Beitrag)", "weight": 1, "category": "coordination" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-trinkwv-frist",
+            "description": "TrinkwV-Anzeige beim Gesundheitsamt unverzüglich (§ 11/§ 13 TrinkwV 2023)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld, Bevölkerungs-Warnung, OT-Härtungs-Investition)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-trinkwasser-qualität",
+            "description": "Trinkwasser-Qualität gewahrt (Plausibilitäts-Sperre, Out-of-Band-Probennahme, OT-Härtung)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-communication-bevoelkerung",
+            "description": "Bevölkerungs-Information (Multi-Channel, Vorsorge-Information vs. Akut-Warnung, koordiniert mit Bürgermeister und Gesundheitsamt)",
+            "weight": 2,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-mitarbeiter",
+            "description": "Belegschaft-Information mit klarer Verhaltens-Empfehlung",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-cross-sector-coordination",
+            "description": "Sektor-CERT-Mitarbeit (CyberSec@Wasser-Lagezentrum, Sektor-Schutz-Beitrag)",
+            "weight": 1,
+            "category": "coordination"
+          }
         ]
       },
       {
@@ -1229,23 +1571,57 @@
         "version": "1.0.0",
         "title": "Hochwasser-Ereignis mit Wasserwerk-Überflutung und Klärwerk-Überlauf",
         "summary": "Ein dreitägiges Starkregen-Ereignis (Flussgebiets-Wasserstand-Warnstufe 3) bringt das Hauptwasserwerk eines kommunalen Versorgers in Überflutungsgefahr und das angeschlossene Klärwerk in Mischwasser-Überlauf-Gefahr. Trinkwasser-Aufbereitung muss in Notbetrieb fahren (Aktivkohle-Filter teils unter Wasser, Mess-Sensorik gefährdet), Klärwerk-Mischwasser-Überlauf in den Vorfluter ist mit der unteren Wasserbehörde zu koordinieren. Das Szenario simuliert die Krisenstabsarbeit über 2,5 Stunden für einen kommunalen Versorger (ca. 280.000 versorgte Personen, NIS2-„wichtige Einrichtung“). Schwerpunkt: Notwasserversorgung mobilisieren, Bevölkerung mit Vorsorge-Empfehlung informieren (Vorratshaltung, Abkochen-Empfehlung), Klärwerk-Notabschaltung vs. kontrollierter Überlauf, Multi-Behörden-Koordination (Gesundheitsamt, untere Wasserbehörde, BBK, Kommune). Realitätsbezug: Hochwasser Süddeutschland Mai/Juni 2024 mit 100–150 mm Niederschlag im Allgäu/Augsburg, mehreren Klärwerken im Mischwasser-Überlauf, Trinkwasser-Einschränkung in Rudersberg. Das Szenario komprimiert die operative Krisenstabsarbeit auf 150 Minuten.",
-        "sectors": ["Wasser"],
-        "applicableRegimes": ["TrinkwV", "WHG"],
+        "sectors": [
+          "Wasser"
+        ],
+        "applicableRegimes": [
+          "TrinkwV",
+          "WHG"
+        ],
         "durationMinutes": 150,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Notwasser-Aktivierung, Bevölkerungs-Information, Klärwerk-Notabschaltung). Schnittstelle zu Bürgermeister-Büro, BBK und Landrats-Ebene. Bei kommunalen Versorgern üblich besetzt mit Geschäftsführer*in oder Werksleitung." },
-          { "id": "role-wassermeister", "title": "Wassermeister*in", "briefing": "Operative Aufbereitungs-Verantwortung. Beurteilt Wasserwerks-Status (Schaltanlagen, Mess-Sensorik, Aktivkohle-Filter), entscheidet über Notbetrieb-Modus, koordiniert Probennahme nach Pegel-Spitze." },
-          { "id": "role-wwtp-lead", "title": "Klärwerks-Leitung", "briefing": "Operative Klärwerks-Verantwortung. Beurteilt Belebungsbecken-Belüftung, Mischwasser-Zufluss, Faulturm-Status. Trifft Entscheidung über Mischwasser-Überlauf-Aktivierung in Abstimmung mit unterer Wasserbehörde." },
-          { "id": "role-untere-wasserbehoerde-liaison", "title": "Schnittstelle untere Wasserbehörde / Compliance", "briefing": "Koordiniert WHG-Anzeige bei Mischwasser-Überlauf in den Vorfluter, klärt Genehmigung der Notabschaltungs-Aktivierung, dokumentiert nach WHG § 54 für spätere behördliche Bewertung. Direkter Draht zu Sachbearbeiter*in untere Wasserbehörde." },
-          { "id": "role-gesundheitsamt-liaison", "title": "Schnittstelle Gesundheitsamt", "briefing": "Verantwortet TrinkwV-Anzeige bei Beeinträchtigung der Aufbereitung (§ 11/§ 13), koordiniert Probennahme nach Hochwasser, bewertet Notwendigkeit von Abkoch-Empfehlung gegenüber Bevölkerung. Direkter Draht zu Amtsärzt*in." },
-          { "id": "role-press", "title": "Pressesprecher / Bevölkerungs-Kommunikation", "briefing": "Externe Kommunikation und Multi-Channel-Bevölkerungs-Information. Vorsorge-Empfehlungen (Vorratshaltung, Abkochen) müssen klar und nicht panik-erzeugend formuliert werden. Schnittstelle zu Lokalmedien, Bürgermeister-Büro und BBK-Pressestelle." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Notwasser-Aktivierung, Bevölkerungs-Information, Klärwerk-Notabschaltung). Schnittstelle zu Bürgermeister-Büro, BBK und Landrats-Ebene. Bei kommunalen Versorgern üblich besetzt mit Geschäftsführer*in oder Werksleitung."
+          },
+          {
+            "id": "role-wassermeister",
+            "title": "Wassermeister*in",
+            "briefing": "Operative Aufbereitungs-Verantwortung. Beurteilt Wasserwerks-Status (Schaltanlagen, Mess-Sensorik, Aktivkohle-Filter), entscheidet über Notbetrieb-Modus, koordiniert Probennahme nach Pegel-Spitze."
+          },
+          {
+            "id": "role-wwtp-lead",
+            "title": "Klärwerks-Leitung",
+            "briefing": "Operative Klärwerks-Verantwortung. Beurteilt Belebungsbecken-Belüftung, Mischwasser-Zufluss, Faulturm-Status. Trifft Entscheidung über Mischwasser-Überlauf-Aktivierung in Abstimmung mit unterer Wasserbehörde."
+          },
+          {
+            "id": "role-untere-wasserbehoerde-liaison",
+            "title": "Schnittstelle untere Wasserbehörde / Compliance",
+            "briefing": "Koordiniert WHG-Anzeige bei Mischwasser-Überlauf in den Vorfluter, klärt Genehmigung der Notabschaltungs-Aktivierung, dokumentiert nach WHG § 54 für spätere behördliche Bewertung. Direkter Draht zu Sachbearbeiter*in untere Wasserbehörde."
+          },
+          {
+            "id": "role-gesundheitsamt-liaison",
+            "title": "Schnittstelle Gesundheitsamt",
+            "briefing": "Verantwortet TrinkwV-Anzeige bei Beeinträchtigung der Aufbereitung (§ 11/§ 13), koordiniert Probennahme nach Hochwasser, bewertet Notwendigkeit von Abkoch-Empfehlung gegenüber Bevölkerung. Direkter Draht zu Amtsärzt*in."
+          },
+          {
+            "id": "role-press",
+            "title": "Pressesprecher / Bevölkerungs-Kommunikation",
+            "briefing": "Externe Kommunikation und Multi-Channel-Bevölkerungs-Information. Vorsorge-Empfehlungen (Vorratshaltung, Abkochen) müssen klar und nicht panik-erzeugend formuliert werden. Schnittstelle zu Lokalmedien, Bürgermeister-Büro und BBK-Pressestelle."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-water-level-alert", "title": "Pegel-Warnstufe 3 erreicht", "description": "Wassermeister*in meldet: Pegel an der Hochwasser-Mess-Stelle hat Warnstufe 3 erreicht. DWD-Vorhersage: weitere 30–60 mm Niederschlag in den nächsten 12 h, Pegel-Spitze in 14–18 h erwartet. Das Hauptwasserwerk liegt im potenziellen Überflutungs-Bereich, Aktivkohle-Filter und ein Teil der Mess-Sensorik im Untergeschoss. Klärwerk meldet bereits jetzt rapide ansteigenden Mischwasser-Zufluss.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-water-level-alert",
+                "title": "Pegel-Warnstufe 3 erreicht",
+                "description": "Wassermeister*in meldet: Pegel an der Hochwasser-Mess-Stelle hat Warnstufe 3 erreicht. DWD-Vorhersage: weitere 30–60 mm Niederschlag in den nächsten 12 h, Pegel-Spitze in 14–18 h erwartet. Das Hauptwasserwerk liegt im potenziellen Überflutungs-Bereich, Aktivkohle-Filter und ein Teil der Mess-Sensorik im Untergeschoss. Klärwerk meldet bereits jetzt rapide ansteigenden Mischwasser-Zufluss.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1254,10 +1630,28 @@
                 "roleId": "role-wassermeister",
                 "guidance": "Trade-off zwischen Sofort-Eskalation (Krisenstab aktiviert, Personal mobilisiert) und Vorab-Vorbereitung (Sandsack-Ausgabe, Schaltanlagen-Schutz, dann Eskalation falls Lage sich verschärft). Bei Hochwasser-Schablone Süddeutschland 2024 hat zu späte Eskalation in mehreren Fällen zu Mischwasser-Überlauf ohne Behörden-Koordination geführt.",
                 "options": [
-                  { "id": "opt-immediate-escalation", "label": "Sofort-Eskalation an Krisenstabs-Leitung, parallel Sandsack-Ausgabe und Schaltanlagen-Schutz im Wasserwerk, Klärwerks-Leitung ins Stand-by", "consequence": "Krisenstab innerhalb 30 min einsatzbereit, Vorbereitungs-Maßnahmen laufen parallel. Empfohlene Variante.", "evaluationHints": ["Schnelle Eskalation bei Pegel-Warnstufe 3"], "scoreContribution": 3 },
-                  { "id": "opt-prep-then-escalate", "label": "Erst Vorbereitungs-Maßnahmen, dann Eskalation falls Lage sich verschärft", "consequence": "30–60 min Verzögerung der Krisenstab-Aktivierung. Bei schneller Pegel-Spitze kostbar verlorene Zeit. Schwächere Option.", "evaluationHints": ["Verzögerte Eskalation"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-immediate-escalation",
+                    "label": "Sofort-Eskalation an Krisenstabs-Leitung, parallel Sandsack-Ausgabe und Schaltanlagen-Schutz im Wasserwerk, Klärwerks-Leitung ins Stand-by",
+                    "consequence": "Krisenstab innerhalb 30 min einsatzbereit, Vorbereitungs-Maßnahmen laufen parallel. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Schnelle Eskalation bei Pegel-Warnstufe 3"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-prep-then-escalate",
+                    "label": "Erst Vorbereitungs-Maßnahmen, dann Eskalation falls Lage sich verschärft",
+                    "consequence": "30–60 min Verzögerung der Krisenstab-Aktivierung. Bei schneller Pegel-Spitze kostbar verlorene Zeit. Schwächere Option.",
+                    "evaluationHints": [
+                      "Verzögerte Eskalation"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1265,7 +1659,12 @@
             "t": 10,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-double-impact", "title": "Doppel-Lage bestätigt: Wasserwerk + Klärwerk", "description": "Klärwerks-Leitung meldet: Mischwasser-Zufluss bereits 180 % der Trockenwetter-Kapazität, Tendenz steigend. Belebungsbecken nimmt es noch auf, aber bei weiterer Steigerung droht Überlauf in den Vorfluter (Bach durch Vorort-Wohngebiet, mündet in Fluss). Wassermeister*in meldet parallel: Schaltanlagen-Schutz im Wasserwerk-Untergeschoss läuft, aber bei Pegel-Spitze in 14 h reicht das nicht — Sofort-Verlagerung der mobilen Aufbereitungs-Komponenten in höher gelegene Räume erforderlich.", "roleId": "role-wwtp-lead" }
+              {
+                "id": "inj-double-impact",
+                "title": "Doppel-Lage bestätigt: Wasserwerk + Klärwerk",
+                "description": "Klärwerks-Leitung meldet: Mischwasser-Zufluss bereits 180 % der Trockenwetter-Kapazität, Tendenz steigend. Belebungsbecken nimmt es noch auf, aber bei weiterer Steigerung droht Überlauf in den Vorfluter (Bach durch Vorort-Wohngebiet, mündet in Fluss). Wassermeister*in meldet parallel: Schaltanlagen-Schutz im Wasserwerk-Untergeschoss läuft, aber bei Pegel-Spitze in 14 h reicht das nicht — Sofort-Verlagerung der mobilen Aufbereitungs-Komponenten in höher gelegene Räume erforderlich.",
+                "roleId": "role-wwtp-lead"
+              }
             ],
             "decisions": [
               {
@@ -1274,11 +1673,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen vollem Schutz beider Anlagen (maximaler Personal-Aufwand, Mobilisierung externer Hilfe) und priorisiertem Schutz (Wasserwerk zuerst wegen Trinkwasser-Versorgungs-Pflicht, Klärwerk-Überlauf akzeptiert mit WHG-Anzeige). Bei Süddeutschland-2024-Schablone haben Kommunen, die früh externe Hilfe (THW, BBK-mobile-Trinkwasser-Aufbereitung) angefordert haben, deutlich besser bestanden.",
                 "options": [
-                  { "id": "opt-prep-both", "label": "Voller Schutz beider Anlagen: Wasserwerks-Komponenten verlagern, Klärwerk-Pufferbecken aktivieren, externe Hilfe (THW, Nachbar-Versorger) anfordern", "consequence": "Maximaler Schutz, aber hoher Personal-Aufwand. Externe Hilfe muss in 4–8 h vor Ort sein. Empfohlene Variante.", "evaluationHints": ["Vollständige Schutz-Strategie"], "scoreContribution": 3 },
-                  { "id": "opt-prep-prioritize-water", "label": "Priorisierter Schutz Wasserwerk, Klärwerk-Überlauf wird WHG-konform angekündigt und akzeptiert", "consequence": "Trinkwasser-Versorgung gesichert, Klärwerk-Überlauf mit WHG-Anzeige. Mischwasser im Vorfluter mit Umweltfolgen, aber kontrolliert.", "evaluationHints": ["Priorisierter Schutz mit WHG-Anzeige"], "scoreContribution": 2 },
-                  { "id": "opt-prep-wait", "label": "Vorbereitung minimal halten, abwarten ob Pegel-Spitze tatsächlich eintritt", "consequence": "Bei tatsächlicher Pegel-Spitze ist es zu spät. Schwächere Option.", "evaluationHints": ["Verzögerte Vorbereitung, hohes Risiko"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-prep-both",
+                    "label": "Voller Schutz beider Anlagen: Wasserwerks-Komponenten verlagern, Klärwerk-Pufferbecken aktivieren, externe Hilfe (THW, Nachbar-Versorger) anfordern",
+                    "consequence": "Maximaler Schutz, aber hoher Personal-Aufwand. Externe Hilfe muss in 4–8 h vor Ort sein. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Vollständige Schutz-Strategie"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-prep-prioritize-water",
+                    "label": "Priorisierter Schutz Wasserwerk, Klärwerk-Überlauf wird WHG-konform angekündigt und akzeptiert",
+                    "consequence": "Trinkwasser-Versorgung gesichert, Klärwerk-Überlauf mit WHG-Anzeige. Mischwasser im Vorfluter mit Umweltfolgen, aber kontrolliert.",
+                    "evaluationHints": [
+                      "Priorisierter Schutz mit WHG-Anzeige"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-prep-wait",
+                    "label": "Vorbereitung minimal halten, abwarten ob Pegel-Spitze tatsächlich eintritt",
+                    "consequence": "Bei tatsächlicher Pegel-Spitze ist es zu spät. Schwächere Option.",
+                    "evaluationHints": [
+                      "Verzögerte Vorbereitung, hohes Risiko"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität", "crit-operations-klaerwerk-resilience"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität",
+                  "crit-operations-klaerwerk-resilience"
+                ]
               }
             ]
           },
@@ -1286,8 +1712,18 @@
             "t": 25,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, Wassermeister*in, Klärwerks-Leitung, untere-Wasserbehörde-Schnittstelle, Gesundheitsamt-Schnittstelle, Pressesprecher einberufen. Bürgermeister-Büro im Stand-by, BBK-Vertretung über Telefonkonferenz zugeschaltet, THW-Anforderung läuft.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-emergency-supply", "title": "Notwasserversorgungs-Mobilisierung", "description": "Tankwagen-Rahmenvertrag aktiviert: vier Tankwagen kommen in 4–6 h. Notbrunnen-Liste durchgegangen: drei aktive Notbrunnen verfügbar (alle drei vor Hochwasser-Linie), Aktivierung benötigt 2–3 h pro Brunnen. Verteilstellen-Plan mit Kommune läuft an: 12 Verteilstellen in Schul-/Bürger-Hallen vorgesehen, Aufbau durch THW.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, Wassermeister*in, Klärwerks-Leitung, untere-Wasserbehörde-Schnittstelle, Gesundheitsamt-Schnittstelle, Pressesprecher einberufen. Bürgermeister-Büro im Stand-by, BBK-Vertretung über Telefonkonferenz zugeschaltet, THW-Anforderung läuft.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-emergency-supply",
+                "title": "Notwasserversorgungs-Mobilisierung",
+                "description": "Tankwagen-Rahmenvertrag aktiviert: vier Tankwagen kommen in 4–6 h. Notbrunnen-Liste durchgegangen: drei aktive Notbrunnen verfügbar (alle drei vor Hochwasser-Linie), Aktivierung benötigt 2–3 h pro Brunnen. Verteilstellen-Plan mit Kommune läuft an: 12 Verteilstellen in Schul-/Bürger-Hallen vorgesehen, Aufbau durch THW.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1296,10 +1732,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen früher Aktivierung (sicher, aber Bevölkerung wird vor Pegel-Spitze schon eingeschränkt) und reaktiver Aktivierung (effizient, aber bei tatsächlicher Aufbereitungs-Beeinträchtigung Versorgungs-Lücke von 4–6 h bis Tankwagen vor Ort sind). DVGW W 405 empfiehlt vorbereitende Aktivierung bei klar ansteigender Lage.",
                 "options": [
-                  { "id": "opt-emergency-preemptive", "label": "Preemptive Aktivierung: Tankwagen kommen, Notbrunnen werden aktiviert, Verteilstellen werden aufgebaut — auch wenn Aufbereitung noch läuft", "consequence": "Versorgungs-Lücke vermeidbar. Aufwand und Kosten höher (Tankwagen-Tagessätze, THW-Mobilisierung), Bevölkerung muss informiert werden. Empfohlene Variante.", "evaluationHints": ["Preemptive Aktivierung"], "scoreContribution": 3 },
-                  { "id": "opt-emergency-reactive", "label": "Reaktive Aktivierung erst bei tatsächlicher Beeinträchtigung der Aufbereitung", "consequence": "4–6 h Versorgungs-Lücke wahrscheinlich. Bei Pegel-Spitze schwer kontrollierbar. Akzeptabel nur wenn klare Triggers definiert sind.", "evaluationHints": ["Reaktive Aktivierung mit Versorgungs-Lücken-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-emergency-preemptive",
+                    "label": "Preemptive Aktivierung: Tankwagen kommen, Notbrunnen werden aktiviert, Verteilstellen werden aufgebaut — auch wenn Aufbereitung noch läuft",
+                    "consequence": "Versorgungs-Lücke vermeidbar. Aufwand und Kosten höher (Tankwagen-Tagessätze, THW-Mobilisierung), Bevölkerung muss informiert werden. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Preemptive Aktivierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-emergency-reactive",
+                    "label": "Reaktive Aktivierung erst bei tatsächlicher Beeinträchtigung der Aufbereitung",
+                    "consequence": "4–6 h Versorgungs-Lücke wahrscheinlich. Bei Pegel-Spitze schwer kontrollierbar. Akzeptabel nur wenn klare Triggers definiert sind.",
+                    "evaluationHints": [
+                      "Reaktive Aktivierung mit Versorgungs-Lücken-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität"
+                ]
               }
             ]
           },
@@ -1307,7 +1761,12 @@
             "t": 50,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-population-warning-question", "title": "Bevölkerungs-Information ist überfällig", "description": "Pressesprecher meldet: Lokalradio fragt schon nach (sie haben das BBK-Telefonkonferenz-Geräusch durch eigene Quellen mitgekriegt), Bürger sehen die Tankwagen-Anfahrt und stellen Fragen an Stadt-Hotline. Empfehlung: jetzt strukturierte Multi-Channel-Information mit Vorsorge-Empfehlung (Vorratshaltung 1–2 Tage Trinkwasser, ggf. spätere Abkoch-Empfehlung), bevor das Narrativ kippt.", "roleId": "role-press" }
+              {
+                "id": "inj-population-warning-question",
+                "title": "Bevölkerungs-Information ist überfällig",
+                "description": "Pressesprecher meldet: Lokalradio fragt schon nach (sie haben das BBK-Telefonkonferenz-Geräusch durch eigene Quellen mitgekriegt), Bürger sehen die Tankwagen-Anfahrt und stellen Fragen an Stadt-Hotline. Empfehlung: jetzt strukturierte Multi-Channel-Information mit Vorsorge-Empfehlung (Vorratshaltung 1–2 Tage Trinkwasser, ggf. spätere Abkoch-Empfehlung), bevor das Narrativ kippt.",
+                "roleId": "role-press"
+              }
             ],
             "decisions": [
               {
@@ -1316,11 +1775,37 @@
                 "roleId": "role-press",
                 "guidance": "Wasser-spezifische Härte: Bevölkerung muss Vorratshaltung und gegebenenfalls Abkoch-Empfehlung umsetzen. Multi-Channel-Optionen: NINA-Push, Lokalradio, Lautsprecher-Wagen, Aushänge, Stadt-Website, Social Media, ggf. Sirenen (für akute Lage). Aktuell ist die Lage angespannt, aber nicht akut — die Kommunikation muss Vorsorge-Charakter haben, nicht Panik. Vorab-Texte aus dem Bevölkerungs-Warnplan stehen bereit.",
                 "options": [
-                  { "id": "opt-info-multichannel-vorsorge", "label": "Multi-Channel-Vorsorge-Information (NINA + Lokalradio + Stadt-Website + Aushänge in Hochwasser-Vororten + Social Media): Pegel-Lage, Vorsorge-Empfehlung Vorratshaltung 1–2 Tage Trinkwasser, Notwasserversorgungs-Verteilstellen werden aufgebaut, weitere Updates folgen", "consequence": "Krisenkultur sichtbar, Vertrauen erhalten. Vorratshaltungs-Empfehlung gibt der Bevölkerung Handlungsoption. Empfohlene Variante.", "evaluationHints": ["Multi-Channel-Vorsorge-Information — gleichwertig zu opt-info-coordinated"], "scoreContribution": 2 },
-                  { "id": "opt-info-coordinated", "label": "Koordinierte Information mit Bürgermeister-Büro und BBK: gemeinsamer Auftritt, einheitliche Sprachregelung, Vorsorge-Empfehlung über Stadt-Kanäle und über NINA", "consequence": "Politische Disziplin maximal, Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung. Gleichwertige Best-Practice-Variante.", "evaluationHints": ["Koordinierte Multi-Stakeholder-Kommunikation — gleichwertig zu opt-info-multichannel-vorsorge"], "scoreContribution": 2 },
-                  { "id": "opt-info-late", "label": "Information erst nach Pegel-Spitze und konkreter Beeinträchtigung", "consequence": "Bevölkerung erfährt aus Lokalradio / Twitter, Vertrauensschaden hoch. Vorratshaltung kommt zu spät. Schwächere Option.", "evaluationHints": ["Verzögerte Information"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-info-multichannel-vorsorge",
+                    "label": "Multi-Channel-Vorsorge-Information (NINA + Lokalradio + Stadt-Website + Aushänge in Hochwasser-Vororten + Social Media): Pegel-Lage, Vorsorge-Empfehlung Vorratshaltung 1–2 Tage Trinkwasser, Notwasserversorgungs-Verteilstellen werden aufgebaut, weitere Updates folgen",
+                    "consequence": "Krisenkultur sichtbar, Vertrauen erhalten. Vorratshaltungs-Empfehlung gibt der Bevölkerung Handlungsoption. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Multi-Channel-Vorsorge-Information — gleichwertig zu opt-info-coordinated"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-info-coordinated",
+                    "label": "Koordinierte Information mit Bürgermeister-Büro und BBK: gemeinsamer Auftritt, einheitliche Sprachregelung, Vorsorge-Empfehlung über Stadt-Kanäle und über NINA",
+                    "consequence": "Politische Disziplin maximal, Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung. Gleichwertige Best-Practice-Variante.",
+                    "evaluationHints": [
+                      "Koordinierte Multi-Stakeholder-Kommunikation — gleichwertig zu opt-info-multichannel-vorsorge"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-info-late",
+                    "label": "Information erst nach Pegel-Spitze und konkreter Beeinträchtigung",
+                    "consequence": "Bevölkerung erfährt aus Lokalradio / Twitter, Vertrauensschaden hoch. Vorratshaltung kommt zu spät. Schwächere Option.",
+                    "evaluationHints": [
+                      "Verzögerte Information"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-bevoelkerung"]
+                "relatedCriteria": [
+                  "crit-communication-bevoelkerung"
+                ]
               }
             ]
           },
@@ -1328,7 +1813,12 @@
             "t": 75,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-overflow-decision", "title": "Klärwerk: Mischwasser-Überlauf droht in 90 Minuten", "description": "Klärwerks-Leitung meldet: Mischwasser-Zufluss bei 240 % der Trockenwetter-Kapazität, Pufferbecken bei 90 % Füllstand. Bei aktuellem Anstieg droht Überlauf in den Vorfluter in 90 Minuten. Entscheidung steht an: kontrollierter Mischwasser-Überlauf in den Vorfluter mit WHG-Anzeige, oder Klärwerk-Notabschaltung mit Mischwasser-Stau im Kanalnetz (Risiko: Rückstau in tieferliegende Stadtteile).", "roleId": "role-wwtp-lead" }
+              {
+                "id": "inj-overflow-decision",
+                "title": "Klärwerk: Mischwasser-Überlauf droht in 90 Minuten",
+                "description": "Klärwerks-Leitung meldet: Mischwasser-Zufluss bei 240 % der Trockenwetter-Kapazität, Pufferbecken bei 90 % Füllstand. Bei aktuellem Anstieg droht Überlauf in den Vorfluter in 90 Minuten. Entscheidung steht an: kontrollierter Mischwasser-Überlauf in den Vorfluter mit WHG-Anzeige, oder Klärwerk-Notabschaltung mit Mischwasser-Stau im Kanalnetz (Risiko: Rückstau in tieferliegende Stadtteile).",
+                "roleId": "role-wwtp-lead"
+              }
             ],
             "decisions": [
               {
@@ -1337,11 +1827,38 @@
                 "roleId": "role-wwtp-lead",
                 "guidance": "Klassischer Klärwerks-Trade-off bei Hochwasser. Trade-off zwischen kontrolliertem Mischwasser-Überlauf (WHG-Anzeige, Umweltfolgen im Vorfluter, aber Klärwerk bleibt intakt) und Notabschaltung mit Kanalnetz-Stau (potenzielle Rückstau-Schäden in tieferliegenden Stadtteilen, dafür Klärwerk-Biologie geschützt). Untere Wasserbehörde muss in beiden Fällen einbezogen werden. Süddeutschland-2024-Schablone: mehrere Kommunen wählten kontrollierten Überlauf mit Behörden-Koordination und kamen damit gut durch.",
                 "options": [
-                  { "id": "opt-wwtp-controlled-overflow", "label": "Kontrollierter Mischwasser-Überlauf nach Genehmigung der unteren Wasserbehörde, WHG-Anzeige mit Sachverhalts-Bericht, Bevölkerung im Vorfluter-Bereich mit Bade-/Spielverbot informieren", "consequence": "Klärwerk bleibt intakt, Umweltfolgen im Vorfluter (Mischwasser-Belastung über 24–48 h, Verdünnung durch Hochwasser mildert). Empfohlene Variante bei klar absehbarer Pegel-Spitze und Genehmigungs-Zeit. Gleichwertig zu opt-wwtp-shutdown-with-stop.", "evaluationHints": ["Kontrollierter Überlauf mit Behörden-Koordination — gleichwertig zu opt-wwtp-shutdown-with-stop"], "scoreContribution": 2 },
-                  { "id": "opt-wwtp-shutdown-with-stop", "label": "Klärwerk-Notabschaltung mit aktivem Rückstau-Schutz (mobile Pumpen, Sandsäcke in Risiko-Stadtteilen), Mischwasser staut im Kanalnetz", "consequence": "Klärwerk-Biologie geschützt, Vorfluter unbelastet. Risiko Rückstau in tieferliegende Stadtteile mit Keller-Überschwemmungs-Schäden. Aufwendiger zu koordinieren, aber bei besonders sensiblen Vorfluter-Strecken (Trinkwasser-Schutzgebiet, Naturschutz) richtige Variante. Gleichwertig zu opt-wwtp-controlled-overflow.", "evaluationHints": ["Notabschaltung mit Rückstau-Schutz — gleichwertig zu opt-wwtp-controlled-overflow"], "scoreContribution": 2 },
-                  { "id": "opt-wwtp-uncontrolled", "label": "Unkontrollierter Überlauf ohne vorherige WHG-Anzeige, später Sachverhalts-Bericht", "consequence": "WHG-Verstoß formal. Bußgeld nach WHG, Reputations-Schaden. Schwächere Option, nur akzeptabel wenn WHG-Anzeige aus Zeitgründen objektiv nicht möglich war.", "evaluationHints": ["Unkontrollierter Überlauf, WHG-Verstoß"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-wwtp-controlled-overflow",
+                    "label": "Kontrollierter Mischwasser-Überlauf nach Genehmigung der unteren Wasserbehörde, WHG-Anzeige mit Sachverhalts-Bericht, Bevölkerung im Vorfluter-Bereich mit Bade-/Spielverbot informieren",
+                    "consequence": "Klärwerk bleibt intakt, Umweltfolgen im Vorfluter (Mischwasser-Belastung über 24–48 h, Verdünnung durch Hochwasser mildert). Empfohlene Variante bei klar absehbarer Pegel-Spitze und Genehmigungs-Zeit. Gleichwertig zu opt-wwtp-shutdown-with-stop.",
+                    "evaluationHints": [
+                      "Kontrollierter Überlauf mit Behörden-Koordination — gleichwertig zu opt-wwtp-shutdown-with-stop"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-wwtp-shutdown-with-stop",
+                    "label": "Klärwerk-Notabschaltung mit aktivem Rückstau-Schutz (mobile Pumpen, Sandsäcke in Risiko-Stadtteilen), Mischwasser staut im Kanalnetz",
+                    "consequence": "Klärwerk-Biologie geschützt, Vorfluter unbelastet. Risiko Rückstau in tieferliegende Stadtteile mit Keller-Überschwemmungs-Schäden. Aufwendiger zu koordinieren, aber bei besonders sensiblen Vorfluter-Strecken (Trinkwasser-Schutzgebiet, Naturschutz) richtige Variante. Gleichwertig zu opt-wwtp-controlled-overflow.",
+                    "evaluationHints": [
+                      "Notabschaltung mit Rückstau-Schutz — gleichwertig zu opt-wwtp-controlled-overflow"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-wwtp-uncontrolled",
+                    "label": "Unkontrollierter Überlauf ohne vorherige WHG-Anzeige, später Sachverhalts-Bericht",
+                    "consequence": "WHG-Verstoß formal. Bußgeld nach WHG, Reputations-Schaden. Schwächere Option, nur akzeptabel wenn WHG-Anzeige aus Zeitgründen objektiv nicht möglich war.",
+                    "evaluationHints": [
+                      "Unkontrollierter Überlauf, WHG-Verstoß"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-klaerwerk-resilience", "crit-reporting-whg-frist"]
+                "relatedCriteria": [
+                  "crit-operations-klaerwerk-resilience",
+                  "crit-reporting-whg-frist"
+                ]
               }
             ]
           },
@@ -1349,7 +1866,12 @@
             "t": 100,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-flood-peak", "title": "Pegel-Spitze erreicht, Wasserwerk-Untergeschoss steht 30 cm unter Wasser", "description": "Wassermeister*in meldet: Pegel-Spitze früher als prognostiziert erreicht. Wasserwerk-Untergeschoss steht 30 cm unter Wasser, ein Teil der Mess-Sensorik ist abgesoffen, Aktivkohle-Filter sind über die Schaltbühne von oben noch zugänglich. Aufbereitung läuft im manuellen Notbetrieb mit Hand-Stichproben, Dosierung Hand-überwacht. TrinkwV-konforme Werte aktuell, aber stark stress-getestete Lage.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-flood-peak",
+                "title": "Pegel-Spitze erreicht, Wasserwerk-Untergeschoss steht 30 cm unter Wasser",
+                "description": "Wassermeister*in meldet: Pegel-Spitze früher als prognostiziert erreicht. Wasserwerk-Untergeschoss steht 30 cm unter Wasser, ein Teil der Mess-Sensorik ist abgesoffen, Aktivkohle-Filter sind über die Schaltbühne von oben noch zugänglich. Aufbereitung läuft im manuellen Notbetrieb mit Hand-Stichproben, Dosierung Hand-überwacht. TrinkwV-konforme Werte aktuell, aber stark stress-getestete Lage.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1358,10 +1880,29 @@
                 "roleId": "role-gesundheitsamt-liaison",
                 "guidance": "UBA-Empfehlung nach Hochwasser: Bei Verdacht auf mikrobiologische Beeinträchtigung der Aufbereitung Trinkwasser nur abgekocht trinken. Aktuelle Werte sind sauber, aber die abgesoffene Mess-Sensorik macht die Sicherheits-Annahme fragil. Trade-off zwischen Vorsorge (Abkochen, sicher, Belastung der Bevölkerung) und Verifizieren-und-Warten (akkreditiertes Labor 24–48 h, Risiko unentdeckter Verkeimung).",
                 "options": [
-                  { "id": "opt-boil-water-precautionary", "label": "Vorsorge-Abkoch-Empfehlung über alle Kanäle: 'Bis Voll-Bestätigung in 48 h Trinkwasser nur abgekocht trinken'", "consequence": "Vorsorge maximal. Bevölkerungs-Belastung mittel, aber bei Hochwasser-Lage erwartet. Trinkwasserverordnung-Konformität klar (riskobasiertes Hygienemanagement seit TrinkwV 2023). Empfohlene Variante.", "evaluationHints": ["Vorsorge-Abkoch-Empfehlung"], "scoreContribution": 3 },
-                  { "id": "opt-boil-water-after-lab", "label": "Abkoch-Empfehlung erst nach Labor-Bestätigung einer Beeinträchtigung", "consequence": "Falls in 24–48 h tatsächlich mikrobiologische Verkeimung gefunden wird, ist die Belastung schon erfolgt. Schwächere Option.", "evaluationHints": ["Reaktive Empfehlung mit Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-boil-water-precautionary",
+                    "label": "Vorsorge-Abkoch-Empfehlung über alle Kanäle: 'Bis Voll-Bestätigung in 48 h Trinkwasser nur abgekocht trinken'",
+                    "consequence": "Vorsorge maximal. Bevölkerungs-Belastung mittel, aber bei Hochwasser-Lage erwartet. Trinkwasserverordnung-Konformität klar (riskobasiertes Hygienemanagement seit TrinkwV 2023). Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Vorsorge-Abkoch-Empfehlung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-boil-water-after-lab",
+                    "label": "Abkoch-Empfehlung erst nach Labor-Bestätigung einer Beeinträchtigung",
+                    "consequence": "Falls in 24–48 h tatsächlich mikrobiologische Verkeimung gefunden wird, ist die Belastung schon erfolgt. Schwächere Option.",
+                    "evaluationHints": [
+                      "Reaktive Empfehlung mit Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität", "crit-communication-bevoelkerung"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität",
+                  "crit-communication-bevoelkerung"
+                ]
               }
             ]
           },
@@ -1369,7 +1910,12 @@
             "t": 125,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-multi-agency", "title": "Behörden-Koordination", "description": "Untere Wasserbehörde hat WHG-Genehmigung für kontrollierten Klärwerk-Überlauf erteilt (Bedingung: Sachverhalts-Bericht binnen 7 Tagen, Vorfluter-Beprobung über 14 Tage). Gesundheitsamt hat die Abkoch-Empfehlung mitgetragen und eigene Bevölkerungs-Information herausgegeben. BBK koordiniert THW-Einsatz und Tankwagen-Logistik. Bürgermeister-Büro hat Stadtrats-Kommunikation übernommen.", "roleId": "role-untere-wasserbehoerde-liaison" }
+              {
+                "id": "inj-multi-agency",
+                "title": "Behörden-Koordination",
+                "description": "Untere Wasserbehörde hat WHG-Genehmigung für kontrollierten Klärwerk-Überlauf erteilt (Bedingung: Sachverhalts-Bericht binnen 7 Tagen, Vorfluter-Beprobung über 14 Tage). Gesundheitsamt hat die Abkoch-Empfehlung mitgetragen und eigene Bevölkerungs-Information herausgegeben. BBK koordiniert THW-Einsatz und Tankwagen-Logistik. Bürgermeister-Büro hat Stadtrats-Kommunikation übernommen.",
+                "roleId": "role-untere-wasserbehoerde-liaison"
+              }
             ],
             "decisions": [
               {
@@ -1378,10 +1924,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen zentraler Koordination (Krisenstab als Single Point of Contact, alle Behörden-Anfragen laufen dort zusammen) und dezentraler Koordination (Schnittstellen-Rollen sind direkt mit ihren Behörden im Austausch, Krisenstab nur als Konflikt-Entscheidung). Bei Multi-Behörden-Lagen mit unterschiedlichen Rechtskreisen (TrinkwV, WHG, BBK-Eingriff) ist Mischform üblich.",
                 "options": [
-                  { "id": "opt-coord-mixed", "label": "Mischform: Schnittstellen-Rollen direkt mit ihren Behörden im Austausch, Krisenstab als Eskalations-Punkt für Konflikte und gemeinsame Pressemitteilungen", "consequence": "Effiziente Koordination, jede Schnittstelle im eigenen Fach. Empfohlene Variante.", "evaluationHints": ["Effiziente Multi-Stakeholder-Koordination"], "scoreContribution": 3 },
-                  { "id": "opt-coord-central", "label": "Zentrale Koordination: alle Behörden-Anfragen laufen über die Krisenstabs-Leitung", "consequence": "Einheitlicher Auftritt, aber Krisenstabs-Leitung wird zum Bottleneck. Bei mehrstündigem Vorfall belastet.", "evaluationHints": ["Zentrale Koordination, Bottleneck-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-coord-mixed",
+                    "label": "Mischform: Schnittstellen-Rollen direkt mit ihren Behörden im Austausch, Krisenstab als Eskalations-Punkt für Konflikte und gemeinsame Pressemitteilungen",
+                    "consequence": "Effiziente Koordination, jede Schnittstelle im eigenen Fach. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Effiziente Multi-Stakeholder-Koordination"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-coord-central",
+                    "label": "Zentrale Koordination: alle Behörden-Anfragen laufen über die Krisenstabs-Leitung",
+                    "consequence": "Einheitlicher Auftritt, aber Krisenstabs-Leitung wird zum Bottleneck. Bei mehrstündigem Vorfall belastet.",
+                    "evaluationHints": [
+                      "Zentrale Koordination, Bottleneck-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-cross-sector-coordination"]
+                "relatedCriteria": [
+                  "crit-cross-sector-coordination"
+                ]
               }
             ]
           },
@@ -1389,7 +1953,12 @@
             "t": 145,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-recovery-projection", "title": "Recovery-Projektion", "description": "Pegel sinkt seit 60 Minuten. Wasserwerks-Untergeschoss wird voraussichtlich in 18–24 h wieder trocken sein, Mess-Sensorik-Reparatur 3–7 Tage. Klärwerk-Mischwasser-Überlauf läuft kontrolliert, Ende erwartet in 12 h. Notwasserversorgung läuft an 12 Verteilstellen. Abkoch-Empfehlung bleibt bis Voll-Labor-Bestätigung in 48 h. Bevölkerungs-Information seit 90 min konsistent über alle Kanäle.", "roleId": "role-wassermeister" }
+              {
+                "id": "inj-recovery-projection",
+                "title": "Recovery-Projektion",
+                "description": "Pegel sinkt seit 60 Minuten. Wasserwerks-Untergeschoss wird voraussichtlich in 18–24 h wieder trocken sein, Mess-Sensorik-Reparatur 3–7 Tage. Klärwerk-Mischwasser-Überlauf läuft kontrolliert, Ende erwartet in 12 h. Notwasserversorgung läuft an 12 Verteilstellen. Abkoch-Empfehlung bleibt bis Voll-Labor-Bestätigung in 48 h. Bevölkerungs-Information seit 90 min konsistent über alle Kanäle.",
+                "roleId": "role-wassermeister"
+              }
             ],
             "decisions": [
               {
@@ -1398,10 +1967,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen Mess-Sensorik-Wiederherstellung (technisch wichtig, aber dauert) und schneller Aufhebung der Abkoch-Empfehlung (politisch wichtig, aber Sicherheits-Risiko bei vorschneller Aufhebung). Empfohlen: Abkoch-Empfehlung bleibt bis Labor-Bestätigung, parallel Mess-Sensorik wieder herstellen.",
                 "options": [
-                  { "id": "opt-recovery-staged", "label": "Gestaffelt: Mess-Sensorik-Wiederherstellung sofort (parallel zu Notbetrieb), Abkoch-Empfehlung bleibt bis Voll-Labor-Bestätigung, Notwasserversorgungs-Abbau erst danach", "consequence": "Sicherheits-Disziplin maximal, Bevölkerung weiß was wann zu erwarten ist. Empfohlene Variante.", "evaluationHints": ["Gestaffelter Wiederanlauf mit Labor-Bestätigung"], "scoreContribution": 3 },
-                  { "id": "opt-recovery-fast", "label": "Schnell: Abkoch-Empfehlung sofort aufheben sobald Pegel sinkt, Mess-Sensorik nachträglich", "consequence": "Politisch früher 'erledigt', Sicherheits-Risiko bei unentdeckter Beeinträchtigung. Schwächere Option.", "evaluationHints": ["Schneller Wiederanlauf, Sicherheits-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-recovery-staged",
+                    "label": "Gestaffelt: Mess-Sensorik-Wiederherstellung sofort (parallel zu Notbetrieb), Abkoch-Empfehlung bleibt bis Voll-Labor-Bestätigung, Notwasserversorgungs-Abbau erst danach",
+                    "consequence": "Sicherheits-Disziplin maximal, Bevölkerung weiß was wann zu erwarten ist. Empfohlene Variante.",
+                    "evaluationHints": [
+                      "Gestaffelter Wiederanlauf mit Labor-Bestätigung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-recovery-fast",
+                    "label": "Schnell: Abkoch-Empfehlung sofort aufheben sobald Pegel sinkt, Mess-Sensorik nachträglich",
+                    "consequence": "Politisch früher 'erledigt', Sicherheits-Risiko bei unentdeckter Beeinträchtigung. Schwächere Option.",
+                    "evaluationHints": [
+                      "Schneller Wiederanlauf, Sicherheits-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-trinkwasser-qualität"]
+                "relatedCriteria": [
+                  "crit-operations-trinkwasser-qualität"
+                ]
               }
             ]
           },
@@ -1409,18 +1996,53 @@
             "t": 150,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro", "title": "Retro-Kickoff", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im Wasser-Hochwasser-Kontext besonders relevant: Wasserwerks-Untergeschoss-Schutz strukturell verbessern (Mess-Sensorik in höhere Räume), Notwasser-Verteilstellen-Plan mit Kommune ausweiten, gemeinsame Hochwasser-Übung mit unterer Wasserbehörde, Vorab-Texte für Bevölkerungs-Information aktualisieren, Klärwerk-Pufferbecken-Kapazität strukturell prüfen.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro",
+                "title": "Retro-Kickoff",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen. Im Wasser-Hochwasser-Kontext besonders relevant: Wasserwerks-Untergeschoss-Schutz strukturell verbessern (Mess-Sensorik in höhere Räume), Notwasser-Verteilstellen-Plan mit Kommune ausweiten, gemeinsame Hochwasser-Übung mit unterer Wasserbehörde, Vorab-Texte für Bevölkerungs-Information aktualisieren, Klärwerk-Pufferbecken-Kapazität strukturell prüfen.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Hochwasser-Doppellage", "weight": 1.5, "category": "governance" },
-          { "id": "crit-operations-trinkwasser-qualität", "description": "Trinkwasser-Qualität gewahrt (Notbetrieb, Hand-Stichproben, Abkoch-Empfehlung als Vorsorge)", "weight": 2, "category": "operations" },
-          { "id": "crit-operations-klaerwerk-resilience", "description": "Klärwerk-Resilienz (kontrollierter Überlauf vs. Notabschaltung, Vorfluter-Schutz)", "weight": 1.5, "category": "operations" },
-          { "id": "crit-reporting-whg-frist", "description": "WHG-Anzeige bei Mischwasser-Überlauf, Genehmigung der unteren Wasserbehörde — operative Krise heißt nicht ohne rechtliche Frist", "weight": 2, "category": "reporting" },
-          { "id": "crit-communication-bevoelkerung", "description": "Bevölkerungs-Information (Multi-Channel, Vorsorge-Empfehlung Vorratshaltung, Abkoch-Empfehlung, koordiniert mit Bürgermeister und Gesundheitsamt)", "weight": 2, "category": "communication" },
-          { "id": "crit-cross-sector-coordination", "description": "Multi-Behörden-Koordination (untere Wasserbehörde, Gesundheitsamt, BBK, Bürgermeister-Büro, THW)", "weight": 1, "category": "coordination" }
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Hochwasser-Doppellage",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-trinkwasser-qualität",
+            "description": "Trinkwasser-Qualität gewahrt (Notbetrieb, Hand-Stichproben, Abkoch-Empfehlung als Vorsorge)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-operations-klaerwerk-resilience",
+            "description": "Klärwerk-Resilienz (kontrollierter Überlauf vs. Notabschaltung, Vorfluter-Schutz)",
+            "weight": 1.5,
+            "category": "operations"
+          },
+          {
+            "id": "crit-reporting-whg-frist",
+            "description": "WHG-Anzeige bei Mischwasser-Überlauf, Genehmigung der unteren Wasserbehörde — operative Krise heißt nicht ohne rechtliche Frist",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-communication-bevoelkerung",
+            "description": "Bevölkerungs-Information (Multi-Channel, Vorsorge-Empfehlung Vorratshaltung, Abkoch-Empfehlung, koordiniert mit Bürgermeister und Gesundheitsamt)",
+            "weight": 2,
+            "category": "communication"
+          },
+          {
+            "id": "crit-cross-sector-coordination",
+            "description": "Multi-Behörden-Koordination (untere Wasserbehörde, Gesundheitsamt, BBK, Bürgermeister-Büro, THW)",
+            "weight": 1,
+            "category": "coordination"
+          }
         ]
       }
     ]

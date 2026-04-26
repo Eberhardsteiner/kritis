@@ -6,7 +6,7 @@
     "moduleId": "logistics",
     "name": "Logistik-Basismodul",
     "version": "1.1.0",
-    "description": "Zusatzparameter für Transport- und Logistikunternehmen mit Fokus auf Knotenpunkte, Fahrer- und Dispositionsverfügbarkeit sowie Routenrobustheit. Pack umfasst seit C5.3d zusätzlich 16 Risiko-Templates mit Schwerpunkt interdependency (Vernetzte Branche, 4 Einträge), zwei Tabletop-Szenarien (TMS-Ransomware mit Hub-Lähmung, Streik-Welle und Hafen-Sperrung mit Verkehrsträger-Kaskade) und einen NIS2-orientierten Resilienzplan-Template-Entwurf mit 14 Maßnahmen.",
+    "description": "Branchenmodul für Transport- und Logistikunternehmen mit Fokus auf Dispositionsfähigkeit, Multi-Modal-Resilienz und Frachtsicherheit.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Transport und Verkehr",
@@ -32,14 +32,20 @@
       "minAppVersion": "1.8.0",
       "minEngineVersion": "1.0.0"
     },
-    "releaseChannel": "sector"
+    "releaseChannel": "sector",
+    "versionHistory": [
+      {
+        "version": "1.1.0",
+        "note": "Verbose pre-cleanup module description (preserved 2026-04-26 during the cross-pack description cleanup): Zusatzparameter für Transport- und Logistikunternehmen mit Fokus auf Knotenpunkte, Fahrer- und Dispositionsverfügbarkeit sowie Routenrobustheit. Pack umfasst seit C5.3d zusätzlich Risiko-Templates nach NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz nach Vorbild § 12 KRITIS-Dachgesetz, interdependency-Schwerpunkt für die Vernetzte Branche), zwei Tabletop-Szenarien (TMS-Ransomware mit Hub-Lähmung samt Knights-of-Old-Schablone, Streik-Welle und Hafen-Sperrung mit Multi-Modal-Re-Balancing und AWG-Korridor-Decision) und einen NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist Dispositionsfähigkeit (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“). Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Vertragspflicht, Dispositionsfähigkeit, Multi-Modal-Routing, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Logistics-Decisions zur Lösegeld-Frage, zur Tier-1-Kunden-Kommunikation, zur force-majeure-Klausel-Verhandlung und zur Fahrer-Kommunikations-Kanal-Wahl sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können."
+      }
+    ]
   },
   "module": {
     "schemaVersion": 1,
     "id": "logistics",
     "name": "Logistik & Transport",
     "version": "1.1.0",
-    "description": "Zusatzparameter für Transport- und Logistikunternehmen mit Fokus auf Knotenpunkte, Fahrer- und Dispositionsverfügbarkeit sowie Routenrobustheit. Pack umfasst seit C5.3d zusätzlich Risiko-Templates nach NIS2-Risikomanagement-Methodik (16 Risiken, all-hazards-Ansatz nach Vorbild § 12 KRITIS-Dachgesetz, interdependency-Schwerpunkt für die Vernetzte Branche), zwei Tabletop-Szenarien (TMS-Ransomware mit Hub-Lähmung samt Knights-of-Old-Schablone, Streik-Welle und Hafen-Sperrung mit Multi-Modal-Re-Balancing und AWG-Korridor-Decision) und einen NIS2-orientierten Resilienzplan-Template-Entwurf. Sektor-spezifische Performance-Dimension ist Dispositionsfähigkeit (parallel zu Healthcare „Patientensicherheit“, Energy „Netzstabilität“, Industry „Produktionsfähigkeit“). Evaluation-Gewichtungs-Modell wie in den anderen Sektor-Packs: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Vertragspflicht, Dispositionsfähigkeit, Multi-Modal-Routing, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. In den Logistics-Decisions zur Lösegeld-Frage, zur Tier-1-Kunden-Kommunikation, zur force-majeure-Klausel-Verhandlung und zur Fahrer-Kommunikations-Kanal-Wahl sind absichtlich zwei Optionen mit scoreContribution=2 angesetzt — die Demo soll vermitteln, dass beide Wege fachlich vertretbar sind und situativ gewählt werden können.",
+    "description": "Branchenmodul für Transport- und Logistikunternehmen mit Fokus auf Dispositionsfähigkeit, Multi-Modal-Resilienz und Frachtsicherheit.",
     "sectorCategory": "Transport und Verkehr",
     "domainWeightAdjustments": {
       "supply": 1.25,
@@ -99,7 +105,7 @@
         "prompt": "Ist definiert, welche Kunden, Lieferungen oder Services im Störfall vorrangig bedient werden?",
         "guidance": "Nützlich sind Serviceklassen und abgestimmte Notfallvereinbarungen.",
         "recommendation": "Definieren Sie Priorisierungsregeln für Kunden, Güter und Services im Störfall.",
-        "weight": 1.0,
+        "weight": 1,
         "evidenceHint": "Serviceklassen, Priorisierungsliste, Kundenvereinbarungen",
         "tags": [
           "Kundenpriorisierung",
@@ -857,24 +863,62 @@
         "version": "1.0.0",
         "title": "Ransomware-Angriff auf TMS mit Hub-Lähmung",
         "summary": "Eine Ransomware-Gruppe verschlüsselt das zentrale Transport-Management-System (TMS) eines mittelständischen Logistik-Dienstleisters (ca. 1.200 Mitarbeitende, 4 regionale Hubs, 800 LKW-Zugmaschinen, JIT-Verträge mit Automotive-Tier-1-Kunden). Disposition, Sendungsverfolgung, Hub-Sortier-Steuerung und Tour-Planung stehen still. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf manuellen Notbetrieb über Papier-Tourenlisten, NIS2-/§8d-BSIG-Meldewege, Schlüsselkunden-SLA-Klauseln, und die Lösegeld-Entscheidung mit Logistik-Spezifika (Fracht-Daten als Konkurrenz-Sensitivität, weil Routen-Optimierung und Kunden-Konditionen exfiltriert werden). Realitätsbezug: Knights of Old Logistics UK Juli 2025 — 158 Jahre alte Spedition in Insolvenz nach Ransomware durch ein einziges schwaches Passwort, 700 MA arbeitslos, 500 LKW lahmgelegt. Das Szenario komprimiert die entscheidenden Weichenstellungen auf 180 Minuten.",
-        "sectors": ["Transport und Verkehr"],
-        "applicableRegimes": ["BSIG", "DSGVO"],
+        "sectors": [
+          "Transport und Verkehr"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "DSGVO"
+        ],
         "durationMinutes": 180,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Hub-Notbetrieb, Lösegeld-Entscheidung, Kunden-Eskalation, Pressemitteilung). NIS2 verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung. Bei mittelständischen Logistik-Tenants typisch Geschäftsführung Operations oder COO mit Vollmacht." },
-          { "id": "role-ciso", "title": "CISO / IT-Sicherheitsverantwortung", "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, NIS2-/§8d-BSIG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister und LKA Cybercrime. Bei Mittelständlern oft Personalunion mit IT-Leitung." },
-          { "id": "role-it-leitung", "title": "IT-Leitung / IT-Betrieb", "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Prüfung, TMS-Wiederanlaufplanung, Telematik-/Fleet-Management-Integrität prüfen. Stellt die technische Faktenbasis für Krisenstab und CISO bereit." },
-          { "id": "role-leitstelle", "title": "Leitstelle / Disposition", "briefing": "Operative Tour-Steuerung. Trifft Entscheidungen zu manuellem Notbetrieb (Papier-Tourenlisten, Telefon-Disposition, Sicht-Freigabe an Hubs), Schicht-Mobilisierung, Priorisierung kritischer Touren. Schnittstelle zu Fahrer*innen und Hub-Schichtleitungen." },
-          { "id": "role-hub-leitung", "title": "Hub-Leitung (Zentral-Hub)", "briefing": "Operative Hub-Verantwortung. Steuert Sortier-Anlage und Umschlag-Disziplin im Manuell-Modus, koordiniert Personal-Mobilisierung, entscheidet über Hub-interne Last-Verteilung. Bei mehreren Hubs konsolidierte Berichtslinie zur Leitstelle." },
-          { "id": "role-vertrieb-key-account", "title": "Vertrieb / Key-Account-Management", "briefing": "Schnittstelle zu Schlüsselkunden (Tier-1-OEM mit JIT-Klauseln, Express-Kunden mit Same-Day-Zusagen, Pharma-Kunden mit GDP-Pflicht). Verhandelt SLA-Ausnahmen, Pönale-Streckung, Service-Verschiebungen. Hat die Vertrags-Eskalations-Matrix in der Hand." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG-Umsetzung), DSGVO Art. 33/34 bei Mitarbeiter- und Kundendaten-Exfiltration, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung bei sanktionierten Gruppen), OFAC-Sanctions-Screening, GüKG-Konformität bei Notbetrieb (Lenkzeit-Disziplin), AWG-Implikationen bei internationaler Fracht." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Hub-Notbetrieb, Lösegeld-Entscheidung, Kunden-Eskalation, Pressemitteilung). NIS2 verlangt explizit Cybersicherheits-Verantwortung auf Geschäftsleitungsebene mit nicht delegierbarer Letztverantwortung. Bei mittelständischen Logistik-Tenants typisch Geschäftsführung Operations oder COO mit Vollmacht."
+          },
+          {
+            "id": "role-ciso",
+            "title": "CISO / IT-Sicherheitsverantwortung",
+            "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, NIS2-/§8d-BSIG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister und LKA Cybercrime. Bei Mittelständlern oft Personalunion mit IT-Leitung."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung / IT-Betrieb",
+            "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Prüfung, TMS-Wiederanlaufplanung, Telematik-/Fleet-Management-Integrität prüfen. Stellt die technische Faktenbasis für Krisenstab und CISO bereit."
+          },
+          {
+            "id": "role-leitstelle",
+            "title": "Leitstelle / Disposition",
+            "briefing": "Operative Tour-Steuerung. Trifft Entscheidungen zu manuellem Notbetrieb (Papier-Tourenlisten, Telefon-Disposition, Sicht-Freigabe an Hubs), Schicht-Mobilisierung, Priorisierung kritischer Touren. Schnittstelle zu Fahrer*innen und Hub-Schichtleitungen."
+          },
+          {
+            "id": "role-hub-leitung",
+            "title": "Hub-Leitung (Zentral-Hub)",
+            "briefing": "Operative Hub-Verantwortung. Steuert Sortier-Anlage und Umschlag-Disziplin im Manuell-Modus, koordiniert Personal-Mobilisierung, entscheidet über Hub-interne Last-Verteilung. Bei mehreren Hubs konsolidierte Berichtslinie zur Leitstelle."
+          },
+          {
+            "id": "role-vertrieb-key-account",
+            "title": "Vertrieb / Key-Account-Management",
+            "briefing": "Schnittstelle zu Schlüsselkunden (Tier-1-OEM mit JIT-Klauseln, Express-Kunden mit Same-Day-Zusagen, Pharma-Kunden mit GDP-Pflicht). Verhandelt SLA-Ausnahmen, Pönale-Streckung, Service-Verschiebungen. Hat die Vertrags-Eskalations-Matrix in der Hand."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG-Umsetzung), DSGVO Art. 33/34 bei Mitarbeiter- und Kundendaten-Exfiltration, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung bei sanktionierten Gruppen), OFAC-Sanctions-Screening, GüKG-Konformität bei Notbetrieb (Lenkzeit-Disziplin), AWG-Implikationen bei internationaler Fracht."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-tms-anomaly", "title": "Erste Anomalie aus dem IT-Betrieb", "description": "IT-Betriebsleiter meldet ungewöhnlich hohe CPU-Last auf den TMS-Datenbank-Servern, parallel Schreibfehler bei Touren-Buchungen aus zwei Hubs. WMS-Schnittstelle zeigt fehlgeschlagene Status-Updates. Erstindikatoren deuten auf Schadsoftware, aber noch keine Verschlüsselung sichtbar.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-tms-anomaly",
+                "title": "Erste Anomalie aus dem IT-Betrieb",
+                "description": "IT-Betriebsleiter meldet ungewöhnlich hohe CPU-Last auf den TMS-Datenbank-Servern, parallel Schreibfehler bei Touren-Buchungen aus zwei Hubs. WMS-Schnittstelle zeigt fehlgeschlagene Status-Updates. Erstindikatoren deuten auf Schadsoftware, aber noch keine Verschlüsselung sichtbar.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -883,10 +927,28 @@
                 "roleId": "role-ciso",
                 "guidance": "NIS2 verlangt für besonders wichtige und wichtige Einrichtungen einen dokumentierten Reaktionsprozess. Frühe Eskalation (hoher False-Positive-Anteil, aber schnelle Reaktion) vs. Eigen-Diagnose (Ressourcen-schonend, aber Verzögerung). Bei Logistik-Tenants mit JIT-Verträgen ist frühe Eskalation explizit empfohlen — jede Stunde Verzögerung kaskadiert in Kunden-Pönalen.",
                 "options": [
-                  { "id": "opt-early-escalate", "label": "Sofort Krisenstab aktivieren und Forensik einleiten", "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, Personal gebunden. Leitstelle und Hub-Leitung werden parallel auf Stand-by gesetzt.", "evaluationHints": ["Krisenstab-Alarmierungskette getestet"], "scoreContribution": 3 },
-                  { "id": "opt-initial-diagnostics", "label": "Erst eigene Triage ohne Krisenstab-Eskalation", "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung Richtung Backup-Server und Telematik-Cloud-Schnittstelle.", "evaluationHints": ["Zeitverlust durch Eigen-Diagnose"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-early-escalate",
+                    "label": "Sofort Krisenstab aktivieren und Forensik einleiten",
+                    "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, Personal gebunden. Leitstelle und Hub-Leitung werden parallel auf Stand-by gesetzt.",
+                    "evaluationHints": [
+                      "Krisenstab-Alarmierungskette getestet"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-initial-diagnostics",
+                    "label": "Erst eigene Triage ohne Krisenstab-Eskalation",
+                    "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung Richtung Backup-Server und Telematik-Cloud-Schnittstelle.",
+                    "evaluationHints": [
+                      "Zeitverlust durch Eigen-Diagnose"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -894,7 +956,12 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-tms-encrypted", "title": "Bestätigung: TMS-Ransomware mit Verschlüsselung", "description": "Erste Touren-Datensätze sind nicht mehr lesbar, Lösegeld-Datei auf TMS-Servern und WMS-Fileshare platziert. Gruppe identifiziert sich als LockBit-Nachfolger, typische Logistik-TTP. Sample-Leak zeigt Routen-Daten und Kundenkonditionen — exfiltriert vor Verschlüsselung. Knights-of-Old-Schablone: dort wurde im Juli 2025 die Insolvenz durch genau dieses Doppel-Erpressungs-Muster (Encrypt + Leak) ausgelöst.", "roleId": "role-ciso" }
+              {
+                "id": "inj-tms-encrypted",
+                "title": "Bestätigung: TMS-Ransomware mit Verschlüsselung",
+                "description": "Erste Touren-Datensätze sind nicht mehr lesbar, Lösegeld-Datei auf TMS-Servern und WMS-Fileshare platziert. Gruppe identifiziert sich als LockBit-Nachfolger, typische Logistik-TTP. Sample-Leak zeigt Routen-Daten und Kundenkonditionen — exfiltriert vor Verschlüsselung. Knights-of-Old-Schablone: dort wurde im Juli 2025 die Insolvenz durch genau dieses Doppel-Erpressungs-Muster (Encrypt + Leak) ausgelöst.",
+                "roleId": "role-ciso"
+              }
             ],
             "decisions": [
               {
@@ -903,11 +970,37 @@
                 "roleId": "role-it-leitung",
                 "guidance": "Trade-off Containment vs. Forensik plus logistik-spezifische Sonderfrage: Telematik-Cloud-Anbindung mit erhalten oder mit-isolieren? Bei Mit-Isolation gehen Live-Positionen der laufenden Touren (ca. 500 LKW im Einsatz) für die Dauer der Maßnahme verloren — Disposition muss per Telefon kompensieren. Bei Erhalt der Telematik-Anbindung wahrscheinliche Übergriffs-Pforte für Angreifer ins Fleet-Management.",
                 "options": [
-                  { "id": "opt-hard-decouple-it", "label": "TMS- und WMS-Netz hart abkoppeln, Telematik-Cloud bleibt aktiv (Out-of-Band-überwacht)", "consequence": "Containment-Disziplin mit Kompromiss zugunsten operativer Sichtbarkeit. Live-Positionen bleiben verfügbar, Live-Forensik begrenzt möglich. Risiko Telematik-Übergriff niedrig wenn Out-of-Band-Monitoring stark.", "evaluationHints": ["Containment + Operations-Erhalt"], "scoreContribution": 3 },
-                  { "id": "opt-hard-decouple-all", "label": "Komplette Sofort-Entkopplung TMS + WMS + Telematik", "consequence": "Maximales Containment, aber Disposition fährt komplett blind. 500 LKW-Touren ohne Live-Positions-Daten, Eskalations-Aufwand hoch.", "evaluationHints": ["Maximales Containment, Operations-Risiko nicht abgewogen"], "scoreContribution": 1 },
-                  { "id": "opt-segmented-isolation", "label": "Segmentierte Isolation mit laufender Forensik, Telematik aktiv", "consequence": "Live-Telemetrie erhalten, aber Risiko weiterer Vollbefalls auf Backup-Servern. Nur realistisch mit eingespieltem IR-Team und EDR-Coverage.", "evaluationHints": ["Risiko/Nutzen abgewogen"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-hard-decouple-it",
+                    "label": "TMS- und WMS-Netz hart abkoppeln, Telematik-Cloud bleibt aktiv (Out-of-Band-überwacht)",
+                    "consequence": "Containment-Disziplin mit Kompromiss zugunsten operativer Sichtbarkeit. Live-Positionen bleiben verfügbar, Live-Forensik begrenzt möglich. Risiko Telematik-Übergriff niedrig wenn Out-of-Band-Monitoring stark.",
+                    "evaluationHints": [
+                      "Containment + Operations-Erhalt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-hard-decouple-all",
+                    "label": "Komplette Sofort-Entkopplung TMS + WMS + Telematik",
+                    "consequence": "Maximales Containment, aber Disposition fährt komplett blind. 500 LKW-Touren ohne Live-Positions-Daten, Eskalations-Aufwand hoch.",
+                    "evaluationHints": [
+                      "Maximales Containment, Operations-Risiko nicht abgewogen"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-segmented-isolation",
+                    "label": "Segmentierte Isolation mit laufender Forensik, Telematik aktiv",
+                    "consequence": "Live-Telemetrie erhalten, aber Risiko weiterer Vollbefalls auf Backup-Servern. Nur realistisch mit eingespieltem IR-Team und EDR-Coverage.",
+                    "evaluationHints": [
+                      "Risiko/Nutzen abgewogen"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-dispositionsfähigkeit"]
+                "relatedCriteria": [
+                  "crit-operations-dispositionsfähigkeit"
+                ]
               }
             ]
           },
@@ -915,8 +1008,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, CISO, IT-Leitung, Leitstelle, Hub-Leitung Zentral-Hub, Vertrieb-Key-Account, Rechtsabteilung einberufen. Lageraum eingerichtet, Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe geprüft. Hub-Leitungen der drei dezentralen Hubs per Konferenzschaltung zugeschaltet.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-tour-status", "title": "Tour-Status: 487 LKW im Einsatz, 142 Touren geplant für nächste Schicht", "description": "Leitstelle meldet: 487 LKW aktuell auf Touren (Live-Position via Telematik), 142 Touren für die nächste Schicht in 4 Stunden geplant — diese Touren-Zuweisungen liegen ausschließlich im verschlüsselten TMS, Papier-Backup nur teilweise vorhanden (eine Hub-Leitung hat eine Tagesliste am Vorabend ausgedruckt, drei nicht).", "roleId": "role-leitstelle" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, CISO, IT-Leitung, Leitstelle, Hub-Leitung Zentral-Hub, Vertrieb-Key-Account, Rechtsabteilung einberufen. Lageraum eingerichtet, Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe geprüft. Hub-Leitungen der drei dezentralen Hubs per Konferenzschaltung zugeschaltet.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-tour-status",
+                "title": "Tour-Status: 487 LKW im Einsatz, 142 Touren geplant für nächste Schicht",
+                "description": "Leitstelle meldet: 487 LKW aktuell auf Touren (Live-Position via Telematik), 142 Touren für die nächste Schicht in 4 Stunden geplant — diese Touren-Zuweisungen liegen ausschließlich im verschlüsselten TMS, Papier-Backup nur teilweise vorhanden (eine Hub-Leitung hat eine Tagesliste am Vorabend ausgedruckt, drei nicht).",
+                "roleId": "role-leitstelle"
+              }
             ],
             "decisions": [
               {
@@ -925,11 +1028,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Manueller Notbetrieb (Papier-Tourenlisten, Telefon-Disposition, Sicht-Freigabe an Hubs) sollte vorab dokumentiert sein. Bei vollem Rollout: Personal-Belastung steigt deutlich, Fehlerrate steigt, Lenkzeit-Disziplin schwer überprüfbar. Teil-Rollout möglich, wenn ältere Tourenpläne aus E-Mail oder Papier rekonstruiert werden können.",
                 "options": [
-                  { "id": "opt-full-manual", "label": "Vollständiger manueller Notbetrieb, alle 142 Touren auf Papier rekonstruiert aus Vortag-Listen, E-Mail-Bestätigungen, Telefon-Abstimmung mit Kunden", "consequence": "Klares einheitliches Verfahren. Personal stark belastet (zusätzliche Disponent*innen aus Verwaltung mobilisiert), Lenkzeit-Disziplin manuell überwacht. Schicht startet mit 1–2 h Verzögerung, alle Schlüsselkunden werden bedient.", "evaluationHints": ["Manueller Notbetrieb angewendet, GüKG-Lenkzeit-Disziplin gewahrt"], "scoreContribution": 3 },
-                  { "id": "opt-partial-manual", "label": "Selektiver Notbetrieb nur für Top-30-Touren (Schlüsselkunden), Rest auf nächste Schicht verschoben", "consequence": "Fokus auf Schlüsselkunden-Bedienung. B-/C-Kunden gehen in Verzug, kleine Pönalen, aber überschaubare Komplexität. Risiko: bei Zweit-Verzögerung am Folgetag kumulieren Pönalen.", "evaluationHints": ["Risikobasiert priorisierter Notbetrieb"], "scoreContribution": 2 },
-                  { "id": "opt-full-stop", "label": "Vollständiger Touren-Stop bis TMS wiederhergestellt", "consequence": "Klare, sichere Lage. Alle Schlüsselkunden müssen sofort informiert werden, JIT-Pönale-Lawine greift sofort. Bei JIT-OEM-Bandstillstand 25 T€/h Pönale.", "evaluationHints": ["Voller Stop, Pönale-Lawine"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-manual",
+                    "label": "Vollständiger manueller Notbetrieb, alle 142 Touren auf Papier rekonstruiert aus Vortag-Listen, E-Mail-Bestätigungen, Telefon-Abstimmung mit Kunden",
+                    "consequence": "Klares einheitliches Verfahren. Personal stark belastet (zusätzliche Disponent*innen aus Verwaltung mobilisiert), Lenkzeit-Disziplin manuell überwacht. Schicht startet mit 1–2 h Verzögerung, alle Schlüsselkunden werden bedient.",
+                    "evaluationHints": [
+                      "Manueller Notbetrieb angewendet, GüKG-Lenkzeit-Disziplin gewahrt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-partial-manual",
+                    "label": "Selektiver Notbetrieb nur für Top-30-Touren (Schlüsselkunden), Rest auf nächste Schicht verschoben",
+                    "consequence": "Fokus auf Schlüsselkunden-Bedienung. B-/C-Kunden gehen in Verzug, kleine Pönalen, aber überschaubare Komplexität. Risiko: bei Zweit-Verzögerung am Folgetag kumulieren Pönalen.",
+                    "evaluationHints": [
+                      "Risikobasiert priorisierter Notbetrieb"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-full-stop",
+                    "label": "Vollständiger Touren-Stop bis TMS wiederhergestellt",
+                    "consequence": "Klare, sichere Lage. Alle Schlüsselkunden müssen sofort informiert werden, JIT-Pönale-Lawine greift sofort. Bei JIT-OEM-Bandstillstand 25 T€/h Pönale.",
+                    "evaluationHints": [
+                      "Voller Stop, Pönale-Lawine"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-dispositionsfähigkeit"]
+                "relatedCriteria": [
+                  "crit-operations-dispositionsfähigkeit"
+                ]
               }
             ]
           },
@@ -937,7 +1066,12 @@
             "t": 60,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-key-customer-call", "title": "Tier-1-OEM-Kunde fragt JIT-Bandanlieferung ab", "description": "Automotive-Tier-1-Kunde (35 % des Quartalsumsatzes) meldet sich: heute 14:00 Uhr ist die nächste JIT-Anlieferung im Bandwerk fällig. Sein eigenes Band steht ohne unsere Lieferung still. Vertragsstrafe ist 25.000 € pro angefangener Stunde Bandstillstand bei seinem Werk. Bei Verzug > 4 h Eskalation zur OEM-Konzern-Einkaufsleitung.", "roleId": "role-vertrieb-key-account" }
+              {
+                "id": "inj-key-customer-call",
+                "title": "Tier-1-OEM-Kunde fragt JIT-Bandanlieferung ab",
+                "description": "Automotive-Tier-1-Kunde (35 % des Quartalsumsatzes) meldet sich: heute 14:00 Uhr ist die nächste JIT-Anlieferung im Bandwerk fällig. Sein eigenes Band steht ohne unsere Lieferung still. Vertragsstrafe ist 25.000 € pro angefangener Stunde Bandstillstand bei seinem Werk. Bei Verzug > 4 h Eskalation zur OEM-Konzern-Einkaufsleitung.",
+                "roleId": "role-vertrieb-key-account"
+              }
             ],
             "decisions": [
               {
@@ -946,11 +1080,38 @@
                 "roleId": "role-vertrieb-key-account",
                 "guidance": "Vertragspflicht zur unverzüglichen Information bei drohender Lieferunfähigkeit ist im Tier-1-RV typisch. Zwei pragmatische Optionen sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von Beziehungs-Tiefe und der Disposition des OEM für eigene Sub-Logistik ab: (a) Vollständige Offenheit mit konkreter Wiederanlauf-Erwartung, (b) Aktive Mit-Steuerung — OEM aktiviert eigenen Sub-Logistik-Pool als Backup, wir liefern was wir können. Defensive Beschwichtigung ohne Detail bleibt diskutierbar bei sehr enger Beziehung, ist aber spätrisikobehaftet.",
                 "options": [
-                  { "id": "opt-customer-full", "label": "Sofortige offene Information: Cyber-Vorfall, Wiederanlauf voraussichtlich 12–48 h, manueller Notbetrieb läuft, Lieferung 14:00 ist nicht haltbar — Vorschlag Verschiebung um 4 h mit Bandstillstand-Pönale-Verhandlung", "consequence": "Vertrauenserhaltung. Kunde hat Faktenbasis, kann eigenen Krisenstab aktivieren. Pönale-Verhandlung läuft transparent. Voller Bandstillstand am OEM-Werk droht.", "evaluationHints": ["Frühe Offenheit, Vertragspflicht erfüllt — gleichwertig zu opt-customer-co-steering"], "scoreContribution": 2 },
-                  { "id": "opt-customer-co-steering", "label": "Aktive Mit-Steuerung: OEM aktiviert eigenen Sub-Logistik-Pool als Backup, wir liefern was wir manuell schaffen, gemeinsame Live-Eskalation", "consequence": "OEM wird Partner statt Gegner. Bandstillstand reduziert auf 1–2 h, Pönale halbiert. Setzt enge OEM-Beziehung mit etablierten Backup-Carrier-Pool voraus.", "evaluationHints": ["Kunde-als-Partner-Modus — gleichwertig zu opt-customer-full"], "scoreContribution": 2 },
-                  { "id": "opt-customer-summary", "label": "Beschwichtigende Zusammenfassung: technisches Problem, Lieferung verspätet sich um max. 2 h, Details folgen", "consequence": "Kurz-Beruhigung des OEM-Disponenten. Bei tatsächlicher Verzögerung > 2 h doppelter Vertrauensverlust. Vertragspflicht zur unverzüglichen Information formal nicht erfüllt — späteres Pönale-Risiko erhöht.", "evaluationHints": ["Defensive Beschwichtigung, spätrisikobehaftet"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-customer-full",
+                    "label": "Sofortige offene Information: Cyber-Vorfall, Wiederanlauf voraussichtlich 12–48 h, manueller Notbetrieb läuft, Lieferung 14:00 ist nicht haltbar — Vorschlag Verschiebung um 4 h mit Bandstillstand-Pönale-Verhandlung",
+                    "consequence": "Vertrauenserhaltung. Kunde hat Faktenbasis, kann eigenen Krisenstab aktivieren. Pönale-Verhandlung läuft transparent. Voller Bandstillstand am OEM-Werk droht.",
+                    "evaluationHints": [
+                      "Frühe Offenheit, Vertragspflicht erfüllt — gleichwertig zu opt-customer-co-steering"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-co-steering",
+                    "label": "Aktive Mit-Steuerung: OEM aktiviert eigenen Sub-Logistik-Pool als Backup, wir liefern was wir manuell schaffen, gemeinsame Live-Eskalation",
+                    "consequence": "OEM wird Partner statt Gegner. Bandstillstand reduziert auf 1–2 h, Pönale halbiert. Setzt enge OEM-Beziehung mit etablierten Backup-Carrier-Pool voraus.",
+                    "evaluationHints": [
+                      "Kunde-als-Partner-Modus — gleichwertig zu opt-customer-full"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-summary",
+                    "label": "Beschwichtigende Zusammenfassung: technisches Problem, Lieferung verspätet sich um max. 2 h, Details folgen",
+                    "consequence": "Kurz-Beruhigung des OEM-Disponenten. Bei tatsächlicher Verzögerung > 2 h doppelter Vertrauensverlust. Vertragspflicht zur unverzüglichen Information formal nicht erfüllt — späteres Pönale-Risiko erhöht.",
+                    "evaluationHints": [
+                      "Defensive Beschwichtigung, spätrisikobehaftet"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunde", "crit-governance-vertragspflicht"]
+                "relatedCriteria": [
+                  "crit-communication-kunde",
+                  "crit-governance-vertragspflicht"
+                ]
               }
             ]
           },
@@ -958,8 +1119,18 @@
             "t": 90,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-bsi-portal", "title": "BSI-Meldeportal-Erstmeldung erstellt", "description": "CISO hat über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG erstellt (24-h-Pflicht eingehalten). BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung mit Schadensbild. Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG 2025 eingestuft (Sektor Transport und Verkehr, > 250 MA, > 50 Mio. € Umsatz).", "roleId": "role-ciso" },
-              { "id": "inj-dsb-assessment", "title": "DSGVO-Bewertung: Mitarbeiter- und Kundendaten betroffen", "description": "Datenschutzbeauftragte*r (Personalunion mit Rechtsabteilung) bewertet: Im WMS-Fileshare lagen Personalakten-Auszüge (Fahrer-Daten mit Lenkzeit-Logs, Bewerber-Unterlagen) und Kundenkonditionen mit personenbezogenen Daten von Ansprechpartner*innen. Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h verpflichtend.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-bsi-portal",
+                "title": "BSI-Meldeportal-Erstmeldung erstellt",
+                "description": "CISO hat über das BSI-Meldeportal die NIS2-Erstmeldung nach § 8d BSIG erstellt (24-h-Pflicht eingehalten). BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung mit Schadensbild. Tenant ist als 'wichtige Einrichtung' nach NIS2UmsuCG 2025 eingestuft (Sektor Transport und Verkehr, > 250 MA, > 50 Mio. € Umsatz).",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-dsb-assessment",
+                "title": "DSGVO-Bewertung: Mitarbeiter- und Kundendaten betroffen",
+                "description": "Datenschutzbeauftragte*r (Personalunion mit Rechtsabteilung) bewertet: Im WMS-Fileshare lagen Personalakten-Auszüge (Fahrer-Daten mit Lenkzeit-Logs, Bewerber-Unterlagen) und Kundenkonditionen mit personenbezogenen Daten von Ansprechpartner*innen. Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h verpflichtend.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -968,10 +1139,29 @@
                 "roleId": "role-ciso",
                 "guidance": "Vollständige Offenlegung unterstützt das BSI-Lagebild und ermöglicht Sektor-CERT-Funktion (BSI kann andere Logistik-Tenants warnen). Zurückhaltende Meldung reduziert Leak-Risiko, erhöht aber Risiko der Nachforderung. NIS2UmsuCG-Bußgelder bei Meldeversäumnis bis 7 Mio. € oder 1,4 % des weltweiten Jahresumsatzes für 'wichtige Einrichtungen'.",
                 "options": [
-                  { "id": "opt-full-disclosure", "label": "Vollständige Offenlegung: TTPs, IOCs, Ransomware-Gruppe, lateral-movement-Pfad, Telematik-Cloud-Befallsreichweite", "consequence": "BSI hat vollständiges Bild, kann Lageeinschätzung an andere Logistik-Tenants weitergeben. Konformitäts-Stärke gegenüber späterer Aufsichtsprüfung.", "evaluationHints": ["Vollständige Meldeinhalte"], "scoreContribution": 3 },
-                  { "id": "opt-minimal-disclosure", "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)", "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei 72-h-Folgemeldung wenn zusätzliche Erkenntnisse nicht rechtzeitig nachgereicht werden.", "evaluationHints": ["Minimalmeldung fristgerecht"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-disclosure",
+                    "label": "Vollständige Offenlegung: TTPs, IOCs, Ransomware-Gruppe, lateral-movement-Pfad, Telematik-Cloud-Befallsreichweite",
+                    "consequence": "BSI hat vollständiges Bild, kann Lageeinschätzung an andere Logistik-Tenants weitergeben. Konformitäts-Stärke gegenüber späterer Aufsichtsprüfung.",
+                    "evaluationHints": [
+                      "Vollständige Meldeinhalte"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-minimal-disclosure",
+                    "label": "Minimalmeldung: Pflichtinhalte § 8d BSIG (Art des Vorfalls, Auswirkung, ergriffene Maßnahmen)",
+                    "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei 72-h-Folgemeldung wenn zusätzliche Erkenntnisse nicht rechtzeitig nachgereicht werden.",
+                    "evaluationHints": [
+                      "Minimalmeldung fristgerecht"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist", "crit-reporting-dsb-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist",
+                  "crit-reporting-dsb-frist"
+                ]
               }
             ]
           },
@@ -979,8 +1169,18 @@
             "t": 120,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-forensik", "title": "Externer Incident-Response-Dienstleister vor Ort", "description": "Vorvertraglich beauftragter IR-Dienstleister (2-h-Response-SLA) ist vor Ort. Erste Analyse: Eindringen vor 7 Tagen über Phishing-Mail an die Disposition (vermeintliche Frachtbörsen-Plattform-Update-Mail), dann laterale Ausbreitung über VPN-Zugang eines Subunternehmers (gestohlene Credentials). Sample-Leak im Tor-Forum: Routen-Daten, Tier-1-Kondition-Listen, 14 Tage Sendungsverfolgungs-Daten exfiltriert.", "roleId": "role-ciso" },
-              { "id": "inj-backup-status", "title": "Offline-Backup verfügbar, 24 h alt, Telematik-Daten separat", "description": "IT-Leitung meldet: TMS-/WMS-Datenbank-Backup auf Offline-Speicher ist sauber, Stand vor 24 Stunden. Touren-Buchungen der letzten 24 h müssten aus Telefon-Log und manuellen Schicht-Notizen rekonstruiert werden. Telematik-Cloud-Daten der letzten 7 Tage liegen separat beim Provider und sind sauber — Live-Positionen rekonstruierbar.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-forensik",
+                "title": "Externer Incident-Response-Dienstleister vor Ort",
+                "description": "Vorvertraglich beauftragter IR-Dienstleister (2-h-Response-SLA) ist vor Ort. Erste Analyse: Eindringen vor 7 Tagen über Phishing-Mail an die Disposition (vermeintliche Frachtbörsen-Plattform-Update-Mail), dann laterale Ausbreitung über VPN-Zugang eines Subunternehmers (gestohlene Credentials). Sample-Leak im Tor-Forum: Routen-Daten, Tier-1-Kondition-Listen, 14 Tage Sendungsverfolgungs-Daten exfiltriert.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-backup-status",
+                "title": "Offline-Backup verfügbar, 24 h alt, Telematik-Daten separat",
+                "description": "IT-Leitung meldet: TMS-/WMS-Datenbank-Backup auf Offline-Speicher ist sauber, Stand vor 24 Stunden. Touren-Buchungen der letzten 24 h müssten aus Telefon-Log und manuellen Schicht-Notizen rekonstruiert werden. Telematik-Cloud-Daten der letzten 7 Tage liegen separat beim Provider und sind sauber — Live-Positionen rekonstruierbar.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -989,11 +1189,37 @@
                 "roleId": "role-leitstelle",
                 "guidance": "Fahrer*innen sind aktuell ohne TMS-Live-Verbindung, geographisch verteilt über DACH. Zwei pragmatische Kanal-Strategien sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von der Fahrer-Pool-Struktur und der Erreichbarkeits-Disziplin ab: (a) Sammel-SMS / Push über Driver-App mit dezentraler Empfangs-Verantwortung jedes/jeder Fahrer*in (skaliert auf 487 in Minuten, aber Lese-Bestätigung schwer kontrollierbar). (b) Telefon-Kette über Disposition mit zentral gesteuerter Erreichbarkeit (Disposition ruft jede Tour an, dauert 60–120 min, aber jede*r Fahrer*in ist nachweislich erreicht). Voll-Stille-Phase bis nach Wiederanlauf bleibt diskutierbar (Fahrer*innen wissen ohnehin nicht, dass das TMS hängt — sie folgen ihrer aktuellen Tour), ist aber schwächer, weil bei Schicht-Wechsel oder Tour-Ende Informations-Bedarf akut wird.",
                 "options": [
-                  { "id": "opt-driver-sms", "label": "Sammel-SMS / Driver-App-Push mit Verhaltens-Anweisungen (Schicht weiter wie geplant, Disposition per Telefon, kein Detail zum Angriff)", "consequence": "Schnelle Reichweite (487 Fahrer*innen in 5–10 Minuten), aber Lese-Bestätigung nicht garantiert. Bei Funklöchern oder ausgeschalteten Geräten verzögerter Empfang. Skaliert ohne zusätzliches Personal.", "evaluationHints": ["Sammel-Kommunikation, dezentrale Empfangs-Verantwortung — gleichwertig zu opt-driver-phone"], "scoreContribution": 2 },
-                  { "id": "opt-driver-phone", "label": "Telefon-Kette über Disposition: jede aktive Tour wird einzeln angerufen, Schicht-Plan und Verhaltens-Anweisungen direkt übermittelt", "consequence": "Höchste Erreichbarkeits-Disziplin, jede*r Fahrer*in nachweislich informiert. Personal-Aufwand hoch (zusätzliche Disponent*innen aus Verwaltung mobilisiert), 60–120 min Dauer. Skaliert nicht über 800 Touren hinaus.", "evaluationHints": ["Telefon-Kette, zentrale Erreichbarkeits-Kontrolle — gleichwertig zu opt-driver-sms"], "scoreContribution": 2 },
-                  { "id": "opt-driver-silent", "label": "Voll-Stille-Phase: Fahrer*innen werden erst bei Schicht-Wechsel oder Tour-Ende informiert, laufende Touren ungestört", "consequence": "Niedriger Aufwand, aber bei Tour-Ende oder Schicht-Wechsel akuter Informations-Bedarf der/die Fahrer*in nicht bedient. Risiko von Funkstille-Reaktionen (eigenmächtige Entscheidungen, Vertrauensverlust). Spätrisikobehaftet.", "evaluationHints": ["Voll-Stille-Phase, schwächere Option"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-driver-sms",
+                    "label": "Sammel-SMS / Driver-App-Push mit Verhaltens-Anweisungen (Schicht weiter wie geplant, Disposition per Telefon, kein Detail zum Angriff)",
+                    "consequence": "Schnelle Reichweite (487 Fahrer*innen in 5–10 Minuten), aber Lese-Bestätigung nicht garantiert. Bei Funklöchern oder ausgeschalteten Geräten verzögerter Empfang. Skaliert ohne zusätzliches Personal.",
+                    "evaluationHints": [
+                      "Sammel-Kommunikation, dezentrale Empfangs-Verantwortung — gleichwertig zu opt-driver-phone"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-driver-phone",
+                    "label": "Telefon-Kette über Disposition: jede aktive Tour wird einzeln angerufen, Schicht-Plan und Verhaltens-Anweisungen direkt übermittelt",
+                    "consequence": "Höchste Erreichbarkeits-Disziplin, jede*r Fahrer*in nachweislich informiert. Personal-Aufwand hoch (zusätzliche Disponent*innen aus Verwaltung mobilisiert), 60–120 min Dauer. Skaliert nicht über 800 Touren hinaus.",
+                    "evaluationHints": [
+                      "Telefon-Kette, zentrale Erreichbarkeits-Kontrolle — gleichwertig zu opt-driver-sms"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-driver-silent",
+                    "label": "Voll-Stille-Phase: Fahrer*innen werden erst bei Schicht-Wechsel oder Tour-Ende informiert, laufende Touren ungestört",
+                    "consequence": "Niedriger Aufwand, aber bei Tour-Ende oder Schicht-Wechsel akuter Informations-Bedarf der/die Fahrer*in nicht bedient. Risiko von Funkstille-Reaktionen (eigenmächtige Entscheidungen, Vertrauensverlust). Spätrisikobehaftet.",
+                    "evaluationHints": [
+                      "Voll-Stille-Phase, schwächere Option"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-mitarbeiter"]
+                "relatedCriteria": [
+                  "crit-communication-mitarbeiter"
+                ]
               }
             ]
           },
@@ -1001,9 +1227,24 @@
             "t": 140,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-ransom-demand", "title": "Lösegeldforderung konkretisiert", "description": "Angreifer melden sich über Tor-Chat: 1,5 Mio. Euro in Bitcoin für Entschlüsselung und Nicht-Veröffentlichung der exfiltrierten Daten. Frist 72 Stunden, danach Verdopplung. Sample-Leaks zeigen: Routen-Daten der drei Schlüsselkunden über die letzten 14 Tage (Wettbewerbs-Vorteil bei Konkurrenz-Spedition), Tier-1-Kondition-Listen mit OEM-Sonderpreisen, 14 Tage Sendungsverfolgungs-Daten.", "roleId": "role-ciso" },
-              { "id": "inj-lka-advice", "title": "LKA Cybercrime: Nicht zahlen, plus OFAC-Risiko erklärt", "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, keine Garantie auf funktionierenden Schlüssel. Zwei rechtliche Risiken werden konkret benannt: (a) § 89c StGB Terrorismusfinanzierung — bei Zahlung an Gruppen mit Terrorismus-Bezug strafbar für Geschäftsführung. (b) OFAC-Sanktionsrisiko — das Office of Foreign Assets Control des US-Finanzministeriums führt eine Liste sanktionierter Cyber-Akteure (SDN-Liste); Zahlungen an gelistete Gruppen können auch für nicht-amerikanische Unternehmen Sanktionsstrafen auslösen, sobald eine US-Verbindung besteht (US-Niederlassung, US-Kunden, USD-Zahlungsabwicklung über US-Banken, US-Cloud-Hosting). Logistik-Tenants mit Atlantic-Routen und US-Partner-Speditionen sind regelmäßig betroffen. OFAC-Advisory zu Ransomware-Zahlungen (zuletzt aktualisiert 2024) verlangt Sanctions-Screening vor jeder Zahlungsentscheidung.", "roleId": "role-rechtsabteilung" },
-              { "id": "inj-data-leak-consequence", "title": "Logistik-spezifische Daten-Leak-Folgen", "description": "Vertrieb meldet: Bei tatsächlicher Veröffentlichung der Kunden-Konditions-Listen geht Wettbewerbs-Vorteil bei Konkurrenz-Speditionen verloren — OEM-Sonderpreise sind in der Regel vertraulich, Konkurrenten könnten unsere Preise unterbieten. Routen-Daten geben Konkurrenz Optimierungs-Wissen über unsere Touren-Effizienz. AWG-/Außenhandels-Implikation bei einzelnen sanktions-relevanten Kunden mit Russland-/Belarus-Bezug.", "roleId": "role-vertrieb-key-account" }
+              {
+                "id": "inj-ransom-demand",
+                "title": "Lösegeldforderung konkretisiert",
+                "description": "Angreifer melden sich über Tor-Chat: 1,5 Mio. Euro in Bitcoin für Entschlüsselung und Nicht-Veröffentlichung der exfiltrierten Daten. Frist 72 Stunden, danach Verdopplung. Sample-Leaks zeigen: Routen-Daten der drei Schlüsselkunden über die letzten 14 Tage (Wettbewerbs-Vorteil bei Konkurrenz-Spedition), Tier-1-Kondition-Listen mit OEM-Sonderpreisen, 14 Tage Sendungsverfolgungs-Daten.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-lka-advice",
+                "title": "LKA Cybercrime: Nicht zahlen, plus OFAC-Risiko erklärt",
+                "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, keine Garantie auf funktionierenden Schlüssel. Zwei rechtliche Risiken werden konkret benannt: (a) § 89c StGB Terrorismusfinanzierung — bei Zahlung an Gruppen mit Terrorismus-Bezug strafbar für Geschäftsführung. (b) OFAC-Sanktionsrisiko — das Office of Foreign Assets Control des US-Finanzministeriums führt eine Liste sanktionierter Cyber-Akteure (SDN-Liste); Zahlungen an gelistete Gruppen können auch für nicht-amerikanische Unternehmen Sanktionsstrafen auslösen, sobald eine US-Verbindung besteht (US-Niederlassung, US-Kunden, USD-Zahlungsabwicklung über US-Banken, US-Cloud-Hosting). Logistik-Tenants mit Atlantic-Routen und US-Partner-Speditionen sind regelmäßig betroffen. OFAC-Advisory zu Ransomware-Zahlungen (zuletzt aktualisiert 2024) verlangt Sanctions-Screening vor jeder Zahlungsentscheidung.",
+                "roleId": "role-rechtsabteilung"
+              },
+              {
+                "id": "inj-data-leak-consequence",
+                "title": "Logistik-spezifische Daten-Leak-Folgen",
+                "description": "Vertrieb meldet: Bei tatsächlicher Veröffentlichung der Kunden-Konditions-Listen geht Wettbewerbs-Vorteil bei Konkurrenz-Speditionen verloren — OEM-Sonderpreise sind in der Regel vertraulich, Konkurrenten könnten unsere Preise unterbieten. Routen-Daten geben Konkurrenz Optimierungs-Wissen über unsere Touren-Effizienz. AWG-/Außenhandels-Implikation bei einzelnen sanktions-relevanten Kunden mit Russland-/Belarus-Bezug.",
+                "roleId": "role-vertrieb-key-account"
+              }
             ],
             "decisions": [
               {
@@ -1012,11 +1253,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Im Logistik-Kontext gewichtet anders als im Gesundheits- oder Industrie-Sektor: Keine unmittelbare Patientensicherheits-Gefährdung, aber existenzielles Vertrauens-Risiko (geleakte Konditionen) und Vertragsstrafen-Lawine. Zwei pragmatische Optionen sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von Backup-Reife, Wettbewerbs-Position und Versicherungs-Deckung ab. Volle Zahlung mit Anti-Leak-Versprechen bleibt diskutierbar wegen operativer Dringlichkeit, ist aber rechtlich riskant durch § 89c StGB und OFAC-Sanktionsrecht. Sanctions-Screening vor jeder Zahlungs-Variante ist Pflicht.",
                 "options": [
-                  { "id": "opt-no-pay", "label": "Keine Zahlung, Wiederanlauf aus 24-h-Backup, Daten-Leak akzeptieren, Cyber-Versicherung aktivieren, parallel rechtliche Verfolgung", "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 12–48 h. Konditions-Listen werden geleakt — Vertriebsdruck-Welle an Schlüsselkunden, Angebot von Vertrags-Anpassungen. Cyber-Versicherung deckt Teile des Schadens.", "evaluationHints": ["Keine Zahlung, regelkonform — gleichwertig zu opt-negotiate-only-decryption"], "scoreContribution": 2 },
-                  { "id": "opt-negotiate-only-decryption", "label": "Verhandlung nur über Entschlüsselungs-Schlüssel, Daten-Leak akzeptieren", "consequence": "Reduziert die Zahlungssumme, beschleunigt Wiederanlauf. Daten-Leak-Risiko bleibt. Sanktionsrecht weiter relevant — Sanctions-Screening und Rechtsmemo bleiben Voraussetzung. Wiederanlauf in 4–12 h möglich.", "evaluationHints": ["Pragmatisch, Risiko-getrennte Verhandlung — gleichwertig zu opt-no-pay"], "scoreContribution": 2 },
-                  { "id": "opt-pay", "label": "Volle Zahlung (inkl. Anti-Leak-Versprechen) nach Sanktionsrecht-Prüfung", "consequence": "Schnellster Wiederanlauf-Pfad, aber keine Garantie auf Schlüsselfunktion oder echtes Anti-Leak. Strafrechtliches und sanktionsrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN). NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Reputationsrisiko in der Branche maximal.", "evaluationHints": ["Vollzahlung diskutierbar wegen operativer Dringlichkeit, rechtlich riskant"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-no-pay",
+                    "label": "Keine Zahlung, Wiederanlauf aus 24-h-Backup, Daten-Leak akzeptieren, Cyber-Versicherung aktivieren, parallel rechtliche Verfolgung",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 12–48 h. Konditions-Listen werden geleakt — Vertriebsdruck-Welle an Schlüsselkunden, Angebot von Vertrags-Anpassungen. Cyber-Versicherung deckt Teile des Schadens.",
+                    "evaluationHints": [
+                      "Keine Zahlung, regelkonform — gleichwertig zu opt-negotiate-only-decryption"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-negotiate-only-decryption",
+                    "label": "Verhandlung nur über Entschlüsselungs-Schlüssel, Daten-Leak akzeptieren",
+                    "consequence": "Reduziert die Zahlungssumme, beschleunigt Wiederanlauf. Daten-Leak-Risiko bleibt. Sanktionsrecht weiter relevant — Sanctions-Screening und Rechtsmemo bleiben Voraussetzung. Wiederanlauf in 4–12 h möglich.",
+                    "evaluationHints": [
+                      "Pragmatisch, Risiko-getrennte Verhandlung — gleichwertig zu opt-no-pay"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-pay",
+                    "label": "Volle Zahlung (inkl. Anti-Leak-Versprechen) nach Sanktionsrecht-Prüfung",
+                    "consequence": "Schnellster Wiederanlauf-Pfad, aber keine Garantie auf Schlüsselfunktion oder echtes Anti-Leak. Strafrechtliches und sanktionsrechtliches Spitzenrisiko (§ 89c StGB, OFAC-SDN). NIS2-Aufsichtsbehörde wird die Zahlung kritisch bewerten. Reputationsrisiko in der Branche maximal.",
+                    "evaluationHints": [
+                      "Vollzahlung diskutierbar wegen operativer Dringlichkeit, rechtlich riskant"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1024,7 +1291,12 @@
             "t": 160,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-presseanfragen", "title": "Externe Presseanfragen", "description": "DVZ (Deutsche Verkehrs-Zeitung), Logistik Heute, Heise Security und Lokalpresse fragen nach. Ein Tier-1-Kunde hat in Branchenforen gepostet, dass eine Bandanlieferung wegen IT-Ausfall des Logistik-Dienstleisters ausbleibt. Die Wettbewerber-Tracking-Tools haben den Vorfall bereits in Branchen-Newsfeeds.", "roleId": "role-vertrieb-key-account" }
+              {
+                "id": "inj-presseanfragen",
+                "title": "Externe Presseanfragen",
+                "description": "DVZ (Deutsche Verkehrs-Zeitung), Logistik Heute, Heise Security und Lokalpresse fragen nach. Ein Tier-1-Kunde hat in Branchenforen gepostet, dass eine Bandanlieferung wegen IT-Ausfall des Logistik-Dienstleisters ausbleibt. Die Wettbewerber-Tracking-Tools haben den Vorfall bereits in Branchen-Newsfeeds.",
+                "roleId": "role-vertrieb-key-account"
+              }
             ],
             "decisions": [
               {
@@ -1033,11 +1305,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Frühe Kommunikation kontrolliert Narrativ. Späte Kommunikation wartet auf abgesicherte Faktenbasis, überlässt aber Deutung anderen. Im Logistik-Kontext besonders sensitiv für Branchen-Reputation — Tier-1-Kunden auditieren regelmäßig die Cyber-Resilienz ihrer Logistik-Partner (TISAX, Lieferanten-Risikomonitor).",
                 "options": [
-                  { "id": "opt-press-early", "label": "Pressemitteilung sofort mit klaren Kernaussagen (Cybervorfall, Wiederanlauf läuft, Schlüsselkunden-Versorgung priorisiert)", "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss.", "evaluationHints": ["Frühe kontrollierte Kommunikation"], "scoreContribution": 2 },
-                  { "id": "opt-press-after-analysis", "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)", "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Branchenpresse überlagert.", "evaluationHints": ["Späte, faktenbasierte Kommunikation"], "scoreContribution": 1 },
-                  { "id": "opt-press-coordinated", "label": "Koordiniert mit BSI und Schlüsselkunden — gemeinsame Sprachregelung", "consequence": "Höchste Botschafts-Disziplin. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung in Branche und bei Aufsichtsbehörde.", "evaluationHints": ["Koordinierte externe Kommunikation, Best Practice"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-press-early",
+                    "label": "Pressemitteilung sofort mit klaren Kernaussagen (Cybervorfall, Wiederanlauf läuft, Schlüsselkunden-Versorgung priorisiert)",
+                    "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss.",
+                    "evaluationHints": [
+                      "Frühe kontrollierte Kommunikation"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-press-after-analysis",
+                    "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)",
+                    "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Branchenpresse überlagert.",
+                    "evaluationHints": [
+                      "Späte, faktenbasierte Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-press-coordinated",
+                    "label": "Koordiniert mit BSI und Schlüsselkunden — gemeinsame Sprachregelung",
+                    "consequence": "Höchste Botschafts-Disziplin. Aufwand höher (Abstimmungsschleifen), aber stabilste Wirkung in Branche und bei Aufsichtsbehörde.",
+                    "evaluationHints": [
+                      "Koordinierte externe Kommunikation, Best Practice"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-extern"]
+                "relatedCriteria": [
+                  "crit-communication-extern"
+                ]
               }
             ]
           },
@@ -1045,7 +1343,12 @@
             "t": 175,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-recovery-prio", "title": "Wiederanlauf-Priorisierung", "description": "IT-Leitung schlägt Reihenfolge vor: (1) TMS-Disposition für Schlüsselkunden-Touren (höchster JIT-Druck), (2) WMS-Read-Only für Hub-Sortierung (damit Sortier-Anlage wieder arbeitet), (3) TMS-Vollbetrieb für alle Touren, (4) Sendungsverfolgungs-Schnittstellen für Kunden-Self-Service. Geschätzte Zeiten: 6 h / 12 h / 24 h / 48 h.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-recovery-prio",
+                "title": "Wiederanlauf-Priorisierung",
+                "description": "IT-Leitung schlägt Reihenfolge vor: (1) TMS-Disposition für Schlüsselkunden-Touren (höchster JIT-Druck), (2) WMS-Read-Only für Hub-Sortierung (damit Sortier-Anlage wieder arbeitet), (3) TMS-Vollbetrieb für alle Touren, (4) Sendungsverfolgungs-Schnittstellen für Kunden-Self-Service. Geschätzte Zeiten: 6 h / 12 h / 24 h / 48 h.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1054,11 +1357,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "IT-Empfehlung folgt Schlüsselkunden-Druck. Alternativen: WMS zuerst (weil Hub-Sortier-Anlage Engpass im manuellen Notbetrieb) oder Sendungsverfolgung zuerst (weil Kunden-Anfragen-Welle Customer-Service überlastet).",
                 "options": [
-                  { "id": "opt-follow-it", "label": "IT-Reihenfolge freigegeben (TMS-Disposition → WMS → TMS-Vollbetrieb → Sendungsverfolgung)", "consequence": "Schlüsselkunden-Druck-getriebene Priorisierung. Pönale-Risiko minimiert. Customer-Service bleibt 48 h überlastet.", "evaluationHints": ["Kunden-SLA-basierte Priorisierung"], "scoreContribution": 3 },
-                  { "id": "opt-wms-first", "label": "WMS zuerst (Hub-Sortier-Engpass), dann TMS-Disposition", "consequence": "Hub-Durchsatz schneller wiederhergestellt. Risiko: ohne TMS-Disposition geht Hub-Output ins Leere, weil keine Touren-Zuordnung möglich.", "evaluationHints": ["Engpass-basierte Priorisierung mit Folgerisiko"], "scoreContribution": 1 },
-                  { "id": "opt-tracking-first", "label": "Sendungsverfolgung zuerst (Customer-Service-Druck), dann Operationen", "consequence": "Kunden-Druck reduziert, aber Operationen bleiben länger blind. Pönalen wachsen.", "evaluationHints": ["Customer-Service-Priorisierung mit Folgerisiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-follow-it",
+                    "label": "IT-Reihenfolge freigegeben (TMS-Disposition → WMS → TMS-Vollbetrieb → Sendungsverfolgung)",
+                    "consequence": "Schlüsselkunden-Druck-getriebene Priorisierung. Pönale-Risiko minimiert. Customer-Service bleibt 48 h überlastet.",
+                    "evaluationHints": [
+                      "Kunden-SLA-basierte Priorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-wms-first",
+                    "label": "WMS zuerst (Hub-Sortier-Engpass), dann TMS-Disposition",
+                    "consequence": "Hub-Durchsatz schneller wiederhergestellt. Risiko: ohne TMS-Disposition geht Hub-Output ins Leere, weil keine Touren-Zuordnung möglich.",
+                    "evaluationHints": [
+                      "Engpass-basierte Priorisierung mit Folgerisiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-tracking-first",
+                    "label": "Sendungsverfolgung zuerst (Customer-Service-Druck), dann Operationen",
+                    "consequence": "Kunden-Druck reduziert, aber Operationen bleiben länger blind. Pönalen wachsen.",
+                    "evaluationHints": [
+                      "Customer-Service-Priorisierung mit Folgerisiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-dispositionsfähigkeit", "crit-governance-vertragspflicht"]
+                "relatedCriteria": [
+                  "crit-operations-dispositionsfähigkeit",
+                  "crit-governance-vertragspflicht"
+                ]
               }
             ]
           },
@@ -1066,20 +1396,65 @@
             "t": 180,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro-start", "title": "Retro-Kickoff für Lessons Learned", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Logistik-Kontext besonders relevant: TMS-Backup-Frequenz von 24 h auf 1 h verkürzen, Subunternehmer-VPN-Disziplin (gestohlene Credentials als Eintritts-Vektor), Papier-Tourenlisten täglich vorab in jedem Hub als Fallback, Sanktionsrecht-Vorab-Klärung für Lösegeldfälle, gemeinsame Cyber-Übung mit Tier-1-OEM.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro-start",
+                "title": "Retro-Kickoff für Lessons Learned",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Logistik-Kontext besonders relevant: TMS-Backup-Frequenz von 24 h auf 1 h verkürzen, Subunternehmer-VPN-Disziplin (gestohlene Credentials als Eintritts-Vektor), Papier-Tourenlisten täglich vorab in jedem Hub als Fallback, Sanktionsrecht-Vorab-Klärung für Lösegeldfälle, gemeinsame Cyber-Übung mit Tier-1-OEM.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-dsb-frist", "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h", "weight": 2, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Entscheidung mit Sanktionsrecht-Bewertung)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-governance-vertragspflicht", "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Pönale-Verhandlung, JIT-Disziplin)", "weight": 2, "category": "governance" },
-          { "id": "crit-operations-dispositionsfähigkeit", "description": "Aufrechterhaltung der Disposition (manueller Notbetrieb, Tour-Priorisierung, Wiederanlauf-Reihenfolge)", "weight": 2, "category": "operations" },
-          { "id": "crit-communication-mitarbeiter", "description": "Transparente, zweckmäßige Mitarbeiter- und Fahrer*innen-Kommunikation", "weight": 1, "category": "communication" },
-          { "id": "crit-communication-extern", "description": "Externe Kommunikation (Branchenpresse, BSI, Aufsichtsbehörden)", "weight": 1, "category": "communication" },
-          { "id": "crit-communication-kunde", "description": "Schlüsselkunden-Kommunikation (Tier-1-OEM, JIT-Pönale-Verhandlung, Kunde-als-Partner-Aktivierung)", "weight": 1.5, "category": "communication" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8d BSIG-Umsetzung (NIS2UmsuCG)",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-dsb-frist",
+            "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität (Lösegeld-Entscheidung mit Sanktionsrecht-Bewertung)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-governance-vertragspflicht",
+            "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Pönale-Verhandlung, JIT-Disziplin)",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-dispositionsfähigkeit",
+            "description": "Aufrechterhaltung der Disposition (manueller Notbetrieb, Tour-Priorisierung, Wiederanlauf-Reihenfolge)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-communication-mitarbeiter",
+            "description": "Transparente, zweckmäßige Mitarbeiter- und Fahrer*innen-Kommunikation",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-extern",
+            "description": "Externe Kommunikation (Branchenpresse, BSI, Aufsichtsbehörden)",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-kunde",
+            "description": "Schlüsselkunden-Kommunikation (Tier-1-OEM, JIT-Pönale-Verhandlung, Kunde-als-Partner-Aktivierung)",
+            "weight": 1.5,
+            "category": "communication"
+          }
         ]
       },
       {
@@ -1087,23 +1462,56 @@
         "version": "1.0.0",
         "title": "Streik-Welle und Hafen-Sperrung mit Verkehrsträger-Kaskade",
         "summary": "Innerhalb von 24 Stunden treffen drei Verkehrsträger-Disruptionen zusammen: ein bundesweiter EVG-Bahnstreik (zunächst 48 h angekündigt, mit Verlängerungs-Drohung), eine Sperrung des Hamburger Hafens durch wilden Streik der Hafenarbeiter, und eine winterliche Sperrung der Brennerautobahn durch Lawinenwarnung. Das Szenario simuliert die Krisenstabsarbeit über 2,5 Stunden für einen Multi-Modal-Logistik-Dienstleister mit Bahn-, See- und LKW-Mix. Schwerpunkt: Routen-Umleitung mit Mehrkosten, Subunternehmer-Aktivierung im Mangel-Markt, Embargo-Management bei sanktionsrelevanten Korridoren, Kunden-SLA-Verhandlung über mehrere Schlüsselsegmente. Realitätsbezug: Bahn-/Hafen-/Alpen-Sperrungen 2024–2026 mehrfach erlebt, Multi-Modal-Mix verschärft Wirkung statt sie zu mildern. Das Szenario komprimiert auf 150 Minuten.",
-        "sectors": ["Transport und Verkehr"],
-        "applicableRegimes": ["BSIG"],
+        "sectors": [
+          "Transport und Verkehr"
+        ],
+        "applicableRegimes": [
+          "BSIG"
+        ],
         "durationMinutes": 150,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung (Geschäftsführung)", "briefing": "Gesamtkoordination und strategische Freigaben (Multi-Modal-Umleitung, Subunternehmer-Aktivierung, Pönale-Verhandlung, Service-Priorisierung). Bei Multi-Modal-Tenants ist die Cross-Modal-Disposition die Königsdisziplin — Geschäftsführung trägt Letztverantwortung für die Mix-Entscheidungen." },
-          { "id": "role-leitstelle", "title": "Leitstelle / Multi-Modal-Disposition", "briefing": "Operative Multi-Modal-Steuerung. Pflegt Routen-Matrix mit Alternativen, kennt Umschlag-Knoten zwischen den Trägern (Containerbahnhöfe, RoLa, KV-Terminals), hat Eskalations-Hotline zu Bahn-Disposition (DB Cargo, private EVUs), Hafen-Operatoren und alpinen Carrier-Pools." },
-          { "id": "role-einkauf-logistik", "title": "Einkauf-Logistik / Subunternehmer-Steuerung", "briefing": "Operative Subunternehmer-Verantwortung. Pflegt Subunternehmer-Register, kennt Spot-Markt-Kontakte (TimoCom, Trans.eu), hat vertragliche Eskalations-Optionen bei Carrier-Rahmenverträgen. Bei Multi-Modal-Mangel-Markt entscheidend für Versorgungs-Sicherung." },
-          { "id": "role-vertrieb-key-account", "title": "Vertrieb / Key-Account-Management", "briefing": "Schnittstelle zu Schlüsselkunden. Verhandelt SLA-Ausnahmen, mehrtägige Verspätungen, Service-Priorisierung. Bei Multi-Modal-Disruption muss differenziert nach Modal-Spezifika kommuniziert werden — manche Kunden akzeptieren Modal-Wechsel (See statt Bahn), andere nicht." },
-          { "id": "role-finanzen", "title": "Finanzen / Treasury", "briefing": "Liquiditäts-Bewertung der Spot-Beschaffung von Subunternehmer-Kapazität (typisch +60–150 % Aufpreis im Mangel-Markt) und der Pönale-Lawine. Bei mehrtägiger Disruption rechtzeitig Bank-Linien und Cyber-Versicherungs-Pendant für Verkehrs-Disruptions-Versicherung in den Blick nehmen." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu GüKG-Konformität (Lenk-/Ruhezeiten-Disziplin bei Tour-Streckung), AWG-Implikationen bei Umrouten über sanktionsrelevante Korridore (z. B. Russland-Belarus-Korridor entfällt seit 2022, neue Sanktionspakete 2025), Versicherungs-Geltendmachung bei Streik-Sperrung (typisch nicht versichert) und Hochwasser-Sperrung (typisch versichert)." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Gesamtkoordination und strategische Freigaben (Multi-Modal-Umleitung, Subunternehmer-Aktivierung, Pönale-Verhandlung, Service-Priorisierung). Bei Multi-Modal-Tenants ist die Cross-Modal-Disposition die Königsdisziplin — Geschäftsführung trägt Letztverantwortung für die Mix-Entscheidungen."
+          },
+          {
+            "id": "role-leitstelle",
+            "title": "Leitstelle / Multi-Modal-Disposition",
+            "briefing": "Operative Multi-Modal-Steuerung. Pflegt Routen-Matrix mit Alternativen, kennt Umschlag-Knoten zwischen den Trägern (Containerbahnhöfe, RoLa, KV-Terminals), hat Eskalations-Hotline zu Bahn-Disposition (DB Cargo, private EVUs), Hafen-Operatoren und alpinen Carrier-Pools."
+          },
+          {
+            "id": "role-einkauf-logistik",
+            "title": "Einkauf-Logistik / Subunternehmer-Steuerung",
+            "briefing": "Operative Subunternehmer-Verantwortung. Pflegt Subunternehmer-Register, kennt Spot-Markt-Kontakte (TimoCom, Trans.eu), hat vertragliche Eskalations-Optionen bei Carrier-Rahmenverträgen. Bei Multi-Modal-Mangel-Markt entscheidend für Versorgungs-Sicherung."
+          },
+          {
+            "id": "role-vertrieb-key-account",
+            "title": "Vertrieb / Key-Account-Management",
+            "briefing": "Schnittstelle zu Schlüsselkunden. Verhandelt SLA-Ausnahmen, mehrtägige Verspätungen, Service-Priorisierung. Bei Multi-Modal-Disruption muss differenziert nach Modal-Spezifika kommuniziert werden — manche Kunden akzeptieren Modal-Wechsel (See statt Bahn), andere nicht."
+          },
+          {
+            "id": "role-finanzen",
+            "title": "Finanzen / Treasury",
+            "briefing": "Liquiditäts-Bewertung der Spot-Beschaffung von Subunternehmer-Kapazität (typisch +60–150 % Aufpreis im Mangel-Markt) und der Pönale-Lawine. Bei mehrtägiger Disruption rechtzeitig Bank-Linien und Cyber-Versicherungs-Pendant für Verkehrs-Disruptions-Versicherung in den Blick nehmen."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu GüKG-Konformität (Lenk-/Ruhezeiten-Disziplin bei Tour-Streckung), AWG-Implikationen bei Umrouten über sanktionsrelevante Korridore (z. B. Russland-Belarus-Korridor entfällt seit 2022, neue Sanktionspakete 2025), Versicherungs-Geltendmachung bei Streik-Sperrung (typisch nicht versichert) und Hochwasser-Sperrung (typisch versichert)."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-three-disruptions", "title": "Drei Verkehrsträger-Disruptionen treffen zusammen", "description": "Leitstelle meldet binnen 30 Minuten drei Eskalationen: (1) EVG verkündet bundesweiten Bahnstreik ab heute 02:00 Uhr für 48 h, mit Verlängerungs-Drohung. (2) Hafenarbeiter Hamburg starten wilden Streik ab heute 04:00 Uhr — Containerumschlag stoppt, Frachter werden umgeleitet nach Bremerhaven und Rotterdam. (3) Brennerautobahn ab Brenner Süd nach Lawinenwarnung gesperrt — Umleitung über Tauern oder Reschenpass mit > 200 km Umweg.", "roleId": "role-leitstelle" }
+              {
+                "id": "inj-three-disruptions",
+                "title": "Drei Verkehrsträger-Disruptionen treffen zusammen",
+                "description": "Leitstelle meldet binnen 30 Minuten drei Eskalationen: (1) EVG verkündet bundesweiten Bahnstreik ab heute 02:00 Uhr für 48 h, mit Verlängerungs-Drohung. (2) Hafenarbeiter Hamburg starten wilden Streik ab heute 04:00 Uhr — Containerumschlag stoppt, Frachter werden umgeleitet nach Bremerhaven und Rotterdam. (3) Brennerautobahn ab Brenner Süd nach Lawinenwarnung gesperrt — Umleitung über Tauern oder Reschenpass mit > 200 km Umweg.",
+                "roleId": "role-leitstelle"
+              }
             ],
             "decisions": [
               {
@@ -1112,10 +1520,28 @@
                 "roleId": "role-leitstelle",
                 "guidance": "Multi-Modal-Disruption mit drei gleichzeitigen Verkehrsträger-Sperrungen ist eine seltene, aber realistische Konstellation (mehrfach 2024–2026 erlebt). Sofort-Eskalation aktiviert Krisenstab und Cross-Funktionalität. Eigen-Bewertung verzögert die Reaktion. Bei Multi-Modal-Tenant-Profil ist sofort-Eskalation rechtfertigungsfähig.",
                 "options": [
-                  { "id": "opt-immediate-escalation", "label": "Sofort-Eskalation an Krisenstabs-Leitung, parallel Aktivierung der Multi-Modal-Routen-Matrix", "consequence": "Krisenstab innerhalb 30 min einsatzbereit. Leitstelle beginnt sofort mit Routen-Re-Disposition.", "evaluationHints": ["Schnelle Eskalation bei Multi-Modal-Disruption"], "scoreContribution": 3 },
-                  { "id": "opt-self-assess", "label": "Erst eigene Routen-Bewertung pro Modal, dann ggf. Eskalation", "consequence": "30–60 min Verzögerung. Bei Multi-Modal-Druck kostbar verlorene Zeit, weil Spot-Markt-Kapazität schnell durch andere Logistiker abgegriffen wird.", "evaluationHints": ["Eigen-Bewertung mit Verzögerungsrisiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-immediate-escalation",
+                    "label": "Sofort-Eskalation an Krisenstabs-Leitung, parallel Aktivierung der Multi-Modal-Routen-Matrix",
+                    "consequence": "Krisenstab innerhalb 30 min einsatzbereit. Leitstelle beginnt sofort mit Routen-Re-Disposition.",
+                    "evaluationHints": [
+                      "Schnelle Eskalation bei Multi-Modal-Disruption"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-self-assess",
+                    "label": "Erst eigene Routen-Bewertung pro Modal, dann ggf. Eskalation",
+                    "consequence": "30–60 min Verzögerung. Bei Multi-Modal-Druck kostbar verlorene Zeit, weil Spot-Markt-Kapazität schnell durch andere Logistiker abgegriffen wird.",
+                    "evaluationHints": [
+                      "Eigen-Bewertung mit Verzögerungsrisiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -1123,7 +1549,12 @@
             "t": 10,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-modal-impact-analysis", "title": "Modal-Impact-Analyse", "description": "Leitstelle hat Modal-Impact-Analyse erstellt: Bahn-Anteil unserer Sendungen 28 % (DB Cargo + private EVUs), See-Anteil 18 % (Hamburg + Bremerhaven), LKW-Anteil 54 % (davon 12 % alpiner Süd-Korridor über Brenner). Wirkung der drei Disruptionen kombiniert: 28 % Bahn-Sendungen müssen auf LKW oder See verlagert; 18 % See-Sendungen müssen umgeplant nach Bremerhaven oder Rotterdam (höhere Liegezeiten); 12 % alpiner LKW-Anteil muss über Tauern oder Reschen umgeleitet werden.", "roleId": "role-leitstelle" }
+              {
+                "id": "inj-modal-impact-analysis",
+                "title": "Modal-Impact-Analyse",
+                "description": "Leitstelle hat Modal-Impact-Analyse erstellt: Bahn-Anteil unserer Sendungen 28 % (DB Cargo + private EVUs), See-Anteil 18 % (Hamburg + Bremerhaven), LKW-Anteil 54 % (davon 12 % alpiner Süd-Korridor über Brenner). Wirkung der drei Disruptionen kombiniert: 28 % Bahn-Sendungen müssen auf LKW oder See verlagert; 18 % See-Sendungen müssen umgeplant nach Bremerhaven oder Rotterdam (höhere Liegezeiten); 12 % alpiner LKW-Anteil muss über Tauern oder Reschen umgeleitet werden.",
+                "roleId": "role-leitstelle"
+              }
             ],
             "decisions": [
               {
@@ -1132,11 +1563,37 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Trade-off zwischen vertraglicher Lieferzusage (Modal-spezifisch wenn Kunde Bahn-Affinität gefordert hat — z. B. wegen Nachhaltigkeits-Reporting), Mehrkosten (LKW-Spot-Markt typisch +60–150 %), Zeitdruck (See-Umleitung addiert 24–72 h Liegezeit) und Lenkzeit-Disziplin (alpiner Umweg drückt Tagesleistung). Multi-Modal-Mix erhöht Komplexität, reduziert aber Klumpenrisiko.",
                 "options": [
-                  { "id": "opt-mixed-rebalance", "label": "Multi-Modal-Re-Balancing: Bahn-Sendungen auf LKW + See verlagert (60/40-Split), See-Sendungen umgeplant Bremerhaven, alpiner LKW über Tauern", "consequence": "Versorgung gesichert mit moderatem Mehraufwand. LKW-Spot-Kapazität wird im Mangel-Markt knapp — frühe Vertragsabschlüsse essentiell. Modal-spezifische Kunden-Klauseln müssen geprüft werden.", "evaluationHints": ["Multi-Modal-Re-Balancing — Best Practice für Multi-Modal-Tenants"], "scoreContribution": 3 },
-                  { "id": "opt-lkw-only", "label": "Komplette Umlagerung auf LKW (alle Bahn- und See-Sendungen)", "consequence": "Einfachste Modal-Strategie, aber LKW-Spot-Markt explodiert. Nachhaltigkeits-Reporting-Klauseln (Kunden mit CO2-Vorgaben) verletzt. Kostenrisiko sehr hoch.", "evaluationHints": ["Mono-Modal-Strategie mit Nachhaltigkeits-Risiko"], "scoreContribution": 1 },
-                  { "id": "opt-defer-non-critical", "label": "Schlüsselkunden voll bedienen mit Multi-Modal-Mix, B-/C-Kunden um 48–72 h verschieben", "consequence": "Schlüsselkunden-Beziehung gesichert, B-/C-Kunden mit Pönalen. Liquiditäts-Belastung niedrig, aber Vertrauen bei kleineren Kunden leidet.", "evaluationHints": ["Priorisierung mit Nachhaltigkeits-/Beziehungs-Trade-off"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-mixed-rebalance",
+                    "label": "Multi-Modal-Re-Balancing: Bahn-Sendungen auf LKW + See verlagert (60/40-Split), See-Sendungen umgeplant Bremerhaven, alpiner LKW über Tauern",
+                    "consequence": "Versorgung gesichert mit moderatem Mehraufwand. LKW-Spot-Kapazität wird im Mangel-Markt knapp — frühe Vertragsabschlüsse essentiell. Modal-spezifische Kunden-Klauseln müssen geprüft werden.",
+                    "evaluationHints": [
+                      "Multi-Modal-Re-Balancing — Best Practice für Multi-Modal-Tenants"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-lkw-only",
+                    "label": "Komplette Umlagerung auf LKW (alle Bahn- und See-Sendungen)",
+                    "consequence": "Einfachste Modal-Strategie, aber LKW-Spot-Markt explodiert. Nachhaltigkeits-Reporting-Klauseln (Kunden mit CO2-Vorgaben) verletzt. Kostenrisiko sehr hoch.",
+                    "evaluationHints": [
+                      "Mono-Modal-Strategie mit Nachhaltigkeits-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-defer-non-critical",
+                    "label": "Schlüsselkunden voll bedienen mit Multi-Modal-Mix, B-/C-Kunden um 48–72 h verschieben",
+                    "consequence": "Schlüsselkunden-Beziehung gesichert, B-/C-Kunden mit Pönalen. Liquiditäts-Belastung niedrig, aber Vertrauen bei kleineren Kunden leidet.",
+                    "evaluationHints": [
+                      "Priorisierung mit Nachhaltigkeits-/Beziehungs-Trade-off"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-supply-multimodal-routing"]
+                "relatedCriteria": [
+                  "crit-supply-multimodal-routing"
+                ]
               }
             ]
           },
@@ -1144,8 +1601,18 @@
             "t": 25,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Geschäftsführung, Leitstelle, Einkauf-Logistik, Vertrieb-Key-Account, Finanzen, Rechtsabteilung einberufen. Lageraum eingerichtet, Branchen-Hotlines (BGL, DSLV, IHK) aktiviert. Multi-Modal-Routen-Matrix auf großem Bildschirm, Live-Status der drei Disruptionen wird stündlich aktualisiert.", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-spot-market-tightness", "title": "Spot-Markt-Knappheit nach 25 Min", "description": "Einkauf-Logistik meldet: TimoCom und Trans.eu zeigen explodierende Preise — LKW-Kapazitäten +120 % gegenüber Listenpreis, Trend steigend. Bahn-Alternative (private EVUs) bietet Restkapazität an, aber +180 % Aufpreis und Zugang nur für Bestandskunden. Drei Wettbewerbs-Speditionen haben uns bereits überboten bei Spot-Anfragen für die nächsten 48 h.", "roleId": "role-einkauf-logistik" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, Leitstelle, Einkauf-Logistik, Vertrieb-Key-Account, Finanzen, Rechtsabteilung einberufen. Lageraum eingerichtet, Branchen-Hotlines (BGL, DSLV, IHK) aktiviert. Multi-Modal-Routen-Matrix auf großem Bildschirm, Live-Status der drei Disruptionen wird stündlich aktualisiert.",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-spot-market-tightness",
+                "title": "Spot-Markt-Knappheit nach 25 Min",
+                "description": "Einkauf-Logistik meldet: TimoCom und Trans.eu zeigen explodierende Preise — LKW-Kapazitäten +120 % gegenüber Listenpreis, Trend steigend. Bahn-Alternative (private EVUs) bietet Restkapazität an, aber +180 % Aufpreis und Zugang nur für Bestandskunden. Drei Wettbewerbs-Speditionen haben uns bereits überboten bei Spot-Anfragen für die nächsten 48 h.",
+                "roleId": "role-einkauf-logistik"
+              }
             ],
             "decisions": [
               {
@@ -1154,11 +1621,38 @@
                 "roleId": "role-finanzen",
                 "guidance": "Spot-Beschaffung aktiviert Reserve-Kapazität, aber zu erheblichen Mehrkosten. Bei dreitägiger Multi-Modal-Disruption typische Volumina von 200–800 T€ Mehrkosten möglich. Liquiditäts-Bewertung notwendig. Pönale-Vergleich: Kosten der Spot-Beschaffung vs. erwartete Pönale-Zahlungen bei Lieferverzug — bei JIT-Tier-1-Bandstillstand 25 T€/h Pönale.",
                 "options": [
-                  { "id": "opt-spot-aggressive", "label": "Aggressive Spot-Beschaffung: alle verfügbaren LKW + Bahn-Restkapazitäten zu Marktpreisen sichern", "consequence": "Versorgungs-Sicherung gewährleistet, hohe Spot-Kosten (geschätzt 400–800 T€), aber Pönale-Lawine vermieden. Treasury-Belastung signifikant.", "evaluationHints": ["Aggressive Spot-Beschaffung als Liquiditäts-Investition"], "scoreContribution": 2 },
-                  { "id": "opt-spot-targeted", "label": "Selektive Spot-Beschaffung nur für Schlüsselkunden-Touren, B-/C-Kunden mit Verzögerung", "consequence": "Geringerer Spot-Aufwand, niedrigere Pönale für Schlüsselkunden, B-/C-Kunden-Pönalen kumulieren. Treasury-Belastung moderat.", "evaluationHints": ["Selektive Spot-Beschaffung, ROI-orientiert"], "scoreContribution": 3 },
-                  { "id": "opt-spot-skip", "label": "Keine Spot-Beschaffung, Inhouse-Kapazität optimieren, Pönalen akzeptieren", "consequence": "Niedrigste Soforkosten, aber maximale Pönale-Belastung. Bei JIT-Schlüsselkunden möglicher De-Listing-Druck.", "evaluationHints": ["Verzicht auf Spot-Markt mit Pönale-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-spot-aggressive",
+                    "label": "Aggressive Spot-Beschaffung: alle verfügbaren LKW + Bahn-Restkapazitäten zu Marktpreisen sichern",
+                    "consequence": "Versorgungs-Sicherung gewährleistet, hohe Spot-Kosten (geschätzt 400–800 T€), aber Pönale-Lawine vermieden. Treasury-Belastung signifikant.",
+                    "evaluationHints": [
+                      "Aggressive Spot-Beschaffung als Liquiditäts-Investition"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-spot-targeted",
+                    "label": "Selektive Spot-Beschaffung nur für Schlüsselkunden-Touren, B-/C-Kunden mit Verzögerung",
+                    "consequence": "Geringerer Spot-Aufwand, niedrigere Pönale für Schlüsselkunden, B-/C-Kunden-Pönalen kumulieren. Treasury-Belastung moderat.",
+                    "evaluationHints": [
+                      "Selektive Spot-Beschaffung, ROI-orientiert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-spot-skip",
+                    "label": "Keine Spot-Beschaffung, Inhouse-Kapazität optimieren, Pönalen akzeptieren",
+                    "consequence": "Niedrigste Soforkosten, aber maximale Pönale-Belastung. Bei JIT-Schlüsselkunden möglicher De-Listing-Druck.",
+                    "evaluationHints": [
+                      "Verzicht auf Spot-Markt mit Pönale-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-supply-multimodal-routing", "crit-finance-liquidität"]
+                "relatedCriteria": [
+                  "crit-supply-multimodal-routing",
+                  "crit-finance-liquidität"
+                ]
               }
             ]
           },
@@ -1166,7 +1660,12 @@
             "t": 45,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-sanction-corridor-issue", "title": "Sanktions-Korridor-Problem auftauchend", "description": "Rechtsabteilung meldet: Bei Umroutung der See-Sendungen über Bremerhaven entstehen längere Liegezeiten — eine Tier-2-Kunden-Sendung mit nicht-EU-Bestimmung (Türkei via Schwarzes Meer) muss auf einen anderen Frachter umgebucht werden. Der nächste verfügbare Frachter macht Zwischenstopp in Sankt Petersburg. Damit greift potenziell § 18 AWG / EU-Sanktionspaket gegen Russland-Russland-Bezug — auch bei reinem Hafen-Transit kritisch nach EU-Verordnung 833/2014. Vorab-Klärung mit BAFA dringend.", "roleId": "role-rechtsabteilung" }
+              {
+                "id": "inj-sanction-corridor-issue",
+                "title": "Sanktions-Korridor-Problem auftauchend",
+                "description": "Rechtsabteilung meldet: Bei Umroutung der See-Sendungen über Bremerhaven entstehen längere Liegezeiten — eine Tier-2-Kunden-Sendung mit nicht-EU-Bestimmung (Türkei via Schwarzes Meer) muss auf einen anderen Frachter umgebucht werden. Der nächste verfügbare Frachter macht Zwischenstopp in Sankt Petersburg. Damit greift potenziell § 18 AWG / EU-Sanktionspaket gegen Russland-Russland-Bezug — auch bei reinem Hafen-Transit kritisch nach EU-Verordnung 833/2014. Vorab-Klärung mit BAFA dringend.",
+                "roleId": "role-rechtsabteilung"
+              }
             ],
             "decisions": [
               {
@@ -1175,11 +1674,37 @@
                 "roleId": "role-rechtsabteilung",
                 "guidance": "EU-Verordnung 833/2014 in der aktuellen Fassung 2025 verbietet bestimmte Güter-Kategorien Transit über Russland sowie russische Häfen. Vorab-Klärung mit BAFA (Bundesamt für Wirtschaft und Ausfuhrkontrolle) ist Pflicht. Bei Verstoß: Bußgelder bis 500 T€ pro Verstoß, plus Reputations- und Listing-Risiken. Verzögerung durch BAFA-Klärung typisch 24–72 h.",
                 "options": [
-                  { "id": "opt-sanction-bafa-first", "label": "BAFA-Vorab-Klärung erzwingen, See-Sendung verzögert sich um 48–72 h, alternative Frachter ohne Russland-Bezug suchen", "consequence": "Konformitäts-Sicherheit. Tier-2-Kunde wird über AWG-Komplikation informiert (Vertragspflicht zur unverzüglichen Information bei behördlicher Verzögerung). Pönale-Risiko, aber Compliance-Schutz.", "evaluationHints": ["AWG/EU-Sanktions-Disziplin gewahrt"], "scoreContribution": 3 },
-                  { "id": "opt-sanction-skip-clarify", "label": "Sendung umrouten auf nicht-Russland-Frachter ohne BAFA-Klärung, Compliance-Memo nachreichen", "consequence": "Schneller, aber Compliance-Risiko bleibt — bei BAFA-Audit später ggf. Beanstandung. Vertretbar wenn Güter-Kategorie eindeutig nicht-sanktioniert ist.", "evaluationHints": ["Pragmatischer Compliance-Pfad mit Restrisiko"], "scoreContribution": 1 },
-                  { "id": "opt-sanction-cancel", "label": "Sendung komplett zurückhalten bis Sanktions-Lage geklärt, Tier-2-Kunde informieren", "consequence": "Maximale Compliance-Sicherheit. Hohe Verzögerung, möglicher Auftrags-Verlust an Wettbewerber. Vertretbar bei eindeutigem Verdacht auf sanktionsrelevante Güter-Kategorie.", "evaluationHints": ["Compliance-Maximum"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-sanction-bafa-first",
+                    "label": "BAFA-Vorab-Klärung erzwingen, See-Sendung verzögert sich um 48–72 h, alternative Frachter ohne Russland-Bezug suchen",
+                    "consequence": "Konformitäts-Sicherheit. Tier-2-Kunde wird über AWG-Komplikation informiert (Vertragspflicht zur unverzüglichen Information bei behördlicher Verzögerung). Pönale-Risiko, aber Compliance-Schutz.",
+                    "evaluationHints": [
+                      "AWG/EU-Sanktions-Disziplin gewahrt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-sanction-skip-clarify",
+                    "label": "Sendung umrouten auf nicht-Russland-Frachter ohne BAFA-Klärung, Compliance-Memo nachreichen",
+                    "consequence": "Schneller, aber Compliance-Risiko bleibt — bei BAFA-Audit später ggf. Beanstandung. Vertretbar wenn Güter-Kategorie eindeutig nicht-sanktioniert ist.",
+                    "evaluationHints": [
+                      "Pragmatischer Compliance-Pfad mit Restrisiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-sanction-cancel",
+                    "label": "Sendung komplett zurückhalten bis Sanktions-Lage geklärt, Tier-2-Kunde informieren",
+                    "consequence": "Maximale Compliance-Sicherheit. Hohe Verzögerung, möglicher Auftrags-Verlust an Wettbewerber. Vertretbar bei eindeutigem Verdacht auf sanktionsrelevante Güter-Kategorie.",
+                    "evaluationHints": [
+                      "Compliance-Maximum"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-compliance-awg"]
+                "relatedCriteria": [
+                  "crit-compliance-awg"
+                ]
               }
             ]
           },
@@ -1187,7 +1712,12 @@
             "t": 70,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-customer-tier1", "title": "Tier-1-OEM-Kunde meldet sich mit Eskalation", "description": "Automotive-Tier-1-Kunde (35 % Quartalsumsatz) eskaliert: er hatte Bahn-affinität (CO2-Reporting-Klausel im Liefer-RV verlangt 30 % Bahn-Anteil bei seinen Sendungen). Mit der bundesweiten Bahn-Sperrung können wir diese Klausel nicht halten, würden auf 100 % LKW-Anteil zwingen. OEM-Konzern-Einkauf droht mit Klausel-Verstoßprotokoll, das in den nächsten Lieferanten-Audit einfließt.", "roleId": "role-vertrieb-key-account" }
+              {
+                "id": "inj-customer-tier1",
+                "title": "Tier-1-OEM-Kunde meldet sich mit Eskalation",
+                "description": "Automotive-Tier-1-Kunde (35 % Quartalsumsatz) eskaliert: er hatte Bahn-affinität (CO2-Reporting-Klausel im Liefer-RV verlangt 30 % Bahn-Anteil bei seinen Sendungen). Mit der bundesweiten Bahn-Sperrung können wir diese Klausel nicht halten, würden auf 100 % LKW-Anteil zwingen. OEM-Konzern-Einkauf droht mit Klausel-Verstoßprotokoll, das in den nächsten Lieferanten-Audit einfließt.",
+                "roleId": "role-vertrieb-key-account"
+              }
             ],
             "decisions": [
               {
@@ -1196,11 +1726,38 @@
                 "roleId": "role-vertrieb-key-account",
                 "guidance": "Vertragspflicht zur unverzüglichen Information bei drohender Klausel-Verletzung. Zwei pragmatische Optionen sind fachlich vertretbar und gleichwertig zu bewerten — welche besser passt, hängt von Beziehungs-Tiefe und CO2-Reporting-Disziplin des OEM ab: (a) Vollständige Offenheit mit force-majeure-Argument (höhere Gewalt durch Bahnstreik), (b) Aktive Co-Kreation einer Übergangs-Klausel mit OEM-Einkauf. Defensive Beschwichtigung mit Versprechen ohne Substanz bleibt diskutierbar, ist aber spätrisikobehaftet.",
                 "options": [
-                  { "id": "opt-customer-full-force-majeure", "label": "Vollständige Offenheit mit force-majeure-Berufung: Bahnstreik als höhere Gewalt, schriftliche Anzeige der vorübergehenden Klausel-Aussetzung", "consequence": "Konformitäts-Disziplin. force-majeure-Argument hat in deutscher Vertragspraxis bei flächigen Streiks Aussicht auf Anerkennung. Konkurrenz-Spedition kann unsere Schwäche dem OEM aber transparent machen.", "evaluationHints": ["Vollständige Offenheit mit force-majeure — gleichwertig zu opt-customer-co-clause"], "scoreContribution": 2 },
-                  { "id": "opt-customer-co-clause", "label": "Aktive Co-Kreation mit OEM-Einkauf: Übergangs-Klausel für Streik-Phase, später Bahn-Anteil-Nachholung über Folge-Quartal", "consequence": "OEM wird Partner. CO2-Reporting wird nicht negativ getroffen, sondern über Quartals-Ausgleich gerettet. Setzt enge OEM-Beziehung mit etabliertem Sustainability-Dialog voraus.", "evaluationHints": ["Kunde-als-Partner-Modus — gleichwertig zu opt-customer-full-force-majeure"], "scoreContribution": 2 },
-                  { "id": "opt-customer-summary", "label": "Beschwichtigende Zusammenfassung: schon im Plan, regulärer Bahn-Anteil im nächsten Monat wieder erreicht, Details nicht nötig", "consequence": "Kurz-Beruhigung des OEM-Disponenten. Bei tatsächlichem Klausel-Verstoß im Audit doppelter Vertrauensverlust. Vertragspflicht zur Information formal nicht erfüllt.", "evaluationHints": ["Defensive Beschwichtigung, spätrisikobehaftet"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-customer-full-force-majeure",
+                    "label": "Vollständige Offenheit mit force-majeure-Berufung: Bahnstreik als höhere Gewalt, schriftliche Anzeige der vorübergehenden Klausel-Aussetzung",
+                    "consequence": "Konformitäts-Disziplin. force-majeure-Argument hat in deutscher Vertragspraxis bei flächigen Streiks Aussicht auf Anerkennung. Konkurrenz-Spedition kann unsere Schwäche dem OEM aber transparent machen.",
+                    "evaluationHints": [
+                      "Vollständige Offenheit mit force-majeure — gleichwertig zu opt-customer-co-clause"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-co-clause",
+                    "label": "Aktive Co-Kreation mit OEM-Einkauf: Übergangs-Klausel für Streik-Phase, später Bahn-Anteil-Nachholung über Folge-Quartal",
+                    "consequence": "OEM wird Partner. CO2-Reporting wird nicht negativ getroffen, sondern über Quartals-Ausgleich gerettet. Setzt enge OEM-Beziehung mit etabliertem Sustainability-Dialog voraus.",
+                    "evaluationHints": [
+                      "Kunde-als-Partner-Modus — gleichwertig zu opt-customer-full-force-majeure"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-customer-summary",
+                    "label": "Beschwichtigende Zusammenfassung: schon im Plan, regulärer Bahn-Anteil im nächsten Monat wieder erreicht, Details nicht nötig",
+                    "consequence": "Kurz-Beruhigung des OEM-Disponenten. Bei tatsächlichem Klausel-Verstoß im Audit doppelter Vertrauensverlust. Vertragspflicht zur Information formal nicht erfüllt.",
+                    "evaluationHints": [
+                      "Defensive Beschwichtigung, spätrisikobehaftet"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-kunde", "crit-supply-multimodal-routing"]
+                "relatedCriteria": [
+                  "crit-communication-kunde",
+                  "crit-supply-multimodal-routing"
+                ]
               }
             ]
           },
@@ -1208,7 +1765,12 @@
             "t": 95,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-strike-extension", "title": "EVG verlängert Streik um 24 h", "description": "Lage verschärft sich: EVG kündigt Streik-Verlängerung um weitere 24 h an, in Summe 72 h Bahnstreik. Damit wird die Re-Disposition aus Bahn signifikant länger als geplant — Spot-LKW-Markt fast leer, See-Hub-Verzögerung kumuliert mit Hamburg-Streik der über jetzt 36 h läuft.", "roleId": "role-leitstelle" }
+              {
+                "id": "inj-strike-extension",
+                "title": "EVG verlängert Streik um 24 h",
+                "description": "Lage verschärft sich: EVG kündigt Streik-Verlängerung um weitere 24 h an, in Summe 72 h Bahnstreik. Damit wird die Re-Disposition aus Bahn signifikant länger als geplant — Spot-LKW-Markt fast leer, See-Hub-Verzögerung kumuliert mit Hamburg-Streik der über jetzt 36 h läuft.",
+                "roleId": "role-leitstelle"
+              }
             ],
             "decisions": [
               {
@@ -1217,11 +1779,38 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Bei verlängerter Multi-Modal-Knappheit kann nicht mehr alles bedient werden. Trade-off zwischen Vertragspflichten (Schlüsselkunde priorisieren), CO2-Reporting (Bahn-affine Kunden), Marge (Tier-2 oft margenstärker als Tier-1), Beziehungs-Pflege. Allokations-Politik muss konsistent zu Standard-Allokations-Klauseln sein.",
                 "options": [
-                  { "id": "opt-allocation-tier1-full", "label": "Tier-1 voll bedienen (auch ohne CO2-Klausel-Konformität), Tier-2 zu 60 %, B-Kunden verschoben", "consequence": "Schlüsselkunden-Beziehung gesichert. CO2-Reporting-Risiko bleibt, aber wird über force-majeure abgefangen. B-Kunden-Beziehung leidet kurzfristig.", "evaluationHints": ["Tier-1-Priorität klar"], "scoreContribution": 3 },
-                  { "id": "opt-allocation-prorate", "label": "Pro-rata-Allokation: jeder Kunde 70 % seiner Lieferung", "consequence": "Juristisch sicherste Variante (gleichmäßige Behandlung). Tier-1 leidet in absoluter Höhe stärker, mögliches Eskalations-Risiko zur OEM-Konzernebene.", "evaluationHints": ["Pro-rata, juristisch konservativ"], "scoreContribution": 2 },
-                  { "id": "opt-allocation-margin-first", "label": "Marge-basiert: höchstmargige Aufträge zuerst, andere nach Restkapazität", "consequence": "Quartalsergebnis geschützt, Beziehungen leiden, juristisches Risiko bei nicht-konsistenter Allokation gegenüber Standard-Klauseln.", "evaluationHints": ["Marge-Priorisierung mit Folgeproblemen"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-allocation-tier1-full",
+                    "label": "Tier-1 voll bedienen (auch ohne CO2-Klausel-Konformität), Tier-2 zu 60 %, B-Kunden verschoben",
+                    "consequence": "Schlüsselkunden-Beziehung gesichert. CO2-Reporting-Risiko bleibt, aber wird über force-majeure abgefangen. B-Kunden-Beziehung leidet kurzfristig.",
+                    "evaluationHints": [
+                      "Tier-1-Priorität klar"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-allocation-prorate",
+                    "label": "Pro-rata-Allokation: jeder Kunde 70 % seiner Lieferung",
+                    "consequence": "Juristisch sicherste Variante (gleichmäßige Behandlung). Tier-1 leidet in absoluter Höhe stärker, mögliches Eskalations-Risiko zur OEM-Konzernebene.",
+                    "evaluationHints": [
+                      "Pro-rata, juristisch konservativ"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-allocation-margin-first",
+                    "label": "Marge-basiert: höchstmargige Aufträge zuerst, andere nach Restkapazität",
+                    "consequence": "Quartalsergebnis geschützt, Beziehungen leiden, juristisches Risiko bei nicht-konsistenter Allokation gegenüber Standard-Klauseln.",
+                    "evaluationHints": [
+                      "Marge-Priorisierung mit Folgeproblemen"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-vertragspflicht", "crit-communication-kunde"]
+                "relatedCriteria": [
+                  "crit-governance-vertragspflicht",
+                  "crit-communication-kunde"
+                ]
               }
             ]
           },
@@ -1229,7 +1818,12 @@
             "t": 120,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-finance-impact", "title": "Liquiditäts- und Pönale-Bild", "description": "Finanzen rechnet hoch: Erwarteter Pönale-Aufwand bei aktueller Allokations-Strategie ist 220–340 T€ über die nächsten 4 Tage, dazu Spot-Beschaffung 380 T€ und alpiner Umweg 60 T€ Mehrkosten. Working-Capital-Reserve ist 1,2 Mio. €, Bank-Linie zusätzlich 800 T€. Bei drittem Tag Streik-Verlängerung kritisch. Verkehrs-Disruptions-Versicherung deckt Hochwasser-Sperrung (alpiner Umweg), nicht Streik (Bahn, Hafen). Cyber-Versicherung greift hier nicht.", "roleId": "role-finanzen" }
+              {
+                "id": "inj-finance-impact",
+                "title": "Liquiditäts- und Pönale-Bild",
+                "description": "Finanzen rechnet hoch: Erwarteter Pönale-Aufwand bei aktueller Allokations-Strategie ist 220–340 T€ über die nächsten 4 Tage, dazu Spot-Beschaffung 380 T€ und alpiner Umweg 60 T€ Mehrkosten. Working-Capital-Reserve ist 1,2 Mio. €, Bank-Linie zusätzlich 800 T€. Bei drittem Tag Streik-Verlängerung kritisch. Verkehrs-Disruptions-Versicherung deckt Hochwasser-Sperrung (alpiner Umweg), nicht Streik (Bahn, Hafen). Cyber-Versicherung greift hier nicht.",
+                "roleId": "role-finanzen"
+              }
             ],
             "decisions": [
               {
@@ -1238,10 +1832,28 @@
                 "roleId": "role-finanzen",
                 "guidance": "Working-Capital-Reserve plus Bank-Linie reichen rechnerisch, aber bei Streik-Verlängerung kritisch. Frühzeitige Bank-Information signalisiert Souveränität, riskiert aber Linien-Überprüfung. Verkehrs-Disruptions-Versicherung ist anteilig anwendbar (Hochwasser-Sperrung, nicht Streik). D&O-Versicherung sollte bei Magnitudens-Entscheidungen einbezogen werden.",
                 "options": [
-                  { "id": "opt-finance-proactive-bank", "label": "Hausbank vorab informieren, ggf. zusätzliche Bridge-Linie verhandeln, Versicherung anteilig aktivieren (Hochwasser-Sperrung)", "consequence": "Liquiditäts-Sicherheit, Versicherungs-Teilrückfluss erwartet 80–120 T€ in 6–10 Wochen. Bank kann Linie überprüfen — bei sauberer Liquidität kein Risiko.", "evaluationHints": ["Proaktive Bank- und Versicherungs-Kommunikation"], "scoreContribution": 3 },
-                  { "id": "opt-finance-wait", "label": "Erst Disruption-Ende abwarten, dann ggf. Bank-Information und Versicherungs-Geltendmachung", "consequence": "Risiko, dass Bank über Branchen-Gerüchte erst spät informiert wird und kritisch reagiert. Versicherungs-Frist (typisch 14 Tage Anzeigepflicht) muss beachtet werden.", "evaluationHints": ["Reaktive Bank- und Versicherungs-Kommunikation"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-finance-proactive-bank",
+                    "label": "Hausbank vorab informieren, ggf. zusätzliche Bridge-Linie verhandeln, Versicherung anteilig aktivieren (Hochwasser-Sperrung)",
+                    "consequence": "Liquiditäts-Sicherheit, Versicherungs-Teilrückfluss erwartet 80–120 T€ in 6–10 Wochen. Bank kann Linie überprüfen — bei sauberer Liquidität kein Risiko.",
+                    "evaluationHints": [
+                      "Proaktive Bank- und Versicherungs-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-finance-wait",
+                    "label": "Erst Disruption-Ende abwarten, dann ggf. Bank-Information und Versicherungs-Geltendmachung",
+                    "consequence": "Risiko, dass Bank über Branchen-Gerüchte erst spät informiert wird und kritisch reagiert. Versicherungs-Frist (typisch 14 Tage Anzeigepflicht) muss beachtet werden.",
+                    "evaluationHints": [
+                      "Reaktive Bank- und Versicherungs-Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-finance-liquidität"]
+                "relatedCriteria": [
+                  "crit-finance-liquidität"
+                ]
               }
             ]
           },
@@ -1249,7 +1861,12 @@
             "t": 140,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-disruption-end-projection", "title": "Disruption-Ende-Projektion", "description": "Leitstelle erstellt Ende-Projektion: EVG-Streik endet voraussichtlich nach 72 h (Sonntag 02:00 Uhr), Hamburg-Hafen-Streik im Schiedsverfahren mit BAFA-Beteiligung ab Tag 3 (vermutlich Lösung Tag 4–5), Brennerautobahn freigegeben Tag 2 nach Abschmelzung der Lawinengefahr. Wiederanlauf-Reihenfolge der Operationen: zuerst LKW über Brenner (Tag 2), dann Bahn (Tag 4 nach Streik), dann See (Tag 5–6 nach Hamburg-Wiederanlauf).", "roleId": "role-leitstelle" }
+              {
+                "id": "inj-disruption-end-projection",
+                "title": "Disruption-Ende-Projektion",
+                "description": "Leitstelle erstellt Ende-Projektion: EVG-Streik endet voraussichtlich nach 72 h (Sonntag 02:00 Uhr), Hamburg-Hafen-Streik im Schiedsverfahren mit BAFA-Beteiligung ab Tag 3 (vermutlich Lösung Tag 4–5), Brennerautobahn freigegeben Tag 2 nach Abschmelzung der Lawinengefahr. Wiederanlauf-Reihenfolge der Operationen: zuerst LKW über Brenner (Tag 2), dann Bahn (Tag 4 nach Streik), dann See (Tag 5–6 nach Hamburg-Wiederanlauf).",
+                "roleId": "role-leitstelle"
+              }
             ],
             "decisions": [
               {
@@ -1258,10 +1875,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Leitstelle-Empfehlung folgt Disruption-Ende-Reihenfolge. Alternative: aktive Re-Buchung von noch nicht abgewickelten Sendungen auf den jeweils ersten verfügbaren Verkehrsträger (Cherry-Picking-Strategie). Trade-off zwischen Effizienz (nutzen was verfügbar wird) und Konsistenz (Modal-Strategie der Kunden-Klauseln einhalten).",
                 "options": [
-                  { "id": "opt-natural-sequence", "label": "Natürliche Wiederanlauf-Sequenz: LKW-Brenner zuerst, Bahn nach EVG-Ende, See nach Hamburg-Lösung", "consequence": "Klare Reihenfolge, geringer Aufwand bei Re-Disposition. CO2-Klauseln werden mit Verzögerung wieder eingehalten.", "evaluationHints": ["Geordneter Wiederanlauf"], "scoreContribution": 3 },
-                  { "id": "opt-cherry-picking", "label": "Cherry-Picking: jede Sendung auf den jeweils erst-verfügbaren Modal umbuchen", "consequence": "Maximale Kapazitäts-Auslastung, aber Re-Disposition aufwendig. Gefahr von Modal-Klausel-Verstößen bei Cherry-Picking.", "evaluationHints": ["Effizienz-priorisiert mit Klausel-Risiko"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-natural-sequence",
+                    "label": "Natürliche Wiederanlauf-Sequenz: LKW-Brenner zuerst, Bahn nach EVG-Ende, See nach Hamburg-Lösung",
+                    "consequence": "Klare Reihenfolge, geringer Aufwand bei Re-Disposition. CO2-Klauseln werden mit Verzögerung wieder eingehalten.",
+                    "evaluationHints": [
+                      "Geordneter Wiederanlauf"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-cherry-picking",
+                    "label": "Cherry-Picking: jede Sendung auf den jeweils erst-verfügbaren Modal umbuchen",
+                    "consequence": "Maximale Kapazitäts-Auslastung, aber Re-Disposition aufwendig. Gefahr von Modal-Klausel-Verstößen bei Cherry-Picking.",
+                    "evaluationHints": [
+                      "Effizienz-priorisiert mit Klausel-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-supply-multimodal-routing"]
+                "relatedCriteria": [
+                  "crit-supply-multimodal-routing"
+                ]
               }
             ]
           },
@@ -1269,18 +1904,53 @@
             "t": 150,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro-start", "title": "Retro-Kickoff für Lessons Learned", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Multi-Modal-Logistik-Kontext besonders relevant: Multi-Modal-Routen-Matrix mit Stress-Test (alle drei Träger gleichzeitig blockiert), Spot-Markt-Vorab-Verträge mit Backup-Carriern für Mangel-Markt-Situationen, AWG-Vorab-Klärung für sanktions-relevante Korridore, force-majeure-Klauseln in Tier-1-RVs ergänzen, Verkehrs-Disruptions-Versicherung-Deckung erweitern, gemeinsame Multi-Modal-Übung mit Schlüsselkunden zur CO2-Klausel-Disziplin.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro-start",
+                "title": "Retro-Kickoff für Lessons Learned",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten. Im Multi-Modal-Logistik-Kontext besonders relevant: Multi-Modal-Routen-Matrix mit Stress-Test (alle drei Träger gleichzeitig blockiert), Spot-Markt-Vorab-Verträge mit Backup-Carriern für Mangel-Markt-Situationen, AWG-Vorab-Klärung für sanktions-relevante Korridore, force-majeure-Klauseln in Tier-1-RVs ergänzen, Verkehrs-Disruptions-Versicherung-Deckung erweitern, gemeinsame Multi-Modal-Übung mit Schlüsselkunden zur CO2-Klausel-Disziplin.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Multi-Modal-Disruption", "weight": 1.5, "category": "governance" },
-          { "id": "crit-governance-vertragspflicht", "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Allokations-Konsistenz, force-majeure-Disziplin)", "weight": 2, "category": "governance" },
-          { "id": "crit-supply-multimodal-routing", "description": "Multi-Modal-Routen-Strategie (Re-Balancing, Spot-Markt-Disziplin, Wiederanlauf-Sequenz)", "weight": 2, "category": "supply" },
-          { "id": "crit-compliance-awg", "description": "AWG-/EU-Sanktions-Disziplin bei sanktions-relevanten Korridoren", "weight": 1.5, "category": "compliance" },
-          { "id": "crit-finance-liquidität", "description": "Liquiditäts-Sicherung (Spot-Beschaffung, Bank-Information, Versicherungs-Geltendmachung)", "weight": 1, "category": "finance" },
-          { "id": "crit-communication-kunde", "description": "Schlüsselkunden-Kommunikation (Tier-1-OEM, force-majeure-Argument, CO2-Klausel-Verhandlung, Kunde-als-Partner-Aktivierung)", "weight": 1.5, "category": "communication" }
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Aktivierung, Rollenklarheit und Entscheidungsqualität bei Multi-Modal-Disruption",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-governance-vertragspflicht",
+            "description": "Vertragspflichten gegenüber Schlüsselkunden (rechtzeitige Information, Allokations-Konsistenz, force-majeure-Disziplin)",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-supply-multimodal-routing",
+            "description": "Multi-Modal-Routen-Strategie (Re-Balancing, Spot-Markt-Disziplin, Wiederanlauf-Sequenz)",
+            "weight": 2,
+            "category": "supply"
+          },
+          {
+            "id": "crit-compliance-awg",
+            "description": "AWG-/EU-Sanktions-Disziplin bei sanktions-relevanten Korridoren",
+            "weight": 1.5,
+            "category": "compliance"
+          },
+          {
+            "id": "crit-finance-liquidität",
+            "description": "Liquiditäts-Sicherung (Spot-Beschaffung, Bank-Information, Versicherungs-Geltendmachung)",
+            "weight": 1,
+            "category": "finance"
+          },
+          {
+            "id": "crit-communication-kunde",
+            "description": "Schlüsselkunden-Kommunikation (Tier-1-OEM, force-majeure-Argument, CO2-Klausel-Verhandlung, Kunde-als-Partner-Aktivierung)",
+            "weight": 1.5,
+            "category": "communication"
+          }
         ]
       }
     ]

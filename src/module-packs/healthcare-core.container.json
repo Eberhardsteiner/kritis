@@ -6,7 +6,7 @@
     "moduleId": "healthcare",
     "name": "Gesundheits-Basismodul",
     "version": "1.0.0",
-    "description": "Zusatzparameter für Kliniken, Pflegeeinrichtungen und andere Gesundheitsdienstleister mit Fokus auf Patientenversorgung, Medizintechnik und Meldefähigkeit.",
+    "description": "Branchenmodul für Kliniken und Pflegeeinrichtungen mit Fokus auf Patientensicherheit, KIS-Resilienz und §16-KRITISDachG-Meldefähigkeit.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Gesundheit",
@@ -31,14 +31,20 @@
       "minAppVersion": "1.8.0",
       "minEngineVersion": "1.0.0"
     },
-    "releaseChannel": "sector"
+    "releaseChannel": "sector",
+    "versionHistory": [
+      {
+        "version": "1.0.0",
+        "note": "Verbose pre-cleanup module description (preserved 2026-04-26 during the cross-pack description cleanup): Zusatzparameter für Kliniken, Pflegeeinrichtungen und andere Gesundheitsdienstleister mit Fokus auf Patientenversorgung, Medizintechnik und Meldefähigkeit. Pack umfasst seit C5.3 zusätzlich Risiko-Templates nach § 12 KRITIS-Dachgesetz (All-Gefahren-Ansatz), zwei Tabletop-Szenarien (KIS-Ransomware, Strom+MANV-Kaskade) und einen Resilienzplan-Template-Entwurf. Evaluation-Gewichtungs-Modell der Tabletop-Szenarien: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Patientensicherheit, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. Richtlinie für Pack-Autor*innen: mindestens eine Option pro Decision soll scoreContribution ≥ 2 erreichen, damit didaktischer Raum bleibt."
+      }
+    ]
   },
   "module": {
     "schemaVersion": 1,
     "id": "healthcare",
     "name": "Gesundheit & Krankenhaus",
     "version": "1.0.0",
-    "description": "Zusatzparameter für Kliniken, Pflegeeinrichtungen und andere Gesundheitsdienstleister mit Fokus auf Patientenversorgung, Medizintechnik und Meldefähigkeit. Pack umfasst seit C5.3 zusätzlich Risiko-Templates nach § 12 KRITIS-Dachgesetz (All-Gefahren-Ansatz), zwei Tabletop-Szenarien (KIS-Ransomware, Strom+MANV-Kaskade) und einen Resilienzplan-Template-Entwurf. Evaluation-Gewichtungs-Modell der Tabletop-Szenarien: evaluationCriteria[].weight ist relativ, nicht normiert. Frontend berechnet Score als Σ(scoreContribution × weight) / Σ(maxPossibleContribution × weight) pro Kriterium; Gesamtscore als gewichteter Durchschnitt. Kritische Kriterien (Patientensicherheit, BSI-Meldefrist) tragen weight=2, moderat wichtige weight=1,5, beiläufige weight=1. scoreContribution pro Decision-Option ist 0–3: 3 = Best-Practice, 2 = akzeptabel, 1 = diskutierbar mit Folgeproblemen, 0 = deutlich problematisch. Richtlinie für Pack-Autor*innen: mindestens eine Option pro Decision soll scoreContribution ≥ 2 erreichen, damit didaktischer Raum bleibt.",
+    "description": "Branchenmodul für Kliniken und Pflegeeinrichtungen mit Fokus auf Patientensicherheit, KIS-Resilienz und §16-KRITISDachG-Meldefähigkeit.",
     "sectorCategory": "Gesundheit",
     "domainWeightAdjustments": {
       "operations": 1.25,
@@ -871,24 +877,63 @@
         "version": "1.0.0",
         "title": "Ransomware-Angriff auf das zentrale KIS",
         "summary": "Über eine Phishing-Kaskade verschlüsselt eine Ransomware-Gruppe das zentrale Krankenhaus-Informationssystem (KIS) und angekoppelte PACS-/LIS-Systeme. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf Sofortmaßnahmen, BSI-/DSGVO-Meldewege, Downtime-Verfahren und die Lösegeldentscheidung. Realitätsbezug: Wiederanlauf dauert 3–6 Wochen (vgl. Düsseldorf 2020, Neuss 2021, Leipzig 2024); das Szenario komprimiert die entscheidenden Weichenstellungen auf 180 Minuten.",
-        "sectors": ["Gesundheit"],
-        "applicableRegimes": ["KRITISDachG", "BSIG", "DSGVO"],
+        "sectors": [
+          "Gesundheit"
+        ],
+        "applicableRegimes": [
+          "KRITISDachG",
+          "BSIG",
+          "DSGVO"
+        ],
         "durationMinutes": 180,
         "roles": [
-          { "id": "role-krisenstab-leitung", "title": "Krisenstabs-Leitung", "briefing": "Gesamtkoordination aller Maßnahmen. Einberufung des Krisenstabs, strategische Freigaben (Downtime-Aktivierung, Lösegeldentscheidung, Kommunikationslinien). Typisch besetzt mit Ärztlicher Direktion oder Geschäftsführung." },
-          { "id": "role-ciso", "title": "CISO", "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, § 8b BSIG / § 16 KRITISDachG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister." },
-          { "id": "role-it-leitung", "title": "IT-Leitung / IT-Betrieb", "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Überprüfung, Wiederanlaufplanung. Stellt die technische Faktenbasis für Krisenstab und CISO bereit." },
-          { "id": "role-pflegedirektion", "title": "Pflegedirektion", "briefing": "Organisiert Downtime-Verfahren auf den Stationen (Papier-Aufnahme, manuelle Medikationsdokumentation, verschärfte Allergien-/Identifikations-Abfragen). Kommuniziert an Stationsleitungen." },
-          { "id": "role-dsb", "title": "Datenschutzbeauftragte*r", "briefing": "Prüft DSGVO-Meldepflicht nach Art. 33 (72-h-Frist), koordiniert Betroffenen-Benachrichtigung nach Art. 34, bewertet Bußgeldrisiko. Im KRITIS-Kontext zudem Schnittstelle zur Landesbeauftragten für Datenschutz." },
-          { "id": "role-presse", "title": "Presse- und Öffentlichkeitsarbeit", "briefing": "Formuliert interne Mitarbeiter-Kommunikation und externe Pressestatements. Muss eng mit Krisenstabs-Leitung und Rechtsabteilung abgestimmt sein — jede voreilige Aussage erhöht das Reputations- und Haftungsrisiko." },
-          { "id": "role-rechtsabteilung", "title": "Rechtsabteilung / Compliance", "briefing": "Berät zu Meldepflichten, straf-/zivilrechtlichen Implikationen (§ 203 StGB Schweigepflicht), Schnittstelle zur Polizei (LKA Cybercrime), Vertragsrecht mit IT-Dienstleistern." }
+          {
+            "id": "role-krisenstab-leitung",
+            "title": "Krisenstabs-Leitung",
+            "briefing": "Gesamtkoordination aller Maßnahmen. Einberufung des Krisenstabs, strategische Freigaben (Downtime-Aktivierung, Lösegeldentscheidung, Kommunikationslinien). Typisch besetzt mit Ärztlicher Direktion oder Geschäftsführung."
+          },
+          {
+            "id": "role-ciso",
+            "title": "CISO",
+            "briefing": "Cyber-Incident-Response-Lead. Koordiniert IT-Forensik, Sperrung infizierter Systeme, § 8b BSIG / § 16 KRITISDachG-Meldewege und Austausch mit BSI. Hauptansprechpartner für externe Incident-Response-Dienstleister."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung / IT-Betrieb",
+            "briefing": "Operative IT-Maßnahmen — Netzentkoppelung, Backup-Überprüfung, Wiederanlaufplanung. Stellt die technische Faktenbasis für Krisenstab und CISO bereit."
+          },
+          {
+            "id": "role-pflegedirektion",
+            "title": "Pflegedirektion",
+            "briefing": "Organisiert Downtime-Verfahren auf den Stationen (Papier-Aufnahme, manuelle Medikationsdokumentation, verschärfte Allergien-/Identifikations-Abfragen). Kommuniziert an Stationsleitungen."
+          },
+          {
+            "id": "role-dsb",
+            "title": "Datenschutzbeauftragte*r",
+            "briefing": "Prüft DSGVO-Meldepflicht nach Art. 33 (72-h-Frist), koordiniert Betroffenen-Benachrichtigung nach Art. 34, bewertet Bußgeldrisiko. Im KRITIS-Kontext zudem Schnittstelle zur Landesbeauftragten für Datenschutz."
+          },
+          {
+            "id": "role-presse",
+            "title": "Presse- und Öffentlichkeitsarbeit",
+            "briefing": "Formuliert interne Mitarbeiter-Kommunikation und externe Pressestatements. Muss eng mit Krisenstabs-Leitung und Rechtsabteilung abgestimmt sein — jede voreilige Aussage erhöht das Reputations- und Haftungsrisiko."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu Meldepflichten, straf-/zivilrechtlichen Implikationen (§ 203 StGB Schweigepflicht), Schnittstelle zur Polizei (LKA Cybercrime), Vertragsrecht mit IT-Dienstleistern."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-kis-anomaly", "title": "Erste Anomalie-Meldung aus dem IT-Betrieb", "description": "Systemadministrator meldet ungewöhnlich hohe CPU-Last auf mehreren KIS-Servern, parallel Zugriffsfehler aus zwei Stationen. Erstindikatoren deuten auf Schadsoftware hin, aber noch keine Verschlüsselung sichtbar.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-kis-anomaly",
+                "title": "Erste Anomalie-Meldung aus dem IT-Betrieb",
+                "description": "Systemadministrator meldet ungewöhnlich hohe CPU-Last auf mehreren KIS-Servern, parallel Zugriffsfehler aus zwei Stationen. Erstindikatoren deuten auf Schadsoftware hin, aber noch keine Verschlüsselung sichtbar.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -897,10 +942,28 @@
                 "roleId": "role-ciso",
                 "guidance": "Zwei gegensätzliche Strategien: frühe Eskalation (hoher False-Positive-Anteil, aber schnelle Reaktion möglich) vs. zuerst Eigen-Diagnose (Ressourcen-schonend, aber verzögert Reaktion). Bei KRITIS-Betreibern ist frühe Eskalation explizit empfohlen.",
                 "options": [
-                  { "id": "opt-early-escalate", "label": "Sofort Krisenstab aktivieren und Netzwerk-Forensik einleiten", "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, aber Personal gebunden.", "evaluationHints": ["Krisenstab-Alarmierungskette getestet"], "scoreContribution": 3 },
-                  { "id": "opt-initial-diagnostics", "label": "Erst eigene Triage ohne Krisenstab-Eskalation", "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung.", "evaluationHints": ["Zeitverlust durch Eigen-Diagnose"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-early-escalate",
+                    "label": "Sofort Krisenstab aktivieren und Netzwerk-Forensik einleiten",
+                    "consequence": "Krisenstab einsatzbereit bevor der Vollbefall bestätigt ist — gute Reaktionszeit, aber Personal gebunden.",
+                    "evaluationHints": [
+                      "Krisenstab-Alarmierungskette getestet"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-initial-diagnostics",
+                    "label": "Erst eigene Triage ohne Krisenstab-Eskalation",
+                    "consequence": "30–45 Minuten Verzögerung bei Bestätigung. Angreifer nutzen die Zeit zur lateralen Ausbreitung.",
+                    "evaluationHints": [
+                      "Zeitverlust durch Eigen-Diagnose"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               }
             ]
           },
@@ -908,7 +971,12 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-kis-encrypted", "title": "Bestätigung: KIS-Ransomware mit Verschlüsselung", "description": "Erste Patientenakten sind nicht mehr lesbar, Lösegeldforderung als Textdatei auf mehreren Servern platziert. Gruppe identifiziert sich als 'BlackCat/ALPHV'-Nachfolger, typische TTP aus BSI-Lagebild 2024/2025.", "roleId": "role-ciso" }
+              {
+                "id": "inj-kis-encrypted",
+                "title": "Bestätigung: KIS-Ransomware mit Verschlüsselung",
+                "description": "Erste Patientenakten sind nicht mehr lesbar, Lösegeldforderung als Textdatei auf mehreren Servern platziert. Gruppe identifiziert sich als 'BlackCat/ALPHV'-Nachfolger, typische TTP aus BSI-Lagebild 2024/2025.",
+                "roleId": "role-ciso"
+              }
             ],
             "decisions": [
               {
@@ -917,10 +985,28 @@
                 "roleId": "role-it-leitung",
                 "guidance": "Trade-off Entkopplung vs. Forensik: Bei sofortiger Netzabschaltung geht Live-Angreifer-Telemetrie verloren (erschwert Forensik), aber laterale Ausbreitung stoppt. Bei Isolations-Ansatz Zeit gewonnen für Incident-Response-Tools, aber Risiko weiterer Befallsreichweite.",
                 "options": [
-                  { "id": "opt-hard-decouple", "label": "Sofort-Entkopplung vom Netz, komplettes Shutdown KIS + PACS + LIS", "consequence": "Ausbreitung gestoppt, aber Diagnostik und Dokumentation stehen komplett still. Wiederanlauf beginnt erst nach Forensik.", "evaluationHints": ["Schnelle Containment-Entscheidung"], "scoreContribution": 3 },
-                  { "id": "opt-segmented-isolation", "label": "Segmentierte Isolation mit laufender Forensik", "consequence": "Live-Telemetrie erhalten, aber Risiko eines weiteren Vollbefalls. Nur realistisch mit eingespieltem IR-Team.", "evaluationHints": ["Risiko/Nutzen abgewogen"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-hard-decouple",
+                    "label": "Sofort-Entkopplung vom Netz, komplettes Shutdown KIS + PACS + LIS",
+                    "consequence": "Ausbreitung gestoppt, aber Diagnostik und Dokumentation stehen komplett still. Wiederanlauf beginnt erst nach Forensik.",
+                    "evaluationHints": [
+                      "Schnelle Containment-Entscheidung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-segmented-isolation",
+                    "label": "Segmentierte Isolation mit laufender Forensik",
+                    "consequence": "Live-Telemetrie erhalten, aber Risiko eines weiteren Vollbefalls. Nur realistisch mit eingespieltem IR-Team.",
+                    "evaluationHints": [
+                      "Risiko/Nutzen abgewogen"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-patientensicherheit"]
+                "relatedCriteria": [
+                  "crit-operations-patientensicherheit"
+                ]
               }
             ]
           },
@@ -928,8 +1014,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-krisenstab-active", "title": "Krisenstab konstituiert", "description": "Krisenstabs-Leitung hat Ärztliche Direktion, CISO, IT-Leitung, Pflegedirektion, DSB, Presse, Rechtsabteilung einberufen. Lageraum eingerichtet, Kommunikationsmittel geprüft (inkl. Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe).", "roleId": "role-krisenstab-leitung" },
-              { "id": "inj-op-plan-frage", "title": "OP-Programm im Fragezustand", "description": "OP-Management meldet: 12 elektive Eingriffe heute geplant, 3 bereits begonnen, 4 Notfall-OPs erwartet. Narkose-Geräte sind betriebsfähig, aber Präop-Befunde aus KIS nicht zugänglich.", "roleId": "role-pflegedirektion" }
+              {
+                "id": "inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Ärztliche Direktion, CISO, IT-Leitung, Pflegedirektion, DSB, Presse, Rechtsabteilung einberufen. Lageraum eingerichtet, Kommunikationsmittel geprüft (inkl. Out-of-Band-Kommunikation via vorab definierte Mobilfunk-Gruppe).",
+                "roleId": "role-krisenstab-leitung"
+              },
+              {
+                "id": "inj-op-plan-frage",
+                "title": "OP-Programm im Fragezustand",
+                "description": "OP-Management meldet: 12 elektive Eingriffe heute geplant, 3 bereits begonnen, 4 Notfall-OPs erwartet. Narkose-Geräte sind betriebsfähig, aber Präop-Befunde aus KIS nicht zugänglich.",
+                "roleId": "role-pflegedirektion"
+              }
             ],
             "decisions": [
               {
@@ -938,10 +1034,29 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Downtime-Verfahren (Papier-Aufnahme, manuelle Dokumentation, Alarmketten ohne IT) sollten vorab dokumentiert sein. Bei vollem Rollout: Pflege-Belastung steigt deutlich, Fehlerrate steigt. Teilrollout möglich, wenn einzelne Systeme weiter verfügbar.",
                 "options": [
-                  { "id": "opt-full-downtime", "label": "Vollständige Downtime-Aktivierung, alle Stationen auf Papier", "consequence": "Einheitliche Lage, klares Verfahren. Pflege-Personal stark belastet, Fehlerrate erhöht. Elektivprogramm wird abgesagt.", "evaluationHints": ["Einheitliches Downtime-Verfahren angewendet"], "scoreContribution": 3 },
-                  { "id": "opt-partial-downtime", "label": "Selektiver Rollout nach Kritikalität", "consequence": "Nur betroffene Systeme gehen auf Papier. Risiko inkonsistenter Dokumentation. Elektivprogramm teilweise weitergeführt.", "evaluationHints": ["Risiko-basiertes Downtime"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-downtime",
+                    "label": "Vollständige Downtime-Aktivierung, alle Stationen auf Papier",
+                    "consequence": "Einheitliche Lage, klares Verfahren. Pflege-Personal stark belastet, Fehlerrate erhöht. Elektivprogramm wird abgesagt.",
+                    "evaluationHints": [
+                      "Einheitliches Downtime-Verfahren angewendet"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-partial-downtime",
+                    "label": "Selektiver Rollout nach Kritikalität",
+                    "consequence": "Nur betroffene Systeme gehen auf Papier. Risiko inkonsistenter Dokumentation. Elektivprogramm teilweise weitergeführt.",
+                    "evaluationHints": [
+                      "Risiko-basiertes Downtime"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-patientensicherheit", "crit-operations-triage"]
+                "relatedCriteria": [
+                  "crit-operations-patientensicherheit",
+                  "crit-operations-triage"
+                ]
               }
             ]
           },
@@ -949,8 +1064,18 @@
             "t": 60,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-elective-cancel", "title": "Elektive OPs abgesagt, Notfall-OPs laufen", "description": "OP-Management hat elektive Eingriffe verschoben, Notfall-OP-Fähigkeit bestätigt (Anästhesie-Dokumentation auf Papier). Pflegepersonal zieht zusätzliche Schichten.", "roleId": "role-pflegedirektion" },
-              { "id": "inj-rd-request", "title": "Rettungsdienst-Leitstelle meldet sich", "description": "Leitstelle fragt, ob weitere Patienten-Zuweisungen aktuell möglich sind. 3 Rettungswagen sind unterwegs mit Verdacht auf Schlaganfall und Trauma.", "roleId": "role-pflegedirektion" }
+              {
+                "id": "inj-elective-cancel",
+                "title": "Elektive OPs abgesagt, Notfall-OPs laufen",
+                "description": "OP-Management hat elektive Eingriffe verschoben, Notfall-OP-Fähigkeit bestätigt (Anästhesie-Dokumentation auf Papier). Pflegepersonal zieht zusätzliche Schichten.",
+                "roleId": "role-pflegedirektion"
+              },
+              {
+                "id": "inj-rd-request",
+                "title": "Rettungsdienst-Leitstelle meldet sich",
+                "description": "Leitstelle fragt, ob weitere Patienten-Zuweisungen aktuell möglich sind. 3 Rettungswagen sind unterwegs mit Verdacht auf Schlaganfall und Trauma.",
+                "roleId": "role-pflegedirektion"
+              }
             ],
             "decisions": [
               {
@@ -959,10 +1084,29 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "KRITIS-Betreiber haben im Pandemie-Kontext Erfahrung mit Umleitung. Bei Cyber-Vorfall unüblich, aber § 16 KRITISDachG verlangt Schutz der kritischen Dienstleistung — bei Patientensicherheits-Gefährdung zulässig.",
                 "options": [
-                  { "id": "opt-bypass-all", "label": "Komplette Umleitung Rettungsdienst bis Downtime-Stabilisierung", "consequence": "Patientensicherheit priorisiert. Kooperationskliniken werden belastet, rechtliche Absicherung vorab notwendig.", "evaluationHints": ["Umleitung an Kooperationsklinik aktiviert"], "scoreContribution": 3 },
-                  { "id": "opt-bypass-nothing", "label": "Alle Zuweisungen annehmen, internes Triage verschärfen", "consequence": "Versorgungsanspruch hoch gehalten. Höheres Risiko individueller Versorgungsdefizite.", "evaluationHints": ["Binnen-Triage verschärft"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-bypass-all",
+                    "label": "Komplette Umleitung Rettungsdienst bis Downtime-Stabilisierung",
+                    "consequence": "Patientensicherheit priorisiert. Kooperationskliniken werden belastet, rechtliche Absicherung vorab notwendig.",
+                    "evaluationHints": [
+                      "Umleitung an Kooperationsklinik aktiviert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bypass-nothing",
+                    "label": "Alle Zuweisungen annehmen, internes Triage verschärfen",
+                    "consequence": "Versorgungsanspruch hoch gehalten. Höheres Risiko individueller Versorgungsdefizite.",
+                    "evaluationHints": [
+                      "Binnen-Triage verschärft"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-triage", "crit-communication-extern"]
+                "relatedCriteria": [
+                  "crit-operations-triage",
+                  "crit-communication-extern"
+                ]
               }
             ]
           },
@@ -970,8 +1114,18 @@
             "t": 90,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-bsi-portal", "title": "BSI-Meldeportal-Kontakt hergestellt", "description": "CISO hat über das BSI-Meldeportal die Erstmeldung nach § 8b BSIG / § 16 KRITIS-Dachgesetz erstellt. BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung.", "roleId": "role-ciso" },
-              { "id": "inj-dsb-assessment", "title": "DSGVO-Meldepflicht bejaht", "description": "DSB bewertet: Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h ist verpflichtend. Risiko für Betroffene 'hoch' → Benachrichtigung nach Art. 34 wird geprüft.", "roleId": "role-dsb" }
+              {
+                "id": "inj-bsi-portal",
+                "title": "BSI-Meldeportal-Kontakt hergestellt",
+                "description": "CISO hat über das BSI-Meldeportal die Erstmeldung nach § 8b BSIG / § 16 KRITIS-Dachgesetz erstellt. BSI-CERT meldet sich zurück mit Koordinationsangebot und Bitte um 72-h-Folgemeldung.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-dsb-assessment",
+                "title": "DSGVO-Meldepflicht bejaht",
+                "description": "DSB bewertet: Verletzung personenbezogener Daten bejaht, Benachrichtigung der Aufsichtsbehörde nach Art. 33 DSGVO innerhalb 72 h ist verpflichtend. Risiko für Betroffene 'hoch' → Benachrichtigung nach Art. 34 wird geprüft.",
+                "roleId": "role-dsb"
+              }
             ],
             "decisions": [
               {
@@ -980,10 +1134,29 @@
                 "roleId": "role-ciso",
                 "guidance": "Vollständige Offenlegung unterstützt BSI-Lagebild und schützt vor späterer Vorwurfshaltung. Zurückhaltende Meldung reduziert Leaks, erhöht aber Risiko der Nachforderung und Bußgeld nach § 20 KRITISDachG.",
                 "options": [
-                  { "id": "opt-full-disclosure", "label": "Vollständige Offenlegung inkl. TTPs, IOCs, Angreifer-Vermutung", "consequence": "BSI und Aufsichtsbehörden haben vollständiges Bild, erleichtert Koordination mit anderen betroffenen Kliniken.", "evaluationHints": ["Vollständige Meldeinhalte"], "scoreContribution": 3 },
-                  { "id": "opt-minimal-disclosure", "label": "Minimalmeldung: Pflichtinhalte § 16 Absatz 2 KRITISDachG", "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei Folgemeldung.", "evaluationHints": ["Minimalmeldung fristgerecht"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-full-disclosure",
+                    "label": "Vollständige Offenlegung inkl. TTPs, IOCs, Angreifer-Vermutung",
+                    "consequence": "BSI und Aufsichtsbehörden haben vollständiges Bild, erleichtert Koordination mit anderen betroffenen Kliniken.",
+                    "evaluationHints": [
+                      "Vollständige Meldeinhalte"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-minimal-disclosure",
+                    "label": "Minimalmeldung: Pflichtinhalte § 16 Absatz 2 KRITISDachG",
+                    "consequence": "Meldung fristgerecht, aber Nachfragen der Behörde wahrscheinlich. Fristrisiko bei Folgemeldung.",
+                    "evaluationHints": [
+                      "Minimalmeldung fristgerecht"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-bsi-frist", "crit-reporting-dsb-frist"]
+                "relatedCriteria": [
+                  "crit-reporting-bsi-frist",
+                  "crit-reporting-dsb-frist"
+                ]
               }
             ]
           },
@@ -991,8 +1164,18 @@
             "t": 120,
             "phase": "24h_reporting",
             "injects": [
-              { "id": "inj-forensik", "title": "Externer Forensik-Dienstleister aktiv", "description": "Ein vorvertraglich beauftragter Incident-Response-Dienstleister ist vor Ort. Erste Analyse bestätigt: Eindringen vor 11 Tagen über Phishing-Mail an Verwaltungsassistenz, dann laterale Ausbreitung über gecachte Administrator-Credentials.", "roleId": "role-ciso" },
-              { "id": "inj-backup-check", "title": "Offline-Backup verfügbar, aber 5 Tage alt", "description": "IT-Leitung meldet: Offline-Backup auf LTO-Bändern ist sauber, Stand vor 5 Tagen. Alle Behandlungsdaten der letzten 5 Tage müssten rekonstruiert werden — manuell aus Papierakten, Befund-E-Mails und OP-Protokollen.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-forensik",
+                "title": "Externer Forensik-Dienstleister aktiv",
+                "description": "Ein vorvertraglich beauftragter Incident-Response-Dienstleister ist vor Ort. Erste Analyse bestätigt: Eindringen vor 11 Tagen über Phishing-Mail an Verwaltungsassistenz, dann laterale Ausbreitung über gecachte Administrator-Credentials.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-backup-check",
+                "title": "Offline-Backup verfügbar, aber 5 Tage alt",
+                "description": "IT-Leitung meldet: Offline-Backup auf LTO-Bändern ist sauber, Stand vor 5 Tagen. Alle Behandlungsdaten der letzten 5 Tage müssten rekonstruiert werden — manuell aus Papierakten, Befund-E-Mails und OP-Protokollen.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1001,10 +1184,28 @@
                 "roleId": "role-presse",
                 "guidance": "Mitarbeitende sind gleichzeitig Helfer und potenzielle Leaks (Soziale Medien, Angehörige). Frühe transparente Kommunikation reduziert Gerüchte, zu viel Detail liefert Angreifern Informationen.",
                 "options": [
-                  { "id": "opt-full-internal", "label": "Komplette interne Transparenz (Angriffsvektor, Verlauf, Downtime-Dauer-Erwartung)", "consequence": "Vertrauen der Belegschaft hoch, Mitwirkungsbereitschaft steigt. Leak-Risiko zu Social Media.", "evaluationHints": ["Hohe interne Transparenz"], "scoreContribution": 2 },
-                  { "id": "opt-focused-internal", "label": "Fokussierte Info: Verhalten, Downtime-Regeln, keine Angriffsdetails", "consequence": "Angriffsdetails bleiben intern beschränkt. Mitarbeitende wissen, wie sie arbeiten sollen.", "evaluationHints": ["Operative interne Kommunikation"], "scoreContribution": 3 }
+                  {
+                    "id": "opt-full-internal",
+                    "label": "Komplette interne Transparenz (Angriffsvektor, Verlauf, Downtime-Dauer-Erwartung)",
+                    "consequence": "Vertrauen der Belegschaft hoch, Mitwirkungsbereitschaft steigt. Leak-Risiko zu Social Media.",
+                    "evaluationHints": [
+                      "Hohe interne Transparenz"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-focused-internal",
+                    "label": "Fokussierte Info: Verhalten, Downtime-Regeln, keine Angriffsdetails",
+                    "consequence": "Angriffsdetails bleiben intern beschränkt. Mitarbeitende wissen, wie sie arbeiten sollen.",
+                    "evaluationHints": [
+                      "Operative interne Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-mitarbeiter"]
+                "relatedCriteria": [
+                  "crit-communication-mitarbeiter"
+                ]
               }
             ]
           },
@@ -1012,9 +1213,24 @@
             "t": 140,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-ransom-demand", "title": "Lösegeldforderung konkretisiert", "description": "Angreifer melden sich über Tor-Chat: 2,5 Mio. Euro in Bitcoin für Entschlüsselungs-Schlüssel und 'Nicht-Veröffentlichung' der exfiltrierten Daten. Frist: 72 Stunden, danach Verdopplung.", "roleId": "role-ciso" },
-              { "id": "inj-lka-advice", "title": "LKA Cybercrime empfiehlt nicht zu zahlen", "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, kein Garantie auf funktionierenden Entschlüsselungs-Schlüssel, strafrechtliche Risiken für Geschäftsführung (§ 89c StGB Terrorismusfinanzierung bei bestimmten Gruppen).", "roleId": "role-rechtsabteilung" },
-              { "id": "inj-dsgvo-art34-trigger", "title": "DSGVO Art. 34 — Benachrichtigung der Betroffenen erforderlich", "description": "DSB bewertet: Das Risiko für die Rechte und Freiheiten der betroffenen Patient*innen ist 'hoch' — Entschlüsselung nicht sichergestellt, Exfiltration bestätigt, Patientendaten besonders sensibel (Art. 9 DSGVO). Damit ist nach Art. 34 DSGVO die Benachrichtigung der Betroffenen 'unverzüglich' erforderlich, nicht nur die Aufsichtsbehörde nach Art. 33. Ca. 180.000 Patient*innen des Klinikverbunds sind potenziell betroffen.", "roleId": "role-dsb" }
+              {
+                "id": "inj-ransom-demand",
+                "title": "Lösegeldforderung konkretisiert",
+                "description": "Angreifer melden sich über Tor-Chat: 2,5 Mio. Euro in Bitcoin für Entschlüsselungs-Schlüssel und 'Nicht-Veröffentlichung' der exfiltrierten Daten. Frist: 72 Stunden, danach Verdopplung.",
+                "roleId": "role-ciso"
+              },
+              {
+                "id": "inj-lka-advice",
+                "title": "LKA Cybercrime empfiehlt nicht zu zahlen",
+                "description": "Zentrale Ansprechstelle Cybercrime des LKA bestätigt: Zahlungen finanzieren weitere Angriffe, kein Garantie auf funktionierenden Entschlüsselungs-Schlüssel, strafrechtliche Risiken für Geschäftsführung (§ 89c StGB Terrorismusfinanzierung bei bestimmten Gruppen).",
+                "roleId": "role-rechtsabteilung"
+              },
+              {
+                "id": "inj-dsgvo-art34-trigger",
+                "title": "DSGVO Art. 34 — Benachrichtigung der Betroffenen erforderlich",
+                "description": "DSB bewertet: Das Risiko für die Rechte und Freiheiten der betroffenen Patient*innen ist 'hoch' — Entschlüsselung nicht sichergestellt, Exfiltration bestätigt, Patientendaten besonders sensibel (Art. 9 DSGVO). Damit ist nach Art. 34 DSGVO die Benachrichtigung der Betroffenen 'unverzüglich' erforderlich, nicht nur die Aufsichtsbehörde nach Art. 33. Ca. 180.000 Patient*innen des Klinikverbunds sind potenziell betroffen.",
+                "roleId": "role-dsb"
+              }
             ],
             "decisions": [
               {
@@ -1023,10 +1239,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Die Zahlungsentscheidung ist die Kern-Kontroverse jedes Ransomware-Vorfalls. BSI/LKA raten generell ab. Rechtlich problematisch. Aber: Bei längerem Ausfall der kritischen Dienstleistung entstehen Patientensicherheitsrisiken — ethisch schwer.",
                 "options": [
-                  { "id": "opt-no-pay", "label": "Keine Zahlung, kompletter Neuaufbau mit Backup-Stand", "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 4–6 Wochen, hohe Personalkosten, 5 Tage Behandlungsdaten manuell zu rekonstruieren. Exfiltrierte Daten werden geleakt.", "evaluationHints": ["Keine Zahlung, regelkonform"], "scoreContribution": 2 },
-                  { "id": "opt-pay", "label": "Zahlung nach Rechtsprüfung", "consequence": "Schnellere Entschlüsselung möglich, aber keine Garantie. Reputations-/strafrechtliche Folgen. Geld finanziert weitere Angriffe. LKA-Empfehlung missachtet.", "evaluationHints": ["Zahlungs-Option mit erheblichen Folgeproblemen diskutierbar"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-no-pay",
+                    "label": "Keine Zahlung, kompletter Neuaufbau mit Backup-Stand",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Wiederanlauf 4–6 Wochen, hohe Personalkosten, 5 Tage Behandlungsdaten manuell zu rekonstruieren. Exfiltrierte Daten werden geleakt.",
+                    "evaluationHints": [
+                      "Keine Zahlung, regelkonform"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-pay",
+                    "label": "Zahlung nach Rechtsprüfung",
+                    "consequence": "Schnellere Entschlüsselung möglich, aber keine Garantie. Reputations-/strafrechtliche Folgen. Geld finanziert weitere Angriffe. LKA-Empfehlung missachtet.",
+                    "evaluationHints": [
+                      "Zahlungs-Option mit erheblichen Folgeproblemen diskutierbar"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab"
+                ]
               },
               {
                 "id": "dec-dsgvo-art34-channel",
@@ -1034,11 +1268,38 @@
                 "roleId": "role-dsb",
                 "guidance": "Art. 34 DSGVO verlangt unverzügliche direkte Benachrichtigung — Inhalt nach Abs. 2 (Art der Verletzung, voraussichtliche Folgen, ergriffene Gegenmaßnahmen, Kontaktdaten DSB). Bei unverhältnismäßigem Aufwand ist nach Abs. 3 lit. c eine öffentliche Information in vergleichbar wirksamer Weise zulässig. Bei 180.000 Betroffenen ist die Direktbenachrichtigung aufwendig (Adressen-Aktualität, Retouren-Handling), aber Rechtsprechung neigt dazu, direkte Benachrichtigung zu verlangen, wenn Adressen vorliegen.",
                 "options": [
-                  { "id": "opt-art34-direct-mail", "label": "Direkte Benachrichtigung per Post an alle Betroffenen, parallel Infoseite im Web", "consequence": "Rechtlich robusteste Option. Hoher operativer Aufwand (Druck, Versand, Retourenbearbeitung), Kosten ca. 300–450 T€, Dauer 2–4 Wochen. Gute Signalwirkung an Aufsichtsbehörde.", "evaluationHints": ["Art. 34 DSGVO in direkter Form umgesetzt"], "scoreContribution": 3 },
-                  { "id": "opt-art34-public-only", "label": "Nur öffentliche Information (Pressemitteilung, Website, § 34 Abs. 3 lit. c)", "consequence": "Niedriger Aufwand, aber Argumentation 'unverhältnismäßiger Aufwand' muss gegenüber Aufsichtsbehörde begründet werden. Rechtsrisiko bei späterer Bewertung durch Aufsicht.", "evaluationHints": ["Öffentliche Info unter Berufung auf Abs. 3 c"], "scoreContribution": 1 },
-                  { "id": "opt-art34-hybrid", "label": "Hybridmodell: Direktbenachrichtigung für Hochrisiko-Betroffene (z. B. laufende Behandlung), öffentliche Information für Restgruppe", "consequence": "Pragmatisch, risikobasiert. Begründung 'unverhältnismäßiger Aufwand' für Teilgruppe robuster. Benötigt klare Abgrenzungskriterien.", "evaluationHints": ["Risikobasierte Art. 34-Strategie"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-art34-direct-mail",
+                    "label": "Direkte Benachrichtigung per Post an alle Betroffenen, parallel Infoseite im Web",
+                    "consequence": "Rechtlich robusteste Option. Hoher operativer Aufwand (Druck, Versand, Retourenbearbeitung), Kosten ca. 300–450 T€, Dauer 2–4 Wochen. Gute Signalwirkung an Aufsichtsbehörde.",
+                    "evaluationHints": [
+                      "Art. 34 DSGVO in direkter Form umgesetzt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-art34-public-only",
+                    "label": "Nur öffentliche Information (Pressemitteilung, Website, § 34 Abs. 3 lit. c)",
+                    "consequence": "Niedriger Aufwand, aber Argumentation 'unverhältnismäßiger Aufwand' muss gegenüber Aufsichtsbehörde begründet werden. Rechtsrisiko bei späterer Bewertung durch Aufsicht.",
+                    "evaluationHints": [
+                      "Öffentliche Info unter Berufung auf Abs. 3 c"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-art34-hybrid",
+                    "label": "Hybridmodell: Direktbenachrichtigung für Hochrisiko-Betroffene (z. B. laufende Behandlung), öffentliche Information für Restgruppe",
+                    "consequence": "Pragmatisch, risikobasiert. Begründung 'unverhältnismäßiger Aufwand' für Teilgruppe robuster. Benötigt klare Abgrenzungskriterien.",
+                    "evaluationHints": [
+                      "Risikobasierte Art. 34-Strategie"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-dsb-frist", "crit-communication-extern"]
+                "relatedCriteria": [
+                  "crit-reporting-dsb-frist",
+                  "crit-communication-extern"
+                ]
               }
             ]
           },
@@ -1046,7 +1307,12 @@
             "t": 160,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-presseanfragen", "title": "Externe Presseanfragen", "description": "Lokalpresse, Ärzteblatt und Heise Security fragen nach. Eine Patientin hat auf Social Media gepostet, dass ihr Termin abgesagt wurde 'wegen IT-Ausfall'. Das Thema geht in Lokalmedien hoch.", "roleId": "role-presse" }
+              {
+                "id": "inj-presseanfragen",
+                "title": "Externe Presseanfragen",
+                "description": "Lokalpresse, Ärzteblatt und Heise Security fragen nach. Eine Patientin hat auf Social Media gepostet, dass ihr Termin abgesagt wurde 'wegen IT-Ausfall'. Das Thema geht in Lokalmedien hoch.",
+                "roleId": "role-presse"
+              }
             ],
             "decisions": [
               {
@@ -1055,10 +1321,28 @@
                 "roleId": "role-presse",
                 "guidance": "Frühe Kommunikation kontrolliert Narrativ. Späte Kommunikation (nach abgeschlossener Erstanalyse) vermeidet voreilige Fehlaussagen, überlässt aber die Deutung anderen.",
                 "options": [
-                  { "id": "opt-press-early", "label": "Pressemitteilung sofort mit klaren Kernaussagen", "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss.", "evaluationHints": ["Frühe kontrollierte Kommunikation — Good Practice"], "scoreContribution": 2 },
-                  { "id": "opt-press-after-analysis", "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)", "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Medien überlagert.", "evaluationHints": ["Späte, faktenbasierte Kommunikation"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-press-early",
+                    "label": "Pressemitteilung sofort mit klaren Kernaussagen",
+                    "consequence": "Narrative unter Kontrolle. Gefahr, dass erste Faktenlage später korrigiert werden muss.",
+                    "evaluationHints": [
+                      "Frühe kontrollierte Kommunikation — Good Practice"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-press-after-analysis",
+                    "label": "Pressemitteilung erst nach Erstanalyse-Abschluss (voraussichtlich 24 h)",
+                    "consequence": "Faktenbasis robust. Zwischenzeit von Spekulationen in Medien überlagert.",
+                    "evaluationHints": [
+                      "Späte, faktenbasierte Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-extern"]
+                "relatedCriteria": [
+                  "crit-communication-extern"
+                ]
               }
             ]
           },
@@ -1066,7 +1350,12 @@
             "t": 175,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-recovery-prio", "title": "Wiederanlauf-Priorisierung", "description": "IT-Leitung schlägt Reihenfolge vor: (1) Not-KIS für Notaufnahme und Intensiv, (2) PACS für radiologische Notfalldiagnostik, (3) LIS für Labor, (4) Voll-KIS mit Voll-Dokumentation. Geschätzte Zeiten: 12 h / 24 h / 48 h / 3–4 Wochen.", "roleId": "role-it-leitung" }
+              {
+                "id": "inj-recovery-prio",
+                "title": "Wiederanlauf-Priorisierung",
+                "description": "IT-Leitung schlägt Reihenfolge vor: (1) Not-KIS für Notaufnahme und Intensiv, (2) PACS für radiologische Notfalldiagnostik, (3) LIS für Labor, (4) Voll-KIS mit Voll-Dokumentation. Geschätzte Zeiten: 12 h / 24 h / 48 h / 3–4 Wochen.",
+                "roleId": "role-it-leitung"
+              }
             ],
             "decisions": [
               {
@@ -1075,10 +1364,28 @@
                 "roleId": "role-krisenstab-leitung",
                 "guidance": "Die IT-Empfehlung folgt Patientensicherheit. Alternativen: PACS zuerst (weil Radiologie oft Engpass) oder LIS zuerst (weil Labor als Input für viele Stationen).",
                 "options": [
-                  { "id": "opt-follow-it", "label": "IT-Reihenfolge freigegeben (Not-KIS → PACS → LIS → Voll-KIS)", "consequence": "Patientensicherheit-getrieben. Bewährter Ansatz.", "evaluationHints": ["Patientensicherheit-basierte Priorisierung"], "scoreContribution": 3 },
-                  { "id": "opt-pacs-first", "label": "PACS zuerst, da Engpass in Radiologie", "consequence": "Engpass Radiologie schneller gelöst, aber Not-KIS für Aufnahme dauert länger.", "evaluationHints": ["Engpass-basierte Priorisierung"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-follow-it",
+                    "label": "IT-Reihenfolge freigegeben (Not-KIS → PACS → LIS → Voll-KIS)",
+                    "consequence": "Patientensicherheit-getrieben. Bewährter Ansatz.",
+                    "evaluationHints": [
+                      "Patientensicherheit-basierte Priorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-pacs-first",
+                    "label": "PACS zuerst, da Engpass in Radiologie",
+                    "consequence": "Engpass Radiologie schneller gelöst, aber Not-KIS für Aufnahme dauert länger.",
+                    "evaluationHints": [
+                      "Engpass-basierte Priorisierung"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-patientensicherheit"]
+                "relatedCriteria": [
+                  "crit-operations-patientensicherheit"
+                ]
               }
             ]
           },
@@ -1086,19 +1393,59 @@
             "t": 180,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-retro-start", "title": "Retro-Kickoff für Lessons Learned", "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten.", "roleId": "role-krisenstab-leitung" }
+              {
+                "id": "inj-retro-start",
+                "title": "Retro-Kickoff für Lessons Learned",
+                "description": "Szenario-Ende. Retro-Facilitator fragt alle Rollen: Was lief gut? Was muss verbessert werden? Konkrete Maßnahmen mit Verantwortlichen und Fristen festhalten.",
+                "roleId": "role-krisenstab-leitung"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-reporting-bsi-frist", "description": "BSI-Meldung innerhalb 24 h nach § 16 KRITIS-Dachgesetz / § 8b BSIG", "weight": 2, "category": "reporting" },
-          { "id": "crit-reporting-dsb-frist", "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h", "weight": 2, "category": "reporting" },
-          { "id": "crit-governance-krisenstab", "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität", "weight": 1.5, "category": "governance" },
-          { "id": "crit-operations-patientensicherheit", "description": "Patientensicherheit während Downtime gewahrt (Medikation, Identifikation, Notfallverfügbarkeit)", "weight": 2, "category": "operations" },
-          { "id": "crit-operations-triage", "description": "Versorgungspriorisierung und Notfall-Kapazität (Downtime-Triage, Umleitung)", "weight": 1.5, "category": "operations" },
-          { "id": "crit-communication-mitarbeiter", "description": "Transparente, zweckmäßige Mitarbeiterkommunikation", "weight": 1, "category": "communication" },
-          { "id": "crit-communication-extern", "description": "Externe Kommunikation (Presse, Aufsichtsbehörden, Patient*innen, Kooperationskliniken)", "weight": 1, "category": "communication" }
+          {
+            "id": "crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 16 KRITIS-Dachgesetz / § 8b BSIG",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-reporting-dsb-frist",
+            "description": "DSGVO-Art.-33-Meldung an Aufsichtsbehörde innerhalb 72 h",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, Rollenklarheit und Entscheidungsqualität",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-operations-patientensicherheit",
+            "description": "Patientensicherheit während Downtime gewahrt (Medikation, Identifikation, Notfallverfügbarkeit)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-operations-triage",
+            "description": "Versorgungspriorisierung und Notfall-Kapazität (Downtime-Triage, Umleitung)",
+            "weight": 1.5,
+            "category": "operations"
+          },
+          {
+            "id": "crit-communication-mitarbeiter",
+            "description": "Transparente, zweckmäßige Mitarbeiterkommunikation",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "crit-communication-extern",
+            "description": "Externe Kommunikation (Presse, Aufsichtsbehörden, Patient*innen, Kooperationskliniken)",
+            "weight": 1,
+            "category": "communication"
+          }
         ]
       },
       {
@@ -1106,24 +1453,63 @@
         "version": "1.0.0",
         "title": "Kaskadierender Stromausfall mit gleichzeitiger Notaufnahme-Überlastung",
         "summary": "Weiträumiger Netzausfall im Umland (Sturmschäden oder Umspannwerks-Defekt) koppelt sich mit einem Massenanfall Verletzter (MANV) durch einen Verkehrsunfall im gleichen Zeitfenster. Die Klinik muss Stromversorgung über Notstrom sichern UND erhöhte Notaufnahme-Kapazität bereitstellen. Fokus: Energie-Priorisierung unter Knappheit, Triage bei MANV, Meldewege an BBK/Gesundheitsamt nach § 16 KRITIS-Dachgesetz.",
-        "sectors": ["Gesundheit"],
-        "applicableRegimes": ["KRITISDachG", "IfSG"],
+        "sectors": [
+          "Gesundheit"
+        ],
+        "applicableRegimes": [
+          "KRITISDachG",
+          "IfSG"
+        ],
         "durationMinutes": 150,
         "roles": [
-          { "id": "role-krisenstab-leitung-ops", "title": "Krisenstabs-Leitung", "briefing": "Gesamtkoordination unter Mehrfach-Belastung. Muss Energie-Priorisierung, MANV-Versorgung und externe Abstimmung parallel koordinieren. Entscheidungsfreigabe für Notabschaltungen und Verlegungen." },
-          { "id": "role-technische-leitung-energie", "title": "Technische Leitung / Energie-/FM-Verantwortung", "briefing": "Führt Dieselvorrats-Überwachung, Notabschaltungen nicht-kritischer Verbraucher, Koordination mit Dieselnachlieferung und Netzbetreiber. Liefert die Energie-Lagekarte für den Krisenstab." },
-          { "id": "role-arztliche-notaufnahme", "title": "Ärztliche Leitung Notaufnahme", "briefing": "Verantwortlich für Triage und Kapazitätsmanagement in der Notaufnahme. Koordiniert mit Rettungsdienst-Leitstelle über Zulauf und Umleitungen." },
-          { "id": "role-pflegedirektion-ops", "title": "Pflegedirektion", "briefing": "Personalmanagement unter parallelem Mehrbedarf (MANV) und Ausfallrisiko (Infrastruktur-Auswirkungen). Koordiniert mit Stationen zu Schichtplänen und Bettenfreimachung." },
-          { "id": "role-op-management", "title": "OP-Management", "briefing": "Entscheidet über Aufrechterhaltung vs. Absage OP-Programm unter Energie-Knappheit. Priorisiert Notfall- vs. Elektiv-Eingriffe." },
-          { "id": "role-externe-komm-ops", "title": "Externe Kommunikation (Leitstelle, Gesundheitsamt, BBK)", "briefing": "Schnittstelle zu Rettungsdienst-Leitstelle, Gesundheitsamt (§ 16 KRITIS-Dachgesetz Meldung an BSI/BBK) und ggf. Lokalpresse. Hält Kontakte in Out-of-Band-Modus (Mobilfunk, falls Telefonanlage ausfällt)." }
+          {
+            "id": "role-krisenstab-leitung-ops",
+            "title": "Krisenstabs-Leitung",
+            "briefing": "Gesamtkoordination unter Mehrfach-Belastung. Muss Energie-Priorisierung, MANV-Versorgung und externe Abstimmung parallel koordinieren. Entscheidungsfreigabe für Notabschaltungen und Verlegungen."
+          },
+          {
+            "id": "role-technische-leitung-energie",
+            "title": "Technische Leitung / Energie-/FM-Verantwortung",
+            "briefing": "Führt Dieselvorrats-Überwachung, Notabschaltungen nicht-kritischer Verbraucher, Koordination mit Dieselnachlieferung und Netzbetreiber. Liefert die Energie-Lagekarte für den Krisenstab."
+          },
+          {
+            "id": "role-arztliche-notaufnahme",
+            "title": "Ärztliche Leitung Notaufnahme",
+            "briefing": "Verantwortlich für Triage und Kapazitätsmanagement in der Notaufnahme. Koordiniert mit Rettungsdienst-Leitstelle über Zulauf und Umleitungen."
+          },
+          {
+            "id": "role-pflegedirektion-ops",
+            "title": "Pflegedirektion",
+            "briefing": "Personalmanagement unter parallelem Mehrbedarf (MANV) und Ausfallrisiko (Infrastruktur-Auswirkungen). Koordiniert mit Stationen zu Schichtplänen und Bettenfreimachung."
+          },
+          {
+            "id": "role-op-management",
+            "title": "OP-Management",
+            "briefing": "Entscheidet über Aufrechterhaltung vs. Absage OP-Programm unter Energie-Knappheit. Priorisiert Notfall- vs. Elektiv-Eingriffe."
+          },
+          {
+            "id": "role-externe-komm-ops",
+            "title": "Externe Kommunikation (Leitstelle, Gesundheitsamt, BBK)",
+            "briefing": "Schnittstelle zu Rettungsdienst-Leitstelle, Gesundheitsamt (§ 16 KRITIS-Dachgesetz Meldung an BSI/BBK) und ggf. Lokalpresse. Hält Kontakte in Out-of-Band-Modus (Mobilfunk, falls Telefonanlage ausfällt)."
+          }
         ],
         "timeline": [
           {
             "t": 0,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-power-loss", "title": "Netzausfall detektiert", "description": "Hauptverteilung meldet Netzausfall, Notstromaggregate starten automatisch und laufen an. USV überbrückt die 12 Sekunden bis zum Generator-Hochfahren. Alle kritischen Bereiche (Intensivstation, OP, Dialyse) haben Strom.", "roleId": "role-technische-leitung-energie" },
-              { "id": "inj-manv-warning", "title": "MANV-Voranmeldung aus Leitstelle", "description": "Rettungsdienst-Leitstelle meldet: Verkehrsunfall auf Bundesstraße mit 15 Verletzten, davon 4 schwer. ETA erster Rettungswagen in 8 Minuten. Parallele Meldung, zeitgleich mit Netzausfall.", "roleId": "role-arztliche-notaufnahme" }
+              {
+                "id": "inj-power-loss",
+                "title": "Netzausfall detektiert",
+                "description": "Hauptverteilung meldet Netzausfall, Notstromaggregate starten automatisch und laufen an. USV überbrückt die 12 Sekunden bis zum Generator-Hochfahren. Alle kritischen Bereiche (Intensivstation, OP, Dialyse) haben Strom.",
+                "roleId": "role-technische-leitung-energie"
+              },
+              {
+                "id": "inj-manv-warning",
+                "title": "MANV-Voranmeldung aus Leitstelle",
+                "description": "Rettungsdienst-Leitstelle meldet: Verkehrsunfall auf Bundesstraße mit 15 Verletzten, davon 4 schwer. ETA erster Rettungswagen in 8 Minuten. Parallele Meldung, zeitgleich mit Netzausfall.",
+                "roleId": "role-arztliche-notaufnahme"
+              }
             ],
             "decisions": [
               {
@@ -1132,10 +1518,28 @@
                 "roleId": "role-krisenstab-leitung-ops",
                 "guidance": "Beide Ereignisse entwickeln sich parallel. Eine Rolle kann nicht zwei Lagebilder gleichzeitig aufnehmen. Delegation an Fachrollen ist der Standardweg — Krisenstab koordiniert, ist nicht selbst operativ.",
                 "options": [
-                  { "id": "opt-delegate-both", "label": "Delegation an Fachrollen, Krisenstab koordiniert Parallel-Aufbau", "consequence": "Technische Leitung arbeitet Energie-Lage aus, Notaufnahme arbeitet MANV-Lage aus. Krisenstab kümmert sich um Schnittstellen.", "evaluationHints": ["Parallele Delegation funktioniert"], "scoreContribution": 3 },
-                  { "id": "opt-sequential", "label": "Sequenziell — erst Energie, dann MANV", "consequence": "Zweite Lage bleibt ungelesen. MANV-Vorbereitung leidet.", "evaluationHints": ["Sequentielle Verarbeitung"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-delegate-both",
+                    "label": "Delegation an Fachrollen, Krisenstab koordiniert Parallel-Aufbau",
+                    "consequence": "Technische Leitung arbeitet Energie-Lage aus, Notaufnahme arbeitet MANV-Lage aus. Krisenstab kümmert sich um Schnittstellen.",
+                    "evaluationHints": [
+                      "Parallele Delegation funktioniert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-sequential",
+                    "label": "Sequenziell — erst Energie, dann MANV",
+                    "consequence": "Zweite Lage bleibt ungelesen. MANV-Vorbereitung leidet.",
+                    "evaluationHints": [
+                      "Sequentielle Verarbeitung"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab-dynamik"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab-dynamik"
+                ]
               }
             ]
           },
@@ -1143,8 +1547,18 @@
             "t": 15,
             "phase": "discovery",
             "injects": [
-              { "id": "inj-power-duration-unknown", "title": "Netzbetreiber meldet: Wiederherstellung unklar, mindestens 6 Stunden", "description": "Energieversorger teilt mit: Umspannwerksschaden, Wiederherstellung frühestens in 6 Stunden, möglicherweise 12+ Stunden. Keine klare Prognose.", "roleId": "role-technische-leitung-energie" },
-              { "id": "inj-manv-arrival", "title": "Erste MANV-Patienten eingetroffen", "description": "RTW mit erstem Schwerverletzten in Notaufnahme, zwei weitere folgen in 10 Minuten. Schockraum 1 und 2 sind belegt. Triage-Team ist aktiviert.", "roleId": "role-arztliche-notaufnahme" }
+              {
+                "id": "inj-power-duration-unknown",
+                "title": "Netzbetreiber meldet: Wiederherstellung unklar, mindestens 6 Stunden",
+                "description": "Energieversorger teilt mit: Umspannwerksschaden, Wiederherstellung frühestens in 6 Stunden, möglicherweise 12+ Stunden. Keine klare Prognose.",
+                "roleId": "role-technische-leitung-energie"
+              },
+              {
+                "id": "inj-manv-arrival",
+                "title": "Erste MANV-Patienten eingetroffen",
+                "description": "RTW mit erstem Schwerverletzten in Notaufnahme, zwei weitere folgen in 10 Minuten. Schockraum 1 und 2 sind belegt. Triage-Team ist aktiviert.",
+                "roleId": "role-arztliche-notaufnahme"
+              }
             ],
             "decisions": [
               {
@@ -1153,10 +1567,28 @@
                 "roleId": "role-krisenstab-leitung-ops",
                 "guidance": "Schwellenwerte für Krisenstab-Einberufung variieren. Stromausfall > 6 h UND MANV sind kumulativ klar schwellen-übergreifend.",
                 "options": [
-                  { "id": "opt-convene", "label": "Krisenstab offiziell einberufen", "consequence": "Formale Struktur, Entscheidungsprotokolle, klare Verantwortung.", "evaluationHints": ["Krisenstab offiziell aktiviert"], "scoreContribution": 3 },
-                  { "id": "opt-informal", "label": "Informelle Koordination ohne offizielle Einberufung", "consequence": "Schnellere Reaktion, aber Protokoll-Lücken. Haftungsrisiko steigt.", "evaluationHints": ["Informelle Koordination"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-convene",
+                    "label": "Krisenstab offiziell einberufen",
+                    "consequence": "Formale Struktur, Entscheidungsprotokolle, klare Verantwortung.",
+                    "evaluationHints": [
+                      "Krisenstab offiziell aktiviert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-informal",
+                    "label": "Informelle Koordination ohne offizielle Einberufung",
+                    "consequence": "Schnellere Reaktion, aber Protokoll-Lücken. Haftungsrisiko steigt.",
+                    "evaluationHints": [
+                      "Informelle Koordination"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-governance-krisenstab-dynamik"]
+                "relatedCriteria": [
+                  "crit-governance-krisenstab-dynamik"
+                ]
               }
             ]
           },
@@ -1164,8 +1596,18 @@
             "t": 30,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-diesel-inventory", "title": "Dieselvorrats-Check: 48 h Puffer", "description": "Technische Leitung meldet: Dieselvorrat für Notstromaggregate reicht bei Standardlast 48 Stunden. Bei erhöhter Last (MANV mit OP-Betrieb) reduziert sich auf 36 Stunden.", "roleId": "role-technische-leitung-energie" },
-              { "id": "inj-manv-triage-start", "title": "MANV-Triage läuft", "description": "Triage-Team hat 10 Patienten kategorisiert: 4x rot, 5x gelb, 1x grün. Schockraum-Kapazität wird zunehmend knapp.", "roleId": "role-arztliche-notaufnahme" }
+              {
+                "id": "inj-diesel-inventory",
+                "title": "Dieselvorrats-Check: 48 h Puffer",
+                "description": "Technische Leitung meldet: Dieselvorrat für Notstromaggregate reicht bei Standardlast 48 Stunden. Bei erhöhter Last (MANV mit OP-Betrieb) reduziert sich auf 36 Stunden.",
+                "roleId": "role-technische-leitung-energie"
+              },
+              {
+                "id": "inj-manv-triage-start",
+                "title": "MANV-Triage läuft",
+                "description": "Triage-Team hat 10 Patienten kategorisiert: 4x rot, 5x gelb, 1x grün. Schockraum-Kapazität wird zunehmend knapp.",
+                "roleId": "role-arztliche-notaufnahme"
+              }
             ],
             "decisions": [
               {
@@ -1174,10 +1616,28 @@
                 "roleId": "role-op-management",
                 "guidance": "Elektiv-OPs haben hohen Energie-Verbrauch. Absage senkt Energielast, erzeugt aber Folgekosten und Patienten-Unzufriedenheit. Weiterführung beschleunigt Energie-Mangel.",
                 "options": [
-                  { "id": "opt-cancel-elective", "label": "Sofort-Absage aller elektiven Eingriffe", "consequence": "Energie-Reserve erhalten. Patientenverschiebungen nötig. Klare Lage.", "evaluationHints": ["Elektiv-OPs abgesagt"], "scoreContribution": 3 },
-                  { "id": "opt-continue-elective-reduced", "label": "Laufende Eingriffe beenden, neue nicht mehr starten", "consequence": "Kompromiss, realistische Behandlung laufender Patienten. Energieverbrauch sinkt allmählich.", "evaluationHints": ["Graduelle Reduktion"], "scoreContribution": 2 }
+                  {
+                    "id": "opt-cancel-elective",
+                    "label": "Sofort-Absage aller elektiven Eingriffe",
+                    "consequence": "Energie-Reserve erhalten. Patientenverschiebungen nötig. Klare Lage.",
+                    "evaluationHints": [
+                      "Elektiv-OPs abgesagt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-continue-elective-reduced",
+                    "label": "Laufende Eingriffe beenden, neue nicht mehr starten",
+                    "consequence": "Kompromiss, realistische Behandlung laufender Patienten. Energieverbrauch sinkt allmählich.",
+                    "evaluationHints": [
+                      "Graduelle Reduktion"
+                    ],
+                    "scoreContribution": 2
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-energie-priorisierung"]
+                "relatedCriteria": [
+                  "crit-operations-energie-priorisierung"
+                ]
               }
             ]
           },
@@ -1185,8 +1645,18 @@
             "t": 45,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-ed-stop-threshold", "title": "Notaufnahme-Aufnahmestopp-Schwelle nah", "description": "Notaufnahme meldet: 30 Wartende, Schockräume beide voll, Trauma-CT ausgelastet. Aufnahmestopp-Schwelle (nach interner Leitlinie) fast erreicht.", "roleId": "role-arztliche-notaufnahme" },
-              { "id": "inj-rd-more-requests", "title": "Leitstelle fragt weitere Zuläufe an", "description": "Rettungsdienst fragt, ob weitere 3 Patienten zugewiesen werden können. Kooperationsklinik 60 km entfernt, hätte Kapazität.", "roleId": "role-externe-komm-ops" }
+              {
+                "id": "inj-ed-stop-threshold",
+                "title": "Notaufnahme-Aufnahmestopp-Schwelle nah",
+                "description": "Notaufnahme meldet: 30 Wartende, Schockräume beide voll, Trauma-CT ausgelastet. Aufnahmestopp-Schwelle (nach interner Leitlinie) fast erreicht.",
+                "roleId": "role-arztliche-notaufnahme"
+              },
+              {
+                "id": "inj-rd-more-requests",
+                "title": "Leitstelle fragt weitere Zuläufe an",
+                "description": "Rettungsdienst fragt, ob weitere 3 Patienten zugewiesen werden können. Kooperationsklinik 60 km entfernt, hätte Kapazität.",
+                "roleId": "role-externe-komm-ops"
+              }
             ],
             "decisions": [
               {
@@ -1195,10 +1665,29 @@
                 "roleId": "role-arztliche-notaufnahme",
                 "guidance": "Umleitung erhöht Transportzeit bei lebensbedrohlichen Verletzungen, entlastet aber eigene Kapazitäten. Bei MANV oft unumgänglich.",
                 "options": [
-                  { "id": "opt-bypass", "label": "Bypass zur Kooperationsklinik für alle neuen Zuläufe", "consequence": "Eigene Notaufnahme kann die aktuellen MANV-Patienten besser versorgen. Transportzeit-Zuwachs für umgeleitete Patienten.", "evaluationHints": ["Koordination mit Kooperationsklinik"], "scoreContribution": 3 },
-                  { "id": "opt-accept-all", "label": "Alle Zuläufe annehmen, Triage weiter verschärfen", "consequence": "Versorgungsanspruch hoch. Kapazitäten werden sehr eng.", "evaluationHints": ["Binnen-Triage"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-bypass",
+                    "label": "Bypass zur Kooperationsklinik für alle neuen Zuläufe",
+                    "consequence": "Eigene Notaufnahme kann die aktuellen MANV-Patienten besser versorgen. Transportzeit-Zuwachs für umgeleitete Patienten.",
+                    "evaluationHints": [
+                      "Koordination mit Kooperationsklinik"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-accept-all",
+                    "label": "Alle Zuläufe annehmen, Triage weiter verschärfen",
+                    "consequence": "Versorgungsanspruch hoch. Kapazitäten werden sehr eng.",
+                    "evaluationHints": [
+                      "Binnen-Triage"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-notaufnahme-triage", "crit-communication-leitstelle"]
+                "relatedCriteria": [
+                  "crit-operations-notaufnahme-triage",
+                  "crit-communication-leitstelle"
+                ]
               }
             ]
           },
@@ -1206,8 +1695,18 @@
             "t": 75,
             "phase": "early_response",
             "injects": [
-              { "id": "inj-diesel-resupply-delay", "title": "Dieselnachlieferung verzögert", "description": "Dieselnachlieferungs-Händler meldet: Flächige Netzkrise, Lieferung frühestens in 12 Stunden. Eigene LKW stehen ohne Strom für Pumpen.", "roleId": "role-technische-leitung-energie" },
-              { "id": "inj-gesundheitsamt-contact", "title": "Gesundheitsamt meldet sich", "description": "Landratsamt / Gesundheitsamt fragt Lagebild an. Nach IfSG zuständig für regionale Abstimmung, koordiniert mit Kreisverwaltung und Rettungsdienst.", "roleId": "role-externe-komm-ops" }
+              {
+                "id": "inj-diesel-resupply-delay",
+                "title": "Dieselnachlieferung verzögert",
+                "description": "Dieselnachlieferungs-Händler meldet: Flächige Netzkrise, Lieferung frühestens in 12 Stunden. Eigene LKW stehen ohne Strom für Pumpen.",
+                "roleId": "role-technische-leitung-energie"
+              },
+              {
+                "id": "inj-gesundheitsamt-contact",
+                "title": "Gesundheitsamt meldet sich",
+                "description": "Landratsamt / Gesundheitsamt fragt Lagebild an. Nach IfSG zuständig für regionale Abstimmung, koordiniert mit Kreisverwaltung und Rettungsdienst.",
+                "roleId": "role-externe-komm-ops"
+              }
             ],
             "decisions": [
               {
@@ -1216,10 +1715,28 @@
                 "roleId": "role-technische-leitung-energie",
                 "guidance": "Patientenzimmer mit Basis-Versorgung, Verwaltung, nicht-kritische Labore sind typische Kandidaten. Kritische Bereiche (Intensiv, OP, Dialyse, Sterilisation, Notaufnahme) dürfen niemals abgeschaltet werden.",
                 "options": [
-                  { "id": "opt-standard-shutdown", "label": "Standard-Notabschaltungsplan: Verwaltung, nicht-klinische Lichter, 50 % HLK", "consequence": "Bewährter Plan, spart ca. 30 % Energie. Dieselvorrat auf 60 h verlängert.", "evaluationHints": ["Notabschaltungsplan angewendet"], "scoreContribution": 3 },
-                  { "id": "opt-aggressive-shutdown", "label": "Aggressive Abschaltung inkl. Patientenzimmer-Teile", "consequence": "Dieselvorrat auf 96 h verlängert. Patientenkomfort/Nicht-klinische Sicherheit reduziert.", "evaluationHints": ["Aggressive Energie-Einsparung"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-standard-shutdown",
+                    "label": "Standard-Notabschaltungsplan: Verwaltung, nicht-klinische Lichter, 50 % HLK",
+                    "consequence": "Bewährter Plan, spart ca. 30 % Energie. Dieselvorrat auf 60 h verlängert.",
+                    "evaluationHints": [
+                      "Notabschaltungsplan angewendet"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-aggressive-shutdown",
+                    "label": "Aggressive Abschaltung inkl. Patientenzimmer-Teile",
+                    "consequence": "Dieselvorrat auf 96 h verlängert. Patientenkomfort/Nicht-klinische Sicherheit reduziert.",
+                    "evaluationHints": [
+                      "Aggressive Energie-Einsparung"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-energie-priorisierung"]
+                "relatedCriteria": [
+                  "crit-operations-energie-priorisierung"
+                ]
               }
             ]
           },
@@ -1227,9 +1744,24 @@
             "t": 105,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-coop-transfer", "title": "Verlegungsgespräch mit Kooperationsklinik", "description": "Kooperationsklinik (60 km entfernt, unterbrochen vom Netzausfall-Gebiet) hat 40 Betten frei, Normalstrom. Bereit für Verlegung von Rehabilitations- und stabil stationären Patienten.", "roleId": "role-krisenstab-leitung-ops" },
-              { "id": "inj-section-17-unterrichtung", "title": "Unterrichtungspflicht nach § 17 KRITIS-Dachgesetz", "description": "Rechtsabteilung weist darauf hin: Bei länger andauernder Umleitung und Verlegung müssen andere betroffene KRITIS-Betreiber aktiv unterrichtet werden (§ 17 KRITIS-Dachgesetz). Relevant: Aufnehmende Kooperationsklinik (explizite Mitteilung zur Belastungssituation, Patientenprofile), Rettungsdienst-Leitstellen der angrenzenden Regionen (falls Umleitung über Regionsgrenzen hinaus wirkt), regionale Apotheken-Kooperationspartner. Die Unterrichtung muss schriftlich dokumentiert werden (Audit-relevant).", "roleId": "role-externe-komm-ops" },
-              { "id": "inj-staff-childcare", "title": "Pflegepersonal-Ausfall beginnt", "description": "Pflegedirektion meldet: Einzelne Pflegekräfte melden sich ab (Schulschließung wegen Stromausfall, Kinderbetreuung nötig). Ca. 8 % Ausfall in der nächsten Schicht.", "roleId": "role-pflegedirektion-ops" }
+              {
+                "id": "inj-coop-transfer",
+                "title": "Verlegungsgespräch mit Kooperationsklinik",
+                "description": "Kooperationsklinik (60 km entfernt, unterbrochen vom Netzausfall-Gebiet) hat 40 Betten frei, Normalstrom. Bereit für Verlegung von Rehabilitations- und stabil stationären Patienten.",
+                "roleId": "role-krisenstab-leitung-ops"
+              },
+              {
+                "id": "inj-section-17-unterrichtung",
+                "title": "Unterrichtungspflicht nach § 17 KRITIS-Dachgesetz",
+                "description": "Rechtsabteilung weist darauf hin: Bei länger andauernder Umleitung und Verlegung müssen andere betroffene KRITIS-Betreiber aktiv unterrichtet werden (§ 17 KRITIS-Dachgesetz). Relevant: Aufnehmende Kooperationsklinik (explizite Mitteilung zur Belastungssituation, Patientenprofile), Rettungsdienst-Leitstellen der angrenzenden Regionen (falls Umleitung über Regionsgrenzen hinaus wirkt), regionale Apotheken-Kooperationspartner. Die Unterrichtung muss schriftlich dokumentiert werden (Audit-relevant).",
+                "roleId": "role-externe-komm-ops"
+              },
+              {
+                "id": "inj-staff-childcare",
+                "title": "Pflegepersonal-Ausfall beginnt",
+                "description": "Pflegedirektion meldet: Einzelne Pflegekräfte melden sich ab (Schulschließung wegen Stromausfall, Kinderbetreuung nötig). Ca. 8 % Ausfall in der nächsten Schicht.",
+                "roleId": "role-pflegedirektion-ops"
+              }
             ],
             "decisions": [
               {
@@ -1238,10 +1770,28 @@
                 "roleId": "role-krisenstab-leitung-ops",
                 "guidance": "Verlegung stabiler Patienten reduziert Eigenlast am meisten. Intensivpatienten sind riskanter zu transportieren. Rehabilitation ist am sichersten verlegbar.",
                 "options": [
-                  { "id": "opt-rehab-first", "label": "Rehabilitations- und stabile Patienten zuerst verlegen", "consequence": "Schnelle Entlastung, niedriges Transportrisiko. Freiräume für MANV-Patienten.", "evaluationHints": ["Risiko-basierte Verlegungspriorisierung"], "scoreContribution": 3 },
-                  { "id": "opt-icu-first", "label": "Intensivpatienten zuerst verlegen (um eigene Intensivkapazität zu schonen)", "consequence": "Transport-Risiko hoch, Intensivkapazität der Kooperationsklinik wird voll. Bei MANV-Zulauf muss eigene Intensivkapazität stehen.", "evaluationHints": ["Hochrisiko-Verlegung"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-rehab-first",
+                    "label": "Rehabilitations- und stabile Patienten zuerst verlegen",
+                    "consequence": "Schnelle Entlastung, niedriges Transportrisiko. Freiräume für MANV-Patienten.",
+                    "evaluationHints": [
+                      "Risiko-basierte Verlegungspriorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-icu-first",
+                    "label": "Intensivpatienten zuerst verlegen (um eigene Intensivkapazität zu schonen)",
+                    "consequence": "Transport-Risiko hoch, Intensivkapazität der Kooperationsklinik wird voll. Bei MANV-Zulauf muss eigene Intensivkapazität stehen.",
+                    "evaluationHints": [
+                      "Hochrisiko-Verlegung"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-communication-leitstelle"]
+                "relatedCriteria": [
+                  "crit-communication-leitstelle"
+                ]
               }
             ]
           },
@@ -1249,8 +1799,18 @@
             "t": 120,
             "phase": "stabilization",
             "injects": [
-              { "id": "inj-bbk-request", "title": "BBK fragt Lagebild an", "description": "Über das BSI-Meldeportal meldet sich das BBK (Bundesamt für Bevölkerungsschutz und Katastrophenhilfe) — bei parallelem physischen Vorfall Zuständigkeit nach § 16 KRITIS-Dachgesetz. Fordert strukturiertes Lagebild binnen 24 h.", "roleId": "role-externe-komm-ops" },
-              { "id": "inj-press-local", "title": "Presseanfragen Lokalsender", "description": "Lokaler TV-Sender und Tageszeitung fragen nach Lage. Social Media berichtet bereits über 'Klinik im Notbetrieb'.", "roleId": "role-externe-komm-ops" }
+              {
+                "id": "inj-bbk-request",
+                "title": "BBK fragt Lagebild an",
+                "description": "Über das BSI-Meldeportal meldet sich das BBK (Bundesamt für Bevölkerungsschutz und Katastrophenhilfe) — bei parallelem physischen Vorfall Zuständigkeit nach § 16 KRITIS-Dachgesetz. Fordert strukturiertes Lagebild binnen 24 h.",
+                "roleId": "role-externe-komm-ops"
+              },
+              {
+                "id": "inj-press-local",
+                "title": "Presseanfragen Lokalsender",
+                "description": "Lokaler TV-Sender und Tageszeitung fragen nach Lage. Social Media berichtet bereits über 'Klinik im Notbetrieb'.",
+                "roleId": "role-externe-komm-ops"
+              }
             ],
             "decisions": [
               {
@@ -1259,10 +1819,28 @@
                 "roleId": "role-externe-komm-ops",
                 "guidance": "§ 16 KRITIS-Dachgesetz verlangt Meldung innerhalb 24 h. Vollständige Erstellung dauert bei akuter Lage lange. Möglichkeit: Kurzmeldung jetzt + Folgemeldung nach Abschluss.",
                 "options": [
-                  { "id": "opt-quick-meldung", "label": "Kurz-Erstmeldung jetzt, Folgemeldung binnen 72 h", "consequence": "Fristtreue, BBK weiß Bescheid. Bearbeitungslast niedrig.", "evaluationHints": ["Fristgerechte Erstmeldung"], "scoreContribution": 3 },
-                  { "id": "opt-delay-meldung", "label": "Vollständige Meldung erst nach Abschluss des Ereignisses", "consequence": "24-h-Frist verstrichen, Bußgeldrisiko nach § 20 KRITIS-Dachgesetz.", "evaluationHints": ["Fristverstoß"], "scoreContribution": 0 }
+                  {
+                    "id": "opt-quick-meldung",
+                    "label": "Kurz-Erstmeldung jetzt, Folgemeldung binnen 72 h",
+                    "consequence": "Fristtreue, BBK weiß Bescheid. Bearbeitungslast niedrig.",
+                    "evaluationHints": [
+                      "Fristgerechte Erstmeldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-delay-meldung",
+                    "label": "Vollständige Meldung erst nach Abschluss des Ereignisses",
+                    "consequence": "24-h-Frist verstrichen, Bußgeldrisiko nach § 20 KRITIS-Dachgesetz.",
+                    "evaluationHints": [
+                      "Fristverstoß"
+                    ],
+                    "scoreContribution": 0
+                  }
                 ],
-                "relatedCriteria": ["crit-reporting-behordenmeldung"]
+                "relatedCriteria": [
+                  "crit-reporting-behordenmeldung"
+                ]
               }
             ]
           },
@@ -1270,8 +1848,18 @@
             "t": 135,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-power-partial-return", "title": "Netzausfall teilweise beseitigt", "description": "Netzbetreiber meldet schrittweise Wiederkehr. Erste Stadtteile haben Strom, die Klinik ist für 1 h noch auf Notstrom, dann schrittweise Rückschaltung auf Netz.", "roleId": "role-technische-leitung-energie" },
-              { "id": "inj-diesel-early", "title": "Dieselnachlieferung trifft früher ein", "description": "Händler hat andere Liefertour umdisponiert, Diesel wird in 2 h statt 12 h geliefert.", "roleId": "role-technische-leitung-energie" }
+              {
+                "id": "inj-power-partial-return",
+                "title": "Netzausfall teilweise beseitigt",
+                "description": "Netzbetreiber meldet schrittweise Wiederkehr. Erste Stadtteile haben Strom, die Klinik ist für 1 h noch auf Notstrom, dann schrittweise Rückschaltung auf Netz.",
+                "roleId": "role-technische-leitung-energie"
+              },
+              {
+                "id": "inj-diesel-early",
+                "title": "Dieselnachlieferung trifft früher ein",
+                "description": "Händler hat andere Liefertour umdisponiert, Diesel wird in 2 h statt 12 h geliefert.",
+                "roleId": "role-technische-leitung-energie"
+              }
             ],
             "decisions": [
               {
@@ -1280,10 +1868,28 @@
                 "roleId": "role-op-management",
                 "guidance": "Sofortige Wiederaufnahme wirkt voreilig. Stabilisierungsphase lässt Puffer für weitere Spitzen. Tageweise gestufte Wiederaufnahme ist Standard.",
                 "options": [
-                  { "id": "opt-gradual-restart", "label": "Elektiv-OPs ab nächstem Werktag gestuft wieder aufnehmen", "consequence": "Pufferzeit für Stabilisierung. Patienten-Nachholbedarf schrittweise abarbeiten.", "evaluationHints": ["Gestufte Wiederaufnahme"], "scoreContribution": 3 },
-                  { "id": "opt-immediate-restart", "label": "Sofort wieder aufnehmen, um Rückstau abzuarbeiten", "consequence": "Hoher Stress, Risiko weiterer Ausfälle. Personal noch von MANV/Nacht beansprucht.", "evaluationHints": ["Voreilige Wiederaufnahme"], "scoreContribution": 1 }
+                  {
+                    "id": "opt-gradual-restart",
+                    "label": "Elektiv-OPs ab nächstem Werktag gestuft wieder aufnehmen",
+                    "consequence": "Pufferzeit für Stabilisierung. Patienten-Nachholbedarf schrittweise abarbeiten.",
+                    "evaluationHints": [
+                      "Gestufte Wiederaufnahme"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-immediate-restart",
+                    "label": "Sofort wieder aufnehmen, um Rückstau abzuarbeiten",
+                    "consequence": "Hoher Stress, Risiko weiterer Ausfälle. Personal noch von MANV/Nacht beansprucht.",
+                    "evaluationHints": [
+                      "Voreilige Wiederaufnahme"
+                    ],
+                    "scoreContribution": 1
+                  }
                 ],
-                "relatedCriteria": ["crit-operations-energie-priorisierung"]
+                "relatedCriteria": [
+                  "crit-operations-energie-priorisierung"
+                ]
               }
             ]
           },
@@ -1291,18 +1897,53 @@
             "t": 150,
             "phase": "recovery",
             "injects": [
-              { "id": "inj-closing", "title": "Lagebild-Abschluss", "description": "Szenario-Ende. 15 MANV-Patienten versorgt (davon 3 verlegt), 2 stationär aufgenommen. Keine Todesfälle. Netzbetrieb stabilisiert, Dieselvorrat wieder aufgefüllt. BBK-Meldung fristgerecht erstellt. Nachbereitung und Lessons Learned für nächste Krisenstab-Sitzung geplant.", "roleId": "role-krisenstab-leitung-ops" }
+              {
+                "id": "inj-closing",
+                "title": "Lagebild-Abschluss",
+                "description": "Szenario-Ende. 15 MANV-Patienten versorgt (davon 3 verlegt), 2 stationär aufgenommen. Keine Todesfälle. Netzbetrieb stabilisiert, Dieselvorrat wieder aufgefüllt. BBK-Meldung fristgerecht erstellt. Nachbereitung und Lessons Learned für nächste Krisenstab-Sitzung geplant.",
+                "roleId": "role-krisenstab-leitung-ops"
+              }
             ],
             "decisions": []
           }
         ],
         "evaluationCriteria": [
-          { "id": "crit-operations-energie-priorisierung", "description": "Energiemanagement unter Notstrombedingungen — Priorisierung, Notabschaltungen, Dieselvorrat-Pflege", "weight": 2, "category": "operations" },
-          { "id": "crit-operations-notaufnahme-triage", "description": "Triage-Qualität und Kapazitätsmanagement bei MANV", "weight": 2, "category": "operations" },
-          { "id": "crit-governance-krisenstab-dynamik", "description": "Krisenstab-Entscheidungsfähigkeit unter Mehrfach-Belastung (Energie + MANV parallel)", "weight": 1.5, "category": "governance" },
-          { "id": "crit-communication-leitstelle", "description": "Abstimmung mit Rettungsdienst-Leitstelle und Kooperationskliniken", "weight": 1.5, "category": "communication" },
-          { "id": "crit-reporting-behordenmeldung", "description": "§ 16 KRITIS-Dachgesetz-Meldung an BBK fristgerecht, trotz akuter Lage", "weight": 1, "category": "reporting" },
-          { "id": "crit-other-dokumentation", "description": "Ereignisdokumentation für Nachbereitung und Lessons-Learned", "weight": 1, "category": "other" }
+          {
+            "id": "crit-operations-energie-priorisierung",
+            "description": "Energiemanagement unter Notstrombedingungen — Priorisierung, Notabschaltungen, Dieselvorrat-Pflege",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-operations-notaufnahme-triage",
+            "description": "Triage-Qualität und Kapazitätsmanagement bei MANV",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "crit-governance-krisenstab-dynamik",
+            "description": "Krisenstab-Entscheidungsfähigkeit unter Mehrfach-Belastung (Energie + MANV parallel)",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "crit-communication-leitstelle",
+            "description": "Abstimmung mit Rettungsdienst-Leitstelle und Kooperationskliniken",
+            "weight": 1.5,
+            "category": "communication"
+          },
+          {
+            "id": "crit-reporting-behordenmeldung",
+            "description": "§ 16 KRITIS-Dachgesetz-Meldung an BBK fristgerecht, trotz akuter Lage",
+            "weight": 1,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-other-dokumentation",
+            "description": "Ereignisdokumentation für Nachbereitung und Lessons-Learned",
+            "weight": 1,
+            "category": "other"
+          }
         ]
       }
     ]
