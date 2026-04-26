@@ -6,6 +6,7 @@ import waterCorePack from '../module-packs/water-core.container.json';
 import itTelecomCorePack from '../module-packs/it-telecom-core.container.json';
 import financeCorePack from '../module-packs/finance-core.container.json';
 import administrationCorePack from '../module-packs/administration-core.container.json';
+import kmuBasisCorePack from '../module-packs/kmu-basis-core.container.json';
 import type { ModulePackContainer } from '../types';
 
 export const builtInModulePacks: ModulePackContainer[] = [
@@ -17,4 +18,5 @@ export const builtInModulePacks: ModulePackContainer[] = [
   itTelecomCorePack,
   financeCorePack,
   administrationCorePack,
+  kmuBasisCorePack,
 ] as ModulePackContainer[];
