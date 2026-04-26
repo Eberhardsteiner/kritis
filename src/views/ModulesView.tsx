@@ -316,7 +316,11 @@ export function ModulesView({
               <button
                 key={module.id}
                 type="button"
-                className={`module-card ${isSelected ? 'selected' : ''}`}
+                className={[
+                  'module-card',
+                  `module-card-pack-${module.id}`,
+                  isSelected ? 'selected' : '',
+                ].filter(Boolean).join(' ')}
                 onClick={() => onSelectModule(module.id)}
               >
                 <div className="module-card-head">

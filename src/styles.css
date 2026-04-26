@@ -893,6 +893,65 @@ textarea:focus {
   transform: translateY(-1px);
 }
 
+/*
+ * Sektor-Akzente pro Pack-ID. Border-Left mit niedrig-gesättigter
+ * Sektor-Farbe + dezenter Background-Tint. Lesbarkeit bleibt voll
+ * erhalten — selected/hover-Zustand greift weiterhin und nimmt
+ * Vorrang vor dem Akzent. Mapping nutzt module.id (nicht packId), da
+ * der ModulesView-Render-Loop module.id als CSS-Klassen-Suffix
+ * vergibt: `module-card-pack-${module.id}`. Sechs Sektoren werden
+ * abgedeckt; nicht-gemappte Module behalten den neutralen Stil.
+ *
+ * Farbphilosophie: jede Sektor-Farbe hat eine offensichtliche
+ * Assoziation (rot-rosa = Gesundheit, gelb-orange = Strom/Wärme,
+ * grau-blau = Industrie/Stahl, grün = Bewegung/Logistik, hellblau =
+ * Wasser, violett = Daten/Netz). Sättigung niedrig, max. 8 % Tint
+ * im Hintergrund, damit es elegant bleibt.
+ */
+.module-card-pack-healthcare {
+  border-left: 3px solid rgba(220, 53, 69, 0.4);
+  background: rgba(248, 215, 218, 0.18);
+}
+
+.module-card-pack-energy {
+  border-left: 3px solid rgba(255, 165, 0, 0.45);
+  background: rgba(253, 235, 208, 0.22);
+}
+
+.module-card-pack-manufacturing {
+  border-left: 3px solid rgba(70, 100, 130, 0.45);
+  background: rgba(220, 230, 240, 0.22);
+}
+
+.module-card-pack-logistics {
+  border-left: 3px solid rgba(40, 167, 69, 0.4);
+  background: rgba(218, 235, 218, 0.2);
+}
+
+.module-card-pack-water {
+  border-left: 3px solid rgba(13, 110, 253, 0.4);
+  background: rgba(208, 232, 250, 0.2);
+}
+
+.module-card-pack-it-telecom {
+  border-left: 3px solid rgba(108, 70, 200, 0.45);
+  background: rgba(228, 218, 245, 0.22);
+}
+
+/*
+ * Selected/Hover-Zustand: der bestehende blaue Selected-Stil bleibt
+ * dominant, aber die Sektor-Border-Left-Linie bleibt auch bei
+ * Selektion sichtbar — als Identitäts-Anker beim Klick.
+ */
+.module-card-pack-healthcare.selected,
+.module-card-pack-energy.selected,
+.module-card-pack-manufacturing.selected,
+.module-card-pack-logistics.selected,
+.module-card-pack-water.selected,
+.module-card-pack-it-telecom.selected {
+  background: #f6faff;
+}
+
 .requirement-card {
   padding: 16px;
   display: grid;
