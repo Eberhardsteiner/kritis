@@ -148,6 +148,14 @@ export function GapAnalysisDashboard({
         Mappings und Evidenzen. Mindest-Gap 0,1. Die Zahlen sind bewusst konservativ gewählt und
         dienen als Ausgangsbasis für Projektangebote, nicht als Festpreis.
       </p>
+      <p className="muted small top-gap">
+        Die Schätzung basiert auf den Status der Compliance-Anforderungen im Bereich Maßnahmen
+        &amp; Bibliothek (offen / in Bearbeitung / erfüllt / nicht zutreffend). Solange
+        Anforderungen den Status „offen" haben, fließen sie mit vollem Gap-Faktor in die
+        Berechnung ein. Die Antworten der Grundanalyse beeinflussen die Domain-Scores im
+        Dashboard, aber nicht direkt den Restaufwand. Setzen Sie Anforderungs-Status im
+        Maßnahmen-Bereich, um den Restaufwand zu reduzieren.
+      </p>
     </section>
   );
 }
