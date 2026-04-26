@@ -136,7 +136,7 @@ export function MeasuresView({
           <span>{actionSummary.total} Maßnahmen</span>
           <span>{actionSummary.overdue} überfällig</span>
           <span>{evidenceSummary.total} Nachweise</span>
-          <span>{evidenceSummary.coverage}% Nachweisabdeckung</span>
+          <span>{evidenceSummary.dataAvailable ? `${evidenceSummary.coverage}% Nachweisabdeckung` : 'Nachweisabdeckung: noch nicht erfasst'}</span>
           <span>{localAttachments} Anhänge</span>
         </div>
       </section>
