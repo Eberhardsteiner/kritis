@@ -328,7 +328,11 @@ export function ModulesView({
                     <p className="eyebrow">{descriptor.sourceLabel}</p>
                     <h4>{module.name}</h4>
                   </div>
-                  {isSelected ? <CheckCircle2 size={18} /> : <Package size={18} />}
+                  {isSelected ? (
+                    <CheckCircle2 size={22} className="module-card-check-icon" />
+                  ) : (
+                    <Package size={18} />
+                  )}
                 </div>
                 <p>{module.description}</p>
                 <div className="chip-row top-gap">

@@ -1,10 +1,10 @@
 /**
- * adoptModuleTemplates.test.ts · C5.3 + C5.3b/c/d/e/f/g/h Pack-Inhalts-Verifikation
+ * adoptModuleTemplates.test.ts · C5.3 + C5.3b/c/d/e/f/g/h/i/j Pack-Inhalts-Verifikation
  *
  * Vitest-Tests, die die ausgelieferten Sektor-Packs (healthcare-core,
  * energy-core, industry-core, logistics-core, water-core, it-telecom-core,
- * finance-core, administration-core) laden und die Adopt-Bereitschaft in
- * allen drei Template-Kategorien bestätigen.
+ * finance-core, administration-core, kmu-basis-core, defence-core) laden
+ * und die Adopt-Bereitschaft in allen drei Template-Kategorien bestätigen.
  * Diese Tests dienen als Content-Gate: Änderungen an den Packs, die eine
  * Kategorie versehentlich leeren, schlagen hier an, bevor sie in der
  * UVM-Demo sichtbar werden.
@@ -27,6 +27,8 @@ import waterPack from '../../module-packs/water-core.container.json';
 import itTelecomPack from '../../module-packs/it-telecom-core.container.json';
 import financePack from '../../module-packs/finance-core.container.json';
 import administrationPack from '../../module-packs/administration-core.container.json';
+import kmuBasisPack from '../../module-packs/kmu-basis-core.container.json';
+import defencePack from '../../module-packs/defence-core.container.json';
 import type { AppState, SectorModuleDefinition } from '../../types';
 import { adoptAllTemplates, countAdoptableTemplates } from './adoptModuleTemplates';
 
@@ -690,6 +692,186 @@ describe('administration-core.container.json · C5.3h Content-Gate', () => {
 
   it('runs adoptAllTemplates without errors against an empty workspace state', () => {
     const result = adoptAllTemplates(module, emptyAdoptionState, 'test-tenant-administration');
+    expect(result.counts.riskAdded).toBeGreaterThan(0);
+    expect(result.counts.planReplaced).toBe(false);
+    expect(result.counts.tabletopAdded).toBeGreaterThan(0);
+    expect(result.counts.tabletopReplaced).toBe(0);
+    expect(result.resiliencePlan).not.toBeNull();
+    expect(result.archivedResiliencePlans).toEqual([]);
+    expect(result.riskEntries.length).toBe(result.counts.riskAdded);
+    expect(result.importedTabletopScenarios.length).toBe(result.counts.tabletopAdded);
+  });
+});
+
+describe('kmu-basis-core.container.json · C5.3i Content-Gate', () => {
+  const module = kmuBasisPack.module as unknown as SectorModuleDefinition;
+
+  it('parses as a SectorModuleDefinition with all three C5.1 template fields populated', () => {
+    const counts = countAdoptableTemplates(module);
+    expect(counts.riskCatalog).toBeGreaterThan(0);
+    expect(counts.resiliencePlan).toBe(1);
+    expect(counts.tabletop).toBeGreaterThan(0);
+    expect(counts.total).toBeGreaterThan(0);
+  });
+
+  it('has at least 15 risk catalog templates covering all six RiskCategoryId enums', () => {
+    const risks = module.riskCatalogTemplates ?? [];
+    expect(risks.length).toBeGreaterThanOrEqual(15);
+    const categories = new Set(risks.map((r) => r.categoryId));
+    expect(categories).toEqual(
+      new Set(['nature', 'technical', 'human_intentional', 'human_unintentional', 'interdependency', 'cyber_physical']),
+    );
+  });
+
+  it('has an interdependency-heavy distribution (sector contrast: Einsteiger-Pack mit dezentral-externer IT-Abhängigkeit)', () => {
+    // KMU-Basis-Demo-Punkt: Geschäftskontinuität und NIS2-Mindest-Compliance
+    // als neunter Demo-Kontrast. interdependency >= 4 (höchste interdependency-
+    // Quote aller Packs) wegen MSP/MSSP/Konzern-Kunde/Bank als die vier
+    // Mittelstands-Schicksals-Verbindungen. Pack-Pragmatik: kein Score-25,
+    // höchster Score 20 für Ransomware-Geschäftsstillstand.
+    const risks = module.riskCatalogTemplates ?? [];
+    const byCategory = new Map<string, number>();
+    for (const risk of risks) {
+      byCategory.set(risk.categoryId, (byCategory.get(risk.categoryId) ?? 0) + 1);
+    }
+    expect(
+      byCategory.get('interdependency') ?? 0,
+      'KMU-Basis pack should have >= 4 interdependency risks (MSP/MSSP/Konzern-Kunde/Bank)',
+    ).toBeGreaterThanOrEqual(4);
+    expect(
+      byCategory.get('cyber_physical') ?? 0,
+      'KMU-Basis pack should have >= 4 cyber_physical risks (Ransomware/CEO-Fraud/Phishing/DDoS)',
+    ).toBeGreaterThanOrEqual(4);
+  });
+
+  it('has at least 2 tabletop scenarios with at least one decision each', () => {
+    const scenarios = module.tabletopScenarios ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(2);
+    for (const scn of scenarios) {
+      const totalDecisions = scn.timeline.reduce((sum, step) => sum + step.decisions.length, 0);
+      expect(totalDecisions, `Scenario ${scn.id} must have at least one decision`).toBeGreaterThan(0);
+    }
+    const allPhases = new Set<string>();
+    for (const scn of scenarios) {
+      for (const step of scn.timeline) {
+        allPhases.add(step.phase);
+      }
+    }
+    expect(allPhases).toEqual(
+      new Set(['discovery', 'early_response', '24h_reporting', 'stabilization', 'recovery']),
+    );
+  });
+
+  it('has a resilience plan template with all six content sections and a NIS2-/Mittelstand-conform review cycle', () => {
+    const tpl = module.resiliencePlanTemplate;
+    expect(tpl).toBeDefined();
+    expect(tpl?.templateId).toBeTruthy();
+    expect(tpl?.content.scope.operatorName).toBeTruthy();
+    expect(tpl?.content.riskBasis.topRisks.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.prevent.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.protect.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.respond.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.recover.length).toBeGreaterThan(0);
+    expect(tpl?.content.governance).toBeDefined();
+    expect(tpl?.content.reporting).toBeDefined();
+    const cycle = tpl?.content.evidence.reviewCycleYears;
+    expect(cycle).toBeGreaterThanOrEqual(1);
+    expect(cycle).toBeLessThanOrEqual(4);
+  });
+
+  it('runs adoptAllTemplates without errors against an empty workspace state', () => {
+    const result = adoptAllTemplates(module, emptyAdoptionState, 'test-tenant-kmu-basis');
+    expect(result.counts.riskAdded).toBeGreaterThan(0);
+    expect(result.counts.planReplaced).toBe(false);
+    expect(result.counts.tabletopAdded).toBeGreaterThan(0);
+    expect(result.counts.tabletopReplaced).toBe(0);
+    expect(result.resiliencePlan).not.toBeNull();
+    expect(result.archivedResiliencePlans).toEqual([]);
+    expect(result.riskEntries.length).toBe(result.counts.riskAdded);
+    expect(result.importedTabletopScenarios.length).toBe(result.counts.tabletopAdded);
+  });
+});
+
+describe('defence-core.container.json · C5.3j Content-Gate', () => {
+  const module = defencePack.module as unknown as SectorModuleDefinition;
+
+  it('parses as a SectorModuleDefinition with all three C5.1 template fields populated', () => {
+    const counts = countAdoptableTemplates(module);
+    expect(counts.riskCatalog).toBeGreaterThan(0);
+    expect(counts.resiliencePlan).toBe(1);
+    expect(counts.tabletop).toBeGreaterThan(0);
+    expect(counts.total).toBeGreaterThan(0);
+  });
+
+  it('has at least 15 risk catalog templates covering all six RiskCategoryId enums', () => {
+    const risks = module.riskCatalogTemplates ?? [];
+    expect(risks.length).toBeGreaterThanOrEqual(15);
+    const categories = new Set(risks.map((r) => r.categoryId));
+    expect(categories).toEqual(
+      new Set(['nature', 'technical', 'human_intentional', 'human_unintentional', 'interdependency', 'cyber_physical']),
+    );
+  });
+
+  it('has a human_intentional-heavy distribution (sector contrast: Hochsicherheits-Branche mit gezielter staatlicher Bedrohung)', () => {
+    // Defence-Demo-Punkt: Geheimhaltungs-Integrität und Lieferfähigkeit als
+    // zehnter (und letzter) Demo-Kontrast. human_intentional >= 5 (höchste
+    // Quote aller 10 Packs) wegen gezielter staatlicher Akteure als
+    // strukturelle Sektor-Realität (APT28/GRU, China-MSS, gedrehter Insider,
+    // Maulwurf, Korruption für Dual-Use-Export, Whistleblower).
+    // Pack-Pragmatik: kein Score-25, EW=5 nicht vergeben (staatliche Akteure
+    // sind regelmäßig aber nicht jährlich).
+    const risks = module.riskCatalogTemplates ?? [];
+    const byCategory = new Map<string, number>();
+    for (const risk of risks) {
+      byCategory.set(risk.categoryId, (byCategory.get(risk.categoryId) ?? 0) + 1);
+    }
+    expect(
+      byCategory.get('human_intentional') ?? 0,
+      'Defence pack should have >= 5 human_intentional risks (Insider/Maulwurf/Korruption/Sabotage/Whistleblower)',
+    ).toBeGreaterThanOrEqual(5);
+    expect(
+      byCategory.get('cyber_physical') ?? 0,
+      'Defence pack should have >= 4 cyber_physical risks (APT28/China-MSS/Lieferkette/Ransomware)',
+    ).toBeGreaterThanOrEqual(4);
+  });
+
+  it('has at least 2 tabletop scenarios with at least one decision each', () => {
+    const scenarios = module.tabletopScenarios ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(2);
+    for (const scn of scenarios) {
+      const totalDecisions = scn.timeline.reduce((sum, step) => sum + step.decisions.length, 0);
+      expect(totalDecisions, `Scenario ${scn.id} must have at least one decision`).toBeGreaterThan(0);
+    }
+    const allPhases = new Set<string>();
+    for (const scn of scenarios) {
+      for (const step of scn.timeline) {
+        allPhases.add(step.phase);
+      }
+    }
+    expect(allPhases).toEqual(
+      new Set(['discovery', 'early_response', '24h_reporting', 'stabilization', 'recovery']),
+    );
+  });
+
+  it('has a resilience plan template with all six content sections and a BMVg-CSA-conform 1-year review cycle', () => {
+    const tpl = module.resiliencePlanTemplate;
+    expect(tpl).toBeDefined();
+    expect(tpl?.templateId).toBeTruthy();
+    expect(tpl?.content.scope.operatorName).toBeTruthy();
+    expect(tpl?.content.riskBasis.topRisks.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.prevent.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.protect.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.respond.length).toBeGreaterThan(0);
+    expect(tpl?.content.measuresByGoal.recover.length).toBeGreaterThan(0);
+    expect(tpl?.content.governance).toBeDefined();
+    expect(tpl?.content.reporting).toBeDefined();
+    const cycle = tpl?.content.evidence.reviewCycleYears;
+    expect(cycle).toBeGreaterThanOrEqual(1);
+    expect(cycle).toBeLessThanOrEqual(4);
+  });
+
+  it('runs adoptAllTemplates without errors against an empty workspace state', () => {
+    const result = adoptAllTemplates(module, emptyAdoptionState, 'test-tenant-defence');
     expect(result.counts.riskAdded).toBeGreaterThan(0);
     expect(result.counts.planReplaced).toBe(false);
     expect(result.counts.tabletopAdded).toBeGreaterThan(0);

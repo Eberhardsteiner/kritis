@@ -919,11 +919,50 @@ textarea:focus {
   transition: 140ms ease;
 }
 
-.module-card.selected,
+/*
+ * Hover-Zustand: dezentes Blau + leichter Lift, klar getrennt vom
+ * Selected-Zustand. Cursor zeigt Klickbarkeit, ohne Auswahl-Verwechslung.
+ */
 .module-card:hover {
   border-color: #8db1ff;
   background: #f6faff;
   transform: translateY(-1px);
+}
+
+/*
+ * Selected-Zustand: deutlich hervorgehoben für die ModulesView mit
+ * zehn Pack-Karten, damit die Auswahl auf einen Blick erkennbar ist
+ * (Test-Kriterium: aus 2 m Abstand vom Bildschirm identifizierbar).
+ *
+ * Drei visuelle Marker wirken zusammen:
+ *  1. Box-Shadow-Ring (2 px slate-blue) als universeller Auswahl-
+ *     Indikator — bewusst über box-shadow statt border-color, damit
+ *     die Sektor-Farb-Identität im border-left erhalten bleibt.
+ *  2. Stärkerer Background-Tint in neutraler Akzentfarbe (~10 %
+ *     slate-blue), unabhängig vom Sektor-Akzent — universell
+ *     erkennbar.
+ *  3. Sanfte Box-Shadow als Tiefen-Effekt, hebt die Karte räumlich
+ *     aus der Liste.
+ *
+ * Sektor-Border-Left bleibt über die `.module-card-pack-{packId}`-
+ * Klassen sichtbar, weil box-shadow den border nicht ersetzt.
+ */
+.module-card.selected {
+  background: rgba(64, 99, 179, 0.1);
+  box-shadow:
+    0 0 0 2px rgba(64, 99, 179, 0.55),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/*
+ * Check-Icon im Selected-Zustand: deutlich vergrößert (size=22 statt
+ * 18) und in der Selected-Akzentfarbe gerendert. Verstärkt die
+ * Auswahl-Erkennbarkeit auch bei reiner Icon-Wahrnehmung.
+ */
+.module-card-check-icon {
+  color: rgb(64, 99, 179);
+  flex-shrink: 0;
 }
 
 /*
@@ -932,15 +971,17 @@ textarea:focus {
  * erhalten — selected/hover-Zustand greift weiterhin und nimmt
  * Vorrang vor dem Akzent. Mapping nutzt module.id (nicht packId), da
  * der ModulesView-Render-Loop module.id als CSS-Klassen-Suffix
- * vergibt: `module-card-pack-${module.id}`. Acht Sektoren werden
+ * vergibt: `module-card-pack-${module.id}`. Zehn Sektoren werden
  * abgedeckt; nicht-gemappte Module behalten den neutralen Stil.
  *
  * Farbphilosophie: jede Sektor-Farbe hat eine offensichtliche
  * Assoziation (rot-rosa = Gesundheit, gelb-orange = Strom/Wärme,
  * grau-blau = Industrie/Stahl, grün = Bewegung/Logistik, hellblau =
  * Wasser, violett = Daten/Netz, gold-bronze = Finanz/Vertrauen,
- * dunkelblau-schiefer = Verwaltung/Administration). Sättigung niedrig,
- * max. 8 % Tint im Hintergrund, damit es elegant bleibt.
+ * dunkelblau-schiefer = Verwaltung/Administration, dunkelgrau-neutral
+ * = KMU-Basis/Querschnitt, dunkelgrün-oliv = Rüstung/Verteidigung).
+ * Sättigung niedrig, max. 8 % Tint im Hintergrund, damit es elegant
+ * bleibt.
  */
 .module-card-pack-healthcare {
   border-left: 3px solid rgba(220, 53, 69, 0.4);
@@ -982,21 +1023,24 @@ textarea:focus {
   background: rgba(220, 225, 235, 0.22);
 }
 
-/*
- * Selected/Hover-Zustand: der bestehende blaue Selected-Stil bleibt
- * dominant, aber die Sektor-Border-Left-Linie bleibt auch bei
- * Selektion sichtbar — als Identitäts-Anker beim Klick.
- */
-.module-card-pack-healthcare.selected,
-.module-card-pack-energy.selected,
-.module-card-pack-manufacturing.selected,
-.module-card-pack-logistics.selected,
-.module-card-pack-water.selected,
-.module-card-pack-it-telecom.selected,
-.module-card-pack-finance.selected,
-.module-card-pack-administration.selected {
-  background: #f6faff;
+.module-card-pack-kmu-basis {
+  border-left: 3px solid rgba(95, 95, 100, 0.45);
+  background: rgba(228, 228, 230, 0.2);
 }
+
+.module-card-pack-defence {
+  border-left: 3px solid rgba(75, 95, 60, 0.5);
+  background: rgba(225, 230, 215, 0.22);
+}
+
+/*
+ * Anmerkung: die früher hier vorhandenen Sektor-spezifischen
+ * `.selected`-Overrides sind entfernt, weil der neue universelle
+ * `.module-card.selected`-Stil (siehe oben) den Sektor-Tint im
+ * Selected-Zustand bewusst überschreibt — die Auswahl ist neutral
+ * blau erkennbar, während die Sektor-Identität allein über das
+ * border-left erhalten bleibt.
+ */
 
 .requirement-card {
   padding: 16px;
