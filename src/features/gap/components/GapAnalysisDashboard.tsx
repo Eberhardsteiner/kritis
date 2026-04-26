@@ -42,6 +42,23 @@ function getConfidenceTone(confidence: EffortConfidence): 'success' | 'warn' | '
   return 'outline';
 }
 
+/**
+ * C5.4.7 Bug 13: Restaufwand-Tone war binär (warn vs success), und
+ * `success` existiert in styles.css gar nicht — die 0-PT-Card bekam
+ * also gar keinen Hintergrund. Mehrstufig + auf reale CSS-Klassen
+ * gemappt:
+ *   0 PT     → good   (alles erledigt)
+ *   < 5 PT   → good   (< 1 Woche, perfekt erfüllter Tenant)
+ *   < 20 PT  → info   (1–4 Wochen, spürbar aber okay)
+ *   ≥ 20 PT  → warn   (> 4 Wochen, gelb)
+ */
+function getRestaufwandTone(totalPt: number): 'good' | 'info' | 'warn' {
+  if (totalPt === 0) return 'good';
+  if (totalPt < 5) return 'good';
+  if (totalPt < 20) return 'info';
+  return 'warn';
+}
+
 function GapEntryDetail({
   entry,
   requirement,
@@ -232,7 +249,7 @@ export function GapAnalysisDashboard({
         </div>
       </div>
 
-      <div className={`stat-card ${summary.totalPersonDays > 0 ? 'warn' : 'success'} top-gap`}>
+      <div className={`stat-card ${getRestaufwandTone(summary.totalPersonDays)} top-gap`}>
         <p className="stat-title">Geschätzter Restaufwand</p>
         <div className="stat-value">{totalPtLabel}</div>
         {totalEuroLabel ? <p className="stat-subtitle"><strong>{totalEuroLabel}</strong></p> : null}

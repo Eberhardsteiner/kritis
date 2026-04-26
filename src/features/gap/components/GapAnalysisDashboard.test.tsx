@@ -122,6 +122,66 @@ describe('GapAnalysisDashboard', () => {
   });
 });
 
+describe('GapAnalysisDashboard · Restaufwand-Tone (C5.4.7 Bug 13)', () => {
+  function makeSummary(totalPt: number): GapAnalysisSummary {
+    return {
+      totalPersonDays: totalPt,
+      minPersonDays: totalPt,
+      maxPersonDays: totalPt,
+      calendarWeeks: Math.ceil(totalPt / 5),
+      minCalendarWeeks: totalPt > 0 ? Math.ceil((totalPt / 5) * 10) / 10 : 0,
+      maxCalendarWeeks: totalPt > 0 ? Math.ceil((totalPt / 5) * 10) / 10 : 0,
+      entryCount: 0,
+      byRegime: [],
+    };
+  }
+
+  function statCardClassNames(container: HTMLElement): string[] {
+    return Array.from(container.querySelectorAll('.stat-card')).map((node) =>
+      node.className.split(/\s+/).join(' '),
+    );
+  }
+
+  it('Restaufwand 0 PT → good-Tone (CSS-Klasse `good`, nicht `success`)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(0)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card good/);
+    expect(classes).not.toMatch(/stat-card success/);
+  });
+
+  it('Restaufwand 4 PT → good-Tone (< 1 Woche, perfekt erfüllt)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(4)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card good/);
+  });
+
+  it('Restaufwand 15 PT → info-Tone (1–4 Wochen, mid-tier)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(15)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card info/);
+    expect(classes).not.toMatch(/stat-card warn/);
+  });
+
+  it('Restaufwand 50 PT → warn-Tone (> 4 Wochen, gelb)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(50)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card warn/);
+    expect(classes).not.toMatch(/stat-card info/);
+  });
+
+  it('Schwelle: 5 PT → info-Tone (Übergang von good zu info)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(5)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card info/);
+  });
+
+  it('Schwelle: 20 PT → warn-Tone (Übergang von info zu warn)', () => {
+    const { container } = render(<GapAnalysisDashboard summary={makeSummary(20)} requirements={[]} />);
+    const classes = statCardClassNames(container).join(' | ');
+    expect(classes).toMatch(/stat-card warn/);
+  });
+});
+
 describe('GapAnalysisDashboard · Aktivitäts-Tabelle Brutto/Rest (C5.4.4)', () => {
   // Eigenes Fixture mit `breakdown`-Source und `resolvedActivities`,
   // damit die Tabellen-Spalten gerendert werden. Status `ready`,

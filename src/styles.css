@@ -417,6 +417,14 @@ textarea:focus {
   background: linear-gradient(180deg, #fffafa 0%, #fef2f2 100%);
 }
 
+/* C5.4.7 Bug 13: Mid-Tier-Tone zwischen `good` und `warn`, eingeführt
+   für die Restaufwand-Card im GapAnalysisDashboard. Skala:
+   0–<5 PT → good, 5–<20 PT → info, >=20 PT → warn. Hellblau-Grauton
+   für „im Bereich, aber spürbar Aufwand". */
+.stat-card.info {
+  background: linear-gradient(180deg, #fbfdff 0%, #eff6ff 100%);
+}
+
 .stat-title {
   font-size: 0.88rem;
   color: var(--muted);
