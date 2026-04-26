@@ -4,6 +4,7 @@ import type {
   RegulatoryRegimeDefinition,
   RequirementDefinition,
 } from '../types';
+import { enrichWithBreakdown } from './kritisRequirementBreakdowns';
 
 export const KRITIS_ELIGIBLE_SECTORS = [
   'Energie',
@@ -95,7 +96,7 @@ export const germanyRegimeDefinitions: RegulatoryRegimeDefinition[] = [
   },
 ];
 
-export const kritisDachRequirements: RequirementDefinition[] = [
+export const kritisDachRequirements: RequirementDefinition[] = ([
   {
     id: 'de_kritis_land_opening_clause',
     title: 'Länderöffnungsklausel geprüft',
@@ -203,9 +204,9 @@ export const kritisDachRequirements: RequirementDefinition[] = [
     regimeId: 'de_kritisdachg',
     category: 'governance',
   },
-];
+] satisfies RequirementDefinition[]).map(enrichWithBreakdown);
 
-export const bsigNis2Requirements: RequirementDefinition[] = [
+export const bsigNis2Requirements: RequirementDefinition[] = ([
   {
     id: 'de_bsig_registration',
     title: 'Einrichtung registrieren',
@@ -272,7 +273,7 @@ export const bsigNis2Requirements: RequirementDefinition[] = [
     regimeId: 'de_bsig_nis2',
     category: 'evidence',
   },
-];
+] satisfies RequirementDefinition[]).map(enrichWithBreakdown);
 
 export const kritisDachChecklist: AuditChecklistItemDefinition[] = [
   {
