@@ -288,6 +288,129 @@ describe('computeGapAnalysis · Confidence', () => {
   });
 });
 
+describe('computeGapAnalysis · Domain-Score-Modulator', () => {
+  it('Domain-Score 100% lässt PT unverändert gegenüber Default-Berechnung', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const baseline = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const withFullScore = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    expect(withFullScore.byRegime[0].entries[0].effortEstimate.personDays).toBe(
+      baseline.byRegime[0].entries[0].effortEstimate.personDays,
+    );
+    // Modulator 1.0 darf keine Aufschlag-Assumption produzieren.
+    const assumptions = withFullScore.byRegime[0].entries[0].effortEstimate.assumptions;
+    expect(assumptions.some((line) => line.startsWith('Aufschlag durch Domain-Score'))).toBe(false);
+  });
+
+  it('Domain-Score 0% erhöht PT um Faktor 1.5', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const baseline = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const withZeroScore = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // measures+open → 10 PT × Modulator 1.5 = 15 PT
+    expect(withZeroScore.byRegime[0].entries[0].effortEstimate.personDays).toBe(
+      baseline.byRegime[0].entries[0].effortEstimate.personDays * 1.5,
+    );
+    // Aufschlag-Assumption muss vorhanden und korrekt formatiert sein.
+    const assumptions = withZeroScore.byRegime[0].entries[0].effortEstimate.assumptions;
+    const surchargeLine = assumptions.find((line) => line.startsWith('Aufschlag durch Domain-Score'));
+    expect(surchargeLine).toBeDefined();
+    expect(surchargeLine).toContain('0 %');
+    expect(surchargeLine).toContain('+0.50');
+  });
+
+  it('Domain-Score 50% ergibt Modulator 1.25 (linearer Aufschlag)', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 50, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // measures+open → 10 PT × Modulator 1.25 = 12.5 PT
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(12.5);
+  });
+
+  it('mappt category=measures auf Domain cyber für den Modulator', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    // Niedriger cyber-Score muss greifen, hoher governance-Score darf nicht greifen.
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+        { domainId: 'governance', label: 'Führung & Governance', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(15);
+  });
+
+  it('mappt category=governance auf Domain governance für den Modulator', () => {
+    const req = makeRequirement({ id: 'req-g', category: 'governance' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-g': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+        { domainId: 'governance', label: 'Führung & Governance', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // governance category=small (2 PT base) × open (1.0) × modulator 1.5 = 3 PT
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(3);
+  });
+
+  it('verhält sich ohne domainScores-Parameter wie die Default-Berechnung (Bestandskompatibilität)', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const withoutScores = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const withEmptyScores = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [],
+    });
+    // Beide ergeben 10 PT, kein Modulator-Effekt.
+    expect(withoutScores.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    expect(withEmptyScores.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+  });
+});
+
 describe('getConfidenceLabel', () => {
   it('übersetzt die drei Confidence-Stufen', () => {
     expect(getConfidenceLabel('high')).toBe('Hoch');
