@@ -50,21 +50,10 @@ const EVIDENCE_REDUCTION_CAP = 0.2;
 const MIN_GAP_FLOOR = 0.1;
 
 /**
- * Maximaler Aufschlag durch den Domain-Score-Modulator. Bei Domain-Score 0 %
- * wird der Gap-Faktor um 50 % erhöht (Modulator 1.5), bei Domain-Score 100 %
- * bleibt der Gap-Faktor unverändert (Modulator 1.0). Linear interpoliert.
- *
- * Hintergrund: Schlechte Antworten in der Grundanalyse signalisieren niedrige
- * Reife und damit Mehraufwand bei der Umsetzung der Compliance-Anforderungen.
- * Der Anforderungs-Status bleibt aber der dominante Treiber — der Modulator
- * ist nur eine Feinjustierung um bis zu ±50 %, nicht der Haupt-Hebel.
- */
-const DOMAIN_MODULATOR_MAX_SURCHARGE = 0.5;
-
-/**
  * Mappt eine Requirement-Kategorie auf eine Domain-ID aus baseDomains.
  * Wird genutzt, um pro Anforderung den passenden Domain-Score aus der
- * Grundanalyse für den Modulator nachzuschlagen.
+ * Grundanalyse für den Status-Vorschlag (`deriveStatusFromDomainScore`)
+ * nachzuschlagen.
  *
  * Heuristik:
  * - Compliance-/Verwaltungs-Aspekte (scope, registration, governance, risk,
@@ -97,12 +86,31 @@ function resolveDomainId(category: string | undefined): string {
   return REQUIREMENT_CATEGORY_TO_DOMAIN[category] ?? 'governance';
 }
 
-function computeDomainModulator(domainScore: number | undefined): number {
-  if (domainScore === undefined) {
-    return 1;
-  }
-  const clamped = Math.max(0, Math.min(100, domainScore));
-  return 1 + (1 - clamped / 100) * DOMAIN_MODULATOR_MAX_SURCHARGE;
+/**
+ * Leitet einen Anforderungs-Status-Vorschlag aus dem Domain-Score ab.
+ * Hohe Domain-Scores signalisieren, dass der Tenant in der zugehörigen
+ * Domäne reif ist – also vermutlich auch die zugehörigen Anforderungen
+ * weitgehend erfüllt sind.
+ *
+ * Schwellen (in C5.4.2 mit Dr. Steiner abgestimmt):
+ *  - Score ≥ 75 % → 'ready' (Anforderung weitgehend erfüllt, nur Pflege
+ *    notwendig — Gap-Faktor 0.1, also 10 % der Bandbreite)
+ *  - Score 50–74 % → 'in_progress' (in Bearbeitung, signifikanter
+ *    Restaufwand — Gap-Faktor 0.5, also 50 % der Bandbreite)
+ *  - Score < 50 % → 'open' (Volle Umsetzung erforderlich — Gap-Faktor
+ *    1.0, also 100 % der Bandbreite)
+ *  - Score undefined → 'open' (Default für Tenants ohne Grundanalyse —
+ *    bestandskonform mit Vor-C5.4.2-Verhalten)
+ *
+ * Wenn explizit ein Status in `requirementStates` gesetzt ist, hat dieser
+ * Vorrang vor dem Vorschlag (User-Override schlägt Heuristik). Das wird
+ * in `computeGapAnalysis` berücksichtigt.
+ */
+export function deriveStatusFromDomainScore(score: number | undefined): RequirementStatus {
+  if (score === undefined) return 'open';
+  if (score >= 75) return 'ready';
+  if (score >= 50) return 'in_progress';
+  return 'open';
 }
 
 function resolveSize(category: string | undefined): RequirementEffortSize {
@@ -148,14 +156,29 @@ function buildEstimate(params: {
   currentStatus: RequirementStatus;
   primaryMappings: number;
   evidenceCount: number;
+  /**
+   * `true`, wenn `currentStatus` aus dem Domain-Score abgeleitet wurde
+   * (kein expliziter `requirementStates`-Eintrag). Steuert den
+   * Transparenz-Hinweis in der Assumptions-Liste.
+   */
+  statusDerivedFromGrundanalyse: boolean;
   domainScore?: number;
   domainId?: string;
 }): EffortEstimate {
-  const { requirement, currentStatus, primaryMappings, evidenceCount, domainScore, domainId } =
-    params;
+  const {
+    requirement,
+    currentStatus,
+    primaryMappings,
+    evidenceCount,
+    statusDerivedFromGrundanalyse,
+    domainScore,
+    domainId,
+  } = params;
 
+  // Gap-Faktor nur noch aus Status (nicht mehr Domain-Modulator-multipliziert).
+  // Status selbst kommt entweder explizit aus requirementStates oder über
+  // deriveStatusFromDomainScore aus der Grundanalyse — siehe computeGapAnalysis.
   const baseGap = STATUS_GAP_FACTOR[currentStatus] ?? 1;
-  const domainModulator = computeDomainModulator(domainScore);
   const mappingReduction = Math.min(
     MAPPING_REDUCTION_CAP,
     primaryMappings * MAPPING_REDUCTION_PER_PRIMARY,
@@ -165,7 +188,7 @@ function buildEstimate(params: {
     evidenceCount * EVIDENCE_REDUCTION_PER_ITEM,
   );
 
-  const rawGap = baseGap * domainModulator - mappingReduction - evidenceReduction;
+  const rawGap = baseGap - mappingReduction - evidenceReduction;
   const gap =
     currentStatus === 'not_applicable' || baseGap === 0
       ? 0
@@ -173,10 +196,10 @@ function buildEstimate(params: {
 
   // ─── Branch 1: explizite effortBreakdown-Aufschlüsselung ────────────
   // Wenn der Requirement einen ausgearbeiteten Breakdown hat, nutzen wir
-  // dessen Min/Max-PT als Basis und multiplizieren mit demselben Gap-
-  // Faktor (inkl. Domain-Modulator und Reduktionen wie bei der Heuristik).
-  // Das gibt UVM-Angebotsgrundlagen mit verteidigbaren Bandbreiten und
-  // Tätigkeits-Listen, statt einer einzelnen Heuristik-Zahl.
+  // dessen Min/Max-PT als Basis und multiplizieren mit dem sauberen
+  // Status-basierten Gap-Faktor. Konzeptionell: „Bei Status `ready`
+  // brauchen wir nur 10 % der Tätigkeitsstunden für Pflege, bei
+  // `in_progress` 50 % als Restaufwand, bei `open` die volle Bandbreite."
   const breakdown = requirement.effortBreakdown;
   if (breakdown) {
     const minPersonDaysRaw =
@@ -191,11 +214,10 @@ function buildEstimate(params: {
       `Breakdown ${breakdown.minPersonDays} – ${breakdown.maxPersonDays} PT aus ${breakdown.activities.length} Tätigkeit${breakdown.activities.length === 1 ? '' : 'en'}`,
       `Gap-Faktor ${baseGap.toFixed(2)} (Status: ${currentStatus})`,
     ];
-    if (domainScore !== undefined && domainModulator !== 1) {
-      const surcharge = baseGap * domainModulator - baseGap;
-      const domainHint = domainId ? ` (${domainId})` : '';
+    if (statusDerivedFromGrundanalyse && domainScore !== undefined) {
+      const domainHint = domainId ? ` in ${domainId}` : '';
       assumptions.push(
-        `Aufschlag durch Domain-Score ${Math.round(domainScore)} %${domainHint}: ${surcharge >= 0 ? '+' : ''}${surcharge.toFixed(2)}`,
+        `Status aus Grundanalyse abgeleitet: ${currentStatus} (Domain-Score ${Math.round(domainScore)} %${domainHint})`,
       );
     }
     if (mappingReduction > 0) {
@@ -234,11 +256,10 @@ function buildEstimate(params: {
     `Basis-Aufwand ${basePersonDays} PT (Kategorie ${size})`,
     `Gap-Faktor ${baseGap.toFixed(2)} (Status: ${currentStatus})`,
   ];
-  if (domainScore !== undefined && domainModulator !== 1) {
-    const surcharge = baseGap * domainModulator - baseGap;
-    const domainHint = domainId ? ` (${domainId})` : '';
+  if (statusDerivedFromGrundanalyse && domainScore !== undefined) {
+    const domainHint = domainId ? ` in ${domainId}` : '';
     assumptions.push(
-      `Aufschlag durch Domain-Score ${Math.round(domainScore)} %${domainHint}: ${surcharge >= 0 ? '+' : ''}${surcharge.toFixed(2)}`,
+      `Status aus Grundanalyse abgeleitet: ${currentStatus} (Domain-Score ${Math.round(domainScore)} %${domainHint})`,
     );
   }
   if (mappingReduction > 0) {
@@ -269,12 +290,22 @@ export interface ComputeGapAnalysisArgs {
   evidenceItems: EvidenceItem[];
   regimeDefinitions: RegulatoryRegimeDefinition[];
   /**
-   * Optionale Domain-Scores aus der Grundanalyse. Wenn übergeben, modulieren
-   * sie den Gap-Faktor pro Anforderung über `computeDomainModulator`:
-   * Domain-Score 100 % → Modulator 1.0 (kein Aufschlag), Domain-Score 0 % →
-   * Modulator 1.5 (50 % Aufschlag). Wenn weggelassen, bleibt das Verhalten
-   * identisch zur Vor-v0.9.22-Berechnung (kein Modulator-Effekt) — damit
-   * Bestands-Tests und Aufrufer ohne Grundanalyse weiterhin funktionieren.
+   * Optionale Domain-Scores aus der Grundanalyse. Wenn übergeben, leiten
+   * sie pro Anforderung einen Status-Vorschlag ab über
+   * `deriveStatusFromDomainScore`:
+   *  - Score ≥ 75 % → ready (10 % der Bandbreite, nur Pflege)
+   *  - Score 50–74 % → in_progress (50 % der Bandbreite)
+   *  - Score < 50 % → open (volle Bandbreite)
+   *
+   * Ein expliziter Eintrag in `requirementStates` schlägt den Vorschlag
+   * (User-Override). Wenn `domainScores` weggelassen oder leer ist,
+   * bleiben alle Anforderungen ohne expliziten Status auf 'open' —
+   * bestandskompatibel mit der Vor-C5.4.2-Berechnung.
+   *
+   * Hinweis: Bis v0.9.25 funktionierte dieser Parameter über einen
+   * Domain-Modulator (1.0–1.5), der den Gap-Faktor multiplizierte.
+   * Dieser Mechanismus war konzeptionell falsch und wurde in C5.4.2
+   * durch den Status-Vorschlag-Mechanismus ersetzt.
    */
   domainScores?: DomainScore[];
 }
@@ -292,16 +323,27 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
   const hasDomainScores = (domainScores?.length ?? 0) > 0;
 
   const entries: GapAnalysisEntry[] = requirements.map((requirement) => {
-    const currentStatus = requirementStates[requirement.id] ?? 'open';
-    const primaryMappings = countPrimaryMappings(requirement);
-    const evidenceCount = countRelatedEvidence(requirement, evidenceItems);
+    const explicitStatus = requirementStates[requirement.id];
     const domainId = resolveDomainId(requirement.category);
     const domainScore = hasDomainScores ? domainScoreById.get(domainId) : undefined;
+
+    // Status-Auflösung (C5.4.2): Expliziter `requirementStates`-Eintrag
+    // hat Vorrang. Sonst Vorschlag aus Grundanalyse über
+    // `deriveStatusFromDomainScore`. Ohne Grundanalyse fällt der Default
+    // auf 'open' (bestandskompatibel mit Vor-C5.4.2).
+    const currentStatus: RequirementStatus =
+      explicitStatus ?? deriveStatusFromDomainScore(domainScore);
+    const statusDerivedFromGrundanalyse =
+      explicitStatus === undefined && domainScore !== undefined;
+
+    const primaryMappings = countPrimaryMappings(requirement);
+    const evidenceCount = countRelatedEvidence(requirement, evidenceItems);
     const effortEstimate = buildEstimate({
       requirement,
       currentStatus,
       primaryMappings,
       evidenceCount,
+      statusDerivedFromGrundanalyse,
       domainScore,
       domainId: hasDomainScores ? domainId : undefined,
     });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeGapAnalysis, getConfidenceLabel } from './gapAnalysis';
+import { computeGapAnalysis, deriveStatusFromDomainScore, getConfidenceLabel } from './gapAnalysis';
 import { germanyRegimeDefinitions } from '../../data/kritisBase';
 import type {
   EvidenceItem,
@@ -288,8 +288,32 @@ describe('computeGapAnalysis · Confidence', () => {
   });
 });
 
-describe('computeGapAnalysis · Domain-Score-Modulator', () => {
-  it('Domain-Score 100% lässt PT unverändert gegenüber Default-Berechnung', () => {
+describe('deriveStatusFromDomainScore · Schwellen', () => {
+  it('liefert ready bei Score ≥ 75', () => {
+    expect(deriveStatusFromDomainScore(75)).toBe('ready');
+    expect(deriveStatusFromDomainScore(80)).toBe('ready');
+    expect(deriveStatusFromDomainScore(100)).toBe('ready');
+  });
+
+  it('liefert in_progress bei Score 50–74', () => {
+    expect(deriveStatusFromDomainScore(50)).toBe('in_progress');
+    expect(deriveStatusFromDomainScore(60)).toBe('in_progress');
+    expect(deriveStatusFromDomainScore(74)).toBe('in_progress');
+  });
+
+  it('liefert open bei Score < 50', () => {
+    expect(deriveStatusFromDomainScore(0)).toBe('open');
+    expect(deriveStatusFromDomainScore(25)).toBe('open');
+    expect(deriveStatusFromDomainScore(49)).toBe('open');
+  });
+
+  it('liefert open bei undefined (Default für Tenants ohne Grundanalyse)', () => {
+    expect(deriveStatusFromDomainScore(undefined)).toBe('open');
+  });
+});
+
+describe('computeGapAnalysis · Status-Vorschlag aus Grundanalyse', () => {
+  it('Domain-Score 100 % setzt Status auf ready, PT sinkt auf 10 Prozent der Bandbreite', () => {
     const req = makeRequirement({ id: 'req-m', category: 'measures' });
     const baseline = computeGapAnalysis({
       requirements: [req],
@@ -299,6 +323,63 @@ describe('computeGapAnalysis · Domain-Score-Modulator', () => {
     });
     const withFullScore = computeGapAnalysis({
       requirements: [req],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // measures+open Heuristik = 10 PT, mit Score 100 → status ready → 10 % davon = 1 PT.
+    expect(baseline.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    expect(withFullScore.byRegime[0].entries[0].effortEstimate.personDays).toBe(1);
+    expect(withFullScore.byRegime[0].entries[0].currentStatus).toBe('ready');
+    // Transparenz-Assumption muss anzeigen, dass Status aus Grundanalyse abgeleitet wurde.
+    const assumptions = withFullScore.byRegime[0].entries[0].effortEstimate.assumptions;
+    const derivedLine = assumptions.find((line) => line.startsWith('Status aus Grundanalyse abgeleitet'));
+    expect(derivedLine).toBeDefined();
+    expect(derivedLine).toContain('ready');
+    expect(derivedLine).toContain('100');
+    expect(derivedLine).toContain('cyber');
+  });
+
+  it('Domain-Score 0 % lässt Status auf open, PT entspricht voller Bandbreite', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // measures+open → 10 PT × 1.0 = 10 PT (keine Reduktion gegenüber Default).
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('open');
+  });
+
+  it('Domain-Score 60 % setzt Status auf in_progress, PT entspricht halber Bandbreite', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 60, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // measures+in_progress → 10 PT × 0.5 = 5 PT.
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(5);
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('in_progress');
+  });
+
+  it('Explizit gesetzter Status überschreibt den Domain-Score-Vorschlag (User-Override)', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    // Score 100 würde status=ready vorschlagen — expliziter open-Eintrag muss dominieren.
+    const summary = computeGapAnalysis({
+      requirements: [req],
       requirementStates: { 'req-m': 'open' },
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
@@ -306,79 +387,19 @@ describe('computeGapAnalysis · Domain-Score-Modulator', () => {
         { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
       ],
     });
-    expect(withFullScore.byRegime[0].entries[0].effortEstimate.personDays).toBe(
-      baseline.byRegime[0].entries[0].effortEstimate.personDays,
-    );
-    // Modulator 1.0 darf keine Aufschlag-Assumption produzieren.
-    const assumptions = withFullScore.byRegime[0].entries[0].effortEstimate.assumptions;
-    expect(assumptions.some((line) => line.startsWith('Aufschlag durch Domain-Score'))).toBe(false);
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('open');
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    // Bei explizitem Status DARF die Grundanalyse-Assumption NICHT erscheinen.
+    const assumptions = summary.byRegime[0].entries[0].effortEstimate.assumptions;
+    expect(assumptions.some((line) => line.startsWith('Status aus Grundanalyse abgeleitet'))).toBe(false);
   });
 
-  it('Domain-Score 0% erhöht PT um Faktor 1.5', () => {
+  it('mappt category=measures auf Domain cyber für den Status-Vorschlag', () => {
     const req = makeRequirement({ id: 'req-m', category: 'measures' });
-    const baseline = computeGapAnalysis({
-      requirements: [req],
-      requirementStates: { 'req-m': 'open' },
-      evidenceItems: [],
-      regimeDefinitions: [deKritisDachg],
-    });
-    const withZeroScore = computeGapAnalysis({
-      requirements: [req],
-      requirementStates: { 'req-m': 'open' },
-      evidenceItems: [],
-      regimeDefinitions: [deKritisDachg],
-      domainScores: [
-        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
-      ],
-    });
-    // measures+open → 10 PT × Modulator 1.5 = 15 PT
-    expect(withZeroScore.byRegime[0].entries[0].effortEstimate.personDays).toBe(
-      baseline.byRegime[0].entries[0].effortEstimate.personDays * 1.5,
-    );
-    // Aufschlag-Assumption muss vorhanden und korrekt formatiert sein.
-    const assumptions = withZeroScore.byRegime[0].entries[0].effortEstimate.assumptions;
-    const surchargeLine = assumptions.find((line) => line.startsWith('Aufschlag durch Domain-Score'));
-    expect(surchargeLine).toBeDefined();
-    expect(surchargeLine).toContain('0 %');
-    expect(surchargeLine).toContain('+0.50');
-  });
-
-  it('Domain-Score 50% ergibt Modulator 1.25 (linearer Aufschlag)', () => {
-    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    // Hoher cyber-Score muss greifen (→ ready), niedriger governance-Score darf nicht.
     const summary = computeGapAnalysis({
       requirements: [req],
-      requirementStates: { 'req-m': 'open' },
-      evidenceItems: [],
-      regimeDefinitions: [deKritisDachg],
-      domainScores: [
-        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 50, completion: 100, answeredCount: 1, totalCount: 1 },
-      ],
-    });
-    // measures+open → 10 PT × Modulator 1.25 = 12.5 PT
-    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(12.5);
-  });
-
-  it('mappt category=measures auf Domain cyber für den Modulator', () => {
-    const req = makeRequirement({ id: 'req-m', category: 'measures' });
-    // Niedriger cyber-Score muss greifen, hoher governance-Score darf nicht greifen.
-    const summary = computeGapAnalysis({
-      requirements: [req],
-      requirementStates: { 'req-m': 'open' },
-      evidenceItems: [],
-      regimeDefinitions: [deKritisDachg],
-      domainScores: [
-        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
-        { domainId: 'governance', label: 'Führung & Governance', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
-      ],
-    });
-    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(15);
-  });
-
-  it('mappt category=governance auf Domain governance für den Modulator', () => {
-    const req = makeRequirement({ id: 'req-g', category: 'governance' });
-    const summary = computeGapAnalysis({
-      requirements: [req],
-      requirementStates: { 'req-g': 'open' },
+      requirementStates: {},
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
       domainScores: [
@@ -386,28 +407,154 @@ describe('computeGapAnalysis · Domain-Score-Modulator', () => {
         { domainId: 'governance', label: 'Führung & Governance', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
       ],
     });
-    // governance category=small (2 PT base) × open (1.0) × modulator 1.5 = 3 PT
-    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(3);
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('ready');
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(1);
+  });
+
+  it('mappt category=governance auf Domain governance für den Status-Vorschlag', () => {
+    const req = makeRequirement({ id: 'req-g', category: 'governance' });
+    // Hoher governance-Score muss greifen, hoher cyber-Score darf nicht.
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+        { domainId: 'governance', label: 'Führung & Governance', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('ready');
+    // governance category=small (2 PT base) × ready (0.1) → Floor 0.1 → 0.2 PT, gerundet 0.2.
+    // Kein floor-clamp nötig, weil 0.1 == MIN_GAP_FLOOR. 2 × 0.1 = 0.2 PT.
+    expect(summary.byRegime[0].entries[0].effortEstimate.personDays).toBe(0.2);
+  });
+
+  it('mappt category=incident auf Domain bcm für den Status-Vorschlag', () => {
+    const req = makeRequirement({ id: 'req-i', category: 'incident' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'bcm', label: 'BCM', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+        { domainId: 'cyber', label: 'IT, Daten & Cyber', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    expect(summary.byRegime[0].entries[0].currentStatus).toBe('ready');
   });
 
   it('verhält sich ohne domainScores-Parameter wie die Default-Berechnung (Bestandskompatibilität)', () => {
     const req = makeRequirement({ id: 'req-m', category: 'measures' });
     const withoutScores = computeGapAnalysis({
       requirements: [req],
-      requirementStates: { 'req-m': 'open' },
+      requirementStates: {},
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
     });
     const withEmptyScores = computeGapAnalysis({
       requirements: [req],
-      requirementStates: { 'req-m': 'open' },
+      requirementStates: {},
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
       domainScores: [],
     });
-    // Beide ergeben 10 PT, kein Modulator-Effekt.
+    // Ohne Grundanalyse fällt Status auf 'open' — measures+open = 10 PT.
     expect(withoutScores.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    expect(withoutScores.byRegime[0].entries[0].currentStatus).toBe('open');
     expect(withEmptyScores.byRegime[0].entries[0].effortEstimate.personDays).toBe(10);
+    expect(withEmptyScores.byRegime[0].entries[0].currentStatus).toBe('open');
+  });
+
+  it('keine Grundanalyse-Assumption bei explizitem Status (auch ohne Domain-Score)', () => {
+    const req = makeRequirement({ id: 'req-m', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-m': 'in_progress' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const assumptions = summary.byRegime[0].entries[0].effortEstimate.assumptions;
+    expect(assumptions.some((line) => line.startsWith('Status aus Grundanalyse abgeleitet'))).toBe(false);
+  });
+});
+
+describe('computeGapAnalysis · Verifikation Dr. Steiner-Szenario (C5.4.2)', () => {
+  // Bei 30 Anforderungen mit gleicher Bandbreite muss die Gesamtsumme
+  // proportional zum Status-Gap-Faktor skalieren:
+  //   alle ready (Score 100)        → 10 % der Open-Summe
+  //   alle in_progress (Score 60)   → 50 % der Open-Summe
+  //   alle open (kein Score)        → 100 % (Baseline)
+  function makeBreakdownRequirements(count: number): RequirementDefinition[] {
+    return Array.from({ length: count }, (_, idx) =>
+      makeRequirement({
+        id: `verify-${idx}`,
+        category: 'risk', // → governance-Domain
+        effortBreakdown: {
+          minPersonDays: 1.1,
+          maxPersonDays: 2.0,
+          activities: [{ label: 'Tätigkeit', minHours: 8, maxHours: 16 }],
+          drivers: [],
+        },
+      }),
+    );
+  }
+
+  it('Alle Anforderungen mit Domain-Score 100 % ergeben ca. 10 % der Open-Bandbreite', () => {
+    const requirements = makeBreakdownRequirements(30);
+    const allReady = computeGapAnalysis({
+      requirements,
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'governance', label: 'Führung', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // 30 × 1.1 PT × 0.1 = 3.3 PT min, 30 × 2.0 PT × 0.1 = 6.0 PT max.
+    expect(allReady.minPersonDays).toBeGreaterThanOrEqual(3.3);
+    expect(allReady.minPersonDays).toBeLessThanOrEqual(3.4);
+    expect(allReady.maxPersonDays).toBe(6);
+    // Alle Anforderungen sollten Status ready haben.
+    for (const entry of allReady.byRegime[0].entries) {
+      expect(entry.currentStatus).toBe('ready');
+    }
+  });
+
+  it('Alle Anforderungen mit Domain-Score 60 % ergeben ca. 50 % der Open-Bandbreite', () => {
+    const requirements = makeBreakdownRequirements(30);
+    const allInProgress = computeGapAnalysis({
+      requirements,
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'governance', label: 'Führung', score: 60, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // 30 × 1.1 × 0.5 = 16.5 PT min, 30 × 2.0 × 0.5 = 30 PT max.
+    expect(allInProgress.minPersonDays).toBe(16.5);
+    expect(allInProgress.maxPersonDays).toBe(30);
+    for (const entry of allInProgress.byRegime[0].entries) {
+      expect(entry.currentStatus).toBe('in_progress');
+    }
+  });
+
+  it('Alle Anforderungen ohne Grundanalyse ergeben volle Bandbreite (Status open)', () => {
+    const requirements = makeBreakdownRequirements(30);
+    const allOpen = computeGapAnalysis({
+      requirements,
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // 30 × 1.1 = 33 PT min, 30 × 2.0 = 60 PT max.
+    expect(allOpen.minPersonDays).toBe(33);
+    expect(allOpen.maxPersonDays).toBe(60);
+    for (const entry of allOpen.byRegime[0].entries) {
+      expect(entry.currentStatus).toBe('open');
+    }
   });
 });
 
@@ -448,27 +595,42 @@ describe('computeGapAnalysis · effortBreakdown', () => {
     expect(entry.effortEstimate.drivers).toEqual(['Anzahl Bundesländer', 'Tenant-Größe']);
   });
 
-  it('Bandbreite reagiert auf Domain-Modulator (Min und Max werden moduliert)', () => {
+  it('Bandbreite reagiert auf Status aus Grundanalyse (Min und Max werden mit Gap-Faktor multipliziert)', () => {
+    // Baseline ohne Grundanalyse: status=open → gap=1.0 → volle Bandbreite.
     const baseline = computeGapAnalysis({
       requirements: [makeBreakdownRequirement()],
-      requirementStates: { 'req-bk': 'open' },
+      requirementStates: {},
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
     });
-    // Domain governance, score 0 → modulator 1.5 → min 6, max 12
-    const withZero = computeGapAnalysis({
+    // Mit Domain-Score 100 in governance → status=ready → gap=0.1 → 10 % der Bandbreite.
+    const withReady = computeGapAnalysis({
       requirements: [makeBreakdownRequirement()],
-      requirementStates: { 'req-bk': 'open' },
+      requirementStates: {},
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
       domainScores: [
-        { domainId: 'governance', label: 'Führung', score: 0, completion: 100, answeredCount: 1, totalCount: 1 },
+        { domainId: 'governance', label: 'Führung', score: 100, completion: 100, answeredCount: 1, totalCount: 1 },
+      ],
+    });
+    // Mit Domain-Score 60 in governance → status=in_progress → gap=0.5 → halbe Bandbreite.
+    const withInProgress = computeGapAnalysis({
+      requirements: [makeBreakdownRequirement()],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+      domainScores: [
+        { domainId: 'governance', label: 'Führung', score: 60, completion: 100, answeredCount: 1, totalCount: 1 },
       ],
     });
     expect(baseline.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(4);
     expect(baseline.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(8);
-    expect(withZero.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(6);
-    expect(withZero.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(12);
+    // ready: 4 × 0.1 = 0.4, 8 × 0.1 = 0.8
+    expect(withReady.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(0.4);
+    expect(withReady.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(0.8);
+    // in_progress: 4 × 0.5 = 2, 8 × 0.5 = 4
+    expect(withInProgress.byRegime[0].entries[0].effortEstimate.minPersonDays).toBe(2);
+    expect(withInProgress.byRegime[0].entries[0].effortEstimate.maxPersonDays).toBe(4);
   });
 
   it('Ohne effortBreakdown fällt die Berechnung auf Heuristik zurück', () => {
