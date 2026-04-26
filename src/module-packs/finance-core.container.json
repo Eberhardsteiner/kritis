@@ -6,7 +6,7 @@
     "moduleId": "finance",
     "name": "Finanz-Basismodul",
     "version": "1.0.0",
-    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilience-Disziplin.",
+    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilienz.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Finanz- und Versicherungswesen",
@@ -43,7 +43,7 @@
     "id": "finance",
     "name": "Finanz- und Versicherungswesen",
     "version": "1.0.0",
-    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilience-Disziplin.",
+    "description": "Branchenmodul für Banken, Sparkassen, Versicherer und Zahlungsdienstleister mit Fokus auf Customer-Trust, transaktionelle Verfügbarkeit und DORA-Resilienz.",
     "sectorCategory": "Finanz- und Versicherungswesen",
     "domainWeightAdjustments": {
       "cyber": 1.3,
