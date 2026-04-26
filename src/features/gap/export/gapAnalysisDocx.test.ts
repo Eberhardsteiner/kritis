@@ -33,6 +33,8 @@ const summary: GapAnalysisSummary = {
   minPersonDays: 12.5,
   maxPersonDays: 12.5,
   calendarWeeks: 3,
+  minCalendarWeeks: 2.5,
+  maxCalendarWeeks: 2.5,
   entryCount: 1,
   byRegime: [
     {
@@ -41,7 +43,7 @@ const summary: GapAnalysisSummary = {
       totalPersonDays: 12.5,
       minPersonDays: 12.5,
       maxPersonDays: 12.5,
-      byCategory: { risk: 12.5 },
+      byCategory: { risk: { minPersonDays: 12.5, maxPersonDays: 12.5, midPersonDays: 12.5 } },
       entries: [
         {
           requirementId: 'de_kritis_risk_assessment',
@@ -94,6 +96,8 @@ describe('buildGapAnalysisDocument', () => {
       minPersonDays: 0,
       maxPersonDays: 0,
       calendarWeeks: 0,
+      minCalendarWeeks: 0,
+      maxCalendarWeeks: 0,
       entryCount: 0,
       byRegime: [],
     };
@@ -125,6 +129,8 @@ describe('buildGapAnalysisDocument · Tätigkeits-Tabelle Brutto/Rest (C5.4.4)',
     minPersonDays: 0.15,
     maxPersonDays: 0.25,
     calendarWeeks: 1,
+    minCalendarWeeks: 0.1,
+    maxCalendarWeeks: 0.1,
     entryCount: 1,
     byRegime: [
       {
@@ -133,7 +139,7 @@ describe('buildGapAnalysisDocument · Tätigkeits-Tabelle Brutto/Rest (C5.4.4)',
         totalPersonDays: 0.2,
         minPersonDays: 0.15,
         maxPersonDays: 0.25,
-        byCategory: { governance: 0.2 },
+        byCategory: { governance: { minPersonDays: 0.15, maxPersonDays: 0.25, midPersonDays: 0.2 } },
         entries: [
           {
             requirementId: 'de_kritis_laenderoeffnung',

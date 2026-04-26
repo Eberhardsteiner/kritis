@@ -84,3 +84,30 @@ export function formatEuroRange(
   }
   return `${formatEuro(min, currency)} – ${formatEuro(max, currency)}`;
 }
+
+/**
+ * Formatiert eine Kalenderwochen-Bandbreite. Bei sehr ähnlichen Werten
+ * (Differenz < 0,1 Wochen) wird nur eine Zahl ausgegeben — der Plural
+ * `Kalenderwochen` greift, sobald min oder max != 1 ist. Eingeführt in
+ * C5.4.7 (Bug 6) als Pendant zu `formatPersonDaysRange`.
+ *
+ * Beispiele:
+ *   (0.7, 1.2) → „0,7 – 1,2 Kalenderwochen"
+ *   (1.0, 1.0) → „1 Kalenderwoche"
+ *   (2.0, 2.0) → „2 Kalenderwochen"
+ *   (0,    0)  → „0 Kalenderwochen"
+ */
+export function formatCalendarWeeksRange(min: number, max: number): string {
+  const formatNumber = (value: number): string => {
+    if (Number.isInteger(value)) {
+      return value.toLocaleString('de-DE');
+    }
+    return value.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  };
+  if (Math.abs(min - max) < 0.1) {
+    const value = max;
+    const label = Math.abs(value - 1) < 0.05 ? 'Kalenderwoche' : 'Kalenderwochen';
+    return `${formatNumber(value)} ${label}`;
+  }
+  return `${formatNumber(min)} – ${formatNumber(max)} Kalenderwochen`;
+}

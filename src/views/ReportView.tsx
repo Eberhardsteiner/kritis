@@ -30,7 +30,7 @@ import { getBsigEntityClassLabel, getEntityClassFieldLabel, getJurisdictionLabel
 import type { KritisMilestones } from '../lib/regulatory';
 import type { PenaltyEstimate } from '../lib/penaltyCalculator';
 import { SHOW_PENALTY_EXPOSURE } from '../lib/featureFlags';
-import { formatPersonDaysRange } from '../features/gap/utils/formatters';
+import { formatCalendarWeeksRange, formatPersonDaysRange } from '../features/gap/utils/formatters';
 
 interface ReportViewProps {
   companyProfile: CompanyProfile;
@@ -462,6 +462,7 @@ export function ReportView({
             <div className="mini-list top-gap">
               <div className="mini-list-row"><span>Gesamt</span><strong>{deadlineSummary.total}</strong></div>
               <div className="mini-list-row"><span>Überfällig</span><strong>{deadlineSummary.overdue}</strong></div>
+              <div className="mini-list-row"><span>Ohne Fälligkeitsdatum</span><strong>{deadlineSummary.undated}</strong></div>
               <div className="mini-list-row"><span>≤ 30 Tage</span><strong>{deadlineSummary.dueSoon}</strong></div>
               <div className="mini-list-row"><span>Regulatorisch</span><strong>{deadlineSummary.regulatory}</strong></div>
             </div>
@@ -508,7 +509,7 @@ export function ReportView({
               <strong>Geschätzter Restaufwand:</strong>{' '}
               {formatPersonDaysRange(gapAnalysisSummary.minPersonDays, gapAnalysisSummary.maxPersonDays)}
               {gapAnalysisSummary.totalPersonDays > 0
-                ? ` · ≈ ${gapAnalysisSummary.calendarWeeks} Kalenderwoche${gapAnalysisSummary.calendarWeeks === 1 ? '' : 'n'} (Mittelwert)`
+                ? ` · ≈ ${formatCalendarWeeksRange(gapAnalysisSummary.minCalendarWeeks, gapAnalysisSummary.maxCalendarWeeks)}`
                 : ''}
             </p>
             {gapAnalysisSummary.byRegime.length > 0 ? (
@@ -521,7 +522,7 @@ export function ReportView({
                       <span className="muted small">
                         {' '}(
                         {Object.entries(regime.byCategory)
-                          .map(([category, pt]) => `${category}: ${pt.toLocaleString('de-DE', { maximumFractionDigits: 1 })}`)
+                          .map(([category, range]) => `${category}: ${formatPersonDaysRange(range.minPersonDays, range.maxPersonDays)}`)
                           .join(', ')}
                         )
                       </span>

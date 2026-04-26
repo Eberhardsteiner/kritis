@@ -3,6 +3,7 @@ import { BarChart3, Calculator, ChevronDown, ChevronRight } from 'lucide-react';
 import { getConfidenceLabel } from '../gapAnalysis';
 import {
   CURRENCY_LABELS,
+  formatCalendarWeeksRange,
   formatEuroRange,
   formatHoursRange,
   formatPersonDays,
@@ -39,6 +40,23 @@ function getConfidenceTone(confidence: EffortConfidence): 'success' | 'warn' | '
     return 'warn';
   }
   return 'outline';
+}
+
+/**
+ * C5.4.7 Bug 13: Restaufwand-Tone war binär (warn vs success), und
+ * `success` existiert in styles.css gar nicht — die 0-PT-Card bekam
+ * also gar keinen Hintergrund. Mehrstufig + auf reale CSS-Klassen
+ * gemappt:
+ *   0 PT     → good   (alles erledigt)
+ *   < 5 PT   → good   (< 1 Woche, perfekt erfüllter Tenant)
+ *   < 20 PT  → info   (1–4 Wochen, spürbar aber okay)
+ *   ≥ 20 PT  → warn   (> 4 Wochen, gelb)
+ */
+function getRestaufwandTone(totalPt: number): 'good' | 'info' | 'warn' {
+  if (totalPt === 0) return 'good';
+  if (totalPt < 5) return 'good';
+  if (totalPt < 20) return 'info';
+  return 'warn';
 }
 
 function GapEntryDetail({
@@ -231,13 +249,13 @@ export function GapAnalysisDashboard({
         </div>
       </div>
 
-      <div className={`stat-card ${summary.totalPersonDays > 0 ? 'warn' : 'success'} top-gap`}>
+      <div className={`stat-card ${getRestaufwandTone(summary.totalPersonDays)} top-gap`}>
         <p className="stat-title">Geschätzter Restaufwand</p>
         <div className="stat-value">{totalPtLabel}</div>
         {totalEuroLabel ? <p className="stat-subtitle"><strong>{totalEuroLabel}</strong></p> : null}
         <p className="stat-subtitle">
           {summary.totalPersonDays > 0
-            ? `≈ ${summary.calendarWeeks} Kalenderwoche${summary.calendarWeeks === 1 ? '' : 'n'} bei einem Consultant in Vollauslastung (Mittelwert ${formatPersonDays(summary.totalPersonDays)})`
+            ? `≈ ${formatCalendarWeeksRange(summary.minCalendarWeeks, summary.maxCalendarWeeks)} bei einem Consultant in Vollauslastung (Mittelwert ${formatPersonDays(summary.totalPersonDays)})`
             : 'Keine offenen Pflichtbausteine erkannt.'}
         </p>
       </div>
@@ -257,9 +275,9 @@ export function GapAnalysisDashboard({
                 </div>
                 {Object.keys(regime.byCategory).length > 0 ? (
                   <div className="chip-row top-gap">
-                    {Object.entries(regime.byCategory).map(([category, personDays]) => (
+                    {Object.entries(regime.byCategory).map(([category, range]) => (
                       <span key={category} className="chip outline">
-                        {category}: {formatPersonDays(personDays)}
+                        {category}: {formatPersonDaysRange(range.minPersonDays, range.maxPersonDays)}
                       </span>
                     ))}
                   </div>

@@ -124,6 +124,7 @@ const documentLibrarySummary: DocumentLibrarySummary = {
 const deadlineSummary: DeadlineSummary = {
   total: 0,
   overdue: 0,
+  undated: 0,
   dueSoon: 0,
   regulatory: 0,
   nextItems: [],
@@ -177,6 +178,8 @@ function buildRequiredProps(overrides: Partial<{
     minPersonDays: 6,
     maxPersonDays: 10,
     calendarWeeks: 2,
+    minCalendarWeeks: 1.2,
+    maxCalendarWeeks: 2,
     entryCount: 2,
     byRegime: [
       {
@@ -185,7 +188,7 @@ function buildRequiredProps(overrides: Partial<{
         totalPersonDays: 8,
         minPersonDays: 6,
         maxPersonDays: 10,
-        byCategory: { risk: 8 },
+        byCategory: { risk: { minPersonDays: 6, maxPersonDays: 10, midPersonDays: 8 } },
         entries: [],
       },
     ],
@@ -276,7 +279,9 @@ describe('ReportView · PT-Bandbreite (C5.4.6 Bug 3)', () => {
     const paragraph = labelNode.closest('p');
     expect(paragraph).not.toBeNull();
     expect(paragraph!.textContent).toMatch(/6 – 10 PT/);
-    expect(paragraph!.textContent).toMatch(/\(Mittelwert\)/);
+    // C5.4.7: Kalenderwochen jetzt als Bandbreite — bei min=1.2, max=2.0
+    // entsteht „1,2 – 2 Kalenderwochen" (über die Toleranz von 0,1).
+    expect(paragraph!.textContent).toMatch(/1,2 – 2 Kalenderwochen/);
   });
 
   it('zeigt eine einzelne PT-Zahl, wenn min == max (kein Bandbreiten-Strich)', () => {
@@ -285,6 +290,8 @@ describe('ReportView · PT-Bandbreite (C5.4.6 Bug 3)', () => {
       minPersonDays: 5,
       maxPersonDays: 5,
       calendarWeeks: 1,
+      minCalendarWeeks: 1,
+      maxCalendarWeeks: 1,
       entryCount: 1,
       byRegime: [
         {
@@ -293,7 +300,7 @@ describe('ReportView · PT-Bandbreite (C5.4.6 Bug 3)', () => {
           totalPersonDays: 5,
           minPersonDays: 5,
           maxPersonDays: 5,
-          byCategory: { risk: 5 },
+          byCategory: { risk: { minPersonDays: 5, maxPersonDays: 5, midPersonDays: 5 } },
           entries: [],
         },
       ],

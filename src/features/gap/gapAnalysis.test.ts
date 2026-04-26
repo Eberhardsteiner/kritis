@@ -235,8 +235,10 @@ describe('computeGapAnalysis · Aggregation', () => {
       evidenceItems: [],
       regimeDefinitions: [deKritisDachg],
     });
-    expect(summary.byRegime[0].byCategory.risk).toBe(10);
-    expect(summary.byRegime[0].byCategory.measures).toBe(10);
+    // C5.4.7: byCategory ist jetzt CategoryEffortRange, nicht number.
+    // midPersonDays bleibt der Mittelwert (Bestandskompatibilität).
+    expect(summary.byRegime[0].byCategory.risk.midPersonDays).toBe(10);
+    expect(summary.byRegime[0].byCategory.measures.midPersonDays).toBe(10);
   });
 
   it('senkt Gesamtaufwand, wenn ein Requirement von open auf ready wechselt', () => {
@@ -257,6 +259,131 @@ describe('computeGapAnalysis · Aggregation', () => {
       regimeDefinitions: [deKritisDachg],
     });
     expect(improved.totalPersonDays).toBeLessThan(baseline.totalPersonDays);
+  });
+});
+
+describe('computeGapAnalysis · byCategory-Bandbreite (C5.4.7 Bug 8)', () => {
+  it('byCategory enthält Min/Max/Mid-Bandbreite pro Kategorie', () => {
+    const req = makeRequirement({
+      id: 'req-bk',
+      category: 'risk',
+      effortBreakdown: {
+        minPersonDays: 1.5,
+        maxPersonDays: 2.5,
+        activities: [{ label: 'Recherche', minHours: 8, maxHours: 16 }],
+      },
+    });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const range = summary.byRegime[0].byCategory.risk;
+    expect(range.minPersonDays).toBe(1.5);
+    expect(range.maxPersonDays).toBe(2.5);
+    expect(range.midPersonDays).toBe(2);
+  });
+
+  it('Kategorien-Aggregation summiert Min und Max korrekt über mehrere Anforderungen', () => {
+    const reqs = [
+      makeRequirement({
+        id: 'r1',
+        regimeId: 'de_kritisdachg',
+        category: 'risk',
+        effortBreakdown: {
+          minPersonDays: 1,
+          maxPersonDays: 3,
+          activities: [{ label: 'A', minHours: 8, maxHours: 24 }],
+        },
+      }),
+      makeRequirement({
+        id: 'r2',
+        regimeId: 'de_kritisdachg',
+        category: 'risk',
+        effortBreakdown: {
+          minPersonDays: 2,
+          maxPersonDays: 4,
+          activities: [{ label: 'B', minHours: 16, maxHours: 32 }],
+        },
+      }),
+    ];
+    const summary = computeGapAnalysis({
+      requirements: reqs,
+      requirementStates: { r1: 'open', r2: 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const range = summary.byRegime[0].byCategory.risk;
+    // min: 1 + 2 = 3, max: 3 + 4 = 7, mid: 2 + 3 = 5
+    expect(range.minPersonDays).toBe(3);
+    expect(range.maxPersonDays).toBe(7);
+    expect(range.midPersonDays).toBe(5);
+  });
+
+  it('Heuristik-Anforderungen tragen mit personDays zu allen drei Werten bei (point-Estimate)', () => {
+    const req = makeRequirement({ id: 'req-h', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // measures+open Heuristik = 10 PT, ohne Bandbreite → min=max=mid=10
+    const range = summary.byRegime[0].byCategory.measures;
+    expect(range.minPersonDays).toBe(10);
+    expect(range.maxPersonDays).toBe(10);
+    expect(range.midPersonDays).toBe(10);
+  });
+});
+
+describe('computeGapAnalysis · Kalenderwochen-Bandbreite (C5.4.7 Bug 6)', () => {
+  it('berechnet minCalendarWeeks und maxCalendarWeeks mit einer Nachkommastelle', () => {
+    const req = makeRequirement({
+      id: 'req-bk',
+      category: 'risk',
+      effortBreakdown: {
+        minPersonDays: 3.4,
+        maxPersonDays: 6,
+        activities: [{ label: 'Recherche', minHours: 8, maxHours: 16 }],
+      },
+    });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-bk': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // 3.4 PT / 5 = 0.68 → ceil(6.8)/10 = 0.7
+    expect(summary.minCalendarWeeks).toBe(0.7);
+    // 6 PT / 5 = 1.2 → ceil(12.0)/10 = 1.2
+    expect(summary.maxCalendarWeeks).toBe(1.2);
+    // Bestand: calendarWeeks aus Mittelwert bleibt 1
+    expect(summary.calendarWeeks).toBe(1);
+  });
+
+  it('liefert minCalendarWeeks=maxCalendarWeeks, wenn min == max (point-Estimate)', () => {
+    const req = makeRequirement({ id: 'req-h', category: 'measures' });
+    const summary = computeGapAnalysis({
+      requirements: [req],
+      requirementStates: { 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    // measures+open Heuristik = 10 PT, min == max == 10 → calendarWeeks 2
+    expect(summary.minCalendarWeeks).toBe(summary.maxCalendarWeeks);
+    expect(summary.maxCalendarWeeks).toBe(2);
+  });
+
+  it('liefert 0 für beide CalendarWeeks bei leerer Anforderungsliste', () => {
+    const summary = computeGapAnalysis({
+      requirements: [],
+      requirementStates: {},
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    expect(summary.minCalendarWeeks).toBe(0);
+    expect(summary.maxCalendarWeeks).toBe(0);
   });
 });
 

@@ -169,6 +169,23 @@ export interface GapAnalysisEntry {
   dependencies: string[];
 }
 
+/**
+ * Aufwands-Bandbreite pro Kategorie. C5.4.7 Bug 8: vorher war das
+ * `byCategory: Record<string, number>` und summierte nur den Mittelwert
+ * — inkonsistent zur Regime-Bandbreite. Seit C5.4.7 trägt jede Kategorie
+ * Min/Max/Mid, sodass Chips und DOCX-Tabellen ehrliche Bandbreiten
+ * zeigen können.
+ */
+export interface CategoryEffortRange {
+  minPersonDays: number;
+  maxPersonDays: number;
+  /**
+   * Bestehender Mittelwert für Bestandskompatibilität (Aufrufer, die
+   * weiterhin nur eine Zahl pro Kategorie brauchen, lesen `midPersonDays`).
+   */
+  midPersonDays: number;
+}
+
 export interface GapAnalysisByRegime {
   regimeId: RegulatoryRegimeId;
   regimeLabel: string;
@@ -181,7 +198,7 @@ export interface GapAnalysisByRegime {
    */
   minPersonDays: number;
   maxPersonDays: number;
-  byCategory: Record<string, number>;
+  byCategory: Record<string, CategoryEffortRange>;
   entries: GapAnalysisEntry[];
 }
 
@@ -193,7 +210,20 @@ export interface GapAnalysisSummary {
    */
   minPersonDays: number;
   maxPersonDays: number;
+  /**
+   * Kalenderwochen-Schätzung auf Basis des Mittelwerts (totalPersonDays).
+   * Bestandskompatibel; UI bevorzugt seit C5.4.7 die Bandbreite
+   * `minCalendarWeeks` – `maxCalendarWeeks`, weil bei 3,4 – 6 PT
+   * Bandbreite die Aussage „≈ 1 Kalenderwoche" zu unscharf ist
+   * (Realität: 0,7 – 1,2 Wochen).
+   */
   calendarWeeks: number;
+  /**
+   * Untere Kalenderwochen-Grenze, mit einer Nachkommastelle. 0 wenn
+   * `minPersonDays` 0 ist. Berechnung: `ceil((minPersonDays / 5) * 10) / 10`.
+   */
+  minCalendarWeeks: number;
+  maxCalendarWeeks: number;
   entryCount: number;
   byRegime: GapAnalysisByRegime[];
 }
@@ -1516,7 +1546,20 @@ export interface DeadlineItem {
 
 export interface DeadlineSummary {
   total: number;
+  /**
+   * Termine mit Fälligkeitsdatum, das in der Vergangenheit liegt.
+   * Vor C5.4.7 wurden Termine ohne Datum (Status `'open'`) hier
+   * mitgezählt — semantisch falsch, weil „kein Datum gepflegt" und
+   * „überfällig" zwei unterschiedliche Kategorien sind. Seit C5.4.7
+   * trennen sich die beiden Zahlen.
+   */
   overdue: number;
+  /**
+   * Termine ohne Fälligkeitsdatum (Status `'open'`). Eingeführt in
+   * C5.4.7 (Bug 12) als Pendant zu `overdue`. Demo-Anzeige: „X ohne
+   * Fälligkeitsdatum".
+   */
+  undated: number;
   dueSoon: number;
   regulatory: number;
   nextItems: DeadlineItem[];

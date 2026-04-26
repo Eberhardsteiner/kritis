@@ -1,4 +1,5 @@
 import type {
+  CategoryEffortRange,
   DomainScore,
   EffortConfidence,
   EffortEstimate,
@@ -435,11 +436,24 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
         )
         .toFixed(2),
     );
-    const byCategory: Record<string, number> = {};
+    // C5.4.7 Bug 8: byCategory aggregiert jetzt min/max/mid, nicht nur
+    // den Mittelwert. Anforderungen ohne effortBreakdown tragen ihren
+    // `personDays`-Wert zu allen drei Werten bei (point-Estimate);
+    // Anforderungen mit Breakdown tragen min/max separat bei.
+    const byCategory: Record<string, CategoryEffortRange> = {};
     for (const entry of regimeEntries) {
-      byCategory[entry.category] = Number(
-        ((byCategory[entry.category] ?? 0) + entry.effortEstimate.personDays).toFixed(1),
-      );
+      const minPt = entry.effortEstimate.minPersonDays ?? entry.effortEstimate.personDays;
+      const maxPt = entry.effortEstimate.maxPersonDays ?? entry.effortEstimate.personDays;
+      const existing = byCategory[entry.category] ?? {
+        minPersonDays: 0,
+        maxPersonDays: 0,
+        midPersonDays: 0,
+      };
+      byCategory[entry.category] = {
+        minPersonDays: Number((existing.minPersonDays + minPt).toFixed(2)),
+        maxPersonDays: Number((existing.maxPersonDays + maxPt).toFixed(2)),
+        midPersonDays: Number((existing.midPersonDays + entry.effortEstimate.personDays).toFixed(1)),
+      };
     }
     return {
       regimeId: definition.id,
@@ -462,11 +476,21 @@ export function computeGapAnalysis(args: ComputeGapAnalysisArgs): GapAnalysisSum
     byRegime.reduce((sum, regime) => sum + regime.maxPersonDays, 0).toFixed(2),
   );
 
+  // C5.4.7 Bug 6: Kalenderwochen aus dem Mittelwert ist zu unscharf —
+  // bei 3,4 – 6 PT Bandbreite hieß es vorher „≈ 1 Kalenderwoche", die
+  // Realität ist 0,7 – 1,2 Wochen. Wir liefern jetzt zusätzlich
+  // min/max-CalendarWeeks mit einer Nachkommastelle, damit UI und
+  // DOCX-Export eine ehrliche Bandbreite anzeigen können.
+  const calendarWeeksFromPt = (pt: number): number =>
+    pt > 0 ? Math.ceil((pt / 5) * 10) / 10 : 0;
+
   return {
     totalPersonDays,
     minPersonDays,
     maxPersonDays,
     calendarWeeks: Math.ceil(totalPersonDays / 5),
+    minCalendarWeeks: calendarWeeksFromPt(minPersonDays),
+    maxCalendarWeeks: calendarWeeksFromPt(maxPersonDays),
     entryCount: entries.length,
     byRegime,
   };
