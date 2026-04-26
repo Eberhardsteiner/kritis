@@ -6,7 +6,7 @@
     "moduleId": "defence",
     "name": "Rüstungs-Basismodul",
     "version": "1.0.0",
-    "description": "Branchenmodul für Verteidigungs-Industrie und sicherheitsrelevante Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontroll-Compliance und Spionage-Schutz.",
+    "description": "Branchenmodul für Verteidigungs-Industrie und Defence-Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontrolle und Spionage-Schutz.",
     "engine": "krisenfest-sector-engine",
     "engineVersion": "1.0.0",
     "sectorCategory": "Rüstung und Verteidigung",
@@ -47,7 +47,7 @@
     "id": "defence",
     "name": "Rüstung und Verteidigung",
     "version": "1.0.0",
-    "description": "Branchenmodul für Verteidigungs-Industrie und sicherheitsrelevante Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontroll-Compliance und Spionage-Schutz.",
+    "description": "Branchenmodul für Verteidigungs-Industrie und Defence-Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontrolle und Spionage-Schutz.",
     "sectorCategory": "Rüstung und Verteidigung",
     "domainWeightAdjustments": {
       "cyber": 1.4,
