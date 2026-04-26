@@ -5,6 +5,7 @@ import logisticsCorePack from '../module-packs/logistics-core.container.json';
 import waterCorePack from '../module-packs/water-core.container.json';
 import itTelecomCorePack from '../module-packs/it-telecom-core.container.json';
 import financeCorePack from '../module-packs/finance-core.container.json';
+import administrationCorePack from '../module-packs/administration-core.container.json';
 import type { ModulePackContainer } from '../types';
 
 export const builtInModulePacks: ModulePackContainer[] = [
@@ -15,4 +16,5 @@ export const builtInModulePacks: ModulePackContainer[] = [
   waterCorePack,
   itTelecomCorePack,
   financeCorePack,
+  administrationCorePack,
 ] as ModulePackContainer[];
