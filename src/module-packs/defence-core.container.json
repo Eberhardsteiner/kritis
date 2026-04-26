@@ -1,0 +1,2113 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-defence-core",
+    "packType": "module",
+    "moduleId": "defence",
+    "name": "Rüstungs-Basismodul",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Verteidigungs-Industrie und sicherheitsrelevante Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontroll-Compliance und Spionage-Schutz.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Rüstung und Verteidigung",
+    "industryClass": "Verteidigungs-Industrie",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "ruestung",
+      "defence",
+      "verteidigung",
+      "bmvg",
+      "bundeswehr",
+      "nato",
+      "vs-nfd",
+      "sueg",
+      "awg",
+      "kwkg",
+      "itar",
+      "bafa"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "sector"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "defence",
+    "name": "Rüstung und Verteidigung",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Verteidigungs-Industrie und sicherheitsrelevante Zulieferer mit Fokus auf Geheimhaltungs-Integrität, Exportkontroll-Compliance und Spionage-Schutz.",
+    "sectorCategory": "Rüstung und Verteidigung",
+    "domainWeightAdjustments": {
+      "cyber": 1.4,
+      "governance": 1.3,
+      "people": 1.3,
+      "supply": 1.25
+    },
+    "additionalQuestions": [
+      {
+        "id": "def_sueg_personal_disziplin",
+        "domainId": "people",
+        "title": "SÜG-Personal-Disziplin (ÜP1/ÜP2/ÜP3) ist gepflegt mit Auslandsreise-Anzeigepflicht",
+        "prompt": "Sind alle Mitarbeiter*innen mit VS-Zugang nach SÜG sicherheitsüberprüft (ÜP1 für VS-VERTRAULICH, ÜP2 für GEHEIM, ÜP3 für STRENG GEHEIM), und ist die jährliche Re-Erklärung mit Auslandsreise-Anzeigepflicht und Verhaltens-Monitoring etabliert?",
+        "guidance": "Defence-Spezifik: SÜG (Sicherheitsüberprüfungsgesetz) verlangt für VS-Zugang abgestufte Sicherheitsüberprüfungen mit Wiederholung alle 5-10 Jahre, jährliche Re-Erklärung mit Anzeigepflicht für Auslandsreisen in Risiko-Länder, Kontakte zu fremden Staatsangehörigen, plötzlicher Lebensstandard-Wechsel. Verstoß: VS-Zugangs-Entzug, ggf. § 99 StGB Geheimdienstliche Agententätigkeit. Bei Insider-Verdacht MAD- bzw. BfV-Konsultation Pflicht.",
+        "recommendation": "SÜG-Verfahren-Tracking in Personal-System, jährliche Re-Erklärung mit Anzeigepflicht, Verhaltens-Anomalie-Reporting an Sicherheitsbeauftragten, MAD-Liaison für Verdachtsfälle vor-vereinbart.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "SÜG-Zertifikate, Re-Erklärungs-Formulare, MAD-Liaison-Vereinbarung",
+        "tags": [
+          "SÜG",
+          "MAD",
+          "VS-Zugang"
+        ]
+      },
+      {
+        "id": "def_vs_logging_air_gap",
+        "domainId": "cyber",
+        "title": "VS-Bearbeitung erfolgt auf Air-Gap-Systemen mit lückenlosem Logging",
+        "prompt": "Werden VS-Daten ausschließlich auf zertifizierten Air-Gap-Systemen (von Internet getrennt, dedizierte VS-Container) bearbeitet, mit lückenlosem Zugriffs-Logging und MAD-Schnittstelle für Anomalie-Erkennung?",
+        "guidance": "Defence-Spezifik: VSA (Verschlusssachenanweisung des Bundes) verlangt Air-Gap-Trennung für VS-VERTRAULICH und höher. Logging muss alle Zugriffe inkl. Kopier-/Druck-/Export-Vorgänge erfassen, Aufbewahrung 10 Jahre, MAD-Schnittstelle für IT-Sicherheits-Anomalien. Verstoß: VS-Akkreditierungs-Entzug, Auftragsverlust, ggf. § 99 StGB.",
+        "recommendation": "Zertifizierte VS-Container nach BSI/BMVg-CSA-Richtlinien, Air-Gap-Architektur dokumentiert, lückenloses Zugriffs-Logging mit SIEM, jährliche VS-Akkreditierungs-Audit.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "VS-Akkreditierung, Air-Gap-Architektur-Diagramm, SIEM-Logs",
+        "tags": [
+          "VS-NfD",
+          "Air-Gap",
+          "VSA"
+        ]
+      },
+      {
+        "id": "def_bafa_compliance_prozess",
+        "domainId": "governance",
+        "title": "BAFA-Compliance-Prozess für Exportkontrolle und Sanktions-Vermeidung",
+        "prompt": "Existiert ein dokumentierter BAFA-Compliance-Prozess für Ausfuhrgenehmigungen, ITAR-Vetting, End-User-Zertifikate, Endverbleibs-Erklärungen und Sanktions-Vermeidungs-Prüfung (UN/EU/US-OFAC)?",
+        "guidance": "Defence-Spezifik: AWG (Außenwirtschaftsgesetz) §§ 17/18 verhängen Bußgelder bis 500.000 € plus Strafrecht; KWKG (Kriegswaffenkontrollgesetz) §§ 19-21 sehen bis 5 Jahre Haft vor. Stuttgart-OLG Juli 2024: 6 Jahre 9 Monate Haft + 880 K € Vermögensabschöpfung wegen Russland-Sanktions-Umgehung über Schein-Empfänger in Hong Kong, Kasachstan, UAE, Türkei. Bei US-Komponenten zusätzlich ITAR/EAR-Compliance verpflichtend.",
+        "recommendation": "BAFA-Compliance-Officer als gesetzlich vorgeschriebene Funktion (ab definiertem Auftrags-Volumen), schriftlicher Genehmigungs-Workflow, ITAR-Re-Export-Klauseln in Verträgen, Sanktions-Listen-Screening (täglich), End-User-Zertifikats-Pflege.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "BAFA-Genehmigungs-Akten, Compliance-Officer-Bestellungs-Urkunde, Sanktions-Screening-Protokoll",
+        "tags": [
+          "BAFA",
+          "AWG",
+          "KWKG",
+          "ITAR"
+        ]
+      },
+      {
+        "id": "def_sicherheitsbeauftragter_bmvg",
+        "domainId": "governance",
+        "title": "Sicherheitsbeauftragter nach BMVg-CSA-Richtlinien bestellt",
+        "prompt": "Ist ein Bundes-Sicherheitsbeauftragter nach BMVg-CSA-Richtlinien (Cyber-Sicherheits-Anweisung des BMVg) bestellt, mit dokumentierter Schnittstelle zu BfV/MAD/BMVg-Sicherheits-Referat?",
+        "guidance": "Defence-Spezifik: Ab definiertem Auftrags-Volumen oder VS-GEHEIM-Stufe ist Bundes-Sicherheitsbeauftragter Pflicht-Funktion. Aufgaben: Schnittstelle zu BMVg-Sicherheitsreferat, MAD bei Spionage-Verdacht, BfV bei Wirtschaftsschutz, jährliche Sicherheits-Audits, Akkreditierungs-Erhaltung.",
+        "recommendation": "Bundes-Sicherheitsbeauftragten benennen mit schriftlicher Bestellung, Schnittstellen-Vereinbarung mit BMVg-/BfV-/MAD-Referenten, jährlicher Sicherheits-Audit-Termin, Stellvertretung definiert.",
+        "weight": 1.25,
+        "critical": true,
+        "evidenceHint": "Bestellungs-Urkunde, Schnittstellen-Vereinbarung, jährliches Audit-Protokoll",
+        "tags": [
+          "BMVg",
+          "CSA",
+          "Sicherheitsbeauftragter"
+        ]
+      },
+      {
+        "id": "def_lieferkette_haerten_hardware",
+        "domainId": "supply",
+        "title": "Lieferkette gegen Hardware-Kompromittierung gehärtet (Trusted Foundry, Vetting)",
+        "prompt": "Sind Halbleiter, Sensorik und sicherheitsrelevante Hardware-Komponenten aus Trusted-Foundry-Quellen oder mit dokumentiertem Vetting-Prozess beschaffen, mit Hardware-Inspection bei Eingangskontrolle?",
+        "guidance": "Defence-Spezifik: Lieferketten-Kompromittierung mit Hardware-Implants ist gezielte staatliche Angriffs-Methode (BfV-Wirtschaftsschutz 2025: 28 % der betroffenen Unternehmen führen Angriffe auf staatliche Akteure zurück, Vervierfachung gegenüber 2023). NATO-Industrial-Security verlangt dokumentierte Lieferketten-Härtung bei klassifizierten Aufträgen. Trusted Foundry: zertifizierte Halbleiter-Produktion mit Bundeswehr-/NATO-Vetting.",
+        "recommendation": "Lieferanten-Vetting nach NATO-Industrial-Security-Standards, Hardware-Inspection bei Eingangskontrolle für sicherheits-relevante Komponenten, Zweit-Quellen-Strategie für ITAR-relevante Bauteile, jährlicher Lieferanten-Audit.",
+        "weight": 1.25,
+        "critical": false,
+        "evidenceHint": "Lieferanten-Vetting-Akten, Hardware-Inspection-Protokoll, Zweit-Quellen-Plan",
+        "tags": [
+          "Lieferkette",
+          "Trusted Foundry",
+          "NATO-Industrial-Security"
+        ]
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "Rüstung und Verteidigung"
+      ],
+      "hints": [
+        "Rüstung ist kein eigenständiger KRITIS-Sektor nach BSI-KritisV — KRITIS-Schwellen werden in Defence selten erreicht (außer bei sehr großen Standorten mit eigener Energie- oder Wasser-Infrastruktur).",
+        "NIS2-Umsetzungsgesetz seit 6.12.2025 erfasst die meisten größeren Verteidigungs-Unternehmen über § 8d BSIG (50 MA / 10 Mio. €-Schwelle).",
+        "Defence-spezifische Compliance-Stapelung: AWG (Außenwirtschaftsgesetz), KWKG (Kriegswaffenkontrollgesetz), SÜG (Sicherheitsüberprüfungsgesetz), VSA (Verschlusssachenanweisung des Bundes), BMVg-CSA-Richtlinien, ITAR/EAR bei US-Komponenten, NATO-Industrial-Security bei NATO-Aufträgen.",
+        "Cross-Sector-Bezug: Defence-Tenants sind über Hardware-Lieferanten und Software-Stack mit IT/Telekom-Pack verknüpft; über Sanktions-Compliance mit Finanz-Pack; über ITDZ-Strukturen mit Verwaltungs-Pack."
+      ],
+      "additionalRequirements": []
+    },
+    "uiHints": {
+      "accentLabel": "Geheimhaltungs-Integrität, Lieferfähigkeit, Spionage-Schutz",
+      "focusAreas": [
+        "SÜG-Personal-Disziplin (ÜP1/ÜP2/ÜP3)",
+        "VS-Bearbeitung auf Air-Gap-Systemen mit MAD-Logging",
+        "BAFA-Compliance (AWG/KWKG/ITAR/Sanktionen)",
+        "Lieferketten-Härtung gegen Hardware-Kompromittierung",
+        "BfV-/MAD-Liaison bei Spionage-Verdacht"
+      ]
+    },
+    "recommendedActions": [
+      {
+        "id": "def_action_sueg_baseline",
+        "title": "SÜG-Baseline-Audit (Personal-Überprüfung, Auslandsreise-Anzeige, MAD-Liaison)",
+        "description": "Drei-Punkte-Audit: (1) SÜG-Verfahren für alle Mitarbeiter*innen mit VS-Zugang aktuell (ÜP1/ÜP2/ÜP3), (2) jährliche Re-Erklärung mit Auslandsreise-Anzeigepflicht und Verhaltens-Monitoring, (3) MAD-Liaison für Verdachtsfälle vor-vereinbart. Bei Lücken Sofort-Maßnahmen-Plan mit BMVg-Koordination.",
+        "priority": "kritisch",
+        "ownerRole": "Sicherheitsbeauftragter / Personal",
+        "relatedQuestionIds": [
+          "def_sueg_personal_disziplin"
+        ]
+      },
+      {
+        "id": "def_action_bafa_compliance_audit",
+        "title": "BAFA-Compliance-Audit mit ITAR-Vetting und Sanktions-Listen-Screening",
+        "description": "Audit der Exportkontroll-Compliance: BAFA-Compliance-Officer benannt, schriftlicher Genehmigungs-Workflow, ITAR-Re-Export-Klauseln in Verträgen, tägliches Sanktions-Listen-Screening (UN/EU/US-OFAC), End-User-Zertifikats-Pflege. Stuttgart-OLG-Schablone Juli 2024 als Realitäts-Anker.",
+        "priority": "kritisch",
+        "ownerRole": "BAFA-Compliance-Officer / Geschäftsführung",
+        "relatedQuestionIds": [
+          "def_bafa_compliance_prozess"
+        ]
+      },
+      {
+        "id": "def_action_vs_logging_haerten",
+        "title": "VS-Logging mit MAD-Schnittstelle und Anomalie-Erkennung härten",
+        "description": "VS-System-Logging auf 100 % Zugriffs-Erfassung erweitern (Kopier-/Druck-/Export-Vorgänge), SIEM-Integration mit MAD-Schnittstelle für IT-Sicherheits-Anomalien, jährliche VS-Akkreditierungs-Audit, 10-Jahres-Aufbewahrung der Logs.",
+        "priority": "hoch",
+        "ownerRole": "Sicherheitsbeauftragter / IT-Leitung",
+        "relatedQuestionIds": [
+          "def_vs_logging_air_gap"
+        ]
+      },
+      {
+        "id": "def_action_lieferkette_vetting",
+        "title": "Lieferkette gegen Hardware-Kompromittierung härten (NATO-Industrial-Security)",
+        "description": "Lieferanten-Vetting nach NATO-Industrial-Security-Standards für sicherheitsrelevante Hardware (Halbleiter, Sensorik), Hardware-Inspection bei Eingangskontrolle, Zweit-Quellen-Strategie für ITAR-relevante Bauteile (Risiko-Reduktion bei US-Politik-Wechsel), jährlicher Lieferanten-Audit.",
+        "priority": "hoch",
+        "ownerRole": "Sicherheitsbeauftragter / Einkauf",
+        "relatedQuestionIds": [
+          "def_lieferkette_haerten_hardware"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "def_evidence_sueg_register",
+        "title": "SÜG-Personal-Register mit ÜP-Stufen und Re-Erklärungs-Status",
+        "type": "register",
+        "ownerRole": "Sicherheitsbeauftragter / Personal",
+        "reviewCycleHint": "Jährlich Re-Erklärung, ÜP-Wiederholung alle 5-10 Jahre",
+        "relatedQuestionIds": [
+          "def_sueg_personal_disziplin"
+        ],
+        "folder": "SÜG-Compliance",
+        "tags": [
+          "SÜG",
+          "Personal"
+        ]
+      },
+      {
+        "id": "def_evidence_vs_akkreditierung",
+        "title": "VS-Akkreditierungs-Dokumentation und Air-Gap-Architektur",
+        "type": "policy",
+        "ownerRole": "Sicherheitsbeauftragter / IT-Leitung",
+        "reviewCycleHint": "Jährliches BMVg-Akkreditierungs-Audit",
+        "relatedQuestionIds": [
+          "def_vs_logging_air_gap"
+        ],
+        "folder": "VS-Schutz",
+        "tags": [
+          "VS-NfD",
+          "Air-Gap",
+          "BMVg-CSA"
+        ]
+      },
+      {
+        "id": "def_evidence_bafa_compliance",
+        "title": "BAFA-Compliance-Akten (Genehmigungen, ITAR-Vetting, Sanktions-Screening)",
+        "type": "register",
+        "ownerRole": "BAFA-Compliance-Officer",
+        "reviewCycleHint": "Tägliches Sanktions-Screening, jährlicher Compliance-Audit",
+        "relatedQuestionIds": [
+          "def_bafa_compliance_prozess"
+        ],
+        "folder": "Exportkontrolle",
+        "tags": [
+          "BAFA",
+          "AWG",
+          "ITAR"
+        ]
+      },
+      {
+        "id": "def_evidence_lieferanten_vetting",
+        "title": "Lieferanten-Vetting-Akten mit NATO-Industrial-Security-Bestätigungen",
+        "type": "contract",
+        "ownerRole": "Sicherheitsbeauftragter / Einkauf",
+        "reviewCycleHint": "Jährlicher Lieferanten-Audit, anlassbezogen bei Politik-Wechsel",
+        "relatedQuestionIds": [
+          "def_lieferkette_haerten_hardware"
+        ],
+        "folder": "Lieferanten-/Vertragspartner",
+        "tags": [
+          "Lieferkette",
+          "NATO-Industrial-Security"
+        ]
+      }
+    ],
+    "roleTemplates": [
+      {
+        "id": "def_role_geschaeftsfuehrung",
+        "label": "Geschäftsführung",
+        "responsibility": "Gesamt-Verantwortung für VS-Akkreditierungs-Erhalt, Exportkontroll-Compliance, BMVg-Auftrags-Vertrags-Disziplin. Persönliche Haftung nach KWKG, AWG und § 99 StGB. Defence-Spezifik: politische Entscheidungen (Lösegeld, Pressemitteilung) mit diplomatischer Tragweite — Bundeskanzleramt-Konsultation bei staatlichen Akteuren.",
+        "approvalScope": "Strategische VS-/Compliance-Entscheidungen, Pressemitteilung mit politischer Sprachregelung",
+        "focusAreas": [
+          "VS-Akkreditierung",
+          "Exportkontrolle",
+          "Politische Tragweite"
+        ]
+      },
+      {
+        "id": "def_role_sicherheitsbeauftragter",
+        "label": "Sicherheitsbeauftragter (BMVg-CSA)",
+        "responsibility": "Personal- und Objekt-Sicherheit, SÜG-Verfahren-Pflege, MAD-/BfV-Liaison, VS-Akkreditierungs-Erhaltung, Spionage-Verdachts-Bewertung, jährliche Sicherheits-Audits. Defence-Spezifik: Pflicht-Funktion ab definiertem VS-Volumen oder GEHEIM-Stufe, schriftliche Bestellung mit BMVg-Anzeige.",
+        "approvalScope": "Sicherheits-Vorfälle (VS-Compromise, Insider-Verdacht), MAD-Eskalation",
+        "focusAreas": [
+          "SÜG",
+          "MAD-Liaison",
+          "VS-Akkreditierung"
+        ]
+      },
+      {
+        "id": "def_role_bafa_compliance_officer",
+        "label": "BAFA-Compliance-Officer (Exportkontrolle)",
+        "responsibility": "Exportkontroll-Compliance nach AWG/KWKG/ITAR/EAR, BAFA-Genehmigungs-Workflow, ITAR-Vetting bei US-Komponenten, End-User-Zertifikate, Endverbleibs-Erklärungen, tägliches Sanktions-Screening (UN/EU/US-OFAC). Defence-Spezifik: gesetzlich vorgeschriebene Funktion mit persönlicher Haftung nach AWG § 19.",
+        "approvalScope": "Exportkontroll-Entscheidungen, Genehmigungs-Anträge, Sanktions-Compliance",
+        "focusAreas": [
+          "BAFA",
+          "AWG/KWKG",
+          "ITAR/EAR"
+        ]
+      },
+      {
+        "id": "def_role_bmvg_schnittstelle",
+        "label": "BMVg-Schnittstelle / Programm-Management",
+        "responsibility": "Schnittstelle zu BMVg-Bedarfsträger und Bundeswehr-Programmleitung, Auftrags-Status-Reporting, Sicherheits-Akkreditierungs-Erhalt, vertragliche Cyber-/Sicherheits-Klauseln. Bei NATO-Aufträgen zusätzlich NATO-Industrial-Security-Officer (NISO). Defence-Spezifik: bei Vorfällen Pflicht zur unverzüglichen BMVg-Information mit Auftrags-Implikations-Bewertung.",
+        "approvalScope": "BMVg-Reporting, NATO-NISO-Schnittstelle, Auftrags-Statusberichte",
+        "focusAreas": [
+          "BMVg",
+          "Bundeswehr",
+          "NATO-Industrial-Security"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 86,
+      "targetByDomain": {
+        "governance": 88,
+        "operations": 84,
+        "people": 88,
+        "physical": 86,
+        "cyber": 90,
+        "supply": 86,
+        "finance": 78,
+        "bcm": 84
+      },
+      "notes": [
+        "Defence-Tenants benötigen sehr hohe Werte in Cyber (90 %), People (88 %, SÜG-Disziplin) und Governance (88 %, BMVg-CSA-Compliance) — die Defence-Achillesfersen sind Spionage-Schutz, Personal-Sicherheit und Auftrags-Akkreditierung.",
+        "Physical (86 %) reflektiert Sabotage-Schutz nach SÜG mit Zaun, Zugangskontrolle, Ausweis-Pflicht — bei Großstandorten höher als bei reinen Büro-Tenants.",
+        "Supply (86 %) reflektiert Lieferketten-Härtung gegen Hardware-Kompromittierung und ITAR-Lieferanten-Risiko-Diversifikation."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "def_audit_sueg_personal",
+        "area": "Personal-Sicherheit",
+        "title": "SÜG-Personal-Register vollständig mit aktuellen Re-Erklärungen",
+        "guidance": "Prüfen: SÜG-Zertifikate aller VS-Zugangs-Mitarbeiter aktuell (ÜP1/ÜP2/ÜP3), jährliche Re-Erklärung mit Auslandsreise-Anzeigepflicht, MAD-Liaison-Vereinbarung, Verhaltens-Monitoring-Prozess.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "def_sueg_personal_disziplin"
+        ]
+      },
+      {
+        "id": "def_audit_vs_akkreditierung",
+        "area": "VS-Schutz",
+        "title": "VS-Akkreditierung aktuell mit Air-Gap-Architektur und SIEM-Logging",
+        "guidance": "Prüfen: BMVg-Akkreditierungs-Bestätigung aktuell, Air-Gap-Trennung dokumentiert, lückenloses Zugriffs-Logging mit 10-Jahres-Aufbewahrung, MAD-SIEM-Schnittstelle, jährliches Akkreditierungs-Audit-Protokoll.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "def_vs_logging_air_gap"
+        ]
+      },
+      {
+        "id": "def_audit_bafa_compliance",
+        "area": "Exportkontrolle",
+        "title": "BAFA-Compliance-Prozess vollständig mit ITAR-Vetting",
+        "guidance": "Prüfen: BAFA-Compliance-Officer benannt, Genehmigungs-Workflow dokumentiert, ITAR-Re-Export-Klauseln in Verträgen, tägliches Sanktions-Screening, End-User-Zertifikats-Akten vollständig. Stuttgart-OLG-Schablone Juli 2024 als Risiko-Anker (6 Jahre 9 Monate Haft).",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "def_bafa_compliance_prozess"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "SÜG-Compliance",
+      "VS-Schutz",
+      "Exportkontrolle",
+      "BMVg-/Bundeswehr-Verträge",
+      "NATO-Industrial-Security",
+      "Lieferanten-/Vertragspartner",
+      "Sicherheits-Akkreditierung",
+      "Spionage-/Sabotage-Schutz"
+    ],
+    "processTemplates": [
+      {
+        "id": "def_proc_vs_bearbeitung",
+        "title": "VS-Bearbeitung (Empfang, Bearbeitung, Versand klassifizierter Daten)",
+        "ownerRole": "Sicherheitsbeauftragter / VS-Registratur",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "0",
+        "dependencies": "Air-Gap-System, VS-Container, SÜG-zertifiziertes Personal, BMVg-Akkreditierung",
+        "outputs": "VS-konforme Dokumente und Datenträger an BMVg/NATO-Partner",
+        "notes": "Defence-Spezifik: VS-Compromise ist nicht durch DSGVO Art. 34 sanierbar — geleakte VS-Information bleibt geleakt und triggert Akkreditierungs-Prozess."
+      },
+      {
+        "id": "def_proc_exportkontrolle",
+        "title": "Exportkontroll-Genehmigungs-Workflow (BAFA, ITAR, EU/UN-Sanktions-Screening)",
+        "ownerRole": "BAFA-Compliance-Officer",
+        "criticality": "kritisch",
+        "mtpdHours": "72",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "BAFA-Online-Antrag, Sanktions-Listen-Screening-System, Vertragsdaten-Bank, ITAR-Re-Export-Datenbank",
+        "outputs": "BAFA-Genehmigungen, End-User-Zertifikate, ITAR-Compliance-Bestätigungen",
+        "notes": "Bei Verstoß: AWG § 17/18 Bußgeld bis 500 K €, KWKG §§ 19-21 bis 5 Jahre Haft. Stuttgart-OLG Juli 2024 als Realitäts-Anker."
+      },
+      {
+        "id": "def_proc_defence_auftrags_abwicklung",
+        "title": "Defence-Auftrags-Abwicklung (BMVg-/NATO-Programm-Management)",
+        "ownerRole": "BMVg-Schnittstelle / Programm-Management",
+        "criticality": "kritisch",
+        "mtpdHours": "120",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "BMVg-Bedarfsträger, Sicherheits-Akkreditierung, ERP-Defence-Abteilung, VS-Bearbeitungs-Kette",
+        "outputs": "Lieferungen an Bundeswehr/NATO mit VS-Konformität",
+        "notes": "Bei Akkreditierungs-Entzug: Auftrags-Stillstand für mehrere Quartale, ggf. existenzbedrohend für Defence-Spezialisten ohne ziviles Backup-Geschäft."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "def_dep_us_itar_lieferant",
+        "title": "US-ITAR-Lieferant (Optronik, Sensorik, Halbleiter, Software)",
+        "category": "lieferant",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "US-Politik-Wechsel kann Re-Export-Genehmigungen entziehen — Substitution erfordert mehrjährige Re-Engineering-Pfade. Zweit-Quellen-Strategie mit europäischen oder verbündeten Anbietern als Resilienz-Investition.",
+        "contractReference": "US-Lieferanten-Vertrag mit ITAR-Re-Export-Klauseln",
+        "notes": "ITAR (US-International Traffic in Arms Regulations) und EAR (Export Administration Regulations) verlangen US-Re-Export-Genehmigung bei Weitergabe an Drittländer. Bei Politik-Wechsel kann ITAR-Embargo das Defence-Geschäft binnen Wochen lähmen."
+      },
+      {
+        "id": "def_dep_nato_industrieverbund",
+        "title": "NATO-Industrieverbund (Konsortial-Partner für Großprogramme)",
+        "category": "partner",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "NATO-Großprogramme (FCAS, MGCS, Eurofighter) sind Konsortien — bei Konsortial-Partner-Ausfall kann das gesamte Programm verzögert werden. Politik-Risiko bei Mitglieds-Land-Politik-Wechsel.",
+        "contractReference": "NATO-Konsortial-Verträge (FCAS, MGCS, Eurofighter, ggf. weitere)",
+        "notes": "NATO-Industrial-Security-Officer (NISO) als Schnittstelle. NATO-Geheimhaltungsgrade NATO RESTRICTED bis COSMIC TOP SECRET parallel zu deutschen VS-Stufen. Sicherheits-Akkreditierung muss NATO-konform sein."
+      },
+      {
+        "id": "def_dep_bafa",
+        "title": "BAFA (Bundesamt für Wirtschaft und Ausfuhrkontrolle)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "BAFA-Genehmigungs-Verzögerungen sind systemisch nicht ersetzbar — Geschäftsstrategie muss BAFA-Vorlauf-Zeiten einplanen. Bei kritischen Aufträgen Eskalations-Pfad über BMVg-Bedarfsträger.",
+        "contractReference": "Keine Verträge — Behördenverhältnis nach AWG/KWKG",
+        "notes": "BAFA-Genehmigungs-Verfahren dauern 4-12 Wochen je nach Land und Komponente. Bei Sanktions-Anpassungen (z. B. EU 2025/2033 Russland-Sanktions-Update Oktober 2025) kann sich der Status laufender Anträge ändern."
+      },
+      {
+        "id": "def_dep_bundeswehr_programm",
+        "title": "Bundeswehr / BMVg-Bedarfsträger als Hauptkunde",
+        "category": "kunde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei Auftrags-Volumen > 50 % BMVg-Anteil ist Diversifikation auf NATO-Partner und ggf. genehmigte Drittländer (z. B. Australien, Japan) Resilienz-Strategie. Bei reinen BMVg-Spezialisten sehr begrenzt.",
+        "contractReference": "BMVg-Rahmenverträge mit Sicherheits- und Cyber-Klauseln",
+        "notes": "Deutsche Defence-Industrie boomt 2025 mit hohem Auftrags-Volumen aus dem 100-Mrd-€-Sondervermögen. Auftrags-Sicherheit hoch, aber bei Akkreditierungs-Entzug oder schweren Vorfällen kann der einzelne Tenant kurzfristig ausgesperrt werden."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "def_scn_apt_spionage",
+        "title": "APT-Spionage-Angriff mit VS-Daten-Exfiltrations-Verdacht",
+        "category": "Cyber-physische Bedrohung mit staatlichem Akteur",
+        "description": "Gezielter APT-Angriff auf Defence-Industrial-Base mit VS-Daten-Exfiltrations-Verdacht. APT28/GRU- oder China-MSS-Schablone. NATO-Mai-2024-Schablone bestätigte Angriffe gegen logistics, defense supply chains, technology service providers in Deutschland.",
+        "likelihood": 4,
+        "impact": 5,
+        "ownerRole": "Sicherheitsbeauftragter / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "def_proc_vs_bearbeitung",
+          "def_proc_defence_auftrags_abwicklung"
+        ],
+        "linkedDependencyTemplateIds": [],
+        "playbook": "BfV/MAD-Sofort-Einbindung, BMVg-Auftrags-Information, Forensik mit staatlichen Akteuren als Annahme, BSI-NIS2-Erstmeldung 24 h, Bundeskanzleramt-Konsultation bei diplomatischer Tragweite, Press-Sprachregelung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "NATO/Deutschland/Tschechien-Attribution Mai 2024 als Schablone, Hensoldt-China-Export-Kontrollen April 2025 als China-Variante."
+      },
+      {
+        "id": "def_scn_insider_vs_zugang",
+        "title": "Insider mit VS-Zugang exfiltriert vermutlich an fremden Nachrichtendienst",
+        "category": "Human Intentional mit Spionage-Verdacht",
+        "description": "Mitarbeiter mit GEHEIM-Stufe-Zugang fällt durch ungewöhnliches Verhalten auf — auffällige Auslandsreisen ohne Anzeige, Kontakte zu fremden Staatsangehörigen, plötzlicher Lebensstandard-Wechsel, ungewöhnliche Datenzugriffs-Pattern nach SOC-Logging.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Sicherheitsbeauftragter / Personal",
+        "linkedProcessTemplateIds": [
+          "def_proc_vs_bearbeitung"
+        ],
+        "linkedDependencyTemplateIds": [],
+        "playbook": "MAD-Sofort-Konsultation (Pflicht-Eskalation bei SÜG-Verdachtsfall), Beobachtungs-vs-Suspensions-Entscheidung, Personal-Akten-Sicherung, BMVg-Information mit Programm-Implikations-Bewertung, Mitarbeiter-Information ohne Insiderwissens-Leak.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "BfV-Wirtschaftsschutz 2025: 28 % der betroffenen Firmen führen Angriffe auf staatliche Akteure zurück — Vervierfachung gegenüber 2023."
+      },
+      {
+        "id": "def_scn_itar_embargo",
+        "title": "US-ITAR-Lieferanten-Embargo durch politisches Zerwürfnis",
+        "category": "Interdependenz mit Politik-Hebel",
+        "description": "US-Politik-Wechsel oder bilaterales Zerwürfnis führt zu ITAR-Re-Export-Genehmigungs-Entzug für sicherheitsrelevante Komponenten — Optronik-Sensoren, Halbleiter, Software-Lizenzen. Deutsche Defence-Tenants mit US-Komponenten verlieren Lieferfähigkeit.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "BAFA-Compliance-Officer / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "def_proc_exportkontrolle"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_us_itar_lieferant"
+        ],
+        "playbook": "BAFA-/BMVg-Konsultation für Eskalations-Pfad, Zweit-Quellen-Aktivierung (europäische oder verbündete Lieferanten), Re-Engineering-Plan mit Bundeswehr-Programm-Verzögerungs-Akzeptanz, ggf. Bundeskanzleramt-Eskalation bei systemischer Bedrohung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Hensoldt China-Export-Kontrollen April 2025 als realistischer Anker für umgekehrtes Szenario (China-Embargo gegen DE-Defence)."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "def_ex_apt_spionage",
+        "title": "APT-Spionage-Angriff Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "def_scn_apt_spionage",
+        "ownerRole": "Krisenstab",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Übung mit Geschäftsführung, Sicherheitsbeauftragtem, BAFA-Compliance-Officer, BMVg-Schnittstelle, BfV-/MAD-Liaison-Person, externer Forensik-Firma (Defence-spezialisiert)."
+      },
+      {
+        "id": "def_ex_insider_vs_zugang",
+        "title": "Insider-mit-VS-Zugang Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "def_scn_insider_vs_zugang",
+        "ownerRole": "Krisenstab",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Übung mit MAD-Liaison-Person als Berater, Personal-Vertretung, externem Anwalt für Arbeitsrecht und Strafrecht."
+      }
+    ],
+    "riskCatalogTemplates": [
+      {
+        "id": "risk-def-apt28-gru-spionage",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "apt_state_actor_espionage",
+        "titel": "APT28/GRU-Spionage-Angriff gegen Defence-Industrial-Base",
+        "beschreibung": "Gezielter APT-Angriff durch staatlich gesponserten Akteur (APT28/GRU Russland, ggf. Salt Typhoon oder andere Cluster) gegen deutsche Verteidigungs-Industrie. NATO-/Deutschland-/Tschechien-Attribution Mai 2024: APT28 zielt auf logistics, defense supply chains, technology service providers, governmental institutions in Deutschland und anderen NATO-Ländern. APT29/SVR (Cozy Bear, Russland-Auslandsgeheimdienst) operiert mit ähnlichem Profil, aber subtileren Datendiebstählen ohne Sabotage und mit längerer Persistenz; im Pack unter dieser Risiko-Kategorie mit-gemeint und durch dieselbe Mitigation abgedeckt. Vektoren: Microsoft Outlook-Zero-Day-Exploit, kompromittierte TP-Link-Router als Relay-Punkte für M365-Credential-Theft, Spear-Phishing gegen Defence-Mitarbeiter*innen, kompromittierte VPN-Zugänge. Tenant-Profil-Hinweis: Großkonzerne (KMW, Airbus Defence, Diehl, Hensoldt, Rheinmetall, MBDA) mit hohem politischen Profil primär betroffen; Mittelstand mit BMVg-Auftragsanteil ebenfalls Ziel für Lieferketten-Kompromittierung. Schadensbild: VS-Daten-Exfiltration mit nicht-sanierbarer Geheimhaltungs-Verletzung (anders als DSGVO Art. 34 ist VS-Compromise nicht durch Bürger-Benachrichtigung sanierbar), Sicherheits-Akkreditierungs-Risiko, BMVg-Auftrags-Implikation, politische Tragweite (BfV-/BND-/Bundeskanzleramt-Konsultation). Mitigation: SIEM mit MAD-Schnittstelle, Air-Gap-Trennung für VS-Daten, Microsoft-Outlook-Patch-Disziplin, MFA für M365 mit FIDO2-Token, Router-Härtung mit BSI-Empfehlungen, jährliche BfV-Wirtschaftsschutz-Konsultation.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / Geschäftsführung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-china-mss-ip-diebstahl",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "china_state_actor_ip_theft",
+        "titel": "China-MSS-IP-Diebstahl mit Forschungs-/Dual-Use-Hebel",
+        "beschreibung": "Gezielter Cyber-Angriff durch China-MSS-affiliierte Akteure (APT10, APT41, weitere Cluster) gegen Forschungs-IP und Dual-Use-Technologie deutscher Defence-Tenants. Bitkom-Wirtschaftsschutz 2025: 45 % der von Industriespionage betroffenen Firmen führen Angriffe auf China zurück, BfV-Vervierfachung der staatlich-attribuierten Angriffe (28 % 2025 vs. 7 % 2023). Reaktiver Anker: China April 2025 Export-Kontrollen gegen 7 europäische Defence-Firmen inkl. Hensoldt wegen Taiwan-Kooperation — politisch-eskalierte Spionage-Lage. Vektoren: Spear-Phishing gegen F&E-Mitarbeiter*innen, kompromittierte chinesisch-deutsche Joint-Venture-Schnittstellen, Watering-Hole-Attacks auf Defence-Industrie-Webseiten, Dual-Use-Forschungs-Konferenz-Kontakte. Tenant-Profil-Hinweis: Optronik/Sensorik/Radar-Spezialisten (Hensoldt-Profil), Halbleiter-Defence-Anwendungen, Dual-Use-Tenants mit zivilem Hauptmarkt primär betroffen. Schadensbild: IP-Verlust mit langfristigem Wettbewerbs-Nachteil (5-10 Jahre Forschungs-Vorsprung), BMVg-Akkreditierungs-Risiko, ggf. politische Implikationen bei systemischen Vorfällen. Mitigation: F&E-Netzwerk-Segmentierung, MFA-Vollabdeckung, China-Konferenz-Reise-Anzeigepflicht, BfV-Beratung für China-Joint-Ventures, MAD-Schnittstelle für IT-Anomalien.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / F&E-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-lieferkette-hardware-kompromittierung",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "supply_chain_hardware_compromise",
+        "titel": "Lieferketten-Kompromittierung mit Hardware-Implant-Risiko",
+        "beschreibung": "Hardware-Implants oder kompromittierte Firmware in sicherheitsrelevanten Komponenten (Halbleiter, Sensorik, Netzwerk-Hardware) durch staatlichen Akteur in der Lieferkette. Gezielte Lieferketten-Angriffe sind etablierte staatliche Methode (US-Bloomberg-Supermicro-Bericht 2018 als Schablone, weitere unbestätigte Vorfälle in westlichen Defence-Industrien). Bei Defence-Tenants besonders kritisch wegen sicherheits-akkreditierter Systeme. Tenant-Profil-Hinweis: Tenants mit Halbleiter-/Sensorik-Anteil im Endprodukt primär betroffen; Tenants mit reinem Software-Stack weniger direkt anfällig, aber mittelbar über Hardware-Plattform. Schadensbild: kompromittierte Defence-Endprodukte beim Kunden (Bundeswehr, NATO-Partner), Sicherheits-Akkreditierungs-Verlust, ggf. Rückruf-Aktion mit massiven Kosten und Reputations-Schaden, politische Tragweite. Mitigation: Lieferanten-Vetting nach NATO-Industrial-Security, Trusted-Foundry-Quellen für sicherheitskritische Halbleiter, Hardware-Inspection bei Eingangskontrolle (Röntgen, Stichproben-Reverse-Engineering), Zweit-Quellen-Strategie, BfV-/BSI-Beratung für Lieferanten-Risiko-Bewertung.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / Einkauf",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-ransomware-vs-leak-drohung",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ransomware_vs_leak_threat",
+        "titel": "Ransomware mit VS-Daten-Leak-Drohung",
+        "beschreibung": "Ransomware-Angriff mit Doppel-Erpressung gegen Defence-Tenant — Verschlüsselung des zivilen IT-Stacks (oder bei mangelhafter Trennung auch des VS-Stacks) plus Drohung mit VS-Daten-Veröffentlichung im Dark-Net. Schablone: Rheinmetall April 2023 BlackBasta-Vorfall — civilian business betroffen, military business durch strikte IT-Trennung verschont, aber NDAs, technical schematics, passport scans, purchase orders im Dark-Net veröffentlicht. Folge-Vorfall April 2025 durch Babuk2-Group. Vektoren: Phishing-E-Mail, kompromittierte VPN-Zugänge, ungepatchte Web-Anwendungen. Tenant-Profil-Hinweis: Tenants mit strikter IT-Trennung zwischen zivilem und Defence-Geschäft (Rheinmetall-Pattern) strukturell besser geschützt; Tenants mit gemeinsamer IT-Infrastruktur bei vollständigem Geschäftsausfall mit zusätzlichem VS-Compromise-Risiko. Schadensbild: ziviler Geschäftsausfall (Rheinmetall-Schablone), VS-Daten-Leak mit nicht-sanierbarer Geheimhaltungs-Verletzung, BMVg-Akkreditierungs-Audit, Lösegeld-Frage mit zusätzlicher Schicht (zahlen heißt nicht nur § 89c StGB-Risiko, sondern auch VS-Compromise-Eingeständnis). Mitigation: strikte Trennung ziviler und Defence-IT (Rheinmetall-Pattern), Backup nach 3-2-1-Regel mit halbjährlichem Restore-Test, EDR auf allen Endpoints, MFA-Vollabdeckung, externe IR-Firma vor-vertraglich gebunden mit Defence-Spezialisierung.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / IT-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-air-gap-system-ausfall",
+        "categoryId": "technical",
+        "subCategoryId": "air_gap_system_failure",
+        "titel": "Air-Gap-VS-System-Ausfall mit Auftrags-Verzögerung",
+        "beschreibung": "Hardware- oder Software-Defekt der Air-Gap-VS-Systeme (zertifizierte VS-Container, dedizierte Workstations für VS-Bearbeitung) mit Geschäfts-Stillstand der Defence-Auftragsabwicklung. Ersatzteile für zertifizierte VS-Hardware sind oft nur über zertifizierte Lieferanten beziehbar (Wochen-Lieferzeit). Tenant-Profil-Hinweis: Tenants mit Single-Air-Gap-System strukturell anfälliger; Tenants mit redundantem Air-Gap-Cluster besser. Schadensbild: BMVg-Auftrags-Verzögerung mit Vertrags-Strafen-Risiko, Sicherheits-Akkreditierungs-Erhalt aber gefährdet wenn Notfall-Workaround unsauber ist. Mitigation: redundantes Air-Gap-Cluster, Ersatzteil-Vorhaltung bei zertifizierten Lieferanten, dokumentierter Notfall-Workflow mit BMVg-Sicherheitsreferat-Abstimmung, jährlicher DR-Test mit Akkreditierungs-Erhaltungs-Dokumentation.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / IT-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-erp-defence-abteilung-outage",
+        "categoryId": "technical",
+        "subCategoryId": "erp_defence_outage",
+        "titel": "ERP-Defence-Abteilung-Ausfall mit BMVg-Auftrags-Stillstand",
+        "beschreibung": "Ausfall des ERP-Systems der Defence-Abteilung (oft separates SAP- oder Defence-spezifisches System mit BMVg-Akkreditierung) — Material-Disposition, BMVg-Bestellungs-Abwicklung, Lieferungs-Tracking nicht verfügbar. Bei großen Defence-Tenants oft eigene Instanz mit erhöhten Sicherheits-Anforderungen, weniger Updates als ziviles ERP. Tenant-Profil-Hinweis: Großkonzerne mit eigenem Defence-ERP primär betroffen; kleinere Tenants mit Cloud-ERP weniger anfällig aber mit anderen Risiken (Cloud-Provider-Vertrauen). Schadensbild: BMVg-Auftrags-Verzögerung, Lohn-/Lieferanten-Zahlungs-Stau, Reporting-Lücken im Bundeswehr-Programm-Management. Mitigation: Multi-Region-Konfiguration mit verschlüsselter Replikation, regelmäßiger DR-Test, Patch-Disziplin mit Sicherheits-Audit-Zyklus, Backup-Strategie mit getrenntem Tape-Backup.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Programm-Management",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-insider-vs-zugang",
+        "categoryId": "human_intentional",
+        "subCategoryId": "insider_vs_access_misuse",
+        "titel": "Insider mit VS-Zugang missbraucht Zugriff (im Laufe der Anstellung gedreht oder aufgefallen)",
+        "beschreibung": "Operativer Charakter: Mitarbeiter*in wird im Laufe der Anstellung gedreht oder fällt durch Verhaltens-Anomalie-Monitoring auf — finanzielle Probleme, ideologische Wandlung, Erpressung durch fremde Akteure, Frustration nach Karriere-Rückschlag, plötzliche Auslandsreisen ohne SÜG-Anzeige. Anders als der unentdeckte Maulwurf (siehe risk-def-spionage-maulwurf), der bereits vor Anstellung infiltriert wurde, ist der Insider durch SÜG-Background-Check ursprünglich unauffällig und wird erst im Laufe der Berufstätigkeit zum Risiko. Mitarbeiter*in mit GEHEIM- oder STRENG-GEHEIM-Stufe nutzt VS-Zugang missbräuchlich — Recherche zu Programmen ohne dienstliche Notwendigkeit, unbefugte Kopier-/Druck-Vorgänge, Mitnahme von VS-Material auf USB-Stick. Trotzdem § 99 StGB-relevant. Tenant-Profil-Hinweis: alle Defence-Tenants mit VS-Bearbeitung gleichermaßen betroffen; Tenants mit ausgeprägtem SOC-Logging und Verhaltens-Anomalie-Monitoring strukturell besser geschützt. Detection-Schwerpunkt: Verhaltens-Monitoring und SOC-Logging (im Gegensatz zum Maulwurf, der oft erst durch externe Hinweise oder Kontaktaufdeckung entdeckt wird). Schadensbild: VS-Compromise mit Akkreditierungs-Risiko, Disziplinarmaßnahmen, ggf. § 99 StGB-Verfahren, MAD-Untersuchung, BMVg-Information mit Programm-Implikations-Bewertung. Mitigation: SIEM mit Verhaltens-Anomalie-Erkennung, Vier-Augen-Prinzip bei Kopier-/Export-Vorgängen, jährliche SÜG-Re-Erklärung mit Verhaltens-Sensibilisierungs-Schulung, MAD-Liaison vor-vereinbart.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / MAD-Liaison",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-spionage-maulwurf",
+        "categoryId": "human_intentional",
+        "subCategoryId": "mole_state_intelligence",
+        "titel": "Unentdeckter Maulwurf eines fremden Nachrichtendienstes (vor-Anstellung infiltriert)",
+        "beschreibung": "Operativer Charakter: Mitarbeiter*in ist bereits vor der Anstellung als rekrutierter oder eingeschleuster Maulwurf für fremden Nachrichtendienst (GRU/SVR Russland, MSS China, ggf. weitere) tätig und kommt mit unauffälligem Lebenslauf durch Standard-SÜG-Verfahren — schwer durch Background-Check entdeckbar. Anders als der gedrehte Insider (siehe risk-def-insider-vs-zugang), der erst im Laufe der Anstellung zum Risiko wird, ist der Maulwurf von Anfang an steuerbar und exfiltriert systematisch VS-Daten über Monate oder Jahre. Auffälligkeiten erst spät erkennbar: ungewöhnliche Auslandsreisen ohne Anzeige, plötzlicher Lebensstandard-Wechsel, Kontakte zu fremden Staatsangehörigen, ungewöhnliche Datenzugriffs-Pattern. Detection-Schwerpunkt: externe Hinweise (BfV-/MAD-Tipps, ausländische Partnerdienst-Erkenntnisse, Whistleblower) und Kontaktaufdeckung — interne Verhaltens-Anomalie-Erkennung greift oft zu spät, weil der Maulwurf strategisch lange unauffällig agiert. Realitäts-Anker: BfV-Wirtschaftsschutz 2025 — 28 % der betroffenen Firmen führen Angriffe auf staatliche Akteure zurück (Vervierfachung gegenüber 2023). Tenant-Profil-Hinweis: Tenants mit politisch-exponierten Programmen (FCAS, MGCS, Eurofighter, U-Boot-Programme) primär betroffen; Tenants mit standardisierten Defence-Komponenten weniger ziel-attraktiv. Schadensbild: schwerwiegender VS-Compromise über Jahre, Programm-Implikationen, politische Tragweite, MAD-/BfV-Verfahren mit Strafrecht (§ 99 StGB Geheimdienstliche Agententätigkeit, bis 10 Jahre Haft). Mitigation: SÜG-Disziplin mit jährlicher Re-Erklärung, BfV-Background-Check-Vertiefung bei Kandidaten aus Risiko-Ländern, Verhaltens-Anomalie-Monitoring (für späte Detection), MAD-Liaison vor-vereinbart, Vier-Augen-Prinzip bei kritischen VS-Operationen, BfV-Sensibilisierungs-Schulung mit Maulwurf-Indikatoren.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / MAD-Liaison",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-sabotage-sicherheits-luecke",
+        "categoryId": "human_intentional",
+        "subCategoryId": "sabotage_security_gap",
+        "titel": "Sabotage durch Sicherheits-Lücke (physisch oder Cyber)",
+        "beschreibung": "Sabotage-Aktion gegen Defence-Tenant durch Insider mit physischem Zugang oder durch Cyber-Vektor — manipulierte Maschinen-Steuerung, Brandstiftung an Produktions-Anlage, manipulierte Konfigurations-Daten in Defence-Endprodukt vor Auslieferung. § 109e StGB Sabotagehandlungen. BfV-/BND-Warnung März 2025: Verteidigungs-Industrie zunehmend Ziel von Spionage UND Sabotage, BfV-Sicherheits-Hinweis an mehrere Unternehmen. Tenant-Profil-Hinweis: Tenants mit physischer Großproduktion (KMW, Rheinmetall) primär für physische Sabotage-Risiko; Tenants mit Software-Stack (Hensoldt-Optronik, Diehl-Lenkflugkörper) für Cyber-Sabotage-Risiko. Schadensbild: Sicherheits-Risiko der Endprodukte beim Kunden (Bundeswehr) — können Menschenleben kosten, politische Tragweite enorm. Mitigation: physische Sicherheit mit Zaun, Zugangskontrolle, Ausweis-Pflicht (SüG-konform), Kamera-Überwachung kritischer Bereiche, Vier-Augen-Prinzip bei Konfigurations-Änderungen, Anomalie-Monitoring auf Maschinen-Steuerung, jährliche Sabotage-Risiko-Bewertung.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / Werksleitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-korruption-dual-use-export",
+        "categoryId": "human_intentional",
+        "subCategoryId": "corruption_dual_use_export",
+        "titel": "Korruption für Dual-Use-Export an Embargo-Land oder ohne Genehmigung",
+        "beschreibung": "Mitarbeiter*in oder Geschäftsführungs-Mitglied wird durch Bestechung oder Erpressung dazu gebracht, Dual-Use-Güter ohne BAFA-Genehmigung oder über Schein-Empfänger an Embargo-Länder (Russland, Iran, Nordkorea, ggf. weitere) zu liefern. Stuttgart-OLG Juli 2024 als Realitäts-Anker: 6 Jahre 9 Monate Haft + 1 Jahr 9 Monate Bewährung wegen Russland-Sanktions-Umgehung über Schein-Empfänger in Hong Kong, Kasachstan, UAE, Türkei. 880.000 € Vermögensabschöpfung. Tenant-Profil-Hinweis: Tenants mit Dual-Use-Hauptgeschäft (zivile Hauptmärkte mit Defence-Anteil) primär anfällig — Druck zum Umsatz-Erhalt; Tenants mit reinem Defence-Geschäft weniger anfällig aber mit höherem Schadens-Hebel. Schadensbild: AWG § 17/18 Bußgeld bis 500 K €, KWKG §§ 19-21 bis 5 Jahre Haft, ggf. § 89c StGB Terrorismusfinanzierung bei Empfänger-Verbindung zu sanktionierten Akteuren, Vermögensabschöpfung, Reputations-Schaden, BMVg-Akkreditierungs-Verlust. Mitigation: BAFA-Compliance-Officer mit Vier-Augen-Prinzip, tägliches Sanktions-Listen-Screening, End-User-Zertifikats-Pflege, anonymes Whistleblower-System, jährlicher Compliance-Audit mit externer Beratung.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "BAFA-Compliance-Officer / Geschäftsführung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-whistleblower-veroeffentlichung",
+        "categoryId": "human_intentional",
+        "subCategoryId": "whistleblower_classified_disclosure",
+        "titel": "Whistleblower-Veröffentlichung von Geheimhaltungs-Material",
+        "beschreibung": "Mitarbeiter*in mit VS-Zugang veröffentlicht oder leakt Geheimhaltungs-Material — aus politischer Motivation, Pazifismus-Überzeugung, Whistleblower-Selbstwahrnehmung oder finanziellem Anreiz. Schablonen: Snowden-Pattern (USA), WikiLeaks-Beiträge, deutsche Vorfälle in Defence-Industrie 2018-2024 mit § 99 StGB-Verfahren. Anders als Insider-Datendiebstahl-zum-Wettbewerber: Veröffentlichung ist öffentlich, nicht zum Marktvorteil. Tenant-Profil-Hinweis: Tenants mit politisch-kontroversen Programmen (Munition, Drohnen, Waffenexporte) primär anfällig; Tenants mit defensive-orientierten Programmen (Sensorik, Aufklärung) weniger ziel-attraktiv für Whistleblower-Motivation. Schadensbild: VS-Compromise mit öffentlicher Sichtbarkeit, politische Tragweite (Bundestags-Anfragen, Pressewelle), Sicherheits-Akkreditierungs-Risiko, Programm-Implikationen mit BMVg-Verhandlungen, Strafrecht-Verfahren gegen Whistleblower (§ 99 StGB, bis 10 Jahre Haft). Mitigation: Mitarbeiter-Sensibilisierung mit Pflicht-Schulung jährlich, anonymes Whistleblower-System für interne Bedenken (BMVg-konform, lenkt nicht-strafbare Bedenken intern), psychologische Eignungsdiagnostik bei SÜG-Verfahren, Verhaltens-Anomalie-Monitoring.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / Personal",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-vs-offenlegung-versehen",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "accidental_classified_disclosure",
+        "titel": "Unbeabsichtigte VS-Offenlegung (E-Mail-Fehler, USB-Stick-Verlust, Cloud-Upload)",
+        "beschreibung": "Mitarbeiter*in offenbart VS-Material unbeabsichtigt — falsche E-Mail-Adresse für VS-NfD-Anhang, USB-Stick mit VS-Material verloren oder im Hotel vergessen, versehentliches Hochladen in zivile Cloud (Microsoft 365 statt VS-Container), Drucker-Auswurf in falschem Tray. Häufige Defence-Realität trotz aller SüG-Disziplin — der menschliche Fehler bleibt der häufigste VS-Compromise-Vektor. EW=4 weil regelmäßig in deutschen Defence-Tenants vorkommend (BMVg-interne Statistik, nicht öffentlich, aber durch Branchen-Kontakte bekannt). Tenant-Profil-Hinweis: alle Defence-Tenants gleichermaßen betroffen, unabhängig von Tenant-Größe. Schadensbild: VS-Compromise mit Sicherheits-Akkreditierungs-Audit, MAD-Information bei höheren Stufen, ggf. dienstrechtliche Folgen für Mitarbeiter*in (keine § 99 StGB-Verfahren bei Fahrlässigkeit, aber Disziplinarmaßnahmen). Mitigation: E-Mail-Verschlüsselung Default für VS-NfD-relevante Adressen, Data-Loss-Prevention auf Cloud-Uploads, USB-Stick-Verschlüsselung mit Eigenkennung, Drucker-Trennung (zivil vs. VS-Drucker), halbjährliche Sensibilisierungs-Schulung mit konkreten Vorfalls-Beispielen.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Sicherheitsbeauftragter / IT-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-itar-lieferanten-embargo",
+        "categoryId": "interdependency",
+        "subCategoryId": "itar_supplier_embargo",
+        "titel": "US-ITAR-Lieferanten-Embargo durch politisches Zerwürfnis",
+        "beschreibung": "US-Politik-Wechsel oder bilaterales Zerwürfnis (Trump-Administration-Politik, Handels-Konflikte, NATO-Beitragsstreit) führt zu ITAR-Re-Export-Genehmigungs-Entzug für sicherheitsrelevante Komponenten — Optronik-Sensoren, Halbleiter, Software-Lizenzen, Spezial-Werkstoffe. Deutsche Defence-Tenants mit US-Komponenten verlieren binnen Wochen Lieferfähigkeit für ihre Endprodukte. Realitäts-Anker (umgekehrt): China April 2025 Export-Kontrollen gegen 7 europäische Defence-Firmen inkl. Hensoldt — Beweis, dass politische Lieferketten-Zerwürfnisse real und kurzfristig wirken. Tenant-Profil-Hinweis mit ITAR-Anteils-Differenzierung: Score 20 (EW=4, AW=5) gilt für Tenants mit hohem ITAR-Anteil (> 30 % ITAR-pflichtige Komponenten in der Bill-of-Materials, typisch bei Optronik-, Lenkflugkörper- und Avionik-Herstellern wie Hensoldt, Diehl Defence, Airbus Defence). Tenants mit moderatem ITAR-Anteil (10-30 %, etwa Sensorik-Spezialisten mit teilweise europäischer Substitution) bleiben bei EW=3 (Score 15). Tenants mit reiner EU-Lieferkette (KMW-Bodensystem-Anteile, MBDA-Frankreich-Konsortien) können EW auf 1-2 absenken (Score 5-10). Schadensbild: Lieferungs-Stopp an Bundeswehr und NATO-Partner, Vertrags-Strafen-Risiko, Existenz-Risiko bei reinen Defence-Spezialisten ohne ziviles Backup. Mitigation: Zweit-Quellen-Strategie mit europäischen oder verbündeten Anbietern (NATO-EDA-Programme), strategische Lagerhaltung kritischer ITAR-Komponenten (12-24 Monate), Re-Engineering-Plan für ITAR-Substitution, BAFA-/BMVg-Eskalations-Pfad für Politik-Krise.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "BAFA-Compliance-Officer / Geschäftsführung / Einkauf",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-bafa-genehmigung-verzoegerung",
+        "categoryId": "interdependency",
+        "subCategoryId": "bafa_approval_delay",
+        "titel": "BAFA-Genehmigungs-Verzögerung mit Lieferungs-Stopp",
+        "beschreibung": "BAFA-Genehmigungs-Verfahren für eine geplante Lieferung verzögert sich überraschend — Drittland-Wechsel zu höherer Risiko-Stufe, Sanktions-Listen-Update (z. B. EU 2025/2033 Russland-Sanktions-Erweiterung Oktober 2025), Anti-Folter-Verordnung, plötzliche politische Anpassungs-Klausel. BAFA-Genehmigungs-Verfahren dauern normalerweise 4-12 Wochen, können aber durch politische Lage auf 6+ Monate ausgedehnt werden. Tenant-Profil-Hinweis mit Auftrags-Volumen-Differenzierung: Score 12 (EW=4, AW=3) gilt für Standard-Auftrags-Volumen ohne Pönale-Klausel — Tenants mit Drittländer-Geschäft (NATO-Partner-Drittländer, Genehmigungs-Pflichtige außerhalb NATO/EU) primär betroffen, aber kommerzielle Verzögerung als Hauptfolge. Bei Mehrjahres-Großverträgen mit Pönale-Klauseln (Munitions-Großaufträge, Lenkflugkörper-Programme, Schiffbau-Verträge mit fixen Lieferterminen und 0,5-2 % Pönale pro Verzugs-Werktag) kann AW auf 4-5 angehoben werden, Score auf 16-20 — bei einem solchen Vertrag wird BAFA-Verzögerung schnell existenz-bedrohend. Tenants mit reinem BMVg-Inland-Geschäft sind nicht betroffen. Schadensbild: Lieferungs-Verzögerung mit Vertrags-Strafen, Cashflow-Stress, Kunden-Vertrauensschaden, ggf. Vertrags-Aufkündigung durch Drittländer-Kunden. Mitigation: BAFA-Vorab-Konsultation mit informellem Genehmigungs-Status-Check, vorgezogene Genehmigungs-Anträge mit zeitlichen Puffern, BMVg-Bedarfsträger als Eskalations-Pfad bei kritischen Bundeswehr-Aufträgen, Sanktions-Anpassungs-Monitoring mit Compliance-Officer, Force-Majeure-Klauseln bei Mehrjahres-Großverträgen mit Pönale.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "BAFA-Compliance-Officer / Vertrieb",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-nato-industrieverbund-ausfall",
+        "categoryId": "interdependency",
+        "subCategoryId": "nato_consortium_failure",
+        "titel": "NATO-Industrieverbund-Ausfall (Konsortial-Partner-Krise)",
+        "beschreibung": "NATO-Großprogramm-Konsortial-Partner gerät in Krise — Insolvenz, schwerer Cyber-Vorfall mit Lieferunfähigkeit, Politik-Wechsel im Mitglieds-Land mit Programm-Rückzug, Sicherheits-Akkreditierungs-Verlust beim Partner. Beispiele: FCAS (Future Combat Air System mit Frankreich/Spanien), MGCS (Main Ground Combat System mit Frankreich), Eurofighter-Konsortium, ggf. weitere. Bei Konsortial-Partner-Ausfall kann das gesamte Programm verzögert werden mit Implikationen für deutsche Tenants. Tenant-Profil-Hinweis: Tenants mit NATO-Großprogramm-Anteil primär betroffen; Tenants mit reinem BMVg-Inland-Geschäft nicht. Schadensbild: Programm-Verzögerung mit Auftrags-Volumen-Reduktion, Personal-Auslastungs-Lücken, ggf. Kurzarbeit oder Personalabbau, Reputations-Schaden im NATO-Industrial-Security-Verbund. Mitigation: Konsortial-Partner-Risiko-Bewertung jährlich, alternative Programm-Optionen mit BMVg vorab dokumentieren, finanzielle Reserve für 6-12 Monats-Auftrags-Lücke, NATO-NISO-Liaison für frühzeitige Krisenwarnung.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "BMVg-Schnittstelle / Geschäftsführung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-def-hochwasser-spezial-klimatisierung",
+        "categoryId": "nature",
+        "subCategoryId": "flood_or_climatisation_failure",
+        "titel": "Hochwasser am Standort oder Stromausfall mit Spezial-Klimatisierungs-Verlust",
+        "beschreibung": "Hochwasser-Ereignis am Defence-Produktions-/F&E-Standort oder längerer Stromausfall mit Verlust der Spezial-Klimatisierung für temperatur-/feuchtigkeits-empfindliche Bauteile (Halbleiter-Reinraum, Optronik-Justage-Halle, Sensorik-Kalibrier-Räume). Schablonen: Ahrtal Juli 2021, Süddeutschland Mai/Juni 2024 mit 100-150 mm Niederschlag im Allgäu. Bei Defence-Tenants besonders kritisch wegen Sicherheits-Akkreditierungs-Anforderungen an die Produktions-Bedingungen. Tenant-Profil-Hinweis: bayerische Defence-Standorte (München, Manching, Taufkirchen, Donau-Region) primär in Hochwasser-Risiko-Gebieten; Standorte in höheren Lagen weniger anfällig. Schadensbild: Produktions-Stillstand mit BMVg-Auftrags-Verzögerung, Akkreditierungs-Audit nach Wiederaufnahme, Versicherungs-Klärung mit Defence-spezifischen Klauseln, ggf. Verlust kalibrierter Anlagen mit langen Wieder-Inbetriebnahme-Zeiten. Mitigation: Hochwasser-Risiko-Karte für Standort, USV für kritische Klimatisierung (4-8 h Überbrückung), Notstrom-Aggregat für 24-48 h, Multi-Standort-Strategie für kritische Programme, Versicherungs-Police mit Defence-Akkreditierungs-Klausel.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Werksleitung / Sicherheitsbeauftragter",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "tabletopScenarios": [
+      {
+        "id": "tabletop-def-apt-spionage-vs-exfiltration",
+        "version": "1.0.0",
+        "title": "APT-Spionage-Angriff mit VS-Daten-Exfiltrations-Verdacht",
+        "summary": "Gezielter APT-Angriff (APT28/GRU- oder China-MSS-Schablone) gegen einen mittelständisch-großen Defence-Tenant mit BMVg-Direktauftrag und NATO-Industrial-Security-Akkreditierung — Donau-Defence GmbH, ca. 900 Mitarbeiter*innen, ca. 200 Mio. € Umsatz, Spezialist für Optronik und Sensorik, ITAR-relevante US-Komponenten in einigen Endprodukten, GEHEIM-Stufe-Akkreditierung. SOC meldet Anomalien: ungewöhnliche M365-Login-Pattern aus IP-Bereichen mit TP-Link-Router-Hijacking-Profil (NATO-Mai-2024-Schablone), kompromittierter Outlook-Webmail-Zugang eines F&E-Mitarbeiters, Spuren von Datenzugriffen auf VS-NfD-Container. Gleichzeitig im Lagebild: Hensoldt-China-April-2025-Export-Kontroll-Verschärfung deutet auf erhöhte Defence-Industrial-Base-Bedrohung. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf BfV-/MAD-Sofort-Einbindung, BSI-NIS2-§-8d-Erstmeldung (24-h-Frist), BMVg-Auftrags-Information mit Sicherheits-Akkreditierungs-Risiko-Bewertung, BAFA-Information falls Export-relevante Programme betroffen, Lösegeld-Frage mit zusätzlicher VS-Compromise-Schicht (zahlen heißt nicht nur § 89c StGB, sondern VS-Compromise-Eingeständnis), und der zentralen politischen Tragweite mit ggf. Bundeskanzleramt-Konsultation bei Attribuierung an staatlichen Akteur. Realitäts-Anker: NATO-/Deutschland-/Tschechien-APT28-Attribution Mai 2024, Rheinmetall-BlackBasta-IT-Trennungs-Lehre April 2023, BfV-Sicherheits-Hinweis März 2025 an Verteidigungs-Industrie. Das Szenario komprimiert auf 180 Minuten.",
+        "sectors": [
+          "Rüstung und Verteidigung"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "NIS2",
+          "SÜG",
+          "VSA",
+          "AWG",
+          "KWKG"
+        ],
+        "durationMinutes": 180,
+        "roles": [
+          {
+            "id": "role-geschaeftsfuehrung",
+            "title": "Krisenstabs-Leitung (Geschäftsführung)",
+            "briefing": "Politische und operative Letztverantwortung. Defence-Spezifik: Lösegeld- und Pressemitteilungs-Entscheidungen mit diplomatischer Tragweite — bei staatlichen Akteuren ggf. Bundeskanzleramt-Konsultation, persönliche Haftung nach KWKG, AWG und § 99 StGB. Schnittstelle zu BMVg-Bedarfsträger-Spitze und ggf. NATO-Industrial-Security-Verbund. Strategische Freigaben (BfV-/MAD-Eskalation, Press-Sprachregelung mit politischer Diplomatie, Vertrags-Implikations-Bewertung)."
+          },
+          {
+            "id": "role-sicherheitsbeauftragter",
+            "title": "Sicherheitsbeauftragter (BMVg-CSA)",
+            "briefing": "Personal- und Objekt-Sicherheits-Lead, MAD-/BfV-Liaison, VS-Akkreditierungs-Verantwortung. Defence-Spezifik: Bei Spionage-Verdacht Pflicht-Eskalation an MAD (Militärischer Abschirmdienst — zuständig für Spionageabwehr im Geschäftsbereich BMVg). Bewertet VS-Compromise-Reichweite (welche Klassifizierungs-Stufen betroffen, welche Programme), trifft erste Eindämmungs-Entscheidungen (Air-Gap-Verstärkung, VS-Container-Isolation, betroffene Mitarbeiter-Konten-Sperrung mit MAD-Abstimmung)."
+          },
+          {
+            "id": "role-it-soc",
+            "title": "IT-Leitung / SOC-Lead",
+            "briefing": "Operative IT-/Cyber-Verantwortung. Hat den Vorfall im SIEM erkannt, koordiniert externe Forensik-Firma (Defence-spezialisiert, vor-vertraglich gebunden mit 4-h-SLA), führt technische Eindämmungs-Maßnahmen (Konten-Sperrung, Netzwerk-Segmentierung, Microsoft-Outlook-Patch-Verifikation, Router-Härtung gegen TP-Link-Hijack-Pattern). Schnittstelle zu BSI-CERT-Bund und ggf. NATO-NCIRC."
+          },
+          {
+            "id": "role-bafa-compliance",
+            "title": "BAFA-Compliance-Officer (Exportkontrolle)",
+            "briefing": "Bewertet Export-Implikationen: Sind Programme mit ITAR-Komponenten oder NATO-Sensitivität betroffen? Müssen US-/NATO-Partner über VS-Compromise informiert werden? Auswirkungen auf laufende BAFA-Genehmigungen? Defence-Spezifik: bei Kompromittierung von ITAR-relevanten Daten ist US-Notifications-Pflicht über die deutsche BMVg-/BAFA-Schnittstelle einzuhalten — versäumte Meldung kann zu ITAR-Sanktionen gegen den Tenant führen."
+          },
+          {
+            "id": "role-bmvg-schnittstelle",
+            "title": "BMVg-Schnittstelle / Programm-Management",
+            "briefing": "Schnittstelle zu BMVg-Bedarfsträger und Bundeswehr-Programmleitung. Bewertet Programm-Implikationen (FCAS, MGCS, U-Boot-Programme, Lenkflugkörper-Programme), informiert BMVg unverzüglich nach VS-konformem Meldepfad, koordiniert mit NATO-Industrial-Security-Officer (NISO) bei NATO-Programmen. Trägt Verantwortung für Sicherheits-Akkreditierungs-Erhalt — bei schwerwiegendem Vorfall droht Akkreditierungs-Audit mit potenziellem Auftrags-Stopp."
+          },
+          {
+            "id": "role-anwalt-defence",
+            "title": "Externer Anwalt (Defence-Recht / IT-Recht)",
+            "briefing": "Berät zu BSIG-§-8d-NIS2-Meldepflicht (24-h-Erstmeldung), § 99 StGB-Implikationen bei staatlichem Akteur, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung + zusätzliche VS-Compromise-Schicht), AWG/KWKG-Implikationen falls Export-relevante Daten kompromittiert, Vertrags-Klauseln mit BMVg/NATO bei Sicherheits-Vorfällen. Defence-Spezifik: Anwalts-Bereitschafts-Vertrag mit Defence-Recht-Spezialisierung ist Pflicht für 24/7-Eskalations-Pfad."
+          },
+          {
+            "id": "role-bfv-mad-liaison",
+            "title": "BfV-/MAD-Liaison-Person (extern)",
+            "briefing": "Vor-vereinbarte Liaison-Person zum BfV-Wirtschaftsschutz-Referat und MAD-Spionageabwehr. Wird bei Spionage-Verdacht ad hoc telefonisch eingebunden. Berät zu Attribuierungs-Hinweisen (APT28/GRU vs. APT29/SVR vs. China-MSS), Forensik-Hinweisen aus laufenden Verfahren, geplanter staatlicher Reaktion. Defence-Spezifik: BfV-/MAD-Konsultation ist nicht optional bei Spionage-Verdacht, sondern Pflicht-Eskalations-Pfad — Frage ist Timing und Koordinations-Stil."
+          },
+          {
+            "id": "role-presse-bka",
+            "title": "Pressesprecher / Bundeskanzleramt-Eskalations-Pfad",
+            "briefing": "Externe Kommunikation mit politischer Sprachregelung. Defence-Spezifik: bei Attribuierung an staatlichen Akteur kann der Vorfall zur diplomatischen Frage werden — Pressemitteilung muss mit Bundeskanzleramt und ggf. Auswärtigem Amt abgestimmt sein. Multi-Channel: Webseite, lokale Presse, Branchen-Presse (CPM Defence Network, Janes), ggf. Tagesschau bei größerer Tragweite. KMW-/Hensoldt-/Rheinmetall-Pattern: Press-Statement extrem zurückhaltend, BMVg-Wording übernehmen."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-soc-anomalie",
+                "title": "SOC-Anomalie-Alarm: ungewöhnliche M365-Login-Pattern",
+                "description": "IT-Leitung/SOC-Lead meldet: SIEM-Alarm um 06:30 Uhr — ungewöhnliche M365-Login-Pattern bei einem F&E-Mitarbeiter (GEHEIM-Stufe, FCAS-Programm-Anteil). Logins aus IP-Bereichen mit bekanntem TP-Link-Router-Hijacking-Profil (NATO-/BSI-Mai-2024-IoC-Liste). Outlook-Webmail-Sitzungs-Token zeigt Re-Authentication aus zwei verschiedenen Geo-Lokationen innerhalb von 30 Minuten (impossible travel). Erste forensische Stichproben: Zugriff auf SharePoint-Bibliothek mit VS-NfD-klassifizierten Programm-Spezifikationen — möglicherweise Kopier-/Download-Vorgänge. F&E-Mitarbeiter selbst ist im Urlaub, Smartphone offline.",
+                "roleId": "role-it-soc"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-eskalation",
+                "question": "Wie wird die Erst-Eskalation gestaltet?",
+                "roleId": "role-it-soc",
+                "guidance": "Defence-Spezifikum: Trade-off zwischen sofortiger BfV-/MAD-Einbindung (rechtlich klar bei Spionage-Verdacht — Pflicht-Pfad nach SÜG, BMVg-CSA-Richtlinien) und kurzer interner Forensik-Phase zur Reichweiten-Bewertung (operativ pragmatisch, aber rechtlich riskant wenn Verdachtsfall verfestigt wird ohne Behörden-Information). Anders als in zivilen Sektoren ist die \"stille interne Phase\" in Defence rechtlich nicht haltbar.",
+                "options": [
+                  {
+                    "id": "opt-bfv-mad-sofort",
+                    "label": "Sofortige BfV-/MAD-Eskalation parallel zu interner Forensik (Sicherheitsbeauftragter ruft MAD-Liaison binnen 30 min an, IT-Leitung beauftragt Defence-spezialisierte externe Forensik mit 4-h-SLA), Geschäftsführung und Anwalt parallel informiert",
+                    "consequence": "Pflicht-Eskalations-Pfad eingehalten, BfV-/MAD-Erkenntnisse aus laufenden Verfahren werden nutzbar, rechtliche Position bei späterem Strafverfahren gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Multi-Eskalation BfV/MAD/Anwalt/Forensik parallel"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-interne-forensik-zuerst",
+                    "label": "Interne Forensik zuerst (60-90 min), erst nach Verdachts-Verfestigung BfV-/MAD-Einbindung",
+                    "consequence": "Defence-Anti-Schablone. Bei VS-Compromise-Verdacht ist die stille Phase rechtlich problematisch — bei späterem Strafverfahren kann die Verzögerung gegen die Geschäftsführung verwendet werden. Schwächste Option.",
+                    "evaluationHints": [
+                      "Stille Phase — defence-rechtlich problematisch"
+                    ],
+                    "scoreContribution": 0
+                  },
+                  {
+                    "id": "opt-mad-zuerst-bfv-spaeter",
+                    "label": "MAD-Liaison sofort (Sicherheitsbeauftragter), BfV-Wirtschaftsschutz-Referat erst nach Verdachts-Verfestigung (1-2 h)",
+                    "consequence": "Pragmatisch — MAD ist primär zuständig im Geschäftsbereich BMVg, BfV ergänzt. Rechtlich vertretbar, aber Empfehlung ist parallele Eskalation. Akzeptabel.",
+                    "evaluationHints": [
+                      "MAD-Eskalation mit BfV-Nachzug"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-governance-krisenstab",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-mad-attribution-hinweis",
+                "title": "MAD-Liaison: Attribuierungs-Hinweis APT28",
+                "description": "MAD-Liaison meldet: aus laufenden Verfahren bekannte IoCs passen zu APT28-Cluster (NATO-/Deutschland-/Tschechien-Attribution Mai 2024). MAD und BfV sehen seit März 2025 verstärkte Defence-Industrial-Base-Aktivität. MAD bittet um forensische Daten-Übergabe binnen 2 h nach VS-konformem Pfad (verschlüsselter Datenträger, Kurier-Übergabe an MAD-Außenstelle Oberammergau). BfV bittet zusätzlich um Wirtschaftsschutz-Beratungs-Termin vor Ort am Nachmittag. Geschäftsführung bittet Sicherheitsbeauftragten um Lagebeurteilung binnen 30 min für Krisenstabs-Konstituierung.",
+                "roleId": "role-bfv-mad-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-vs-container-isolation",
+                "question": "Wie werden die VS-Container/-Systeme isoliert?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Trade-off zwischen vollständiger Isolation aller VS-Container (sicherheitsorientiert, aber legt das gesamte Defence-Geschäft lahm — keine VS-Bearbeitung möglich, BMVg-Auftrags-Stillstand) und gezielter Isolation nur der betroffenen Programm-Container (operativ pragmatisch, aber Eindämmungs-Risiko falls weitere Container kompromittiert sind). Defence-Spezifik: VS-Container-Isolation muss MAD-abgestimmt sein, weil MAD-Forensik laufen muss bevor Container endgültig wieder freigegeben werden.",
+                "options": [
+                  {
+                    "id": "opt-gezielte-isolation-mad",
+                    "label": "Gezielte Isolation der betroffenen Programm-Container (FCAS-Anteil) + Einschränkung der Zugriffsrechte für andere Container auf reine Lese-Operationen, MAD-Abstimmung bei jeder Erweiterung der Isolation",
+                    "consequence": "Operativ pragmatisch, BMVg-Auftrags-Stillstand begrenzt, MAD-Forensik kann gezielt laufen. Empfohlen. Gleichwertig zu opt-vollstaendige-isolation in höchst-eskalierten Fällen.",
+                    "evaluationHints": [
+                      "Gezielte Isolation mit MAD-Abstimmung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-vollstaendige-isolation",
+                    "label": "Vollständige Isolation aller VS-Container, BMVg-Auftrags-Stillstand für alle Programme akzeptieren",
+                    "consequence": "Sicherheits-maximal, aber wirtschaftlich existenzbedrohend. Empfohlen nur bei höchst-eskalierten Fällen mit BMVg-Vorab-Abstimmung. Gleichwertig zu opt-gezielte-isolation-mad bei hoher Eskalation.",
+                    "evaluationHints": [
+                      "Vollständige Isolation — drastisch aber rechtlich sauber"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-keine-isolation",
+                    "label": "Keine Container-Isolation, weiter normaler Betrieb mit verstärktem Logging",
+                    "consequence": "Eindämmungs-Versagen, weitere Exfiltration möglich, MAD-Forensik scheitert. Defence-Anti-Schablone. Schwächste Option.",
+                    "evaluationHints": [
+                      "Keine Eindämmung — gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-governance-krisenstab",
+                  "crit-def-operations-vs-akkreditierung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-konstituiert",
+                "title": "Krisenstab konstituiert + BMVg-Information",
+                "description": "Geschäftsführung hat den Defence-Krisenstab konstituiert: GF, Sicherheitsbeauftragter, IT-Leitung/SOC-Lead, BAFA-Compliance-Officer, BMVg-Schnittstelle, externer Anwalt (Defence-Recht), BfV-/MAD-Liaison telefonisch, Pressesprecher. BMVg-Schnittstelle hat unverzüglich BMVg-Bedarfsträger informiert (FCAS-Programmleitung beim BAAINBw — Bundesamt für Ausrüstung, Informationstechnik und Nutzung der Bundeswehr). BAAINBw bittet um schriftliche VS-Vorfalls-Meldung binnen 4 h und kündigt einen Sicherheits-Akkreditierungs-Audit-Termin innerhalb 5 Werktagen an. Forensik-Firma „Defence-IR Bayern GmbH\" ist eingetroffen.",
+                "roleId": "role-bmvg-schnittstelle"
+              },
+              {
+                "id": "inj-itar-bewertung",
+                "title": "BAFA-Compliance: ITAR-Implikations-Prüfung",
+                "description": "BAFA-Compliance-Officer meldet: FCAS-Programm-Anteile enthalten ITAR-relevante US-Komponenten (US-Hersteller für bestimmte Optronik-Sensoren). Falls VS-Compromise auch ITAR-relevante Daten umfasst, ist US-Notifications-Pflicht über deutsche BMVg-/BAFA-Schnittstelle einzuhalten. Versäumte Meldung kann zu ITAR-Sanktionen gegen den Tenant führen — Lieferungs-Stopp für US-Komponenten, Existenz-Risiko bei reinen ITAR-abhängigen Programmen. Forensik-Firma muss klären, ob ITAR-Daten in der Exfiltrations-Reichweite waren.",
+                "roleId": "role-bafa-compliance"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bsig-erstmeldung",
+                "question": "Wie wird die BSIG-§-8d-NIS2-Erstmeldung gestaltet?",
+                "roleId": "role-anwalt-defence",
+                "guidance": "BSIG-§-8d-Erstmeldungs-Frist: 24 h ab Klassifikation als „Sicherheitsvorfall\" — tickt seit Minute 30. Defence-Spezifik: bei VS-Compromise-Verdacht ist die BSI-Meldung mit der MAD-/BfV-Eskalation zu koordinieren (BSI als zivile Stelle vs. MAD als militärische Stelle). Trade-off zwischen vollständiger strukturierter Erstmeldung mit allen Details (BSI-konform, signalisiert Disziplin) und Minimal-Meldung mit Verweis auf laufende MAD-Untersuchung (knapper, schützt laufende Forensik vor zu früher Offenlegung).",
+                "options": [
+                  {
+                    "id": "opt-meldung-mad-koordiniert",
+                    "label": "BSI-Erstmeldung MAD-koordiniert: Pflichtfelder vollständig, ITAR-Implikations-Prüfung ergänzt, Verweis auf laufende MAD-Untersuchung mit Kontakt-Daten — innerhalb 4 h (deutlich vor 24-h-Frist)",
+                    "consequence": "BSI-konform, MAD-Koordination gewahrt, Anwalt hat Frist-Disziplin dokumentiert. Empfohlen. Gleichwertig zu opt-meldung-vollstaendig.",
+                    "evaluationHints": [
+                      "MAD-koordinierte BSI-Erstmeldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-meldung-vollstaendig",
+                    "label": "Vollständige strukturierte BSI-Erstmeldung mit allen NIS2-Pflichtfeldern, ohne MAD-Koordination — innerhalb 4 h",
+                    "consequence": "BSI-konform, aber MAD-Koordination versäumt — bei späteren Verfahren kann die fehlende Abstimmung problematisch sein. Akzeptabel. Gleichwertig zu opt-meldung-mad-koordiniert in unkomplizierten Fällen.",
+                    "evaluationHints": [
+                      "Vollständige BSI-Erstmeldung ohne MAD-Koordination"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-meldung-verspaetet",
+                    "label": "BSI-Erstmeldung erst nach 24 h aus Sorge um MAD-Forensik",
+                    "consequence": "BSIG-Verstoß. Bußgeld-Risiko bis 10 Mio. € + persönliche GF-Haftung nach § 38 BSIG. MAD-Forensik-Schutz ist kein BSI-Frist-Aussetzungs-Grund. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Frist-Verstoß"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-bsig",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-loesegeld-mail",
+                "title": "Erpresser-Mail mit VS-Daten-Probe-Anhang",
+                "description": "IT-Leitung meldet: über das info@-Postfach ist eine Mail eingegangen mit Betreff „We have your FCAS classified specifications. Pay 1.500.000 EUR in BTC within 72h or we publish them on the Dark Web.\" Anhang enthält Stichproben aus dem FCAS-Programm-Container (vermutlich VS-NfD bis VS-VERTRAULICH). Forensik-Firma bestätigt: Stichproben sind authentisch, Exfiltration also bestätigt. Erpresser-Cluster ist möglicherweise APT28-Affiliated mit zusätzlicher kriminellen Erpressungs-Komponente — staatlicher Akteur kombiniert mit Cyber-Kriminellen-Cluster (BfV-Beobachtung 2024-2025).",
+                "roleId": "role-it-soc"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-loesegeld-vs-doppel-komplikation",
+                "question": "Wie reagiert die Geschäftsführung auf die Lösegeld-Forderung mit VS-Compromise-Schicht?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Defence-Spezifik mit Doppel-Komplikation: Lösegeld an APT28-affiliated Akteure ist nach § 89c StGB (Terrorismusfinanzierung) strafbar UND zahlen heißt VS-Compromise-Eingeständnis (BMVg/MAD-Information mit Auftrags-Implikation). Doppelte Argumentation für Verweigerung. Anders als in zivilen Sektoren: hier gibt es keine \"Zeit-Spielen\"-Option im strafrechtlichen Sinne, weil VS-Material bereits in den Händen des Akteurs ist und die Veröffentlichung den VS-Compromise nicht ändert (er ist bereits eingetreten — Veröffentlichung ist nur die Sichtbarkeit nach außen).",
+                "options": [
+                  {
+                    "id": "opt-nicht-zahlen-bka-mad",
+                    "label": "Lösegeld verweigern, BKA-Anzeige (§ 100 Abs. 1 StPO via Anwalt), MAD-/BfV-Information (Pflicht-Pfad bereits aktiv), BMVg-Information mit VS-Compromise-Eingeständnis, Forensik mit IR-Firma intensivieren, Wiederaufbau aus Air-Gap-Backup priorisieren",
+                    "consequence": "Rechtlich saubere und einzig empfohlene Variante. § 89c StGB- und § 99 StGB-Konflikte vermieden. BMVg-Information unverzüglich gestützt durch Anwalts-Schreiben. Empfohlen.",
+                    "evaluationHints": [
+                      "Lösegeld-Verweigerung mit Behörden-Eskalation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zeit-spielen-mit-mad",
+                    "label": "Verhandeln-um-Zeit-zu-gewinnen mit MAD-Beratung (sehr restriktiv, weil VS-Material bereits exfiltriert ist)",
+                    "consequence": "Im Defence-Kontext sehr selten zulässig — MAD prüft im Einzelfall ob Verhandlungs-Zeit forensischen Gewinn bringt (z. B. Akteur-Identifikation), aber Standard-Position ist Verweigerung. Im Mittelstands-Kontext ohne MAD-Hintergrund-Wissen riskant. Akzeptabel nur bei expliziter MAD-Empfehlung.",
+                    "evaluationHints": [
+                      "MAD-gestützte Verzögerungs-Taktik — sehr restriktiv"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-zahlen-aus-verzweiflung",
+                    "label": "1,5 Mio. € BTC zahlen, um VS-Veröffentlichung zu vermeiden",
+                    "consequence": "§ 89c StGB-Verstoß bei APT28-Affiliated, persönliche GF-Haftung, VS-Compromise-Eingeständnis bleibt bestehen (Veröffentlichung verhindert, aber Material ist bereits beim Akteur — Compromise-Schaden gleich). MAD-/BfV-Verfahren gegen Tenant. Existenz-Risiko. Kontraindiziert auf allen Achsen.",
+                    "evaluationHints": [
+                      "Lösegeld-Zahlung — strafrechtlich + akkreditierungs-rechtlich problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-governance-krisenstab",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bsi-meldung-erfolgt",
+                "title": "BSI-Erstmeldung erfolgt + ITAR-Implikations-Bewertung",
+                "description": "Anwalt hat BSI-Erstmeldung MAD-koordiniert über das BSI-Meldeportal abgesetzt — Bestätigung eingegangen. BAFA-Compliance-Officer meldet: ITAR-Implikations-Prüfung läuft, vorläufige Einschätzung ist „wahrscheinlich ITAR-relevant\" (FCAS-Optronik-Komponenten enthalten US-Spezifikationen). US-Notifications-Pflicht aktiv. BAFA empfiehlt unverzüglich Information an US-Hersteller über deutsche Schnittstelle, mit BMVg-Vorab-Abstimmung. Forensik-Firma hat erste vollständige Reichweiten-Bewertung: ca. 8 Stunden lang aktiver Zugriff auf VS-NfD- und VS-VERTRAULICH-Container, ca. 2-3 GB Daten exfiltriert, F&E-Mitarbeiter-Account weiterhin kompromittiert (Mitarbeiter-Kontakt bleibt offline).",
+                "roleId": "role-anwalt-defence"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-itar-us-notification",
+                "question": "Wie wird die US-Notifications-Pflicht (ITAR) erfüllt?",
+                "roleId": "role-bafa-compliance",
+                "guidance": "ITAR-Notifications-Pflicht ist rechtlich klar (Verstoß führt zu ITAR-Sanktionen mit Lieferungs-Stopp), aber das Timing ist heikel: zu früh heißt unvollständige Forensik-Daten, zu spät heißt Compliance-Verstoß. Defence-Spezifik: US-Hersteller wird die Information voraussichtlich an US-Department-of-State weitergeben, das wiederum diplomatisch eskalieren kann. Sprachregelung muss BMVg-/Auswärtiges-Amt-koordiniert sein.",
+                "options": [
+                  {
+                    "id": "opt-itar-koordiniert",
+                    "label": "ITAR-Notification mit BMVg-/Auswärtiges-Amt-Koordinations-Sprachregelung binnen 24 h, neutraler Sachverhalts-Bericht ohne politische Attribution (Attribuierung bleibt MAD/BfV)",
+                    "consequence": "ITAR-Compliance gewahrt, diplomatische Eskalation kontrolliert, BMVg-Position gestützt. Empfohlen.",
+                    "evaluationHints": [
+                      "Koordinierte ITAR-Notification mit politischer Sprachregelung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-itar-direkt",
+                    "label": "Direkte Information an US-Hersteller ohne politische Sprachregelung, neutraler Sachverhalts-Bericht",
+                    "consequence": "ITAR-Compliance gewahrt, aber ohne politische Sprachregelung Risiko diplomatischer Verkomplikation. Akzeptabel bei klarem nicht-staatlichen Akteur, problematisch bei APT28-Attribution.",
+                    "evaluationHints": [
+                      "Direkte ITAR-Notification ohne Sprachregelung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-itar-verzoegern",
+                    "label": "ITAR-Notification verzögern bis Forensik abgeschlossen (1-2 Wochen)",
+                    "consequence": "ITAR-Verstoß. ITAR-Sanktionen gegen Tenant mit Lieferungs-Stopp für US-Komponenten — Existenz-Risiko bei FCAS-Programm. Kontraindiziert.",
+                    "evaluationHints": [
+                      "ITAR-Verstoß durch Verzögerung"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-itar",
+                  "crit-def-supply-itar"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bundeskanzleramt",
+                "title": "BfV-Liaison: Bundeskanzleramt-Konsultations-Empfehlung",
+                "description": "BfV-/MAD-Liaison meldet: Attribuierung an APT28-Cluster ist verfestigt — IoCs passen vollständig zu NATO-/Mai-2024-Profil. BfV empfiehlt: bei verfestigter Attribuierung an staatlichen Akteur ist Bundeskanzleramt-Konsultation politisch geboten — der Vorfall kann zur diplomatischen Frage werden. Bundeskanzleramt würde voraussichtlich mit dem Auswärtigen Amt eine politische Sprachregelung abstimmen, vor der Tenant-Pressemitteilung. Geschäftsführung muss entscheiden, ob sie die Konsultation aktiv anstößt (über BMVg-/BfV-Pfad) oder reaktiv abwartet.",
+                "roleId": "role-bfv-mad-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bundeskanzleramt-konsultation",
+                "question": "Wird die Bundeskanzleramt-Konsultation aktiv angestoßen?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Defence-Spezifik mit politischer Tragweite: bei staatlichem Akteur (APT28/GRU) wird der Vorfall zur diplomatischen Frage. Trade-off zwischen aktiver Konsultation (Initiative zeigt Defence-Industrie-Bewusstsein, Sprachregelung wird mit-koordiniert) und reaktiver Position (Bundeskanzleramt entscheidet selbst über Konsultations-Bedarf, Tenant bleibt im Hintergrund).",
+                "options": [
+                  {
+                    "id": "opt-bka-aktiv",
+                    "label": "Aktiv über BMVg-/BfV-Pfad Bundeskanzleramt-Konsultation anstoßen, Tenant-Pressemitteilung erst nach politischer Sprachregelung — koordiniert mit Auswärtigem Amt",
+                    "consequence": "Politisch klug, Defence-Industrie-Bewusstsein dokumentiert, Tenant-Reputation als verantwortlicher Defence-Partner gestärkt. Empfohlen. Gleichwertig zu opt-bka-reaktiv bei sehr klarem Sachverhalt.",
+                    "evaluationHints": [
+                      "Aktive Bundeskanzleramt-Konsultation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bka-reaktiv",
+                    "label": "Reaktive Position — Bundeskanzleramt entscheidet selbst über Konsultations-Bedarf, Tenant-Pressemitteilung nach BMVg-Sprachregelung",
+                    "consequence": "Politisch zurückhaltend, weniger Initiative aber dafür kein Anschein der Selbst-Wichtigtuerei. Akzeptabel bei kleineren Tenants oder klar nicht-systemischer Bedrohung. Gleichwertig zu opt-bka-aktiv bei klar-eingegrenzter Lage.",
+                    "evaluationHints": [
+                      "Reaktive politische Position"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bka-uebergehen",
+                    "label": "Direkt eigene Pressemitteilung ohne politische Sprachregelung",
+                    "consequence": "Diplomatische Verkomplikation möglich, BMVg-/BfV-Beziehung beschädigt, ggf. Sicherheits-Akkreditierungs-Audit-Verschärfung. Schwächste Option.",
+                    "evaluationHints": [
+                      "Eigenmächtige Pressemitteilung — politisch problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-communication-politik",
+                  "crit-def-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-stabilisierung",
+                "title": "Stabilisierung: VS-Container wiederhergestellt + Programm-Implikations-Klärung",
+                "description": "IT-Leitung meldet: VS-Container neu aufgesetzt aus Air-Gap-Backup (Stand 24 h vor Vorfall, kein Datenverlust für die letzten 24 h da Backup täglich), kompromittierter F&E-Mitarbeiter-Account gesperrt mit MAD-Abstimmung, neue Credentials für betroffene FCAS-Programm-Mitarbeiter mit FIDO2-Token. BMVg-Schnittstelle meldet: BAAINBw-Programmleitung ist informiert, Sicherheits-Akkreditierungs-Audit-Termin in 4 Werktagen, vorläufige Einschätzung „Akkreditierung bleibt erhalten unter Auflagen\" — Auflagen werden im Audit definiert. F&E-Mitarbeiter ist erreichbar (Urlaubs-Smartphone-Probleme), MAD-Vernehmung läuft (kein Verdacht gegen den Mitarbeiter, sondern Opfer-Position).",
+                "roleId": "role-it-soc"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-presse-strategie",
+                "question": "Wie wird die Pressemitteilung gestaltet?",
+                "roleId": "role-presse-bka",
+                "guidance": "Defence-Spezifik: Pressemitteilung muss BMVg-Sprachregelung übernehmen, ohne staatlichen Akteur zu benennen (Attribuierung ist Sache der Bundesregierung, nicht des Tenants). Trade-off zwischen substanzieller Information (verantwortungsvoll, Branchen-Vertrauen) und maximal zurückhaltender Information (Sicherheits-Logik, BMVg-Wording).",
+                "options": [
+                  {
+                    "id": "opt-presse-bmvg-wording",
+                    "label": "Maximal zurückhaltende Pressemitteilung mit BMVg-Wording: „Wir hatten einen Cyber-Vorfall, BSI/BfV/MAD sind eingebunden, Bundeswehr-Programme nicht beeinträchtigt, weitere Auskünfte über die zuständigen Behörden\" — keine eigene Attribuierung",
+                    "consequence": "BMVg-konform, defensiv aber rechtlich sauber. Empfohlen — KMW-/Hensoldt-/Rheinmetall-Pattern.",
+                    "evaluationHints": [
+                      "Maximal zurückhaltende BMVg-Pressemitteilung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-presse-substanziell",
+                    "label": "Substanziellere Pressemitteilung mit eigener Lage-Beschreibung (ohne staatliche Attribuierung), Hinweis auf erfolgreiche Eindämmung",
+                    "consequence": "Branchen-Vertrauen gestärkt, aber BMVg-Wording-Disziplin schwächer. Akzeptabel bei klarer BMVg-Vorab-Abstimmung. Bei nicht abgestimmter Sprachregelung problematisch.",
+                    "evaluationHints": [
+                      "Substanziellere Pressemitteilung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-presse-attribution",
+                    "label": "Eigene staatliche Attribuierung in der Pressemitteilung („vermutlich Russland-affiliated\")",
+                    "consequence": "Diplomatische Verkomplikation, BMVg-/Auswärtiges-Amt-Beziehung beschädigt, ggf. Klage des attribuierten Staates wegen Tenant-Vorpreschen. Defence-Anti-Schablone. Schwächste Option.",
+                    "evaluationHints": [
+                      "Eigene Attribuierung — diplomatisch problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-communication-politik",
+                  "crit-def-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 160,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-akkreditierungs-audit",
+                "title": "BAAINBw-Akkreditierungs-Audit-Vorbereitung",
+                "description": "BMVg-Schnittstelle meldet: BAAINBw-Akkreditierungs-Audit in 4 Werktagen — Sicherheitsbeauftragter und Geschäftsführung müssen vorbereiten. Erwartete Auflagen: zusätzliche MFA-Verstärkung (FIDO2-Pflicht für alle GEHEIM-Stufe-Mitarbeiter), VS-Container-Air-Gap-Verstärkung mit zusätzlicher Netzwerk-Segmentierung, halbjährliche statt jährliche SÜG-Re-Erklärung für FCAS-Mitarbeiter, externe Sicherheits-Audit-Berichte. Investitions-Volumen geschätzt 800 K - 1,5 Mio. € binnen 6 Monaten. Bei Nicht-Erfüllung droht Programm-Aussetzung.",
+                "roleId": "role-bmvg-schnittstelle"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-akkreditierungs-investition",
+                "question": "Wie wird die Akkreditierungs-Auflagen-Investition gehandhabt?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Defence-Spezifik: Akkreditierungs-Auflagen sind nicht verhandelbar — nicht-Erfüllung = Programm-Aussetzung. Frage ist nur das Tempo und die Strategie. Trade-off zwischen Sofort-Investition mit eigenem Cashflow (proaktiv, signalisiert Disziplin) und Verhandlung mit BMVg über Investitions-Zuschuss bzw. Verteilung über mehrere Quartale.",
+                "options": [
+                  {
+                    "id": "opt-investition-sofort",
+                    "label": "Sofort-Investition aus eigenem Cashflow (800 K € sofort, 700 K € im Q3), proaktive Umsetzung mit BMVg-Berichts-Disziplin",
+                    "consequence": "Disziplin signalisiert, BMVg-Vertrauen gestärkt, Akkreditierungs-Erhalt gesichert. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofort-Investition aus eigenem Cashflow"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-investition-verhandeln",
+                    "label": "Verhandlung mit BMVg über Investitions-Zuschuss bzw. Verteilung über 12 Monate",
+                    "consequence": "Pragmatisch bei Cashflow-Stress, aber BMVg-Vertrauen leicht beschädigt. Akzeptabel bei klar dokumentierter Cashflow-Realität.",
+                    "evaluationHints": [
+                      "Verhandlungs-Position bei BMVg"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-operations-vs-akkreditierung",
+                  "crit-def-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 175,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein. Erste Erkenntnisse: SOC-Anomalie-Detection war Goldwert (Erkennung in 90 min nach Initial-Access — verglichen mit Industrie-Durchschnitt von 200+ Tagen), MAD-Liaison war hochproduktiv (Attribuierung in 30 min), Anwalt-Bereitschafts-Vertrag mit Defence-Recht-Spezialisierung war Schlüssel für Frist-Disziplin. Verbesserungspunkte: F&E-Mitarbeiter-MFA war noch SMS-basiert (jetzt FIDO2-Pflicht), Microsoft-Outlook-Patch-Disziplin war 2 Wochen verzögert (Risiko-Akzeptanz wird neu kalibriert), TP-Link-Router-Inventar war unvollständig (Lieferanten-Vetting wird verschärft), Backup-Frequenz für VS-Container auf 4-stündig statt täglich.",
+                "roleId": "role-it-soc"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-lessons-folge-meldung",
+                "question": "Wie wird die BSIG-Folgemeldung (72 h) und der Abschlussbericht (1 Monat) koordiniert?",
+                "roleId": "role-anwalt-defence",
+                "guidance": "BSIG-§-8d-Folgemeldungs-Pflicht: 72-h-Folgemeldung mit vollständiger Vorfalls-Beschreibung, 1-Monats-Abschlussbericht. MAD-Koordination weiter laufend. Defence-Spezifik: Abschlussbericht muss BAAINBw-Akkreditierungs-Auflagen-Erfüllung integrieren.",
+                "options": [
+                  {
+                    "id": "opt-folgemeldung-mad-baainbw",
+                    "label": "Koordinierte Folgemeldung mit MAD und BAAINBw-Akkreditierungs-Auflagen-Erfüllung als integriertes Paket — gemeinsame Faktenbasis, adressaten-spezifische Überleitungen (BSI: NIS2-Compliance, MAD: Spionage-Verfahren, BAAINBw: Akkreditierung)",
+                    "consequence": "Effizient, BSI-/MAD-/BAAINBw-konform, Tenant signalisiert Disziplin. Empfohlen.",
+                    "evaluationHints": [
+                      "Koordinierte Multi-Behörden-Folgemeldung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-folgemeldung-getrennt",
+                    "label": "Getrennte Folgemeldungen pro Behörde, jeweils adressaten-spezifisch erstellt",
+                    "consequence": "Spezifischer, aber Doppel-Aufwand und Risiko widersprüchlicher Aussagen. Akzeptabel bei sehr unterschiedlichen Faktenlagen.",
+                    "evaluationHints": [
+                      "Getrennte Behörden-Meldungen"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-bsig",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 180,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 8 evaluationCriteria-Achsen. Multi-Eskalation BfV/MAD/BSI/BAFA in Frist und MAD-koordiniert, gezielte VS-Container-Isolation, Lösegeld verweigert mit Doppel-Argumentation (§ 89c StGB + VS-Compromise-Eingeständnis), ITAR-Notification BMVg-koordiniert, Bundeskanzleramt-Konsultation aktiv angestoßen, Pressemitteilung mit BMVg-Wording, Akkreditierungs-Auflagen-Investition sofort aus Cashflow. Lessons-Learned: FIDO2-Pflicht ausweiten, Patch-Disziplin verschärfen, TP-Link-Router-Inventar lückenlos, Backup-Frequenz auf 4-stündig, MAD-Liaison-Beziehung als formelle Quartals-Meeting-Struktur.",
+                "roleId": "role-geschaeftsfuehrung"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-def-reporting-bsig",
+            "description": "BSIG-§-8d-NIS2-Erstmeldung (24 h) MAD-koordiniert + Folgemeldung + Abschlussbericht",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-def-reporting-bfv-mad",
+            "description": "BfV-/MAD-Sofort-Eskalation als Pflicht-Pfad bei Spionage-Verdacht",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-def-reporting-itar",
+            "description": "ITAR-US-Notifications-Pflicht (Compliance-Erhalt für US-Komponenten)",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-def-governance-krisenstab",
+            "description": "Defence-Krisenstabs-Konstituierung mit politischer Letztverantwortung der Geschäftsführung",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-def-operations-vs-akkreditierung",
+            "description": "VS-Container-Isolation MAD-abgestimmt, BAAINBw-Akkreditierungs-Erhalt",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-def-supply-itar",
+            "description": "ITAR-Lieferanten-Beziehung-Erhalt durch Compliance-Disziplin",
+            "weight": 2,
+            "category": "supply"
+          },
+          {
+            "id": "crit-def-communication-politik",
+            "description": "Politische Sprachregelung mit BMVg/Bundeskanzleramt/Auswärtigem Amt",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-def-cross-sector-bka",
+            "description": "Bundeskanzleramt-Konsultations-Pfad bei staatlichem Akteur",
+            "weight": 2,
+            "category": "cross_sector"
+          }
+        ]
+      },
+      {
+        "id": "tabletop-def-insider-vs-zugang-exfiltration",
+        "version": "1.0.0",
+        "title": "Insider mit VS-Zugang exfiltriert vermutlich an fremden Nachrichtendienst",
+        "summary": "Sicherheitsbeauftragter eines Defence-Tenants (Donau-Defence GmbH, ~ 900 MA, BMVg-Direktauftrag, NATO-Industrial-Security-Akkreditierung) erkennt Anomalie-Pattern bei einem Mitarbeiter mit GEHEIM-Stufe-Zugang im FCAS-Programm: drei nicht-angezeigte Auslandsreisen in den letzten 6 Monaten (Türkei, UAE, Singapur — Drittland-Treffpunkte mit Risiko-Profil), plötzlicher Lebensstandard-Wechsel (neuer Premium-Wagen, Renovierung der Wohnung, Auslands-Immobilien-Erwerb), ungewöhnliche Datenzugriffs-Pattern im SOC-Logging (Zugriff auf VS-Container außerhalb der eigenen Programm-Zuständigkeit, Kopier-Vorgänge auf USB-Laufwerk gegen Vier-Augen-Prinzip-Vorgabe). Mitarbeiter ist seit 12 Jahren im Unternehmen, 5 Jahre im FCAS-Programm, ÜP2-Sicherheitsüberprüfung 2022 unauffällig — operativer Charakter passt zu „im Laufe gedrehter Insider\", nicht zu vor-Anstellung-infiltriertem Maulwurf. SÜG-/MAD-Verfahren-Verdacht. Das Szenario simuliert die ersten 2,5 Stunden mit Fokus auf MAD-Sofort-Konsultation (Pflicht-Eskalation bei SÜG-Verdachtsfall), Beobachtung-vs-Suspensions-Entscheidung (operative Sicherheits-Frage mit MAD-Koordination), BMVg-Information-Timing (Programm-Implikations-Bewertung), Personal-Akten-Sicherung (Beweis-Erhaltung für mögliches § 99 StGB-Verfahren), Kommunikation an betroffene Programm-Mitarbeiter*innen (ohne Insiderwissens-Leak), Mitarbeiter-Information mit Schweigepflicht-Disziplin.",
+        "sectors": [
+          "Rüstung und Verteidigung"
+        ],
+        "applicableRegimes": [
+          "SÜG",
+          "VSA",
+          "StGB §99",
+          "BSIG",
+          "NIS2"
+        ],
+        "durationMinutes": 150,
+        "roles": [
+          {
+            "id": "role-sicherheitsbeauftragter",
+            "title": "Sicherheitsbeauftragter (Krisenstabs-Leitung im SÜG-Verdachtsfall)",
+            "briefing": "Operative Letztverantwortung im SÜG-Verdachtsfall — anders als bei Cyber-Vorfällen (wo GF Krisenstabs-Leitung ist), ist bei Spionage-Verdacht der Sicherheitsbeauftragte die operative Spitze, weil MAD-Koordination Personal-Sicherheits-Frage ist. Trifft erste Eindämmungs-Entscheidungen (Beobachtung vs. Suspension), koordiniert MAD-Liaison, schützt Beweis-Lage, informiert GF und Programm-Management. Defence-Spezifik: SÜG-Verdachtsfall-Verfahren ist hochsensibel, jede Falsch-Behandlung kann sowohl § 99 StGB-Verfahren gegen Mitarbeiter als auch arbeitsrechtliche Klage gegen Tenant gefährden."
+          },
+          {
+            "id": "role-mad-liaison",
+            "title": "MAD-Liaison (Spionageabwehr im Geschäftsbereich BMVg)",
+            "briefing": "Vor-vereinbarte MAD-Liaison-Person, ad hoc telefonisch im Krisenstab. Defence-Spezifik: MAD ist primär zuständig für Spionageabwehr im Geschäftsbereich BMVg — bei Defence-Tenants mit BMVg-Auftrag ist MAD die erste Behörden-Eskalation, nicht BfV. MAD bewertet Verdachts-Indikatoren, kann verdeckte Maßnahmen anordnen (Telekommunikations-Überwachung, Observation), entscheidet über strafrechtliche Eskalation an BKA/Generalbundesanwalt."
+          },
+          {
+            "id": "role-geschaeftsfuehrung",
+            "title": "Geschäftsführung",
+            "briefing": "Politische und operative Eskalations-Spitze. Wird vom Sicherheitsbeauftragten in den Krisenstab gerufen, übernimmt Verantwortung für Suspensions-Entscheidung, Personal-Information-Disziplin, BMVg-Information-Timing. Defence-Spezifik: bei Programm-Implikations-Risiko (FCAS-Anteil betroffen) muss GF unverzüglich BAAINBw-Programmleitung informieren — versäumte Information kann zur Akkreditierungs-Verschärfung führen."
+          },
+          {
+            "id": "role-personal-arbeitsrecht",
+            "title": "Personal-Leitung mit externem Anwalt (Arbeitsrecht / Defence-Recht)",
+            "briefing": "Berät zu arbeitsrechtlichen Aspekten der Suspensions-Entscheidung (Freistellung mit Lohnfortzahlung vs. fristlose Kündigung — letztere nur mit klarer Beweis-Lage), Personal-Akten-Sicherung mit Datenschutz-Disziplin (kein Daten-Verlust durch Akte-Lücken, aber kein voreiliger Daten-Transfer an MAD ohne Anwalts-Begleitung), § 99 StGB-Implikationen für eventuelles Strafverfahren. KMU-Defence-Realität: keine Inhouse-Arbeitsrecht-Abteilung bei Mittelständlern, externer Anwalt mit Defence-Spezialisierung wird ad hoc eingebunden."
+          },
+          {
+            "id": "role-bmvg-programm",
+            "title": "BMVg-Schnittstelle / FCAS-Programm-Management",
+            "briefing": "Bewertet Programm-Implikationen: Welche FCAS-Inhalte hatte der Verdächtige im Zugriff? Welche Programm-Phase kann betroffen sein? Welche Information muss BAAINBw bekommen, in welcher Sprachregelung? Defence-Spezifik: bei Insider-Verdacht mit aktivem Programm-Zugang ist die BAAINBw-Information unverzüglich Pflicht (anders als bei abstrakten Vorfällen mit unklarem Programm-Bezug, wo Zeit für interne Klärung möglich ist)."
+          },
+          {
+            "id": "role-it-soc",
+            "title": "IT-Leitung / SOC-Lead",
+            "briefing": "Operative SOC-Verantwortung. Hat die ungewöhnlichen Datenzugriffs-Pattern erkannt und an Sicherheitsbeauftragten gemeldet. Trägt Verantwortung für VS-Container-Zugriffs-Logs (Beweis-Sicherung mit forensischer Integrität), Account-Aktivitäts-Tracking, ggf. spätere Account-Sperrung mit MAD-Abstimmung."
+          },
+          {
+            "id": "role-bka-staatsanwaltschaft",
+            "title": "BKA / Generalbundesanwalt-Eskalations-Pfad",
+            "briefing": "Vor-vorbereiteter Eskalations-Pfad bei Verfestigung des § 99 StGB-Verdachts. MAD entscheidet über Übergabe an BKA/Generalbundesanwalt — Tenant ist bei strafrechtlicher Eskalation Beweismittel-Lieferant, nicht Verfahrensbeteiligter. Strafverfahren wegen geheimdienstlicher Agententätigkeit sind Bundessache (Generalbundesanwalt). Im Tabletop simuliert als ad-hoc-Konsultations-Rolle."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-anomalie-pattern",
+                "title": "Sicherheitsbeauftragter erkennt Anomalie-Pattern",
+                "description": "Sicherheitsbeauftragter meldet seinem Stellvertreter und der Geschäftsführung: Mitarbeiter „M\" (12 Jahre im Unternehmen, ÜP2-Stufe, FCAS-Programm-Anteil) zeigt mehrere zusammenfließende Anomalien. (1) Drei nicht-angezeigte Auslandsreisen in 6 Monaten — Türkei, UAE, Singapur, Drittland-Treffpunkte mit Risiko-Profil; SÜG-Anzeigepflicht verletzt. (2) Lebensstandard-Wechsel: neuer Premium-Wagen, Wohnungs-Renovierung, Auslands-Immobilien-Erwerb in Kroatien — auf das Gehalts-Niveau nicht plausibel erklärbar (Personalakte zeigt keine Erbschaft, keine Beförderung). (3) SOC-Logging zeigt: in den letzten 4 Monaten 14 Zugriffe auf VS-Container außerhalb der eigenen Programm-Zuständigkeit, 7 Kopier-Vorgänge auf USB-Laufwerk gegen Vier-Augen-Prinzip-Vorgabe. Pattern passt zu „im Laufe gedrehter Insider\".",
+                "roleId": "role-sicherheitsbeauftragter"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-mad-eskalation",
+                "question": "Wann und wie wird MAD eskaliert?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Defence-Spezifik mit klarer Pflicht-Eskalation: SÜG-Verdachtsfall mit Spionage-Indikatoren ist Pflicht-Eskalation an MAD. Trade-off ist nur Timing und Koordinations-Stil. Anders als zivile Personal-Vorfälle gibt es hier keine \"interne Klärung zuerst\"-Option. Sofortige MAD-Eskalation ist alternativlos bei diesem Pattern.",
+                "options": [
+                  {
+                    "id": "opt-mad-sofort",
+                    "label": "MAD-Liaison sofort einberufen (binnen 30 min telefonisch), parallele Information an Geschäftsführung und Personal-Leitung mit externem Anwalt, BMVg-Schnittstelle in 60 min",
+                    "consequence": "SÜG-Pflicht-Eskalation eingehalten, Beweis-Lage gesichert, MAD kann verdeckte Maßnahmen vorbereiten. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofortige MAD-Eskalation gemäß SÜG-Pflicht"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-interne-klaerung",
+                    "label": "Erst interne Sicherheitsbeauftragten-Klärung mit GF (60-90 min), dann MAD-Eskalation",
+                    "consequence": "SÜG-Anti-Schablone. Bei späterem § 99 StGB-Verfahren kann die Verzögerung gegen den Tenant verwendet werden. Sicherheitsbeauftragter-Position rechtlich gefährdet (verspätete Pflicht-Eskalation = mögliche Aufsichts-Pflicht-Verletzung).",
+                    "evaluationHints": [
+                      "Verzögerte MAD-Eskalation — pflichtwidrig"
+                    ],
+                    "scoreContribution": 0
+                  },
+                  {
+                    "id": "opt-mitarbeiter-konfrontieren",
+                    "label": "Mitarbeiter direkt konfrontieren, vor MAD-Einbindung Aufklärung versuchen",
+                    "consequence": "Defence-Anti-Schablone. Beweis-Lage gefährdet (Mitarbeiter kann Spuren beseitigen oder fliehen), MAD-Verfahren behindert, ggf. arbeitsrechtliche Klage gegen Tenant wegen Vorverurteilung. Schwächste Option.",
+                    "evaluationHints": [
+                      "Direkte Konfrontation — pflichtwidrig"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-bfv-mad",
+                  "crit-def-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-mad-erste-bewertung",
+                "title": "MAD-Liaison: erste Bewertung des Pattern",
+                "description": "MAD-Liaison meldet nach 12 min telefonischer Bewertung: das Pattern (drei nicht-angezeigte Auslandsreisen + Lebensstandard-Wechsel + ungewöhnliche Datenzugriffs-Pattern) ist bei MAD ein bekannter Indikatoren-Trio für klassische Werbung durch fremden Nachrichtendienst. MAD bestätigt: schon mehrere Defence-Tenant-Vorfälle mit ähnlichem Pattern in 2024-2025, Cluster-Bezug zu russischen oder chinesischen Diensten wahrscheinlich. MAD bittet um (1) sofortige Einstellung sämtlicher Konfrontations-Maßnahmen gegenüber dem Mitarbeiter, (2) Personal-Akten-Sicherung mit forensischer Integrität, (3) SOC-Logging-Daten-Export an MAD-Außenstelle binnen 4 h, (4) keine Suspendierung bis MAD-Anweisung — Beobachtungsphase mit verdeckten Maßnahmen ist die typische erste MAD-Strategie.",
+                "roleId": "role-mad-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-beobachtung-vs-suspension",
+                "question": "Beobachtungsphase mit MAD vs. sofortige Suspension?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Defence-Spezifik: MAD-Empfehlung ist Beobachtung mit verdeckten Maßnahmen, weil das mehr forensischen Erkenntnisgewinn bringt (Auftraggeber-Identifikation, Modus-Operandi, ggf. Mitverdächtige). Tenant-Perspektive ist anders: solange Mitarbeiter nicht suspendiert ist, hat er weiter VS-Zugang — jede Tag bedeutet weitere Exfiltration-Möglichkeit. Trade-off zwischen MAD-Forensik-Gewinn und Schadens-Begrenzung.",
+                "options": [
+                  {
+                    "id": "opt-beobachtung-mit-zugangsbeschraenkung",
+                    "label": "Beobachtungsphase mit MAD-Anweisung folgen, parallel VS-Zugriffs-Beschränkung des Mitarbeiters auf seine Standard-Programm-Zuständigkeit (FCAS-Anteil) — keine Suspension, aber gezielte Berechtigungs-Reduktion ohne dass Mitarbeiter es bemerkt (administrative Anpassung)",
+                    "consequence": "MAD-Forensik-Gewinn maximal, Schadens-Begrenzung pragmatisch. Empfohlen. Gleichwertig zu opt-suspension-mit-mad-abstimmung als alternativer Pfad.",
+                    "evaluationHints": [
+                      "Beobachtungsphase mit Zugangs-Reduktion"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-suspension-mit-mad-abstimmung",
+                    "label": "Sofortige Suspension mit MAD-Abstimmung (MAD-Empfehlung überstimmen wenn Tenant-Schadens-Risiko zu hoch ist), Mitarbeiter wird mit neutraler Begründung freigestellt (keine § 99 StGB-Andeutung)",
+                    "consequence": "Schadens-Begrenzung maximal, MAD-Forensik-Gewinn reduziert. Empfohlen wenn FCAS-Programm-Phase besonders sensitiv ist und weitere Exfiltration nicht akzeptabel. Gleichwertig zu opt-beobachtung-mit-zugangsbeschraenkung als alternativer Pfad.",
+                    "evaluationHints": [
+                      "Sofortige Suspension mit MAD-Abstimmung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-keine-massnahme",
+                    "label": "Keine Maßnahmen ohne MAD-Anweisung",
+                    "consequence": "Schadens-Begrenzung versagt, weiter unbeschränkter VS-Zugang. Bei späterer Auftrags-Implikations-Bewertung wird BAAINBw fragen, warum keine Schadens-Begrenzung erfolgte. Schwächste Option.",
+                    "evaluationHints": [
+                      "Keine Schadens-Begrenzung"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-operations-vs-akkreditierung",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-personal-akten-sicherung",
+                "title": "Personal-Akten-Sicherung mit Anwalts-Begleitung",
+                "description": "Personal-Leitung meldet: externer Anwalt (Defence-Recht) ist eingetroffen, begleitet Personal-Akten-Sicherung mit forensischer Integrität — Akte wird in zwei Kopien gefertigt (Original im Tresor, Arbeits-Kopie für MAD-Übergabe), Anwesenheits-Protokoll, Datums-/Zeit-Stempel. Mitarbeiter ist im Büro anwesend, arbeitet normal — keine Anzeichen, dass er Verdacht geschöpft hat. SOC-Logging-Daten-Export läuft (4-h-MAD-Frist eingehalten). Geschäftsführung ist informiert, BMVg-Schnittstelle wird in 30 min einberufen.",
+                "roleId": "role-personal-arbeitsrecht"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bmvg-information-timing",
+                "question": "Wann wird BMVg-Programmleitung (BAAINBw) informiert?",
+                "roleId": "role-bmvg-programm",
+                "guidance": "Defence-Spezifik: BAAINBw-Information ist bei Programm-Implikations-Verdacht unverzüglich Pflicht. Trade-off zwischen sofortiger Information (Disziplin signalisiert, BAAINBw kann Programm-Schutz-Maßnahmen vorbereiten) und kurz verzögerter Information (Reichweiten-Bewertung erst klar, dann mit substanzieller Sachlage informieren).",
+                "options": [
+                  {
+                    "id": "opt-baainbw-sofort",
+                    "label": "BAAINBw-Programmleitung sofort informieren (binnen 60 min nach Verdachts-Verfestigung), neutraler Sachverhalts-Bericht ohne § 99 StGB-Andeutung, MAD-Verfahren in laufender Abstimmung",
+                    "consequence": "Disziplin signalisiert, BAAINBw kann Programm-Schutz vorbereiten, Vertrauen gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofortige BAAINBw-Information"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-baainbw-mit-reichweiten-bewertung",
+                    "label": "BAAINBw-Information nach erster Reichweiten-Bewertung (4-6 h), substanziellere Sachlage mit Programm-Implikations-Klärung",
+                    "consequence": "Substanziellere Information, aber Verzögerung kann als Disziplin-Mangel interpretiert werden. Akzeptabel bei sehr unklaren Anfangs-Indikatoren, schwächer bei klaren Pattern wie hier.",
+                    "evaluationHints": [
+                      "Verzögerte BAAINBw-Information"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-baainbw-warten",
+                    "label": "BAAINBw-Information erst nach MAD-Verfahrens-Verfestigung (mehrere Werktage)",
+                    "consequence": "BMVg-Anti-Schablone. BAAINBw erfährt zu spät, Akkreditierungs-Konsequenzen können verschärft werden. Schwächste Option.",
+                    "evaluationHints": [
+                      "Spät-Information BAAINBw"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-governance-krisenstab",
+                  "crit-def-operations-vs-akkreditierung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-sicherheitsbeauftragter-fcas-team",
+                "title": "Krisenstab beschäftigt sich mit FCAS-Programm-Mitarbeiter*innen-Information",
+                "description": "Krisenstab beschäftigt sich mit der Frage, ob und wie das FCAS-Programm-Team über die Maßnahmen informiert wird. Pro: 8 Mitarbeiter*innen im FCAS-Team haben tägliche Berührung mit Verdächtigem, könnten weitere Indikatoren liefern oder selbst sensitive Informationen schützen wollen. Contra: Insiderwissens-Leak-Risiko (wenn ein Team-Mitglied dem Verdächtigen Hinweise gibt), Schweigepflicht-Disziplin nach SüG, MAD-Forensik-Risiko durch zu früh informierte Team-Mitglieder.",
+                "roleId": "role-sicherheitsbeauftragter"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-fcas-team-information",
+                "question": "Wird das FCAS-Programm-Team informiert?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Defence-Spezifik: bei aktiver MAD-Beobachtungsphase ist FCAS-Team-Information höchst riskant, weil Insiderwissens-Leak die MAD-Forensik kompromittieren kann. Trade-off: keine Information (Beobachtungs-Schutz, aber Team kann nicht selbst aufpassen) vs. partielle Information (Team-Lead bekommt Hinweis ohne Details, kann Aufsicht verstärken).",
+                "options": [
+                  {
+                    "id": "opt-keine-team-info",
+                    "label": "Keine FCAS-Team-Information bis MAD-Beobachtungsphase abgeschlossen — Schweigepflicht-Disziplin maximal, MAD-Forensik geschützt",
+                    "consequence": "MAD-Forensik-Schutz maximal, Beobachtungsphase erfolgreich. Empfohlen.",
+                    "evaluationHints": [
+                      "Schweigepflicht-Disziplin maximal"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-team-lead-partiell",
+                    "label": "FCAS-Team-Lead partiell informieren (ohne Details: „erhöhte Aufsichts-Pflicht für Programm-Daten, weitere Information später\"), Team-Mitglieder nicht informieren",
+                    "consequence": "Pragmatisch wenn Team-Lead vertrauenswürdig und Aufsichts-Verstärkung sinnvoll ist. Risiko: Team-Lead könnte indirekt Hinweise geben. Akzeptabel mit MAD-Vorab-Abstimmung.",
+                    "evaluationHints": [
+                      "Partielle Team-Lead-Information"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-team-information",
+                    "label": "Vollständige FCAS-Team-Information mit Verdachts-Hinweis",
+                    "consequence": "MAD-Forensik kompromittiert, Insiderwissens-Leak-Risiko hoch, Verdächtiger flieht oder beseitigt Spuren. Defence-Anti-Schablone. Schwächste Option.",
+                    "evaluationHints": [
+                      "Voll-Information — pflichtwidrig"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-communication-team",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bsig-meldepflicht-pruefung",
+                "title": "BSIG-Meldepflicht-Prüfung: Sicherheitsvorfall im NIS2-Sinne?",
+                "description": "Externer Anwalt prüft: SÜG-Insider-Verdachtsfall ist nicht automatisch BSIG-§-8d-NIS2-Sicherheitsvorfall — das ist primär ein SÜG-/Spionageabwehr-Verfahren. Aber: wenn bestätigt wird, dass über die internen Pattern hinaus tatsächlich VS-Daten exfiltriert wurden, ist das ein NIS2-relevanter Sicherheitsvorfall mit 24-h-BSI-Erstmeldungspflicht. Anwalt empfiehlt: vorsichtshalber BSI-Erstmeldung mit MAD-Koordination vorbereiten, aber erst absetzen wenn MAD-Forensik klare Exfiltrations-Bestätigung liefert (nicht voreilig die MAD-Forensik durch BSI-Veröffentlichung kompromittieren).",
+                "roleId": "role-personal-arbeitsrecht"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bsig-erstmeldung-timing",
+                "question": "BSIG-Erstmeldung jetzt oder erst nach MAD-Forensik-Bestätigung?",
+                "roleId": "role-personal-arbeitsrecht",
+                "guidance": "Trade-off zwischen Frist-Disziplin (24-h-Frist tickt ab Klassifikation als Sicherheitsvorfall — Frage ist wann Klassifikation greift) und MAD-Forensik-Schutz (zu früh BSI-Erstmeldung kann MAD-Beobachtungsphase kompromittieren wenn BSI-Information zu Mitarbeiter durchsickert).",
+                "options": [
+                  {
+                    "id": "opt-bsig-mit-mad-abstimmung",
+                    "label": "BSI-Erstmeldung in MAD-Abstimmung absetzen sobald Exfiltration durch MAD-Forensik bestätigt ist, Klassifikations-Zeitpunkt wird mit Anwalt sauber dokumentiert (24-h-Frist-Zähler beginnt mit Klassifikation, nicht mit Verdacht)",
+                    "consequence": "Frist-Disziplin sauber dokumentiert, MAD-Forensik-Schutz gewahrt. Empfohlen.",
+                    "evaluationHints": [
+                      "MAD-koordinierte BSI-Erstmeldung mit Klassifikations-Dokumentation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-bsig-sofort",
+                    "label": "BSI-Erstmeldung sofort als Vorsorge-Meldung („Verdacht auf Sicherheitsvorfall, MAD-Verfahren laufend\")",
+                    "consequence": "Frist-Disziplin maximal, aber MAD-Forensik-Risiko. BSI-Vorsorge-Meldungen sind für solche Fälle nicht ideal — sie blockieren Forensik-Optionen. Akzeptabel bei klar-fortgeschrittener MAD-Lage.",
+                    "evaluationHints": [
+                      "Vorsorge-BSI-Erstmeldung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-bsig",
+                  "crit-def-reporting-bfv-mad"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-mad-update",
+                "title": "MAD-Liaison: Update nach 2 h Beobachtungsphase",
+                "description": "MAD-Liaison meldet nach 2-h-Beobachtungsphase: MAD hat verdeckte Maßnahmen aktiviert (Telekommunikations-Überwachung mit Generalbundesanwalt-Antrag, Observation, ggf. Bundes-Datenschutzbeauftragter-Meldung). Mitarbeiter zeigt heute Nachmittag „normales\" Verhalten — kein Hinweis dass Verdacht geschöpft. MAD bestätigt: Cluster-Bezug deutet auf chinesischen MSS-Nachrichtendienst (nicht russisch wie initial vermutet — auf Basis der Kontaktdaten in den Auslandsreisen). MAD-Strategie: 2-3 Wochen Beobachtung, dann strafrechtliche Eskalation an Generalbundesanwalt mit Verhaftungs-Antrag. Tenant-Aufgabe: Zugriffs-Reduktion ohne Mitarbeiter-Verdacht weiter aufrechterhalten, BMVg-Schnittstelle in laufender Information halten.",
+                "roleId": "role-mad-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-langfristige-strategie",
+                "question": "Wie wird die 2-3-Wochen-Beobachtungs-Strategie operationalisiert?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Defence-Spezifik: lange Beobachtungsphase ist Mittelstands-Tenant-Belastung — Sicherheitsbeauftragter und IT-Leitung müssen 2-3 Wochen lang erhöhte Aufsicht aufrechterhalten ohne dass Tagesgeschäft leidet. Trade-off zwischen voller MAD-Kooperation (2-3 Wochen mit dedizierten Ressourcen) und vorzeitigem Beobachtungs-Ende mit Suspension (kürzere Belastung, aber MAD-Strategie kompromittiert).",
+                "options": [
+                  {
+                    "id": "opt-volle-mad-kooperation",
+                    "label": "Volle MAD-Kooperation mit dedizierten Ressourcen (Sicherheitsbeauftragter + Stellvertreter im Schicht-Modell für 2-3 Wochen, IT-Leitung mit täglichem Zugriffs-Monitoring), Aufwand-Schätzung 80 K - 150 K € externe Beratung",
+                    "consequence": "MAD-Forensik-Erfolg gesichert, Strafverfahren-Vorbereitung optimal, Tenant-Reputation als verlässlicher Defence-Partner gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Volle MAD-Kooperation mit Ressourcen-Investment"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-vorzeitige-suspension",
+                    "label": "Vorzeitige Suspension nach 1-Woche-Beobachtung, MAD-Strategie überstimmen wenn Mittelstand-Ressourcen-Belastung zu hoch wird",
+                    "consequence": "MAD-Forensik-Verlust, ggf. fehlende Beweis-Lage für Strafverfahren. Akzeptabel nur bei klarer Ressourcen-Notlage und MAD-Vorab-Abstimmung.",
+                    "evaluationHints": [
+                      "Vorzeitige Suspension mit MAD-Abstimmung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-reporting-bfv-mad",
+                  "crit-def-operations-vs-akkreditierung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-baainbw-akkreditierung",
+                "title": "BAAINBw-Schnittstelle: Akkreditierungs-Implikations-Bewertung",
+                "description": "BMVg-Schnittstelle meldet: BAAINBw-Sicherheits-Referat hat erste Bewertung übermittelt — Insider-Verdacht mit FCAS-Programm-Bezug ist Akkreditierungs-relevant. Vorläufige Position: Akkreditierung bleibt erhalten unter Auflagen (verstärkte Personal-Sicherheits-Maßnahmen, halbjährliche statt 5-jährliche SÜG-Re-Erklärung für FCAS-Mitarbeiter, externe Sicherheits-Audit-Berichte). Bei Verfestigung des § 99 StGB-Verdachts während 2-3-Wochen-MAD-Phase muss BAAINBw-Akkreditierungs-Audit-Termin angesetzt werden — voraussichtlich 4-6 Werktage nach MAD-Strafverfahrens-Eskalation.",
+                "roleId": "role-bmvg-programm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-akkreditierung-vorbereitung",
+                "question": "Wie wird die Akkreditierungs-Auflagen-Vorbereitung gestaltet?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Defence-Spezifik: Akkreditierungs-Auflagen sind nicht verhandelbar — pragmatische Frage ist Tempo und Vor-Ort-Audit-Vorbereitung. Trade-off zwischen Sofort-Vorbereitung (proaktiv, signalisiert Disziplin) und passiver Audit-Akzeptanz.",
+                "options": [
+                  {
+                    "id": "opt-akkreditierungs-vorbereitung-aktiv",
+                    "label": "Aktive Vorbereitung mit Auflagen-Liste-Vorab-Anfrage bei BAAINBw, externes Audit-Beratungsteam (KPMG/PwC mit Defence-Spezialisierung) eingebunden, Akkreditierungs-Audit-Vorbereitung-Plan mit BAAINBw abgestimmt",
+                    "consequence": "Disziplin signalisiert, Audit-Erfolg-Wahrscheinlichkeit maximal. Empfohlen.",
+                    "evaluationHints": [
+                      "Aktive Akkreditierungs-Vorbereitung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-akkreditierungs-passiv",
+                    "label": "Passive Audit-Akzeptanz, Vorbereitung erst nach BAAINBw-Audit-Termin-Bestätigung",
+                    "consequence": "Disziplin-Mangel, Audit-Erfolg-Wahrscheinlichkeit reduziert. Akzeptabel bei sehr knappen Tenant-Ressourcen.",
+                    "evaluationHints": [
+                      "Passive Audit-Akzeptanz"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-operations-vs-akkreditierung",
+                  "crit-def-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 149,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein. Erste Erkenntnisse: SOC-Logging mit Verhaltens-Anomalie-Erkennung war hochproduktiv (14 Zugriffs-Anomalien + 7 Kopier-Vorgänge in 4 Monaten erkannt — verglichen mit Industrie-Durchschnitt von 200+ Tagen Insider-Detection-Zeit), MAD-Liaison vor-vereinbart war Schlüssel für Pflicht-Eskalations-Disziplin, Personal-Akten-Sicherung mit Anwalts-Begleitung war forensisch sauber. Verbesserungspunkte: SÜG-Auslandsreise-Anzeigepflicht-Compliance war 30 % Verstoß-Rate — Sensibilisierungs-Schulung halbjährlich statt jährlich, finanzielle Lebensumstands-Anomalie-Erkennung (Lebensstandard-Wechsel) wird systematisiert mit Personal-Audit-Quartals-Cadence, MAD-Liaison-Beziehung als formelle Quartals-Meeting-Struktur (statt nur Krisen-Hotline).",
+                "roleId": "role-sicherheitsbeauftragter"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-systemische-lehren",
+                "question": "Welche systemischen Lehren werden aus dem Vorfall gezogen?",
+                "roleId": "role-sicherheitsbeauftragter",
+                "guidance": "Defence-Spezifik: Insider-Verdachtsfälle sind Pattern-Lehre — was hier funktioniert hat, soll auf andere Tenants übertragen werden (über BMVg-/BfV-Industrie-Schutz-Tagungen). Trade-off zwischen Tenant-internen Lehren (eingeschränkt, aber kontrolliert) und Branchen-Wissens-Austausch (breiter Nutzen, aber Risiko der Information über eigene Detection-Methodik).",
+                "options": [
+                  {
+                    "id": "opt-internes-und-branche",
+                    "label": "Tenant-interne Lehren (Schulungs-Cadence, Personal-Audit, MAD-Liaison-Struktur) + Branchen-Wissens-Austausch über BfV-Wirtschaftsschutz-Tagung mit anonymisierter Fallstudie",
+                    "consequence": "Defence-Industrie-Resilienz gesamt gestärkt, Tenant-Reputation als verantwortlicher Branchen-Partner. Empfohlen.",
+                    "evaluationHints": [
+                      "Multi-Lehren-Strategie mit Branchen-Austausch"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-nur-intern",
+                    "label": "Nur Tenant-interne Lehren, kein Branchen-Wissens-Austausch",
+                    "consequence": "Detection-Methodik geschützt, aber Defence-Industrie-Resilienz insgesamt schwächer. Akzeptabel bei sehr sensitiven Detection-Methoden.",
+                    "evaluationHints": [
+                      "Nur interne Lehren"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-def-governance-krisenstab",
+                  "crit-def-cross-sector-bka"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 150,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 7 evaluationCriteria-Achsen. MAD-Sofort-Eskalation gemäß SÜG-Pflicht, Beobachtungsphase mit Zugangs-Reduktion (oder gleichwertig MAD-koordinierte Suspension), BAAINBw-Sofort-Information, FCAS-Team-Schweigepflicht-Disziplin, BSI-Erstmeldung MAD-koordiniert nach Forensik-Bestätigung, volle MAD-Kooperation mit dedizierten Ressourcen, aktive Akkreditierungs-Vorbereitung, Branchen-Wissens-Austausch mit anonymisierter Fallstudie. Lessons-Learned: SÜG-Schulungs-Cadence verschärfen, Personal-Audit mit Lebensstandards-Anomalie-Erkennung, MAD-Liaison-Beziehung als formelle Quartals-Meeting-Struktur.",
+                "roleId": "role-sicherheitsbeauftragter"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-def-reporting-bfv-mad",
+            "description": "MAD-Sofort-Eskalation als SÜG-Pflicht-Pfad, MAD-Forensik-Schutz mit Schweigepflicht",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-def-reporting-bsig",
+            "description": "BSIG-§-8d-Erstmeldung MAD-koordiniert nach Forensik-Bestätigung",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-def-governance-krisenstab",
+            "description": "Sicherheitsbeauftragter als Krisenstabs-Leitung im SÜG-Verdachtsfall, BAAINBw-Sofort-Information",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-def-operations-vs-akkreditierung",
+            "description": "VS-Zugangs-Reduktion ohne Mitarbeiter-Verdacht, Akkreditierungs-Erhalt unter Auflagen",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-def-communication-team",
+            "description": "FCAS-Team-Schweigepflicht-Disziplin, Personal-Akten-Sicherung mit forensischer Integrität",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-def-people-personal-disziplin",
+            "description": "Personal-Akten-Sicherung mit Anwalts-Begleitung, arbeitsrechtliche Suspension-Disziplin",
+            "weight": 2,
+            "category": "people"
+          },
+          {
+            "id": "crit-def-cross-sector-bka",
+            "description": "Branchen-Wissens-Austausch über BfV-Wirtschaftsschutz-Tagung mit anonymisierter Fallstudie",
+            "weight": 2,
+            "category": "cross_sector"
+          }
+        ]
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience-template-defence-bmvg-csa-1.0",
+      "templateNote": "Demo-Entwurf als Starter für einen Resilienzplan im Sektor Rüstung und Verteidigung — ausgerichtet auf die regulatorische Stapelung: NIS2-Umsetzungsgesetz (in Kraft 6.12.2025) für Bundesverwaltung und größere Defence-Tenants direkt erfasst, AWG (Außenwirtschaftsgesetz) mit Bußgeld bis 500 K € + Strafrecht, KWKG (Kriegswaffenkontrollgesetz) mit bis zu 5 Jahren Haft, SÜG (Sicherheitsüberprüfungsgesetz) mit ÜP1/ÜP2/ÜP3-Verfahren und MAD-Pflicht-Eskalation, VSA (Verschlusssachenanweisung des Bundes) für VS-Bearbeitung, BMVg-CSA-Richtlinien (Cyber-Sicherheits-Anweisung des BMVg) für Sicherheitsbeauftragten-Pflicht, ITAR/EAR bei US-Komponenten, NATO-Industrial-Security-Compliance bei NATO-Aufträgen, § 99 StGB (Geheimdienstliche Agententätigkeit, bis 10 Jahre Haft), § 89c StGB (Terrorismusfinanzierung) bei Lösegeld an OFAC-SDN-gelistete Akteure, § 109e StGB (Sabotagehandlungen), DSGVO Art. 33/34 für personenbezogene Bestandteile. Sektor-spezifische Performance-Dimension ist Geheimhaltungs-Integrität und Lieferfähigkeit für Verteidigungs-Aufträge — die zwei harten Defence-Achsen, parallel zu Healthcare „Patientensicherheit\", Energy „Netzstabilität\", Industry „Produktionsfähigkeit\", Logistics „Dispositionsfähigkeit\", Water „Versorgungssicherheit + Trinkwasser-Qualität\", IT/Telekom „Verfügbarkeit + Datenintegrität\", Finanz „Customer-Trust + transaktionelle Verfügbarkeit\", Verwaltung „Bürger-Service + Akten-Integrität\", KMU-Basis „Geschäftskontinuität + NIS2-Mindest-Compliance\". Demo-Argument: Defence ist die Hochsicherheits-Branche mit gezielter staatlicher Bedrohung — anders als alle anderen Packs ist hier der Spionage-Schutz nicht peripher, sondern strukturell zentral. Realitäts-Anker: NATO-/Deutschland-/Tschechien-APT28-Attribution Mai 2024, Rheinmetall-BlackBasta-IT-Trennungs-Lehre April 2023 (civilian betroffen, military durch IT-Trennung verschont), China-Hensoldt-April-2025-Export-Kontrollen, Stuttgart-OLG-Sanktions-Urteil Juli 2024 (6 Jahre 9 Monate Haft + 880 K € Vermögensabschöpfung), BfV-Wirtschaftsschutz 2025 (28 % staatliche Akteure, Vervierfachung gegenüber 2023), BfV-Sicherheits-Hinweis März 2025 an Verteidigungs-Industrie. Die durchgängige Frage des Plans lautet: Bleibt die Geheimhaltungs-Integrität gewahrt und die Lieferfähigkeit für Verteidigungs-Aufträge erhalten — auch bei APT28/GRU- oder China-MSS-Spionage-Angriff, Insider mit VS-Zugang, Lieferketten-Hardware-Kompromittierung, US-ITAR-Lieferanten-Embargo, Ransomware mit VS-Leak-Drohung oder unbeabsichtigter VS-Offenlegung — und kann die BAAINBw-Sicherheits-Akkreditierung erhalten bleiben? Vor Go-Live anzupassen: Operator-Name, Sub-Profil-Zuordnung (Großkonzern wie KMW/Airbus/Diehl/Hensoldt/Rheinmetall/MBDA vs. Mittelstand-Spezial-Lieferant vs. Familienunternehmen vs. Dual-Use-Tenant), Auftrags-Profil (BMVg-direkt / NATO / EU-EDA / genehmigte Drittländer), VS-Stufe (VS-NfD / VS-VERTRAULICH / GEHEIM / STRENG GEHEIM), ITAR-Anteil in der Bill-of-Materials, Sicherheitsbeauftragter-Bestellungs-Daten, MAD-/BfV-/BAAINBw-Liaison-Personen. Cross-Referenzen (topRisks[].riskId, measuresByGoal[*][].linkedActionItemId) bleiben im Pack leer — der Operator verknüpft nach Übernahme manuell. Review-Zyklus 1 Jahr voreingestellt — bei realen Vorfällen oder Akkreditierungs-Audits anlassbezogen früher. Defence-Realität: Sicherheitsbeauftragter ist Pflicht-Funktion ab definiertem VS-Volumen, MAD-Liaison ist nicht optional sondern Pflicht-Eskalations-Pfad bei Spionage-Verdacht.",
+      "content": {
+        "scope": {
+          "operatorName": "Donau-Defence GmbH",
+          "sector": "Rüstung und Verteidigung",
+          "criticalService": "Mittelständisch-großer Defence-Tenant mit BMVg-Direktauftrag und NATO-Industrial-Security-Akkreditierung — Spezialist für Optronik und Sensorik (Wärmebild-Sensoren, Laser-Entfernungsmesser, Aufklärungs-Optronik) mit FCAS-Programm-Anteil, Eurofighter-Avionik-Komponenten, U-Boot-Sensorik. Endprodukte werden an Bundeswehr (BAAINBw), NATO-Konsortial-Partner (Frankreich/Italien/Spanien) und genehmigte Drittländer (Australien, Japan, Korea) geliefert. ITAR-relevante US-Komponenten in einigen Optronik-Modulen (~ 25 % BoM-Anteil, mittlere Substitutions-Schwierigkeit).",
+          "locations": "Hauptsitz Donauwörth (Verwaltung, F&E, Endmontage — ~ 600 MA), Außenstelle Manching (Avionik-Test, NATO-Industrial-Security-akkreditiert — ~ 200 MA), Außenstelle Taufkirchen (Sensorik-Forschung — ~ 100 MA). Eigene Air-Gap-Systeme für VS-Bearbeitung in beiden Hauptstandorten, ziviler IT-Stack in separater Cloud-Umgebung (Rheinmetall-IT-Trennungs-Pattern).",
+          "employees": "Ca. 900 Vollzeitäquivalente, davon 12 mit STRENG-GEHEIM-Stufe (FCAS-Programm-Kern), 85 mit GEHEIM-Stufe, 240 mit VS-VERTRAULICH-Stufe, 380 mit VS-NfD-Stufe, Rest ohne VS-Zugang. Sicherheitsbeauftragter mit Stellvertretung (BMVg-CSA-konform bestellt), BAFA-Compliance-Officer (gesetzlich vorgeschriebene Funktion), interne Rechtsabteilung mit zwei Defence-Recht-Spezialisten.",
+          "personsServed": "Direkte Kunden: BAAINBw (FCAS-Programmleitung, 3 weitere Bundeswehr-Programme), NATO-Industrieverbund (FCAS-Konsortium mit Frankreich/Spanien), 4 genehmigte Drittländer-Streitkräfte. Indirekte Endnutzer: Bundeswehr-Streitkräfte und alliierte Streitkräfte mit Donau-Defence-Sensorik in Endprodukten.",
+          "scopeNote": "Mittelständisch-großer Defence-Spezialist mit doppelter regulatorischer Schicht: NIS2-Umsetzungsgesetz (in Kraft 6.12.2025) für Tenant als „wichtige Einrichtung\", parallel SÜG/VSA/BMVg-CSA-Compliance, ITAR/EAR bei US-Komponenten, NATO-Industrial-Security bei NATO-Aufträgen, AWG/KWKG für Exportkontrolle, DSGVO Art. 30/33/34 für personenbezogene Bestandteile, § 89c/§99/§109e StGB als rechtlicher Anker. ITAR-Anteil ~ 25 % BoM (Score-15-Bereich für ITAR-Embargo-Risiko, vgl. risk-def-itar-lieferanten-embargo). Sub-Tenant-Profil-Hinweis: Diese Vorlage ist für mittelständisch-großen Defence-Spezialisten zugeschnitten — Großkonzerne (KMW, Airbus Defence, Diehl, Hensoldt, Rheinmetall, MBDA) erweitern die Struktur um zusätzliche Standorte und Programm-Anteile, Mittelstand-Lieferanten (50-200 MA) reduzieren auf einen Standort und enger fokussierten BMVg-Auftrag, Dual-Use-Tenants ergänzen ziviles Hauptgeschäft mit eigener IT-Trennungs-Disziplin nach Rheinmetall-Pattern. Operator-Name fiktiv, kein realer Bezug."
+        },
+        "riskBasis": {
+          "methodology": "BSI-Standard 200-2 Risikoanalyse + BMVg-CSA-Risikobewertungs-Methodik als zusammengeführtes Verfahren, ergänzt um SÜG-spezifische Personal-Sicherheits-Bewertung und MAD-koordinierte Spionage-Indikatoren-Bewertung. Bewertungs-Skala 1–5 für Eintrittswahrscheinlichkeit und Auswirkung; Score = EW × AW. Defence-Pragmatik: AW=5 deutlich häufiger als in zivilen Sektoren wegen existenz-bedrohlicher Folgen (Akkreditierungs-Entzug, Auftragsverlust, politische Tragweite). EW=5 nicht vergeben — staatliche Akteure sind regelmäßig aber nicht jährlich, EW=4 ist die empirisch belegbare Höchst-Stufe. Top-Risiken werden quartalsweise im Sicherheits-Komitee überprüft (Geschäftsführung + Sicherheitsbeauftragter + IT-Leitung + BAFA-Compliance-Officer + BMVg-Schnittstelle), zusätzlich anlassbezogen nach BfV-/MAD-Lage-Updates.",
+          "riskAnalysisReference": "Internes VS-Risiko-Register (Verweis vor Go-Live zu setzen). Cross-Referenzen zur Risiko-Katalog-Vorlage des Pack (riskCatalogTemplates) bleiben im Pack leer — der Operator verknüpft nach Adoption manuell.",
+          "topRisks": [
+            {
+              "title": "APT28/GRU-Spionage-Angriff (auch APT29/SVR mit-gemeint)",
+              "category": "Cyber-physische Bedrohung mit staatlichem Akteur",
+              "initialScore": 20,
+              "residualScore": 9,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "China-MSS-IP-Diebstahl mit Forschungs-/Dual-Use-Hebel",
+              "category": "Cyber-physische Bedrohung mit staatlichem Akteur",
+              "initialScore": 20,
+              "residualScore": 9,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "US-ITAR-Lieferanten-Embargo durch politisches Zerwürfnis",
+              "category": "Interdependenz mit Politik-Hebel",
+              "initialScore": 20,
+              "residualScore": 10,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Insider mit VS-Zugang missbraucht Zugriff (im Laufe gedreht)",
+              "category": "Human Intentional mit Spionage-Verdacht",
+              "initialScore": 15,
+              "residualScore": 7,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Ransomware mit VS-Daten-Leak-Drohung",
+              "category": "Cyber-physische Bedrohung mit Doppel-Erpressung",
+              "initialScore": 15,
+              "residualScore": 7,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Unbeabsichtigte VS-Offenlegung (E-Mail-Fehler, USB-Verlust)",
+              "category": "Human Unintentional mit hoher Frequenz",
+              "initialScore": 16,
+              "residualScore": 8,
+              "criticality": "hoch"
+            }
+          ],
+          "riskBasisNote": "Top-6-Risiken decken die fünf Defence-spezifischen Hebel ab: (1) gezielte staatliche Spionage (APT28/GRU + China-MSS — zwei separate Top-Risiken wegen unterschiedlicher Akteurs-Profile), (2) ITAR-Lieferketten-Politik-Risiko (US-Komponenten-Abhängigkeit als strukturelle Achillesferse), (3) Insider-Spionage-Risiko (gedrehter Insider, vom Maulwurf operativ getrennt — siehe risk-def-spionage-maulwurf für vor-Anstellung-infiltrierten Akteur als Top-7), (4) Ransomware-Doppel-Erpressung mit VS-Leak-Komplikation, (5) unbeabsichtigte VS-Offenlegung als häufigster Vektor (EW=4 wegen empirischer Realität trotz aller SÜG-Disziplin). Maulwurf-Risiko (vor-Anstellung infiltriert, Score 10) ist im Resilienzplan auf Position 7 — nicht in den Top-6, weil EW niedriger und durch dieselben Mitigation-Maßnahmen abgedeckt wie der gedrehte Insider. Pack-Pragmatik: Top-Risk-Auswahl bewusst auf operative Defence-Realität fokussiert, mit Doppel-Erfassung der staatlichen Spionage-Risiken (APT28 + China-MSS) als didaktisch wichtige Differenzierung."
+        },
+        "measuresByGoal": {
+          "prevent": [
+            {
+              "id": "m-def-prevent-sueg-personal-disziplin",
+              "title": "SÜG-Personal-Disziplin mit ÜP-Verfahren und Auslandsreise-Anzeigepflicht",
+              "description": "Strukturelle Antwort auf Insider-Risiko (Top-4) und Maulwurf-Risiko (Top-7). Vollständige SÜG-Verfahrens-Pflege für alle Mitarbeiter*innen mit VS-Zugang: ÜP1 für VS-VERTRAULICH, ÜP2 für GEHEIM, ÜP3 für STRENG GEHEIM, Wiederholung alle 5-10 Jahre nach SÜG. Jährliche Re-Erklärung mit Auslandsreise-Anzeigepflicht (Risiko-Länder erfordern Vorab-Anzeige), Verhaltens-Anomalie-Reporting an Sicherheitsbeauftragten (plötzlicher Lebensstandard-Wechsel, Kontakte zu fremden Staatsangehörigen, finanzielle Probleme). MAD-Liaison vor-vereinbart mit 30-min-Eskalations-SLA für Verdachtsfälle. BfV-Background-Check-Vertiefung bei Kandidaten aus Risiko-Ländern. Halbjährliche Sensibilisierungs-Schulung mit Maulwurf-Indikatoren und SÜG-Pflichten-Auffrischung.",
+              "goal": "prevent",
+              "owner": "Sicherheitsbeauftragter / Personal",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-prevent-vs-air-gap-mad-siem",
+              "title": "VS-Bearbeitung auf Air-Gap-Systemen mit MAD-SIEM-Schnittstelle",
+              "description": "Strukturelle Antwort auf APT-Spionage (Top-1 + Top-2), Ransomware-VS-Leak (Top-5), unbeabsichtigte VS-Offenlegung (Top-6) und Insider-Risiko (Top-4). Zertifizierte VS-Container nach BSI/BMVg-CSA-Richtlinien mit Air-Gap-Trennung für VS-VERTRAULICH und höher, lückenloses Zugriffs-Logging (alle Zugriffe inkl. Kopier-/Druck-/Export-Vorgänge), 10-Jahres-Aufbewahrung der Logs. SIEM mit MAD-Schnittstelle für IT-Sicherheits-Anomalien — anonymisierte IoC-Übergabe an MAD-zentrale Erkennungs-Plattform. Jährliches BAAINBw-Akkreditierungs-Audit mit dokumentierter Air-Gap-Architektur. Zusätzlich strikte IT-Trennung zwischen zivilem und Defence-Stack nach Rheinmetall-Pattern (April 2023): Cyber-Vorfall im zivilen Stack soll Defence-Stack nicht erreichen können.",
+              "goal": "prevent",
+              "owner": "Sicherheitsbeauftragter / IT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-prevent-bafa-compliance-itar-vetting",
+              "title": "BAFA-Compliance-Office mit ITAR-Vetting und Sanktions-Listen-Screening",
+              "description": "Strukturelle Antwort auf ITAR-Embargo (Top-3) und Korruption-Dual-Use-Export (Top-9). BAFA-Compliance-Officer als gesetzlich vorgeschriebene Funktion (AWG § 19) mit schriftlicher Bestellung. Schriftlicher Genehmigungs-Workflow mit Vier-Augen-Prinzip für jede Ausfuhr-Genehmigung: BAFA-Antrag, ITAR-Re-Export-Vetting bei US-Komponenten, End-User-Zertifikate, Endverbleibs-Erklärungen, tägliches Sanktions-Listen-Screening (UN/EU/US-OFAC) mit automatisierter Toolchain (z. B. Tradesphere, Amber Road). Stuttgart-OLG-Schablone Juli 2024 als Risiko-Anker (6 Jahre 9 Monate Haft + 880 K € Vermögensabschöpfung wegen Russland-Sanktions-Umgehung). Anonymes Whistleblower-System für Compliance-Bedenken, jährliche externe Compliance-Audit-Beratung.",
+              "goal": "prevent",
+              "owner": "BAFA-Compliance-Officer / Geschäftsführung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-prevent-lieferketten-vetting-trusted-foundry",
+              "title": "Lieferanten-Vetting nach NATO-Industrial-Security mit Hardware-Inspection",
+              "description": "Strukturelle Antwort auf Lieferketten-Hardware-Kompromittierung (Top-5) und ITAR-Embargo-Resilienz (Top-3). Lieferanten-Vetting nach NATO-Industrial-Security-Standards für sicherheitsrelevante Hardware (Halbleiter, Sensorik, Netzwerk-Hardware): Trusted-Foundry-Quellen für sicherheitskritische Halbleiter, Hardware-Inspection bei Eingangskontrolle (Röntgen-Stichproben, Reverse-Engineering bei Verdacht), Zweit-Quellen-Strategie für ITAR-relevante Bauteile (europäische oder verbündete Anbieter mit NATO-EDA-Programmen). Strategische Lagerhaltung kritischer ITAR-Komponenten 12-24 Monate als Buffer für Politik-Krisen. Jährlicher Lieferanten-Audit mit BfV-/BSI-Beratung für Risiko-Bewertung. Cross-Sector-Bezug zum IT/Telekom-Pack (TP-Link-Router-Hijacking-Pattern als Hardware-Vektor-Beispiel).",
+              "goal": "prevent",
+              "owner": "Sicherheitsbeauftragter / Einkauf",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "protect": [
+            {
+              "id": "m-def-protect-mfa-fido2-vs-zugang",
+              "title": "MFA-Vollabdeckung mit FIDO2-Token für VS-Zugangs-Mitarbeiter",
+              "description": "Strukturelle Antwort auf APT-Credential-Theft (Top-1 + Top-2 — NATO-Mai-2024-M365-Credential-Theft-Schablone), Insider-Risiko (Top-4), Ransomware (Top-5). FIDO2/WebAuthn-Pflicht für alle Mitarbeiter*innen mit GEHEIM-Stufe oder höher — Phishing-resistente Hardware-Token (z. B. YubiKey 5, Feitian-Token mit BMVg-Zertifizierung). MFA-Vollabdeckung für M365, VPN-Zugänge, VS-Container-Zugriffe, Bank-Online-Banking. Halbjährliche Phishing-Simulation mit Klicker-Statistik und Nachschulung. Bei verfestigtem Verdacht (im Laufe gedrehter Insider) selektive Token-Sperrung mit MAD-Abstimmung als Schadens-Begrenzung.",
+              "goal": "protect",
+              "owner": "Sicherheitsbeauftragter / IT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-protect-edr-soc-monitoring",
+              "title": "EDR + SOC-Monitoring mit Verhaltens-Anomalie-Erkennung",
+              "description": "Strukturelle Antwort auf APT-Spionage (Top-1 + Top-2), Insider-Risiko (Top-4), Ransomware (Top-5). EDR-Tool mit Defence-Spezialisierung (CrowdStrike Falcon Defence, SentinelOne Singularity, Microsoft Defender for Endpoint mit US-Spezial-Klassifizierung) auf allen Workstations und Servern. SOC mit 24/7-Monitoring durch externes SOC oder Inhouse-SOC bei größeren Tenants, Verhaltens-Anomalie-Erkennung mit Baseline-Modell pro Mitarbeiter (Insider-Detection-Schwerpunkt). Automatische Isolation bei Verdacht. Monatliches MAD-Status-Update mit anonymisierten Anomalie-Statistiken. Bei Defence-Tenants oft dediziertes Cyber-Versicherungs-Modul mit Defence-Klauseln (250 K – 5 Mio. € Limit je nach Tenant-Größe, Lösegeld inzwischen ausgeschlossen).",
+              "goal": "protect",
+              "owner": "IT-Leitung / Sicherheitsbeauftragter",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-protect-it-trennung-zivil-defence",
+              "title": "Strikte IT-Trennung ziviler/Defence-Stack (Rheinmetall-Pattern)",
+              "description": "Strukturelle Antwort auf Ransomware-VS-Leak (Top-5). Strikte IT-Trennung zwischen zivilem und Defence-Stack — separate Netzwerke, separate Authentifizierungs-Domänen, separate Backup-Systeme. Rheinmetall-BlackBasta-Schablone April 2023: civilian business war kompromittiert (NDAs/schematics/passports im Dark-Net), military business durch IT-Trennung verschont. Bei Defence-Tenants ohne Trennung: bei Ransomware-Vorfall im zivilen Stack droht zusätzlich VS-Compromise mit Akkreditierungs-Risiko. Trennungs-Architektur dokumentiert mit Penetration-Tests halbjährlich, Übergänge ausschließlich über zertifizierte Datendiode-Lösungen (BSI-/BMVg-zugelassen).",
+              "goal": "protect",
+              "owner": "IT-Leitung / Sicherheitsbeauftragter",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "respond": [
+            {
+              "id": "m-def-respond-mad-bfv-liaison-bereitschaft",
+              "title": "MAD-/BfV-Liaison-Bereitschafts-Vereinbarung mit 30-min-Eskalations-SLA",
+              "description": "Strukturelle Antwort auf alle Spionage-Risiken (Top-1, Top-2, Top-4) und SÜG-Verdachts-Pflicht-Pfade. Vor-vereinbarte MAD-Liaison-Person mit 30-min-Eskalations-SLA bei SÜG-Verdachtsfall (MAD ist primär zuständig im Geschäftsbereich BMVg). Parallel BfV-Wirtschaftsschutz-Liaison bei staatlichen Akteur-Vorfällen mit Wirtschafts-Bezug. Quartalsweiser Liaison-Termin mit MAD und BfV (statt nur Krisen-Hotline) — Beziehungs-Investition für schnellere Krisen-Reaktion. Jährliche BfV-Wirtschaftsschutz-Tagungs-Teilnahme für Branchen-Wissens-Austausch (anonymisierte Fallstudien-Präsentation als Beitrag zur Defence-Industrie-Resilienz).",
+              "goal": "respond",
+              "owner": "Sicherheitsbeauftragter / Geschäftsführung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-respond-bsig-meldepfad-mad-koordiniert",
+              "title": "BSIG-§-8d-Meldepfad MAD-koordiniert mit Anwalts-Bereitschaft",
+              "description": "Strukturelle Antwort auf NIS2-Erstmeldungs-Pflicht (24 h Erstmeldung, 72 h Folgemeldung, 1 Monat Abschlussbericht) bei Defence-Tenants als „wichtige Einrichtung\". Defence-Spezifik: BSI-Meldung muss MAD-koordiniert sein, weil zu früh BSI-Veröffentlichung MAD-Forensik kompromittieren kann (Tabletop B als Schablone). Anwalts-Bereitschafts-Vereinbarung mit Defence-Recht-Spezialisierung für 24/7-Meldepfad-Begleitung — Wochenend-/Feiertags-Verfügbarkeit Pflicht. Vor-strukturierte Meldevorlagen für Erstmeldung mit allen NIS2-Pflichtfeldern und MAD-Verweis-Klausel. Parallel-Pfade für DSGVO Art. 33/34 (LfD/LDI) und BAAINBw-Information mit Programm-Implikations-Bewertung.",
+              "goal": "respond",
+              "owner": "Sicherheitsbeauftragter / Externer Anwalt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-respond-baainbw-akkreditierung-erhaltung",
+              "title": "BAAINBw-Akkreditierungs-Erhaltungs-Programm mit jährlichem Audit",
+              "description": "Strukturelle Antwort auf Sicherheits-Akkreditierungs-Risiko bei allen Defence-Top-Risiken. Jährliches BAAINBw-Akkreditierungs-Audit mit dokumentierter SÜG-Disziplin, VS-Container-Architektur, MAD-Liaison-Beziehung, Lieferanten-Vetting. Bei Vorfällen: aktive Vorbereitung des Audit-Termins binnen 4-6 Werktagen mit externem Audit-Beratungsteam (KPMG/PwC mit Defence-Spezialisierung), Auflagen-Liste-Vorab-Anfrage bei BAAINBw, Investitions-Plan-Bereitschaft für Akkreditierungs-Auflagen (typisches Volumen 800 K - 1,5 Mio. € für Verstärkungs-Maßnahmen wie zusätzliche FIDO2-Coverage, halbjährliche statt jährliche SÜG-Re-Erklärung, externe Sicherheits-Audit-Berichte).",
+              "goal": "respond",
+              "owner": "BMVg-Schnittstelle / Geschäftsführung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-respond-bundeskanzleramt-eskalations-pfad",
+              "title": "Bundeskanzleramt-/Auswärtiges-Amt-Eskalations-Pfad bei staatlichem Akteur",
+              "description": "Strukturelle Antwort auf APT-Spionage (Top-1 + Top-2) mit politischer Tragweite. Vor-vereinbarter Eskalations-Pfad über BMVg-/BfV-Schnittstelle zu Bundeskanzleramt und Auswärtigem Amt für politisch-diplomatische Sprachregelung bei Vorfällen mit staatlichem Akteur. Bei Attribuierung an APT28/GRU oder China-MSS (NATO-/Mai-2024-Schablone) ist die diplomatische Eskalation politisch geboten — Tenant-Pressemitteilung erst nach politischer Sprachregelung. Defence-Spezifik: BMVg-Wording-Disziplin in der Pressemitteilung (KMW-/Hensoldt-/Rheinmetall-Pattern), keine eigene staatliche Attribuierung durch Tenant. Bei Attribuierung-Konflikten oder diplomatischen Folgewirkungen kann Bundeskanzleramt-Konsultation Tage in Anspruch nehmen — Tenant-Geduld und Zwischen-Sprachregelungs-Disziplin Pflicht.",
+              "goal": "respond",
+              "owner": "Geschäftsführung / Pressesprecher",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "recover": [
+            {
+              "id": "m-def-recover-air-gap-backup-4h-frequenz",
+              "title": "Air-Gap-Backup mit 4-h-Frequenz und VS-konformer Restore-Disziplin",
+              "description": "Strukturelle Antwort auf Ransomware-VS-Leak (Top-5), APT-Spionage (Top-1 + Top-2), Air-Gap-System-Ausfall. Air-Gap-Backup mit 4-h-Frequenz (statt täglich wie bei zivilen Tenants) wegen hoher VS-Daten-Verlust-Empfindlichkeit, Tape-Backup im VS-konformen Tresor mit ÜP2-zertifiziertem Personal-Zugang, Immutable-Storage als zusätzliche Schicht. Quartalsweiser Restore-Test mit Stoppuhr-Messung, Ziel-RTO 4 h für VS-Container, 12 h für ERP-Defence-Abteilung, 24 h für ziviles ERP. Restore muss VS-konform sein — kein Restore-Vorgang über zivile Workstations, dedizierte VS-Restore-Hardware mit Air-Gap-Trennung. Backup-Tresor-Passwörter im SÜG-zertifizierten Passwort-Manager mit Notfall-Zugang für Sicherheitsbeauftragten und Stellvertreter (Vier-Augen-Prinzip).",
+              "goal": "recover",
+              "owner": "Sicherheitsbeauftragter / IT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-recover-press-bmvg-wording-drehbuch",
+              "title": "Pressemitteilungs-Drehbuch mit BMVg-Wording (KMW/Hensoldt/Rheinmetall-Pattern)",
+              "description": "Strukturelle Antwort auf Reputations-Folgewirkung nach allen Defence-Top-Risiken. Vor-strukturiertes Pressemitteilungs-Drehbuch mit BMVg-Wording-Disziplin: maximal zurückhaltende Sprache, keine eigene staatliche Attribuierung, BMVg/MAD/BfV als zuständige Behörden für Detail-Fragen. Multi-Channel: Webseite-Status-Page, Branchen-Presse (CPM Defence Network, Janes), lokale Presse, ggf. Tagesschau bei größerer Tragweite. Pressesprecher-Schulung mit Defence-PR-Spezialisten halbjährlich. Pressemitteilung erst nach politischer Sprachregelung (Bundeskanzleramt-/Auswärtiges-Amt-Konsultation bei staatlichem Akteur). Bei Vorfällen mit ITAR-Implikationen zusätzliche Sprachregelung mit US-Hersteller-Schnittstelle abstimmen.",
+              "goal": "recover",
+              "owner": "Pressesprecher / Geschäftsführung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-def-recover-akkreditierungs-investitions-plan",
+              "title": "Akkreditierungs-Auflagen-Investitions-Plan (800 K - 1,5 Mio. €) als Standard-Reaktion",
+              "description": "Strukturelle Antwort auf BAAINBw-Akkreditierungs-Erhaltung nach Vorfall. Vor-strukturierter Investitions-Plan für typische Akkreditierungs-Auflagen: zusätzliche FIDO2-Token-Coverage (50-150 K €), VS-Container-Air-Gap-Verstärkung mit Datendiode-Lösungen (200-400 K €), halbjährliche statt 5-jährliche SÜG-Re-Erklärung mit externem Beratungsaufwand (80-150 K € jährlich), externe Sicherheits-Audit-Berichte (60-120 K €), Penetration-Tests halbjährlich (40-80 K €). Gesamtvolumen 800 K - 1,5 Mio. € binnen 6 Monaten. Cashflow-Bereitschaft im Jahres-Budget vorgehalten (5-10 % Sicherheits-Budget-Reserve), bei größeren Aufwänden BMVg-Verhandlung über Investitions-Zuschuss bzw. Verteilung über mehrere Quartale.",
+              "goal": "recover",
+              "owner": "Geschäftsführung / Sicherheitsbeauftragter",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ]
+        },
+        "governance": {
+          "managementBoardContact": "Geschäftsführung der Donau-Defence GmbH (vor Go-Live zu setzen: Name, Bestellungs-Datum, Stellvertreter*in, ggf. Bestellungs-Bezug zu BMVg-CSA-Pflicht-Funktionen). Persönliche Haftung nach KWKG, AWG, § 99 StGB und § 38 BSIG bei Pflichtverletzung — nicht delegierbar. Defence-Spezifik: bei staatlichen Akteuren ist die Geschäftsführung über die operativen Reaktions-Pflichten hinaus auch politisch verantwortlich gegenüber Bundeskanzleramt-/BMVg-Spitze.",
+          "programOwner": "Sicherheitsbeauftragter (BMVg-CSA-konform bestellt) als operativer Programm-Owner mit eigener Berichtslinie zur Geschäftsführung; BAFA-Compliance-Officer als zweite Säule für Exportkontroll-Compliance. IT-Leitung als dritte operative Säule für Cyber-Sicherheits-Aspekte. Defence-Spezifik: dreifache Programm-Owner-Struktur ist BMVg-CSA-konform und reflektiert die drei Defence-Resilienz-Achillesfersen — Personal-Sicherheit (Sicherheitsbeauftragter), Exportkontroll-Compliance (BAFA-Officer), Cyber-Sicherheit (IT-Leitung). Bei kleineren Defence-Mittelständlern oft Personalunion zwischen Sicherheitsbeauftragtem und Compliance-Officer, bei Großkonzernen vier oder mehr getrennte Programme.",
+          "escalationPath": "Stufe 1: Sicherheitsbeauftragter und IT-Leitung (24/7-Bereitschaft, MAD-Liaison-Hotline binnen 30 min). Stufe 2: Geschäftsführung (eigenständig erreichbar binnen 60 min), Krisenstabs-Konstituierung. Stufe 3: BMVg-Schnittstelle (BAAINBw-Programmleitung-Information), BAFA-Compliance-Officer bei Export-Implikationen, externer Anwalt (Defence-Recht-Spezialisierung mit 24/7-Bereitschaft). Stufe 4: Bei staatlichem Akteur und politischer Tragweite — Bundeskanzleramt-/Auswärtiges-Amt-Eskalation über BMVg-/BfV-Pfad, BfV-Liaison-Person, ggf. NATO-NCIRC-Schnittstelle bei NATO-Programmen. Stufe 5: Bei Verfestigung des § 99 StGB-Verdachts — Übergabe an Generalbundesanwalt über MAD-Pfad.",
+          "boardReviewCadence": "Jährlicher Geschäftsführungs-Review der gesamten Defence-Sicherheits-Compliance (NIS2, SÜG, VSA, BMVg-CSA, AWG/KWKG, ITAR/EAR, NATO-Industrial-Security). Quartalsweiser Sicherheits-Komitee-Review (Geschäftsführung + Sicherheitsbeauftragter + BAFA-Compliance-Officer + IT-Leitung + BMVg-Schnittstelle) mit Top-Risiken, MAD-Lage-Update, Lieferanten-Vetting-Status, Akkreditierungs-Erhaltungs-Status. Anlassbezogene Reviews nach realen Vorfällen oder BfV-/MAD-Lage-Updates binnen 30 Tagen.",
+          "governanceNote": "Defence-Spezifika: Sicherheitsbeauftragter ist Pflicht-Funktion ab definiertem VS-Volumen oder GEHEIM-Stufe (BMVg-CSA-konform bestellt mit BMVg-Anzeige). BAFA-Compliance-Officer ist gesetzlich vorgeschriebene Funktion nach AWG § 19. Bei Familienunternehmen ohne eigene Compliance-Strukturen oft externe Bestellung über spezialisierte Beratungs-Firmen. NATO-Industrial-Security-Officer (NISO) als zusätzliche Funktion bei NATO-Programmen."
+        },
+        "reporting": {
+          "incidentContact": "BSI-Meldeportal für NIS2-/BSIG-§-8d (24-h-Erstmeldung MAD-koordiniert, 72-h-Folgemeldung, 1-Monats-Abschlussbericht). MAD-Liaison-Hotline (parallel zu BSI bei Spionage-Verdacht). BfV-Wirtschaftsschutz-Hotline (bei staatlichen Akteur-Vorfällen mit Wirtschafts-Bezug). Bei DSGVO-Aspekten LfD/LDI-Meldeportal (72 h). Bei ITAR-Implikationen US-Hersteller-Schnittstelle über deutsche BMVg-/BAFA-Koordination.",
+          "incidentBackupContact": "Externer Anwalt (Defence-Recht / IT-Recht) als 24/7-Bereitschafts-Kontakt für Meldepfad-Begleitung. BMVg-Schnittstelle / BAAINBw-Programmleitung als Auftrags-Implikations-Kontakt. NATO-NCIRC-Schnittstelle bei NATO-Programmen. Bei Verfestigung des § 99 StGB-Verdachts Generalbundesanwalt-Eskalations-Pfad über MAD.",
+          "bsiPortalNote": "BSI nimmt NIS2-/BSIG-§-8d-Meldungen entgegen (24-h-Frist für „Sicherheitsvorfall\"). Defence-Spezifik: BSI-Meldung muss MAD-koordiniert sein bei Spionage-Verdacht — zu frühe BSI-Veröffentlichung kann MAD-Beobachtungsphase kompromittieren (Tabletop B als Schablone). Klassifikations-Zeitpunkt sauber dokumentieren (24-h-Frist-Zähler beginnt mit Klassifikation, nicht mit Verdacht). MAD-Liaison koordiniert das Meldetiming.",
+          "firstReportingTimeline": "NIS2-/BSIG-§-8d: Erstmeldung 24 h MAD-koordiniert, Folgemeldung 72 h, Abschlussbericht 1 Monat. SÜG-Verdachtsfall-MAD-Eskalation: 30 min ab Verdachts-Verfestigung. ITAR-US-Notification: 24 h bei Compromise von US-Komponenten. BAAINBw-Information: unverzüglich bei Programm-Implikations-Verdacht. DSGVO Art. 33: 72 h, Art. 34: unverzüglich.",
+          "reportingNote": "Vor-strukturierte Reporting-Templates für BSI/MAD/BfV/BAAINBw/BAFA/LfD sind im Krisenstabs-Drehbuch abgelegt. Halbjährlicher Test der Meldewege durch externen Anwalt mit 2-h-Beratung. BSI- und LfD/LDI-Meldeportal-Logins liegen bei Geschäftsführung-persönlich mit Backup beim Sicherheitsbeauftragten (Vier-Augen-Prinzip). MAD-Liaison-Hotline nur bei Sicherheitsbeauftragten und Stellvertreter bekannt (Schweigepflicht)."
+        },
+        "evidence": {
+          "evidenceReferences": [
+            "NIS2-/BSIG-§-8d-Compliance-Dokumentation",
+            "SÜG-Personal-Register mit ÜP-Stufen und Re-Erklärungs-Status",
+            "BMVg-CSA-Sicherheitsbeauftragten-Bestellungs-Urkunde",
+            "BAFA-Compliance-Officer-Bestellungs-Urkunde nach AWG § 19",
+            "VS-Akkreditierungs-Dokumentation und Air-Gap-Architektur-Diagramm",
+            "BAAINBw-Akkreditierungs-Audit-Protokolle (jährlich)",
+            "MAD-/BfV-Liaison-Vereinbarung mit Quartals-Meeting-Protokollen",
+            "Lieferanten-Vetting-Akten mit NATO-Industrial-Security-Bestätigungen",
+            "BAFA-Genehmigungs-Akten und ITAR-Re-Export-Klauseln",
+            "Krisenstabs-Drehbuch mit BMVg-Wording-Pressemitteilungs-Templates",
+            "Tabletop-Übungs-Protokolle (APT-Spionage, Insider-VS-Zugang)",
+            "IT-Trennungs-Architektur-Diagramm (zivil vs. Defence) mit Penetration-Tests"
+          ],
+          "reviewCycleYears": 1,
+          "equivalentProofsNote": "Review-Zyklus 1 Jahr voreingestellt — Defence-Pragmatik mit hoher Bedrohungs-Lage erlaubt keinen längeren Zyklus. Bei realen Vorfällen oder BfV-/MAD-Lage-Updates anlassbezogen früher. BAAINBw-Akkreditierungs-Audit jährlich. SÜG-Re-Erklärung jährlich, ÜP-Wiederholung alle 5-10 Jahre. Lieferanten-Audit jährlich mit BfV-/BSI-Beratung. BAFA-Compliance-Audit jährlich mit externer Beratung.",
+          "evidenceNote": "Ergänzend zu den hier gelisteten Evidenz-Referenzen sind alle relevanten BMVg-/BfV-/MAD-/BAFA-/NATO-Korrespondenzen, externe Forensik-Berichte und Lieferanten-Vertrags-Updates im VS-konformen Aktenraum dokumentiert (separat vom zivilen Akten-System, ÜP2-zertifizierter Zugang). Bei BAAINBw-Audit wird strukturierte Akten-Übergabe an Audit-Team notwendig — Aktenraum-Strukturierung mit dokumentierter VS-Konformität ist Pflicht."
+        }
+      }
+    }
+  }
+}
