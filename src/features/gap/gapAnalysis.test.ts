@@ -681,6 +681,216 @@ describe('computeGapAnalysis · effortBreakdown', () => {
   });
 });
 
+describe('computeGapAnalysis · resolvedActivities (C5.4.4)', () => {
+  // Realistisches Verifikations-Szenario nach Dr. Steiners Spec:
+  // "Länderöffnungsklausel geprüft", 1.5 – 2.5 PT (= 12 – 20 h),
+  // 4 Tätigkeiten, deren Stunden sich auf min=12, max=20 aufaddieren.
+  function makeLaenderoeffnungsklausel(): RequirementDefinition {
+    return makeRequirement({
+      id: 'req-laenderoeffnung',
+      category: 'governance',
+      effortBreakdown: {
+        minPersonDays: 1.5,
+        maxPersonDays: 2.5,
+        activities: [
+          { label: 'Recherche pro Bundesland', minHours: 4, maxHours: 6 },
+          { label: 'Rechtliche Bewertung', minHours: 4, maxHours: 6 },
+          { label: 'Stakeholder-Abstimmung', minHours: 2, maxHours: 4 },
+          { label: 'Dokumentation', minHours: 2, maxHours: 4 },
+        ],
+        drivers: ['Anzahl Bundesländer'],
+      },
+    });
+  }
+
+  it('resolvedActivities werden bei effortBreakdown erzeugt', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    expect(entry.effortEstimate.resolvedActivities).toBeDefined();
+    expect(entry.effortEstimate.resolvedActivities).toHaveLength(4);
+  });
+
+  it('Brutto-Stunden bleiben unverändert, egal welcher Status', () => {
+    const baseline = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    }).byRegime[0].entries[0];
+    const ready = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'ready' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    }).byRegime[0].entries[0];
+    const inProgress = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'in_progress' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    }).byRegime[0].entries[0];
+    const notApplicable = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'not_applicable' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    }).byRegime[0].entries[0];
+
+    for (const entry of [baseline, ready, inProgress, notApplicable]) {
+      const raws = entry.effortEstimate.resolvedActivities!.map((a) => ({
+        min: a.minHoursRaw,
+        max: a.maxHoursRaw,
+      }));
+      expect(raws).toEqual([
+        { min: 4, max: 6 },
+        { min: 4, max: 6 },
+        { min: 2, max: 4 },
+        { min: 2, max: 4 },
+      ]);
+    }
+  });
+
+  it('Bei Status open sind alle minHoursEffective = 100 % der minHoursRaw', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const resolved = summary.byRegime[0].entries[0].effortEstimate.resolvedActivities!;
+    for (const activity of resolved) {
+      expect(activity.minHoursEffective).toBe(activity.minHoursRaw);
+      expect(activity.maxHoursEffective).toBe(activity.maxHoursRaw);
+    }
+  });
+
+  it('Bei Status in_progress sind alle minHoursEffective = 50 % der minHoursRaw', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'in_progress' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const resolved = summary.byRegime[0].entries[0].effortEstimate.resolvedActivities!;
+    for (const activity of resolved) {
+      expect(activity.minHoursEffective).toBeCloseTo(activity.minHoursRaw * 0.5, 2);
+      expect(activity.maxHoursEffective).toBeCloseTo(activity.maxHoursRaw * 0.5, 2);
+    }
+  });
+
+  it('Bei Status ready sind alle minHoursEffective = 10 % der minHoursRaw', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'ready' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const resolved = summary.byRegime[0].entries[0].effortEstimate.resolvedActivities!;
+    for (const activity of resolved) {
+      expect(activity.minHoursEffective).toBeCloseTo(activity.minHoursRaw * 0.1, 2);
+      expect(activity.maxHoursEffective).toBeCloseTo(activity.maxHoursRaw * 0.1, 2);
+    }
+  });
+
+  it('Bei Status not_applicable sind alle Effective-Werte = 0', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'not_applicable' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const resolved = summary.byRegime[0].entries[0].effortEstimate.resolvedActivities!;
+    for (const activity of resolved) {
+      expect(activity.minHoursEffective).toBe(0);
+      expect(activity.maxHoursEffective).toBe(0);
+    }
+  });
+
+  it('Summe der minHoursEffective entspricht minPersonDays × 8 (Toleranz 0,1) bei Status open', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    const sumMin = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.minHoursEffective,
+      0,
+    );
+    const expectedMin = entry.effortEstimate.minPersonDays! * 8;
+    expect(Math.abs(sumMin - expectedMin)).toBeLessThanOrEqual(0.1);
+  });
+
+  it('Summe der maxHoursEffective entspricht maxPersonDays × 8 (Toleranz 0,1) bei Status ready', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'ready' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    const sumMax = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.maxHoursEffective,
+      0,
+    );
+    const expectedMax = entry.effortEstimate.maxPersonDays! * 8;
+    expect(Math.abs(sumMax - expectedMax)).toBeLessThanOrEqual(0.1);
+  });
+
+  it('Verifikation Dr. Steiner: bei Status ready zeigt Header 0,15-0,25 PT, Effective-Summe = 1,2-2,0 h', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeLaenderoeffnungsklausel()],
+      requirementStates: { 'req-laenderoeffnung': 'ready' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    // Header: 1.5 × 0.1 = 0.15 PT min, 2.5 × 0.1 = 0.25 PT max.
+    expect(entry.effortEstimate.minPersonDays).toBeCloseTo(0.15, 2);
+    expect(entry.effortEstimate.maxPersonDays).toBeCloseTo(0.25, 2);
+    // Effective-Summe: 12 × 0.1 = 1.2 h min, 20 × 0.1 = 2.0 h max.
+    const sumMinEff = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.minHoursEffective,
+      0,
+    );
+    const sumMaxEff = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.maxHoursEffective,
+      0,
+    );
+    expect(sumMinEff).toBeCloseTo(1.2, 2);
+    expect(sumMaxEff).toBeCloseTo(2.0, 2);
+    // Brutto-Summe konstant: 12 h min, 20 h max.
+    const sumMinRaw = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.minHoursRaw,
+      0,
+    );
+    const sumMaxRaw = entry.effortEstimate.resolvedActivities!.reduce(
+      (sum, a) => sum + a.maxHoursRaw,
+      0,
+    );
+    expect(sumMinRaw).toBe(12);
+    expect(sumMaxRaw).toBe(20);
+  });
+
+  it('Bei Heuristik-Fallback (kein effortBreakdown) bleibt resolvedActivities undefined', () => {
+    const summary = computeGapAnalysis({
+      requirements: [makeRequirement({ id: 'req-h', category: 'measures' })],
+      requirementStates: { 'req-h': 'open' },
+      evidenceItems: [],
+      regimeDefinitions: [deKritisDachg],
+    });
+    const entry = summary.byRegime[0].entries[0];
+    expect(entry.effortEstimate.source).toBe('heuristic');
+    expect(entry.effortEstimate.resolvedActivities).toBeUndefined();
+  });
+});
+
 describe('getConfidenceLabel', () => {
   it('übersetzt die drei Confidence-Stufen', () => {
     expect(getConfidenceLabel('high')).toBe('Hoch');

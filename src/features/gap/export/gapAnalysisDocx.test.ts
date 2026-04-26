@@ -119,6 +119,111 @@ describe('buildGapAnalysisBlob', () => {
   });
 });
 
+describe('buildGapAnalysisDocument · Tätigkeits-Tabelle Brutto/Rest (C5.4.4)', () => {
+  const breakdownSummary: GapAnalysisSummary = {
+    totalPersonDays: 0.2,
+    minPersonDays: 0.15,
+    maxPersonDays: 0.25,
+    calendarWeeks: 1,
+    entryCount: 1,
+    byRegime: [
+      {
+        regimeId: 'de_kritisdachg',
+        regimeLabel: 'KRITIS-DachG',
+        totalPersonDays: 0.2,
+        minPersonDays: 0.15,
+        maxPersonDays: 0.25,
+        byCategory: { governance: 0.2 },
+        entries: [
+          {
+            requirementId: 'de_kritis_laenderoeffnung',
+            regimeId: 'de_kritisdachg',
+            category: 'governance',
+            currentStatus: 'ready',
+            targetStatus: 'ready',
+            effortEstimate: {
+              personDays: 0.2,
+              minPersonDays: 0.15,
+              maxPersonDays: 0.25,
+              confidence: 'high',
+              assumptions: ['Breakdown 1.5 – 2.5 PT'],
+              source: 'breakdown',
+              activities: [
+                { label: 'Recherche', minHours: 4, maxHours: 6 },
+                { label: 'Bewertung', minHours: 4, maxHours: 6 },
+              ],
+              resolvedActivities: [
+                { label: 'Recherche', minHoursRaw: 4, maxHoursRaw: 6, minHoursEffective: 0.4, maxHoursEffective: 0.6 },
+                { label: 'Bewertung', minHoursRaw: 4, maxHoursRaw: 6, minHoursEffective: 0.4, maxHoursEffective: 0.6 },
+              ],
+              drivers: ['Anzahl Bundesländer'],
+            },
+            dependencies: [],
+          },
+        ],
+      },
+    ],
+  };
+
+  const breakdownRequirements: RequirementDefinition[] = [
+    {
+      id: 'de_kritis_laenderoeffnung',
+      title: 'Länderöffnungsklausel geprüft',
+      description: '',
+      guidance: '',
+      lawRef: '§ 14 KRITISDachG',
+      regimeId: 'de_kritisdachg',
+      category: 'governance',
+    },
+  ];
+
+  it('serialisiert ohne Fehler, wenn entries resolvedActivities haben', async () => {
+    const document = buildGapAnalysisDocument({
+      companyProfile,
+      gapAnalysisSummary: breakdownSummary,
+      requirements: breakdownRequirements,
+    });
+    const buffer = await Packer.toBuffer(document);
+    expect(buffer.byteLength).toBeGreaterThan(2000);
+  });
+
+  it('erzeugt einen größeren Buffer mit Aktivitäten als ohne — Tabelle wird tatsächlich gerendert', async () => {
+    const withActivities = await Packer.toBuffer(
+      buildGapAnalysisDocument({
+        companyProfile,
+        gapAnalysisSummary: breakdownSummary,
+        requirements: breakdownRequirements,
+      }),
+    );
+    const summaryWithoutActivities: GapAnalysisSummary = {
+      ...breakdownSummary,
+      byRegime: [
+        {
+          ...breakdownSummary.byRegime[0],
+          entries: [
+            {
+              ...breakdownSummary.byRegime[0].entries[0],
+              effortEstimate: {
+                ...breakdownSummary.byRegime[0].entries[0].effortEstimate,
+                activities: [],
+                resolvedActivities: [],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const withoutActivities = await Packer.toBuffer(
+      buildGapAnalysisDocument({
+        companyProfile,
+        gapAnalysisSummary: summaryWithoutActivities,
+        requirements: breakdownRequirements,
+      }),
+    );
+    expect(withActivities.byteLength).toBeGreaterThan(withoutActivities.byteLength);
+  });
+});
+
 describe('buildGapAnalysisFileName', () => {
   it('baut einen konsistenten, filesystem-sicheren Dateinamen', () => {
     const name = buildGapAnalysisFileName(companyProfile, new Date('2026-04-20T10:00:00Z'));
