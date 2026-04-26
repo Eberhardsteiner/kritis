@@ -19,7 +19,7 @@
 declare const __APP_BUILD_COMMIT__: string;
 declare const __APP_BUILD_DATE__: string;
 
-export const APP_VERSION = 'v0.9.26';
+export const APP_VERSION = 'v0.9.27';
 
 export const BUILD_COMMIT =
   typeof __APP_BUILD_COMMIT__ !== 'undefined' ? __APP_BUILD_COMMIT__ : 'dev';

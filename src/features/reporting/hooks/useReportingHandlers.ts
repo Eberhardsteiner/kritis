@@ -55,6 +55,7 @@ export function useReportingHandlers(): ReportingHandlers {
     scoreSnapshot,
     benchmarkSnapshot,
     requirementProgress,
+    resolvedRequirementStates,
     evidenceSummary,
     governanceSummary,
     checklistProgress,
@@ -81,7 +82,10 @@ export function useReportingHandlers(): ReportingHandlers {
       applicability: kritisApplicability,
       requirementProgress,
       requirements: activeRequirements,
-      requirementStates: state.requirementStates,
+      // C5.4.3: bisher `state.requirementStates` (RAW). Damit fehlten
+      // sowohl Override- als auch Grundanalyse-Status — der Markdown-
+      // Report widersprach dem Dashboard. Jetzt aufgelöste Variante.
+      requirementStates: resolvedRequirementStates,
       actionItems: currentActionItems,
       evidenceSummary,
       stakeholders: currentStakeholders,
@@ -115,11 +119,11 @@ export function useReportingHandlers(): ReportingHandlers {
     regimeSummaries,
     regulatoryProfile,
     requirementProgress,
+    resolvedRequirementStates,
     scoreSnapshot,
     showNotice,
     state.certificationState,
     state.companyProfile,
-    state.requirementStates,
     state.reviewPlan,
   ]);
 
@@ -233,7 +237,9 @@ export function useReportingHandlers(): ReportingHandlers {
       regulatoryProfile,
       regimeSummaries,
       requirements: activeRequirements,
-      requirementStates: state.requirementStates,
+      // C5.4.3: aufgelöste Status, sonst zeigt das Audit-PDF "X offene
+      // Anforderungen" während das Dashboard "Reife 100 %" meldet.
+      requirementStates: resolvedRequirementStates,
       checklistProgress,
       findingSummary,
       findings: currentFindings,
@@ -251,10 +257,10 @@ export function useReportingHandlers(): ReportingHandlers {
     hasPermission,
     regimeSummaries,
     regulatoryProfile,
+    resolvedRequirementStates,
     showNotice,
     state.companyProfile,
     state.complianceCalendar,
-    state.requirementStates,
     state.reviewPlan,
   ]);
 
