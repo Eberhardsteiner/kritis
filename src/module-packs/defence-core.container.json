@@ -381,9 +381,9 @@
         "mtpdHours": "24",
         "rtoHours": "12",
         "rpoHours": "0",
-        "dependencies": "Air-Gap-System, VS-Container, SÜG-zertifiziertes Personal, BMVg-Akkreditierung",
-        "outputs": "VS-konforme Dokumente und Datenträger an BMVg/NATO-Partner",
-        "notes": "Defence-Spezifik: VS-Compromise ist nicht durch DSGVO Art. 34 sanierbar — geleakte VS-Information bleibt geleakt und triggert Akkreditierungs-Prozess."
+        "dependencies": "Air-Gap-System, VS-Container, SÜG-zertifiziertes Personal, BMVg-Akkreditierung, VS-Kurier-Logistik, VSA-zertifizierte IT-Systeme",
+        "outputs": "VS-konforme Dokumente und Datenträger an BMVg/NATO-Partner, VS-Registratur-Einträge, Kurier-Übergaben",
+        "notes": "Defence-Spezifik: VS-Compromise ist nicht durch DSGVO Art. 34 sanierbar — geleakte VS-Information bleibt geleakt und triggert Akkreditierungs-Prozess. VS-Klassifikations-Stufen: VS-NfD (BAFA-Anträge, Lieferanten-Korrespondenz), VS-VERTRAULICH (Programm-Management), VS-GEHEIM (F&E-Konstruktions-Daten), STRENG GEHEIM (kryptographische Schlüssel, NATO COSMIC TOP SECRET-Pendants). VSA-Compliance Pflicht. Air-Gap-Welt mit gewollter Langsamkeit (manuelle Schleusen, Vier-Augen-Übergabe, Kurier-Transport zwischen Standorten) — RPO 0 reflektiert synchrone Replikation innerhalb des geschlossenen VS-Netzes; MTPD 24h reflektiert Tagesgeschäft-Pufferzeiten der VS-Registratur."
       },
       {
         "id": "def_proc_exportkontrolle",
@@ -393,9 +393,9 @@
         "mtpdHours": "72",
         "rtoHours": "48",
         "rpoHours": "24",
-        "dependencies": "BAFA-Online-Antrag, Sanktions-Listen-Screening-System, Vertragsdaten-Bank, ITAR-Re-Export-Datenbank",
-        "outputs": "BAFA-Genehmigungen, End-User-Zertifikate, ITAR-Compliance-Bestätigungen",
-        "notes": "Bei Verstoß: AWG § 17/18 Bußgeld bis 500 K €, KWKG §§ 19-21 bis 5 Jahre Haft. Stuttgart-OLG Juli 2024 als Realitäts-Anker."
+        "dependencies": "BAFA-Online-Antrag, Sanktions-Listen-Screening-System, Vertragsdaten-Bank, ITAR-Re-Export-Datenbank, EU-Dual-Use-VO 2021/821, US-EAR-Datenbank",
+        "outputs": "BAFA-Genehmigungen, End-User-Zertifikate, ITAR-Compliance-Bestätigungen, Sanktions-Screening-Berichte",
+        "notes": "Bei Verstoß: AWG § 17/18 Bußgeld bis 500 K €, KWKG §§ 19-21 bis 5 Jahre Haft. Stuttgart-OLG Juli 2024 als Realitäts-Anker. BAFA-Genehmigungsverfahren dauern 4-12 Wochen, manche bis 6 Monate — Bürokratie-Pufferzeiten machen MTPD 72h realistisch. EU-Sanktions-Anpassungen seit 24.02.2022 (13./14. Paket 2024) verschärfen Compliance-Last. Russland-Dual-Use-Blanket-Ban gilt seit 26.02.2022 (EU 833/2014)."
       },
       {
         "id": "def_proc_defence_auftrags_abwicklung",
@@ -405,9 +405,93 @@
         "mtpdHours": "120",
         "rtoHours": "72",
         "rpoHours": "48",
-        "dependencies": "BMVg-Bedarfsträger, Sicherheits-Akkreditierung, ERP-Defence-Abteilung, VS-Bearbeitungs-Kette",
-        "outputs": "Lieferungen an Bundeswehr/NATO mit VS-Konformität",
-        "notes": "Bei Akkreditierungs-Entzug: Auftrags-Stillstand für mehrere Quartale, ggf. existenzbedrohend für Defence-Spezialisten ohne ziviles Backup-Geschäft."
+        "dependencies": "BMVg-Bedarfsträger, Sicherheits-Akkreditierung, ERP-Defence-Abteilung, VS-Bearbeitungs-Kette, BAAINBw-Schnittstelle, NATO-Konsortial-Management (FCAS, MGCS, Eurofighter)",
+        "outputs": "Lieferungen an Bundeswehr/NATO mit VS-Konformität, Meilenstein-Erfüllung, BMVg-Reporting, NATO-Konsortial-Koordination",
+        "notes": "Bei Akkreditierungs-Entzug: Auftrags-Stillstand für mehrere Quartale, ggf. existenzbedrohend für Defence-Spezialisten ohne ziviles Backup-Geschäft. Programm-Management ist Quartals-Geschäft — Liefer-Slots werden Monate im Voraus geplant, Lebenszyklus-Verträge laufen über Jahre, MTPD 120h reflektiert die Wochen-/Monats-Pufferzeit. 100-Mrd-€-Sondervermögen (Bundestag 03.06.2022, GG Art. 87a) als aktueller Auftrags-Boom; 2025: 24,06 Mrd Sondervermögen + 62,43 Mrd Regelhaushalt. F-35: 35 Stück, 8,3 Mrd EUR Lieferung bis 2030."
+      },
+      {
+        "id": "def_proc_sueg",
+        "title": "Sicherheitsüberprüfung Mitarbeiter (SÜG, Verfassungsschutz-Koordination)",
+        "ownerRole": "Personalleitung / Sicherheits-Bevollmächtigter",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "BfV/MAD-Koordinations-Schnittstelle, SÜG-Antragstellung, Personal-Akten-System, BAAINBw-Akkreditierungs-Datenbank, Verfassungsschutz-Bewertungs-Verfahren",
+        "outputs": "Sicherheitsüberprüfungs-Status pro Mitarbeiter (Ü1/Ü2/Ü3), Verlängerungs-Anträge, MAD-Ermittlungs-Begleitung",
+        "notes": "SÜG-Verfahren beim Verfassungsschutz brauchen 6-12 Monate (Ü1 schneller, Ü3 deutlich länger). MTPD 168h für interne Antragstellung-System — der eigentliche Bewertungs-Pfad bei BfV/MAD läuft Monate. Ü1 für VS-NfD-Zugang, Ü2 für VS-VERTRAULICH, Ü3 für VS-GEHEIM und höher. Bei Diehl-Kimsuky-Q3-2024-Schablone wurde Spear-Phishing mit gefälschten Stellenanzeigen und manipulierten Telekom-Login-Portalen genutzt — Personal-Auswahl-Schritte sind Angriffsfläche."
+      },
+      {
+        "id": "def_proc_fe_vs",
+        "title": "Forschung & Entwicklung VS-Bereich (klassifizierte F&E, Konstruktions-Daten)",
+        "ownerRole": "F&E-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "VS-Konstruktions-Datenbank (typisch VS-GEHEIM), Prototypen-Werkstatt mit Zonen-Klassifizierung, BAAINBw-Programm-Schnittstelle, Hochschul-Kooperationen mit VS-Komponenten, Fraunhofer-VVS-Verbund",
+        "outputs": "Klassifizierte F&E-Ergebnisse (typisch VS-GEHEIM), Prototypen, Patente mit Sperrvermerk, BAAINBw-Programm-Lieferungen",
+        "notes": "Lockheed-Martin-F-35-Schablone (APT1/PLA Unit 61398, Mandiant-2013-Attribution, DoJ-Indictment Mai 2014 gegen 5 PLA-Offiziere, Su Bin 2016 schuldig, ~50 TB Konstruktions-Daten exfiltriert) zeigt das langjährige Spionage-Risiko gegen Defence-F&E. APT-Bedrohungslage ist Tagesgeschäft (BfV/Bitkom 2025: 28 % staatliche Akteure, Vervierfachung gegen 2023). Diehl-Kimsuky-Q3-2024 hatte explizit IRIS-T-SLM-Daten als Ziel — F&E-Bestände sind primäres Spionage-Ziel."
+      },
+      {
+        "id": "def_proc_produktion_ot",
+        "title": "Produktion mit OT-Sicherheit (Fertigung mit VS-Anteilen, OT-Trennung, Werks-Sicherheit)",
+        "ownerRole": "Produktions-Leitung / OT-Sicherheits-Beauftragter",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Fertigungssteuerung (MES/SCADA, segmentiert), OT-Netz mit VS-Anteilen, Werks-Stromversorgung, kritische Halbleiter und Spezial-Komponenten",
+        "outputs": "Wehrtechnik-Produkte mit VS-Konformität, Qualitäts-Sicherung, Auslieferungs-Bereitschaft an BMVg/NATO",
+        "notes": "OT-Trennung Pflicht: Produktions-OT von Werks-IT (siehe def_proc_werks_it) und VS-Bearbeitung (def_proc_vs_bearbeitung) segmentiert. Bei VS-Anteilen in der Fertigung Zonen-Klassifizierung mit Zugangskontrolle. Halbleiter-Lieferketten-Risiko durch Russland-/China-Sanktions-Eskalationen seit 2022."
+      },
+      {
+        "id": "def_proc_werks_it",
+        "title": "Werks-IT mit VS-Trennung (Office-IT + separates VS-Netz)",
+        "ownerRole": "CISO Defence",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Active Directory, ERP-System, E-Mail, Office-Dokumenten-Management, Backup-Infrastruktur (immutable), BSI-IT-Grundschutz-Defence-Konformität",
+        "outputs": "Funktionsfähige Office-IT, ERP-Buchungen, Vertriebs-Workflow, interne Kommunikation",
+        "notes": "Strikte Trennung von VS-Netz (def_proc_vs_bearbeitung) und Produktions-OT (def_proc_produktion_ot). Rheinmetall-Cyber-Vorfall 14.04.2023: Black-Basta-Ransomware traf die Automotive-Sparte (Zivil-IT). Militärgeschäft war strikt segmentiert und blieb unbeeinträchtigt. Lehre: Saubere Zivil-/VS-Trennung schützt das Defence-Geschäft auch bei Großvorfällen in zivilen Sparten — positive Demo-Pointe für Architektur-Investition. Bitkom/BfV-Wirtschaftsschutz-2025-Lage: 87 % der Unternehmen 2025 betroffen, 266,6 Mrd EUR Schaden, 28 % Tätergruppe ausländische Nachrichtendienste (Vervierfachung gegen 7 % in 2023). BSI-IT-Grundschutz mit Defence-Spezial-Bausteinen (BSI-Standard 200-3 erweitert)."
+      },
+      {
+        "id": "def_proc_lieferanten",
+        "title": "Lieferanten-Management mit Compliance-Pflicht (NATO-Konsortien, ITAR-Audits, Sub-Supplier)",
+        "ownerRole": "Lieferanten-Management / Compliance-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "12",
+        "dependencies": "Lieferanten-Register, NATO-Industrial-Security-Officer (NISO)-Schnittstelle, ITAR-Lieferanten-Audit-Datenbank, Sub-Supplier-Sicherheits-Überprüfung, BAAINBw-Programm-Lieferanten-Liste",
+        "outputs": "Lieferanten-Audits, ITAR-Compliance-Bestätigungen, Sub-Supplier-Sicherheits-Überprüfungs-Status, NATO-Konsortial-Koordination",
+        "notes": "NATO-Geheimhaltungsgrade NATO RESTRICTED bis COSMIC TOP SECRET parallel zu deutschen VS-Stufen. ITAR-Lieferanten brauchen Re-Export-Klauseln, EU-Dual-Use-VO 2021/821 ergänzt. Sub-Supplier-Audit-Tiefe: bis Tier-3-Lieferanten bei kritischen Komponenten. Bei Russland-Sanktions-Welle 24.02.2022 mussten viele Defence-Lieferketten kurzfristig umgestellt werden."
+      },
+      {
+        "id": "def_proc_werks_sicherheit",
+        "title": "Werks-Sicherheit und Zonen-Management (Zugang, Zonen, Drohnen-Abwehr)",
+        "ownerRole": "Werks-Sicherheit / Sicherheits-Bevollmächtigter",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Zugangskontroll-System mit MFA, Zonen-Klassifizierungs-Datenbank, Video-Überwachung, Drohnen-Detektion und -Abwehr, Werks-Schutz-Personal mit SÜG-Status",
+        "outputs": "Zugangskontrolle nach Zonen-Klassifizierung, Werks-Schutz, Drohnen-Sicherheits-Lage-Bild, Vorfall-Logs",
+        "notes": "Zonen-Klassifizierung nach VS-Stufen: Public (Empfang, Besucher), Internal (Mitarbeiter mit Werksausweis), Restricted (mit Ü1-Status), Classified (mit Ü2/Ü3-Status). Drohnen-Abwehr seit Russland-Sanktions-Welle 2022 verschärfte Lage — mutmaßliche Spionage-Drohnen über deutschen Werks-Geländen wiederholt dokumentiert. MTPD 4h reflektiert die Echtzeit-Erfordernis: ein Sicherheits-Lage-Verlust binnen Stunden ist eskalations-pflichtig."
+      },
+      {
+        "id": "def_proc_krisen_komm",
+        "title": "Krisen-Kommunikation und Bundes-Eskalation (BSI/MAD/BMVg/Pressestelle)",
+        "ownerRole": "Vorstand / Pressestelle",
+        "criticality": "hoch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Pressestelle, Vorstands-Kommunikation, BSI-Meldewege § 8b BSIG, MAD-Liaison-Person, BMVg-Programm-Schnittstelle, Bundeskanzleramt-Eskalations-Pfad bei diplomatischer Tragweite",
+        "outputs": "Pressesperre bei VS-Vorfällen, BSI-Erstmeldung binnen 24h (NIS2), MAD-Information, BMVg-Programm-Eskalation, Vorstands-Pressemitteilung",
+        "notes": "Bei VS-Vorfall: Pressesperre Pflicht — keine Kommunikation ohne BMVg-Abstimmung und MAD-Freigabe. APT-Spionage-Verdacht: BfV-Wirtschaftsschutz-Beratung als parallele Schicht zu BSI-Meldung. Bei Vorfällen mit Allianz-Implikationen NATO-Industrial-Security-Officer (NISO) parallel informieren. Bundeskanzleramt-Konsultation bei diplomatischer Tragweite (z. B. China-Attribution mit politischer Folge)."
       }
     ],
     "dependencyTemplates": [
@@ -419,7 +503,7 @@
         "singlePointOfFailure": true,
         "fallback": "US-Politik-Wechsel kann Re-Export-Genehmigungen entziehen — Substitution erfordert mehrjährige Re-Engineering-Pfade. Zweit-Quellen-Strategie mit europäischen oder verbündeten Anbietern als Resilienz-Investition.",
         "contractReference": "US-Lieferanten-Vertrag mit ITAR-Re-Export-Klauseln",
-        "notes": "ITAR (US-International Traffic in Arms Regulations) und EAR (Export Administration Regulations) verlangen US-Re-Export-Genehmigung bei Weitergabe an Drittländer. Bei Politik-Wechsel kann ITAR-Embargo das Defence-Geschäft binnen Wochen lähmen."
+        "notes": "ITAR (US-International Traffic in Arms Regulations) und EAR (Export Administration Regulations) verlangen US-Re-Export-Genehmigung bei Weitergabe an Drittländer. Bei Politik-Wechsel kann ITAR-Embargo das Defence-Geschäft binnen Wochen lähmen. Mistral-Frankreich-Russland-Schablone 2014/2015 als Embargo-Pattern (jedoch KEIN ITAR, sondern EU-/Frankreich-Politik-Entscheidung; Vertrag 1,2 Mrd EUR, Rückzahlung 949,7 Mio EUR, Schiffe an Ägypten verkauft)."
       },
       {
         "id": "def_dep_nato_industrieverbund",
@@ -429,7 +513,7 @@
         "singlePointOfFailure": false,
         "fallback": "NATO-Großprogramme (FCAS, MGCS, Eurofighter) sind Konsortien — bei Konsortial-Partner-Ausfall kann das gesamte Programm verzögert werden. Politik-Risiko bei Mitglieds-Land-Politik-Wechsel.",
         "contractReference": "NATO-Konsortial-Verträge (FCAS, MGCS, Eurofighter, ggf. weitere)",
-        "notes": "NATO-Industrial-Security-Officer (NISO) als Schnittstelle. NATO-Geheimhaltungsgrade NATO RESTRICTED bis COSMIC TOP SECRET parallel zu deutschen VS-Stufen. Sicherheits-Akkreditierung muss NATO-konform sein."
+        "notes": "NATO-Industrial-Security-Officer (NISO) als Schnittstelle. NATO-Geheimhaltungsgrade NATO RESTRICTED bis COSMIC TOP SECRET parallel zu deutschen VS-Stufen. Sicherheits-Akkreditierung muss NATO-konform sein. FCAS (DE/FR/ES, FR-geführt) und MGCS (DE-geführt) sind die größten aktuellen Konsortial-Programme."
       },
       {
         "id": "def_dep_bafa",
@@ -439,7 +523,7 @@
         "singlePointOfFailure": true,
         "fallback": "BAFA-Genehmigungs-Verzögerungen sind systemisch nicht ersetzbar — Geschäftsstrategie muss BAFA-Vorlauf-Zeiten einplanen. Bei kritischen Aufträgen Eskalations-Pfad über BMVg-Bedarfsträger.",
         "contractReference": "Keine Verträge — Behördenverhältnis nach AWG/KWKG",
-        "notes": "BAFA-Genehmigungs-Verfahren dauern 4-12 Wochen je nach Land und Komponente. Bei Sanktions-Anpassungen (z. B. EU 2025/2033 Russland-Sanktions-Update Oktober 2025) kann sich der Status laufender Anträge ändern."
+        "notes": "BAFA-Genehmigungs-Verfahren dauern 4-12 Wochen je nach Land und Komponente. Bei Sanktions-Anpassungen (z. B. EU 13./14. Russland-Sanktions-Paket 2024) kann sich der Status laufender Anträge ändern. Russland-Dual-Use-Blanket-Ban gilt seit 26.02.2022 (EU 833/2014)."
       },
       {
         "id": "def_dep_bundeswehr_programm",
@@ -448,8 +532,58 @@
         "criticality": "kritisch",
         "singlePointOfFailure": false,
         "fallback": "Bei Auftrags-Volumen > 50 % BMVg-Anteil ist Diversifikation auf NATO-Partner und ggf. genehmigte Drittländer (z. B. Australien, Japan) Resilienz-Strategie. Bei reinen BMVg-Spezialisten sehr begrenzt.",
-        "contractReference": "BMVg-Rahmenverträge mit Sicherheits- und Cyber-Klauseln",
-        "notes": "Deutsche Defence-Industrie boomt 2025 mit hohem Auftrags-Volumen aus dem 100-Mrd-€-Sondervermögen. Auftrags-Sicherheit hoch, aber bei Akkreditierungs-Entzug oder schweren Vorfällen kann der einzelne Tenant kurzfristig ausgesperrt werden."
+        "contractReference": "BMVg-Rahmenverträge mit Sicherheits- und Cyber-Klauseln, BAAINBw-Programm-Verträge",
+        "notes": "Deutsche Defence-Industrie boomt 2025 mit hohem Auftrags-Volumen aus dem 100-Mrd-€-Sondervermögen (Bundestag 03.06.2022, GG Art. 87a). 2025-Verteidigungshaushalt: 24,06 Mrd Sondervermögen + 62,43 Mrd Regelhaushalt. Auftrags-Sicherheit hoch, aber bei Akkreditierungs-Entzug oder schweren Vorfällen kann der einzelne Tenant kurzfristig ausgesperrt werden."
+      },
+      {
+        "id": "def_dep_bfv_mad",
+        "title": "Verfassungsschutz und MAD (Sicherheitsüberprüfung, Spionage-Abwehr, Wirtschaftsschutz)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "BfV/MAD-Schnittstelle ist nicht ersetzbar — bei Verdachtsfall Pflicht-Einbindung. Bei länger dauernden Verfahren (SÜG: 6-12 Monate) Personal-Planung mit ausreichendem Vorlauf.",
+        "contractReference": "Behördliche Beziehung nach SÜG, BVerfSchG, MADG; Wirtschaftsschutz-Beratung als kostenlose Leistung",
+        "notes": "BfV (Bundesamt für Verfassungsschutz) für ziviles Personal, MAD (Militärischer Abschirmdienst) für militärisch-relevante Defence-Tenants. Bei APT-Spionage-Verdacht BfV-Wirtschaftsschutz als beratende Schicht parallel zu BSI-Meldung. Bitkom/BfV 2025: 28 % der Unternehmen identifizieren ausländische Nachrichtendienste als Täter, Vervierfachung gegen 7 % in 2023. Hauptakteure: RUS (APT28/29), CN (APT10/41), DPRK (Kimsuky/Lazarus), IR (APT33). Diehl-Defence-Q3-2024 Kimsuky-Vorfall als deutsche Schablone."
+      },
+      {
+        "id": "def_dep_bsi_defence",
+        "title": "BSI mit Defence-Spezifika (KRITIS-Meldepflicht, IT-Grundschutz Defence, Beratung)",
+        "category": "behoerde",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "BSI-Meldewege nach NIS2 § 8b BSIG; bei Defence-Tenants zusätzliche Spezial-Bausteine im IT-Grundschutz; CERT-Bund als technischer Koordinations-Pfad",
+        "contractReference": "Meldewege nach BSI-KritisV, NIS2-UmsuCG seit 06.12.2025; IT-Grundschutz-Methodik mit Defence-Spezifika",
+        "notes": "Bei Defence-Cyber-Vorfällen mit VS-Bezug parallele Eskalation: BSI für IT-Sicherheit, BfV/MAD für Spionage-Abwehr, BMVg für Programm-Implikationen. NIS2-Erstmeldung binnen 24 h, Final-Report binnen 1 Monat."
+      },
+      {
+        "id": "def_dep_sub_supplier",
+        "title": "Sub-Supplier mit ITAR-/EAR-Pflichten (Halbleiter, Optronik, Software)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Multi-Source-Strategie für ITAR-/EAR-pflichtige Komponenten; europäische Substitution wo möglich; bei Single-Source-Komponenten Lager-Reserve und Re-Engineering-Vorbereitung",
+        "contractReference": "Sub-Supplier-Verträge mit ITAR-/EAR-Re-Export-Klauseln; Sub-Outsourcing-Aufsicht durch Tier-1",
+        "notes": "Halbleiter-Engpässe 2021-2024 zeigten Single-Source-Risiken; Diversifikation in Asien und Europa. Sub-Supplier-Audit-Tiefe bis Tier-3 bei kritischen Komponenten. China-Export-Kontrollen-Eskalation 2025 (Hensoldt-April-2025-Schablone) verschärft Lieferketten-Risiko."
+      },
+      {
+        "id": "def_dep_compliance_beratung",
+        "title": "Beratungs-Konsortium für Compliance (AWG-/KWKG-Berater, ITAR-Anwaltskanzleien)",
+        "category": "dienstleister",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Mehrere Berater-Mandate parallel (AWG-/KWKG-Anwälte, ITAR-Spezial-Kanzleien); bei Eskalations-Bedarf BAFA-direkter Kontakt; interne Compliance-Funktion als Backbone",
+        "contractReference": "Anwalts-Mandatsverträge, Beratungs-Rahmenverträge",
+        "notes": "Externe Beratung erforderlich bei komplexen Sanktions-Lagen, ITAR-Re-Export-Verfahren, Sub-Outsourcing-Verträgen mit US-Bezug. Bei Stuttgart-OLG-Juli-2024-Pattern (AWG-Verstoß) ist Anwalts-Beratung Pflicht."
+      },
+      {
+        "id": "def_dep_forschung",
+        "title": "Forschende Hochschulen und Bundes-Programme (BAAINBw, DLR, Fraunhofer-VVS)",
+        "category": "partner",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Mehrere Forschungs-Kooperationen parallel; bei Hochschul-Wechsel langfristige Personal- und Wissens-Transfer-Pfade; BAAINBw als zentrale Beschaffungs-Schnittstelle",
+        "contractReference": "Forschungs-Kooperations-Verträge, BAAINBw-Programm-Verträge, Fraunhofer-VVS-Konsortial-Verträge",
+        "notes": "Hochschul-Kooperationen mit VS-Komponenten brauchen SÜG-zertifiziertes Wissenschaftler-Personal und Zonen-Klassifizierung in Labor-Bereichen. Fraunhofer-VVS-Verbund als zentrales deutsches Defence-Forschungs-Konsortium. BAAINBw (Bundesamt für Ausrüstung, Informationstechnik und Nutzung der Bundeswehr) als zentrale Beschaffungs-Behörde."
       }
     ],
     "scenarioTemplates": [
@@ -457,52 +591,167 @@
         "id": "def_scn_apt_spionage",
         "title": "APT-Spionage-Angriff mit VS-Daten-Exfiltrations-Verdacht",
         "category": "Cyber-physische Bedrohung mit staatlichem Akteur",
-        "description": "Gezielter APT-Angriff auf Defence-Industrial-Base mit VS-Daten-Exfiltrations-Verdacht. APT28/GRU- oder China-MSS-Schablone. NATO-Mai-2024-Schablone bestätigte Angriffe gegen logistics, defense supply chains, technology service providers in Deutschland.",
+        "description": "Gezielter APT-Angriff auf Defence-Industrial-Base mit VS-Daten-Exfiltrations-Verdacht. Hauptschablone Diehl Defence Q3 2024 (öffentlich Sep 2024 via Spiegel/ZDF): nordkoreanische APT-Gruppe Kimsuky (RGB) führte monatelange Spear-Phishing-Kampagne mit gefälschten Stellenanzeigen und manipulierten Telekom-Login-Portalen — Ziel waren IRIS-T-SLM-Daten. Plus NATO-Mai-2024-Attribution (Deutschland/Tschechien): GRU-APT28 gegen logistics, defense supply chains, technology service providers. APT-Profile 2023-2025: APT28 GooseEgg-Exploit (CVE-2022-38028, Logistik/Defence EU), APT29 WINELOADER gegen DE-Parteien 2024 + WinRAR-CVE-2023-38831 gegen EU-Botschaften, APT41 Google-Calendar-C2 2025 (CN, Trade/Government), APT33 Satelliten-/Defence-Sektor 2023-2025 (Iran). Bitkom/BfV-Wirtschaftsschutz 2025: 87 % Unternehmen betroffen, 266,6 Mrd EUR Schaden, 28 % staatliche Akteure (Vervierfachung gegen 7 % 2023).",
         "likelihood": 4,
         "impact": 5,
         "ownerRole": "Sicherheitsbeauftragter / Geschäftsführung",
         "linkedProcessTemplateIds": [
           "def_proc_vs_bearbeitung",
-          "def_proc_defence_auftrags_abwicklung"
+          "def_proc_fe_vs",
+          "def_proc_werks_it",
+          "def_proc_krisen_komm"
         ],
-        "linkedDependencyTemplateIds": [],
-        "playbook": "BfV/MAD-Sofort-Einbindung, BMVg-Auftrags-Information, Forensik mit staatlichen Akteuren als Annahme, BSI-NIS2-Erstmeldung 24 h, Bundeskanzleramt-Konsultation bei diplomatischer Tragweite, Press-Sprachregelung.",
+        "linkedDependencyTemplateIds": [
+          "def_dep_bfv_mad",
+          "def_dep_bsi_defence"
+        ],
+        "playbook": "BfV/MAD-Sofort-Einbindung (Pflicht bei Defence-Tenants mit Spionage-Verdacht), BMVg-Auftrags-Information mit Programm-Implikations-Bewertung, Forensik mit staatlichen Akteuren als Annahme (externe Defence-spezialisierte Forensik-Firma), BSI-NIS2-Erstmeldung binnen 24 h, IT-Grundschutz-Defence-Vorfall-Analyse, Bundeskanzleramt-Konsultation bei diplomatischer Tragweite (z. B. China-/Russland-Attribution), Pressestelle-Sprachregelung mit MAD-Freigabe, Vorstand-Information binnen Stunden, NATO-Industrial-Security-Officer (NISO) parallel bei Allianz-Implikationen.",
         "exerciseTypeHint": "tabletop",
-        "notes": "NATO/Deutschland/Tschechien-Attribution Mai 2024 als Schablone, Hensoldt-China-Export-Kontrollen April 2025 als China-Variante."
+        "notes": "Diehl-Kimsuky-Q3-2024-Schablone (IRIS-T-SLM-Daten als Ziel) als beste deutsche Defence-Cyber-Schablone. NATO/Deutschland/Tschechien-Attribution Mai 2024 als zweite Schablone (APT28/GRU). Hensoldt-China-Export-Kontrollen April 2025 als China-Variante. APT-Bedrohungslage ist Tagesgeschäft, nicht Eventualität."
       },
       {
         "id": "def_scn_insider_vs_zugang",
         "title": "Insider mit VS-Zugang exfiltriert vermutlich an fremden Nachrichtendienst",
         "category": "Human Intentional mit Spionage-Verdacht",
-        "description": "Mitarbeiter mit GEHEIM-Stufe-Zugang fällt durch ungewöhnliches Verhalten auf — auffällige Auslandsreisen ohne Anzeige, Kontakte zu fremden Staatsangehörigen, plötzlicher Lebensstandard-Wechsel, ungewöhnliche Datenzugriffs-Pattern nach SOC-Logging.",
+        "description": "Mitarbeiter mit GEHEIM-Stufe-Zugang fällt durch ungewöhnliches Verhalten auf — auffällige Auslandsreisen ohne Anzeige, Kontakte zu fremden Staatsangehörigen, plötzlicher Lebensstandard-Wechsel, ungewöhnliche Datenzugriffs-Pattern nach SOC-Logging. Geheimdienstwerbung mit gefälschten Stellenanzeigen (Diehl-Kimsuky-Pattern Q3 2024) zeigt: Insider-Rekrutierung läuft auch über Spear-Phishing in Personal-Auswahl-Schritten.",
         "likelihood": 3,
         "impact": 5,
         "ownerRole": "Sicherheitsbeauftragter / Personal",
         "linkedProcessTemplateIds": [
-          "def_proc_vs_bearbeitung"
+          "def_proc_vs_bearbeitung",
+          "def_proc_sueg",
+          "def_proc_krisen_komm"
         ],
-        "linkedDependencyTemplateIds": [],
-        "playbook": "MAD-Sofort-Konsultation (Pflicht-Eskalation bei SÜG-Verdachtsfall), Beobachtungs-vs-Suspensions-Entscheidung, Personal-Akten-Sicherung, BMVg-Information mit Programm-Implikations-Bewertung, Mitarbeiter-Information ohne Insiderwissens-Leak.",
+        "linkedDependencyTemplateIds": [
+          "def_dep_bfv_mad"
+        ],
+        "playbook": "MAD-Sofort-Konsultation (Pflicht-Eskalation bei SÜG-Verdachtsfall), Beobachtungs-vs-Suspensions-Entscheidung mit MAD-Beratung, Personal-Akten-Sicherung, BMVg-Information mit Programm-Implikations-Bewertung, Mitarbeiter-Information ohne Insiderwissens-Leak (Strafrechts-Anwalt einbinden), SOC-Logging der Datenzugriffe forensisch sichern, ggf. Strafanzeige nach § 94 StGB (Landesverrat) oder § 99 StGB (geheimdienstliche Agententätigkeit).",
         "exerciseTypeHint": "tabletop",
-        "notes": "BfV-Wirtschaftsschutz 2025: 28 % der betroffenen Firmen führen Angriffe auf staatliche Akteure zurück — Vervierfachung gegenüber 2023."
+        "notes": "BfV-Wirtschaftsschutz 2025: 28 % der betroffenen Firmen führen Angriffe auf staatliche Akteure zurück — Vervierfachung gegenüber 7 % 2023. L3 reflektiert die strukturell verschärfte Bedrohungslage seit 2022 (Russland-Sanktionen, China-Tech-Wettbewerb). VS-Klassifikations-Stufen-Bezug: Insider mit Ü3-Status hat Zugang bis VS-GEHEIM (F&E-Konstruktions-Daten), STRENG GEHEIM bei Krypto-Schlüsseln."
       },
       {
         "id": "def_scn_itar_embargo",
         "title": "US-ITAR-Lieferanten-Embargo durch politisches Zerwürfnis",
         "category": "Interdependenz mit Politik-Hebel",
-        "description": "US-Politik-Wechsel oder bilaterales Zerwürfnis führt zu ITAR-Re-Export-Genehmigungs-Entzug für sicherheitsrelevante Komponenten — Optronik-Sensoren, Halbleiter, Software-Lizenzen. Deutsche Defence-Tenants mit US-Komponenten verlieren Lieferfähigkeit.",
+        "description": "US-Politik-Wechsel oder bilaterales Zerwürfnis führt zu ITAR-Re-Export-Genehmigungs-Entzug für sicherheitsrelevante Komponenten — Optronik-Sensoren, Halbleiter, Software-Lizenzen. Deutsche Defence-Tenants mit US-Komponenten verlieren Lieferfähigkeit. Politische Realität 2025+ verschärft das Risiko: Trump-Administrations-Sanktions-Entscheidungen unvorhersehbar, China-Export-Kontrollen-Eskalation parallel.",
         "likelihood": 3,
         "impact": 5,
         "ownerRole": "BAFA-Compliance-Officer / Geschäftsführung",
         "linkedProcessTemplateIds": [
-          "def_proc_exportkontrolle"
+          "def_proc_exportkontrolle",
+          "def_proc_lieferanten",
+          "def_proc_defence_auftrags_abwicklung"
         ],
         "linkedDependencyTemplateIds": [
-          "def_dep_us_itar_lieferant"
+          "def_dep_us_itar_lieferant",
+          "def_dep_bafa",
+          "def_dep_sub_supplier"
         ],
-        "playbook": "BAFA-/BMVg-Konsultation für Eskalations-Pfad, Zweit-Quellen-Aktivierung (europäische oder verbündete Lieferanten), Re-Engineering-Plan mit Bundeswehr-Programm-Verzögerungs-Akzeptanz, ggf. Bundeskanzleramt-Eskalation bei systemischer Bedrohung.",
+        "playbook": "BAFA-/BMVg-Konsultation für Eskalations-Pfad, Zweit-Quellen-Aktivierung (europäische oder verbündete Lieferanten — Diversifikation als Resilienz-Investition), Re-Engineering-Plan mit Bundeswehr-Programm-Verzögerungs-Akzeptanz, ggf. Bundeskanzleramt-Eskalation bei systemischer Bedrohung, NATO-Konsortial-Partner-Information (FCAS, MGCS), Sub-Supplier-Audit auf weitere ITAR-Anteile.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Hensoldt China-Export-Kontrollen April 2025 als realistischer Anker für umgekehrtes Szenario (China-Embargo gegen DE-Defence)."
+        "notes": "Hensoldt China-Export-Kontrollen April 2025 als realistischer Anker für umgekehrtes Szenario (China-Embargo gegen DE-Defence). Mistral-Frankreich-Russland-Schablone 2014/2015 als Embargo-Pattern (jedoch KEIN ITAR, sondern EU-/Frankreich-Politik-Entscheidung; Vertrag 1,2 Mrd EUR, Rückzahlung 949,7 Mio EUR, Schiffe an Ägypten verkauft) — Demo-Pointe: politische Embargos können auch außerhalb von ITAR durchgesetzt werden."
+      },
+      {
+        "id": "def_scn_hensoldt_ransomware",
+        "title": "Cyber-Angriff auf Defence-Tochter mit Daten-Exfiltrations-Verdacht (Hensoldt-Klasse)",
+        "category": "Cyber / Ransomware",
+        "description": "Ransomware-/Daten-Exfiltrations-Angriff auf eine Defence-Tochter (typisch UK/FR/Polen) mit anschließender Daten-Veröffentlichung auf Leak-Site. Hensoldt-Lorenz-Schablone Januar 2022: Lorenz-Ransomware-Gruppe traf UK-Tochter, Lösegeld 500-700k USD, ca. 95 % der Daten auf Leak-Site veröffentlicht (Hensoldt zahlte nicht). Plus Snatch-2022-Pattern: 94 MB von Hensoldt France auf Leak-Site. KEIN BSI-/BfV-Eskalation öffentlich dokumentiert — typisches Pattern für Auslands-Töchter ohne deutschem KRITIS-Status.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "CISO Defence / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "def_proc_werks_it",
+          "def_proc_krisen_komm",
+          "def_proc_lieferanten"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_bsi_defence"
+        ],
+        "playbook": "Tochter-IT vom Mutter-Konzern segmentieren (Verhinderung von Lateral Movement), BSI-NIS2-Meldung binnen 24 h falls deutsche KRITIS-Tenant-Bezug, MAD-Information bei VS-Querverbindungs-Verdacht, Pressestelle-Statement mit Tochter-/Mutter-Abgrenzung, Lösegeld-Verhandlungs-Position klären (mit Strafrechts-Anwalt; in DE strafbar bei staatlich-gesponsertem Akteur), Daten-Exfiltrations-Forensik, Kunden- und Lieferanten-Information, Versicherungs-Schutz-Aktivierung (Cyber-Versicherung), Wiederherstellung aus Offline-Backups.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Hensoldt-2022-Schablone (Lorenz UK + Snatch FR) zeigt: Auslands-Töchter sind Cyber-Schwach­stelle ohne deutschen KRITIS-Schirm. Demo-Pointe: Konzern-weite Cyber-Strategie muss alle Töchter erfassen, nicht nur den deutschen Mutter-Konzern."
+      },
+      {
+        "id": "def_scn_sanktions_welle",
+        "title": "Sanktions-Welle mit Auftrags-Verzögerung (Russland-2022-Schablone)",
+        "category": "Compliance / Politik",
+        "description": "Politische Sanktions-Welle (z. B. Russland-Sanktionen seit 24.02.2022 mit EU-Verordnung 833/2014 erweitert; Dual-Use-Blanket-Ban seit 26.02.2022; mehrere Folge-Pakete bis 14. Paket 2024) führt zu BAFA-Verfahren-Stau, Lieferketten-Anpassung, Vertrags-Anpassungs-Druck mit Drittländern. Aktuelle Lage 2025+: China-Export-Kontrollen-Eskalation parallel, Iran/Nordkorea-Sanktionen, Sub-Saharan-Konflikt-Embargos.",
+        "likelihood": 4,
+        "impact": 4,
+        "ownerRole": "BAFA-Compliance-Officer / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "def_proc_exportkontrolle",
+          "def_proc_lieferanten",
+          "def_proc_defence_auftrags_abwicklung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_bafa",
+          "def_dep_compliance_beratung",
+          "def_dep_sub_supplier"
+        ],
+        "playbook": "BAFA-Antrags-Status aller laufenden Verfahren neu bewerten, EU-Verordnungs-Anpassungen in Sanktions-Screening-System einpflegen, Sub-Supplier-Audit auf neu sanktionierte Komponenten, Vertrags-Klauseln mit Drittland-Kunden auf Force-Majeure-Geltung prüfen, BMVg-Programm-Lieferanten-Status melden, AWG-/KWKG-Anwalts-Beratung bei Eskalations-Bedarf, Pressestelle-Sprachregelung bei Programm-Verzögerungen.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "L4 reflektiert die strukturelle Sanktions-Eskalation seit 2022. EU-Sanktions-Anpassungen erfolgen alle 6-12 Monate, Compliance-Last steigt. Stuttgart-OLG-Juli-2024-AWG-Verstoß-Pattern als Realitätsanker für Bußgeld-Risiko."
+      },
+      {
+        "id": "def_scn_drohne_werk",
+        "title": "Drohnen-Sicherheits-Vorfall am Werks-Gelände",
+        "category": "Physische Sicherheit / Spionage",
+        "description": "Mutmaßliche Spionage-Drohne über Werks-Gelände eines deutschen Defence-Herstellers — zunehmend dokumentierte Lage seit 2022 (Russland-Sanktions-Welle). Drohnen können Werks-Aufnahmen, Funk-Aufklärung oder kurze Land-Versuche durchführen. Werks-Sicherheits-Eskalation Pflicht.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Werks-Sicherheit / Sicherheits-Bevollmächtigter",
+        "linkedProcessTemplateIds": [
+          "def_proc_werks_sicherheit",
+          "def_proc_krisen_komm"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_bfv_mad"
+        ],
+        "playbook": "Drohnen-Detektion bestätigen (Radar, Optik, Funk), Drohnen-Abwehr (Jamming, gezieltes Detektions-Verfahren — in DE rechtlich begrenzt), Werks-Schutz-Personal alarmieren, Polizei-Einbindung bei Strafverfolgung-Bezug, BfV-Wirtschaftsschutz-Beratung, MAD bei VS-Bezug, BMVg-Information bei programmrelevanten Werks-Bereichen, Spuren-Sicherung (Drohne ggf. abfangen mit polizeilicher Begleitung), Pressestelle-Sprachregelung mit MAD-Freigabe.",
+        "exerciseTypeHint": "technical",
+        "notes": "Russland-Sanktions-Welle 2022 verschärfte Drohnen-Spionage-Lage in DE. Drohnen-Abwehr in DE rechtlich begrenzt — keine Kinetik gegen Drohnen ohne polizeiliche Anordnung; Detektions-/Funk-Maßnahmen primär."
+      },
+      {
+        "id": "def_scn_vs_datentraeger_verlust",
+        "title": "VS-Datenträger-Verlust durch Mitarbeiter-Fehler",
+        "category": "Human Unintentional",
+        "description": "Mitarbeiter verliert auf Dienstreise einen Laptop, USB-Stick oder Aktenkoffer mit VS-VERTRAULICH- oder VS-GEHEIM-Daten — z. B. auf Flughafen, in Taxi, im Hotel. Klassischer Vorfall im Defence-Sektor mit zwingender Eskalations-Kette: VS-Compromise nicht durch DSGVO Art. 34 sanierbar, Akkreditierungs-Prozess wird angestoßen.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Sicherheitsbeauftragter / VS-Registratur",
+        "linkedProcessTemplateIds": [
+          "def_proc_vs_bearbeitung",
+          "def_proc_sueg",
+          "def_proc_krisen_komm"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_bfv_mad"
+        ],
+        "playbook": "VS-Compromise-Meldung an BfV/MAD binnen 24 h (Pflicht), BMVg-Programm-Implikations-Bewertung, ggf. Suchanzeige bei Polizei (mit MAD-Abstimmung wegen VS-Bezug), Mitarbeiter-Verhör mit MAD-Begleitung (kein Disziplinar-Vorgang ohne MAD-Beratung), VS-Registratur-Audit auf Folge-Implikationen, Akkreditierungs-Prozess-Verlängerungs-Bewertung, ggf. Programm-Lieferant-Sperre durch BMVg, Pressesperre Pflicht.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "VS-Compromise hat keinen DSGVO-Art-34-Reset-Knopf — geleakte VS-Information bleibt geleakt. Akkreditierungs-Prozess kann Auftrags-Stillstand für Quartale bedeuten. VS-VERTRAULICH-Verlust auf Flughafen ist klassisches Pattern, deshalb VS-Datenträger-Mitnahme strikt nach VSA reglementiert."
+      },
+      {
+        "id": "def_scn_lockheed_f35",
+        "title": "Langjähriger Konstruktions-Daten-Diebstahl (Lockheed-F-35-Klasse)",
+        "category": "Cyber-Spionage / langfristig",
+        "description": "Langjährige APT-Spionage gegen F&E-Bestände mit massiver Daten-Exfiltration über Jahre. Hauptschablone Lockheed Martin F-35 Joint Strike Fighter: 2007 Erstvorfall, jahrelang andauernd. Attribution: APT1 (PLA Unit 61398) durch Mandiant 2013. DoJ-Indictment Mai 2014 gegen 5 PLA-Offiziere. Su Bin (chinesischer Staatsbürger) bekannte sich 2016 in den USA schuldig. Datenumfang laut NSA-Snowden-Doku: 'viele Terabyte', grobe Schätzung ~50 TB ('5 Libraries of Congress'). F-35-Variante J-31 (Shenyang) zeigt mutmaßliche Übernahme von Konstruktions-Elementen.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "CISO Defence / F&E-Leitung / Vorstand",
+        "linkedProcessTemplateIds": [
+          "def_proc_fe_vs",
+          "def_proc_werks_it",
+          "def_proc_defence_auftrags_abwicklung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "def_dep_bfv_mad",
+          "def_dep_bsi_defence"
+        ],
+        "playbook": "Forensik mit Annahme jahrelanger Persistenz (Threat-Hunting in historischen Logs, Backup-Wiederherstellung aus immutablen Backups vor Kompromittierung), BfV/MAD-Sofort-Einbindung mit langfristiger Forensik-Begleitung, BMVg-Information mit Programm-Implikations-Bewertung (welche Konstruktions-Daten sind kompromittiert?), NATO-Konsortial-Partner-Information (FCAS, MGCS), Bundeskanzleramt-Konsultation bei Allianz-Implikationen, Strafanzeige mit DoJ-Style-Indictment-Vorbereitung, Press-Sprachregelung mit MAD-Freigabe.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Lockheed-F-35-APT1-Schablone (NICHT APT10 wie häufig falsch attribuiert) zeigt: Langfristige Spionage über Jahre ist möglich; Forensik muss historisch tief gehen. Demo-Pointe: Threat-Hunting mit jahrelanger Persistenz-Annahme als F&E-Schutz-Disziplin."
       }
     ],
     "exerciseTemplates": [
@@ -513,7 +762,7 @@
         "scenarioTemplateId": "def_scn_apt_spionage",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung mit Geschäftsführung, Sicherheitsbeauftragtem, BAFA-Compliance-Officer, BMVg-Schnittstelle, BfV-/MAD-Liaison-Person, externer Forensik-Firma (Defence-spezialisiert)."
+        "notes": "Jährliche Übung mit Geschäftsführung, Sicherheitsbeauftragtem, BAFA-Compliance-Officer, BMVg-Schnittstelle, BfV-/MAD-Liaison-Person, externer Forensik-Firma (Defence-spezialisiert). Drehbuch alterniert zwischen Diehl-Kimsuky-Pattern (Q3 2024, IRIS-T-SLM-Daten als Ziel, gefälschte Stellenanzeigen) und APT28-GooseEgg-Pattern (Logistik/Defence)."
       },
       {
         "id": "def_ex_insider_vs_zugang",
@@ -522,7 +771,34 @@
         "scenarioTemplateId": "def_scn_insider_vs_zugang",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung mit MAD-Liaison-Person als Berater, Personal-Vertretung, externem Anwalt für Arbeitsrecht und Strafrecht."
+        "notes": "Jährliche Übung mit MAD-Liaison-Person als Berater, Personal-Vertretung, externem Anwalt für Arbeitsrecht und Strafrecht (§ 94 StGB Landesverrat / § 99 StGB geheimdienstliche Agententätigkeit als rechtlicher Rahmen)."
+      },
+      {
+        "id": "def_ex_vs_datentraeger",
+        "title": "VS-Datenträger-Verlust Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "def_scn_vs_datentraeger_verlust",
+        "ownerRole": "Krisenstab",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Übung mit VS-Beauftragtem, Sicherheits-Bevollmächtigtem, MAD-Liaison-Person, Pressestelle. Drehbuch: Mitarbeiter-Laptop-Verlust auf Flughafen mit VS-VERTRAULICH-Daten — Eskalations-Kette binnen 24 h zu BfV/MAD üben. VS-Compromise-Meldung-Disziplin als Lernziel."
+      },
+      {
+        "id": "def_ex_sanktions_welle",
+        "title": "Sanktions-Welle-Compliance-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "def_scn_sanktions_welle",
+        "ownerRole": "Exportkontroll-Beauftragter / Lieferanten-Management / Vorstand",
+        "cadenceMonths": 24,
+        "notes": "Zweijährliche Übung mit BAFA-Compliance-Officer, Lieferanten-Management, Vorstand, AWG-/KWKG-Anwalt. Russland-Sanktions-Welle 24.02.2022-Schablone als Drehbuch-Grundlage (EU 833/2014 Dual-Use-Blanket-Ban, mehrere Folge-Pakete bis 14. Paket 2024). Lernziele: schnelle Antrags-Status-Bewertung, Sub-Supplier-Audit, Vertrags-Klausel-Anpassung."
+      },
+      {
+        "id": "def_ex_drohne_funktionstest",
+        "title": "Drohnen-Sicherheits-Funktionstest",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "def_scn_drohne_werk",
+        "ownerRole": "Werks-Sicherheit / Zonen-Management",
+        "cadenceMonths": 24,
+        "notes": "Zweijährlicher Funktionstest (kein reines Tabletop): Drohnen-Detektion-Test mit eigener Test-Drohne (legal mit Pilot-Erlaubnis), Werks-Schutz-Personal-Eskalation üben, Polizei-Einbindungs-Pfad simulieren. Externe Drohnen-Abwehr-Dienstleister einbinden. Russland-Sanktions-Welle 2022 verschärfte Drohnen-Spionage-Lage in DE als Realitätsanker."
       }
     ],
     "riskCatalogTemplates": [
