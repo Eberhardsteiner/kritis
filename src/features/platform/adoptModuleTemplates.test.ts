@@ -2645,3 +2645,330 @@ describe('finance-core · Resilience-Skeleton (C5.5.9)', () => {
     expect(exerciseTypes.has('technical')).toBe(true);
   });
 });
+
+describe('defence-core · Resilience-Skeleton (C5.5.10)', () => {
+  const module = defencePack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates', () => {
+    expect((module.processTemplates ?? []).length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    expect((module.dependencyTemplates ?? []).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    expect((module.scenarioTemplates ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    expect((module.exerciseTemplates ?? []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 6 kritisch / 4 hoch / 0 mittel (Defence-Charakter, keine mittel-Stufe)', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(6);
+    expect(hoch).toBe(4);
+    expect(mittel).toBe(0);
+  });
+
+  it('Bestands-IDs (alle 12) bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    expect(processIds.has('def_proc_vs_bearbeitung')).toBe(true);
+    expect(processIds.has('def_proc_exportkontrolle')).toBe(true);
+    expect(processIds.has('def_proc_defence_auftrags_abwicklung')).toBe(true);
+    expect(depIds.has('def_dep_us_itar_lieferant')).toBe(true);
+    expect(depIds.has('def_dep_nato_industrieverbund')).toBe(true);
+    expect(depIds.has('def_dep_bafa')).toBe(true);
+    expect(depIds.has('def_dep_bundeswehr_programm')).toBe(true);
+    expect(scnIds.has('def_scn_apt_spionage')).toBe(true);
+    expect(scnIds.has('def_scn_insider_vs_zugang')).toBe(true);
+    expect(scnIds.has('def_scn_itar_embargo')).toBe(true);
+    expect(exIds.has('def_ex_apt_spionage')).toBe(true);
+    expect(exIds.has('def_ex_insider_vs_zugang')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const orphans: string[] = [];
+    for (const exercise of module.exerciseTemplates ?? []) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    for (const scenario of module.scenarioTemplates ?? []) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('VS-Bearbeitung Bestand-Werte beibehalten (24h/12h/0h, Air-Gap-Welt mit gewollter Langsamkeit)', () => {
+    const vs = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_vs_bearbeitung');
+    expect(vs).toBeDefined();
+    expect(parseFloat(vs!.mtpdHours ?? '0')).toBe(24);
+    expect(parseFloat(vs!.rtoHours ?? '0')).toBe(12);
+    expect(parseFloat(vs!.rpoHours ?? '99')).toBe(0);
+  });
+
+  it('Exportkontrolle Bestand-Werte beibehalten (72h/48h/24h, BAFA-Bürokratie-Pufferzeit)', () => {
+    const ex = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_exportkontrolle');
+    expect(ex).toBeDefined();
+    expect(parseFloat(ex!.mtpdHours ?? '0')).toBe(72);
+    expect(parseFloat(ex!.rtoHours ?? '0')).toBe(48);
+    expect(parseFloat(ex!.rpoHours ?? '0')).toBe(24);
+  });
+
+  it('Auftragsabwicklung Bestand-Werte beibehalten (120h/72h/48h, Quartals-Geschäft)', () => {
+    const aa = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_defence_auftrags_abwicklung');
+    expect(aa).toBeDefined();
+    expect(parseFloat(aa!.mtpdHours ?? '0')).toBe(120);
+    expect(parseFloat(aa!.rtoHours ?? '0')).toBe(72);
+    expect(parseFloat(aa!.rpoHours ?? '0')).toBe(48);
+  });
+
+  it('VS-Klassifikations-Stufen mit konkreten Beispielen in def_proc_vs_bearbeitung', () => {
+    const vs = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_vs_bearbeitung');
+    expect(vs).toBeDefined();
+    expect(vs!.notes).toMatch(/VS-NfD/);
+    expect(vs!.notes).toMatch(/VS-VERTRAULICH/);
+    expect(vs!.notes).toMatch(/VS-GEHEIM/);
+    expect(vs!.notes).toMatch(/STRENG GEHEIM/);
+    expect(vs!.notes).toMatch(/VSA-Compliance/);
+  });
+
+  it('Werks-IT mit Rheinmetall-Black-Basta-Schablone als Segmentierungs-Lehre', () => {
+    const it = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_werks_it');
+    expect(it).toBeDefined();
+    expect(it!.criticality).toBe('hoch');
+    expect(it!.notes).toMatch(/Rheinmetall/);
+    expect(it!.notes).toMatch(/14\.04\.2023/);
+    expect(it!.notes).toMatch(/Black.Basta/);
+    expect(it!.notes).toMatch(/Automotive|Zivil-IT/);
+    expect(it!.notes).toMatch(/Militärgeschäft|segmentiert|unbeeinträchtigt/);
+    // Bitkom-2025-Zahlen
+    expect(it!.notes).toMatch(/Bitkom|BfV/);
+    expect(it!.notes).toMatch(/87\s*%|266,6 Mrd|28\s*%/);
+    expect(it!.notes).toMatch(/Vervierfachung|2023/);
+  });
+
+  it('SÜG-Prozess mit 6-12-Monats-Verfahrens-Hinweis', () => {
+    const sueg = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_sueg');
+    expect(sueg).toBeDefined();
+    expect(sueg!.criticality).toBe('hoch');
+    expect(sueg!.notes).toMatch(/6-12 Monate/);
+    expect(sueg!.notes).toMatch(/Ü1|Ü2|Ü3/);
+  });
+
+  it('F&E-Prozess mit Lockheed-F-35-APT1-Schablone (NICHT APT10)', () => {
+    const fe = (module.processTemplates ?? []).find((p) => p.id === 'def_proc_fe_vs');
+    expect(fe).toBeDefined();
+    expect(fe!.criticality).toBe('kritisch');
+    expect(fe!.notes).toMatch(/Lockheed.Martin|F-35/);
+    expect(fe!.notes).toMatch(/APT1|PLA Unit 61398/);
+    expect(fe!.notes).toMatch(/Mandiant.{0,10}2013/);
+    expect(fe!.notes).toMatch(/DoJ|Indictment.{0,10}2014/);
+    expect(fe!.notes).toMatch(/Su Bin/);
+    expect(fe!.notes).toMatch(/50 TB/);
+    // Bitkom 2025
+    expect(fe!.notes).toMatch(/28\s*%/);
+  });
+
+  it('APT-Spionage-Szenario (L4/I5) mit Diehl-Kimsuky-Q3-2024-Schablone', () => {
+    const apt = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_apt_spionage');
+    expect(apt).toBeDefined();
+    expect(apt!.likelihood).toBe(4);
+    expect(apt!.impact).toBe(5);
+    // Diehl-Kimsuky
+    expect(apt!.description).toMatch(/Diehl/);
+    expect(apt!.description).toMatch(/Kimsuky/);
+    expect(apt!.description).toMatch(/IRIS-T-SLM/);
+    expect(apt!.description).toMatch(/gefälschten? Stellenanzeigen|manipulierten? Telekom-Login/);
+    // APT-Profile
+    expect(apt!.description).toMatch(/APT28|GooseEgg/);
+    expect(apt!.description).toMatch(/APT29|WINELOADER/);
+    expect(apt!.description).toMatch(/APT41|Google-Calendar-C2/);
+    expect(apt!.description).toMatch(/APT33/);
+    // Bitkom 2025
+    expect(apt!.description).toMatch(/87\s*%|266,6 Mrd|28\s*%/);
+  });
+
+  it('Insider-Spionage-Szenario L3/I5 (Bestand) mit StGB-§94/§99-Bezug', () => {
+    const ins = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_insider_vs_zugang');
+    expect(ins).toBeDefined();
+    expect(ins!.likelihood).toBe(3);
+    expect(ins!.impact).toBe(5);
+    expect(ins!.playbook).toMatch(/§ 94 StGB|§ 99 StGB|Landesverrat|geheimdienstliche Agententätigkeit/);
+  });
+
+  it('ITAR-Embargo-Szenario L3/I5 (Bestand) mit Mistral-EU-Politik-Korrektur (NICHT ITAR)', () => {
+    const itar = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_itar_embargo');
+    expect(itar).toBeDefined();
+    expect(itar!.likelihood).toBe(3);
+    expect(itar!.impact).toBe(5);
+    // Trump/China-Eskalation
+    expect(itar!.description).toMatch(/Trump|China-Export-Kontrollen/);
+    // Mistral als EU-Politik (NICHT ITAR)
+    expect(itar!.notes).toMatch(/Mistral/);
+    expect(itar!.notes).toMatch(/KEIN ITAR|EU.{0,5}Frankreich-Politik/);
+    expect(itar!.notes).toMatch(/1,2 Mrd|949,7 Mio/);
+    expect(itar!.notes).toMatch(/Ägypten/);
+  });
+
+  it('Hensoldt-Ransomware-Szenario mit korrigiertem Datum 2022 (Lorenz UK + Snatch FR)', () => {
+    const hen = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_hensoldt_ransomware');
+    expect(hen).toBeDefined();
+    expect(hen!.likelihood).toBe(3);
+    expect(hen!.impact).toBe(4);
+    expect(hen!.description).toMatch(/Hensoldt/);
+    expect(hen!.description).toMatch(/Lorenz/);
+    expect(hen!.description).toMatch(/Januar 2022|Jan 2022|2022/);
+    expect(hen!.description).toMatch(/Snatch/);
+    expect(hen!.description).toMatch(/UK-Tochter/);
+    expect(hen!.description).toMatch(/94 MB/);
+  });
+
+  it('Sanktions-Welle-Szenario L4/I4 mit Russland-2022-Schablone', () => {
+    const san = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_sanktions_welle');
+    expect(san).toBeDefined();
+    expect(san!.likelihood).toBe(4);
+    expect(san!.impact).toBe(4);
+    expect(san!.description).toMatch(/24\.02\.2022/);
+    expect(san!.description).toMatch(/EU.{0,3}833\/2014|833\/2014/);
+    expect(san!.description).toMatch(/Dual-Use-Blanket-Ban|26\.02\.2022/);
+    expect(san!.description).toMatch(/13\.|14\. Paket/);
+  });
+
+  it('Drohnen-Szenario L3/I4 mit Russland-Sanktions-Welle-Bezug', () => {
+    const dr = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_drohne_werk');
+    expect(dr).toBeDefined();
+    expect(dr!.likelihood).toBe(3);
+    expect(dr!.impact).toBe(4);
+    expect(dr!.description).toMatch(/Spionage-Drohne|Werks-Gelände/);
+    expect(dr!.description).toMatch(/2022|Russland/);
+  });
+
+  it('VS-Datenträger-Verlust-Szenario mit BfV/MAD-24h-Pflicht', () => {
+    const vs = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_vs_datentraeger_verlust');
+    expect(vs).toBeDefined();
+    expect(vs!.playbook).toMatch(/BfV|MAD/);
+    expect(vs!.playbook).toMatch(/24 h|binnen.*24/);
+    expect(vs!.notes).toMatch(/DSGVO Art\. 34|kein.*Reset/);
+  });
+
+  it('Lockheed-F-35-Szenario L2/I5 mit APT1-Korrektur (NICHT APT10)', () => {
+    const f35 = (module.scenarioTemplates ?? []).find((s) => s.id === 'def_scn_lockheed_f35');
+    expect(f35).toBeDefined();
+    expect(f35!.likelihood).toBe(2);
+    expect(f35!.impact).toBe(5);
+    expect(f35!.description).toMatch(/Lockheed.Martin|F-35/);
+    expect(f35!.description).toMatch(/APT1/);
+    expect(f35!.description).toMatch(/PLA Unit 61398/);
+    expect(f35!.description).toMatch(/Mandiant.{0,10}2013/);
+    expect(f35!.description).toMatch(/DoJ.{0,30}2014|Indictment.{0,5}Mai 2014/);
+    expect(f35!.description).toMatch(/Su Bin/);
+    expect(f35!.description).toMatch(/50 TB/);
+    // explizit NICHT APT10
+    expect(f35!.notes).toMatch(/NICHT APT10|nicht APT10/);
+  });
+
+  it('BfV/MAD-Dependency als kritisch behoerde mit Bitkom-28-%-Statistik', () => {
+    const bfvmad = (module.dependencyTemplates ?? []).find((d) => d.id === 'def_dep_bfv_mad');
+    expect(bfvmad).toBeDefined();
+    expect(bfvmad!.category).toBe('behoerde');
+    expect(bfvmad!.criticality).toBe('kritisch');
+    expect(bfvmad!.notes).toMatch(/28\s*%/);
+    expect(bfvmad!.notes).toMatch(/Vervierfachung|2023/);
+    expect(bfvmad!.notes).toMatch(/Diehl|Kimsuky|Q3 2024/);
+  });
+
+  it('BSI-Defence-Dependency als hoch behoerde mit IT-Grundschutz-Defence-Bezug', () => {
+    const bsi = (module.dependencyTemplates ?? []).find((d) => d.id === 'def_dep_bsi_defence');
+    expect(bsi).toBeDefined();
+    expect(bsi!.category).toBe('behoerde');
+    expect(bsi!.criticality).toBe('hoch');
+    expect(bsi!.notes).toMatch(/NIS2|24 h/);
+  });
+
+  it('Sub-Supplier-Dependency mit ITAR-/EAR-Pflichten', () => {
+    const sub = (module.dependencyTemplates ?? []).find((d) => d.id === 'def_dep_sub_supplier');
+    expect(sub).toBeDefined();
+    expect(sub!.category).toBe('lieferant');
+    expect(sub!.criticality).toBe('hoch');
+  });
+
+  it('Beratungs-Dependency als mittel und Forschungs-Dependency als mittel (zwei mittel-Deps)', () => {
+    const beratung = (module.dependencyTemplates ?? []).find((d) => d.id === 'def_dep_compliance_beratung');
+    const forschung = (module.dependencyTemplates ?? []).find((d) => d.id === 'def_dep_forschung');
+    expect(beratung).toBeDefined();
+    expect(forschung).toBeDefined();
+    expect(beratung!.criticality).toBe('mittel');
+    expect(forschung!.criticality).toBe('mittel');
+  });
+
+  it('Übungs-Mix: tabletop + technical mit Drohnen-Funktionstest', () => {
+    const exerciseTypes = new Set((module.exerciseTemplates ?? []).map((e) => e.exerciseType));
+    expect(exerciseTypes.has('tabletop')).toBe(true);
+    expect(exerciseTypes.has('technical')).toBe(true);
+    const drohne = (module.exerciseTemplates ?? []).find((e) => e.id === 'def_ex_drohne_funktionstest');
+    expect(drohne).toBeDefined();
+    expect(drohne!.exerciseType).toBe('technical');
+    expect(drohne!.cadenceMonths).toBe(24);
+  });
+
+  it('Sanktions-Übung als 24-Monats-Tabletop verlinkt mit Sanktions-Szenario', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'def_ex_sanktions_welle');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.cadenceMonths).toBe(24);
+    expect(ex!.scenarioTemplateId).toBe('def_scn_sanktions_welle');
+  });
+
+  it('VS-Datenträger-Übung mit 12-Monats-Kadenz', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'def_ex_vs_datentraeger');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.cadenceMonths).toBe(12);
+    expect(ex!.scenarioTemplateId).toBe('def_scn_vs_datentraeger_verlust');
+  });
+
+  it('APT-Übung mit Diehl-Kimsuky-Drehbuch in Notes', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'def_ex_apt_spionage');
+    expect(ex).toBeDefined();
+    expect(ex!.notes).toMatch(/Diehl|Kimsuky|IRIS-T/);
+  });
+});
