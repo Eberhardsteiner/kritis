@@ -264,98 +264,383 @@
       {
         "id": "log_proc_dispatch",
         "title": "Disposition und Tourensteuerung",
-        "ownerRole": "Leitstelle",
+        "ownerRole": "Dispositions-Leitung / Leitstelle",
         "criticality": "kritisch",
-        "mtpdHours": "4",
-        "rtoHours": "2",
-        "rpoHours": "1",
-        "dependencies": "TMS, Kommunikation, Fahrersteuerung",
-        "outputs": "Einsatzplanung und Kundensteuerung",
-        "notes": "Manuellen Leitstellenbetrieb vorbereiten."
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "TMS, Telematik, Kommunikations-Anlage, Fahrer-Mobiltelefone, Touren-Vorlagen, Karten-Software",
+        "outputs": "Einsatzplanung, Tour-Anweisungen, Fahrer-Steuerung, Kunden-Aviso-Information",
+        "notes": "Manueller Notbetrieb mit Excel-Touren-Liste und Telefon-Steuerung überbrückt 4-8h. Maersk-NotPetya-Schablone 2017: 80 % des Container-Volumens manuell mit Excel und WhatsApp abgewickelt — Disposition ist mit klarer Vorab-Vorlage notbetriebsfähig."
       },
       {
         "id": "log_proc_hub",
         "title": "Umschlag im Hub",
-        "ownerRole": "Hub-Leitung",
-        "criticality": "hoch",
-        "mtpdHours": "8",
+        "ownerRole": "Hub-Leitung / Umschlags-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "12",
+        "rtoHours": "6",
+        "rpoHours": "4",
+        "dependencies": "Scanner-Infrastruktur, Personal, Sortier-Fördertechnik, WMS-Anbindung, Hub-and-Spoke-Tour-Plan",
+        "outputs": "Sendungsfluss, SLA-Einhaltung, Sortier-Genauigkeit, Cross-Dock-Übergaben",
+        "notes": "Hub-and-Spoke-Topologie macht Hub-Ausfall zum systemischen Risiko — alle Niederlassungen abhängig. Priorisierung kritischer Sendungen (Just-in-time-Automotive, Healthcare-Notfall-Lieferungen) im Notbetriebs-Plan dokumentieren. Manuelle Sortierung mit Papier-Sendungs-Listen als Fallback."
+      },
+      {
+        "id": "log_proc_track_trace",
+        "title": "Sendungs-Verfolgung und Track&Trace (Kunden-Portal, Auftraggeber-Schnittstellen)",
+        "ownerRole": "IT-Leitung Logistik",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Track&Trace-System, EDI-Schnittstellen zu Auftraggebern (DHL, DPD, OEM-Portale), TMS-Anbindung, Kunden-Webportal",
+        "outputs": "Sendungs-Status-Updates, Kunden-Portal-Anzeige, Auftraggeber-EDI-Meldungen, Lieferschein-Dokumentation",
+        "notes": "Maersk-Schablone 2017: 8+ Tage Kunden ohne Status-Information führten zu Vertrags-Eskalation und Auftrags-Entzug. Track&Trace-Ausfall ist Reputations-Eskalations-Faktor — Kunden-Information bei IT-Vorfall muss alternativen Kanal (Telefon-Hotline, E-Mail-Newsletter) als Fallback vorsehen."
+      },
+      {
+        "id": "log_proc_tms",
+        "title": "TMS-System-Betrieb (Transport Management System, Auftragsabwicklung)",
+        "ownerRole": "IT-Leitung Logistik",
+        "criticality": "kritisch",
+        "mtpdHours": "12",
         "rtoHours": "4",
-        "rpoHours": "2",
-        "dependencies": "Scanner, Personal, Fördertechnik",
-        "outputs": "Sendungsfluss und SLA-Einhaltung",
-        "notes": "Priorisierung kritischer Sendungen dokumentieren."
+        "rpoHours": "1",
+        "dependencies": "TMS-Hauptsystem (z.B. Transics, Soloplan, BLU.LOG), Active Directory, ERP-Anbindung, Telematik-Schnittstellen, Backup-Infrastruktur",
+        "outputs": "Auftragsverwaltung, Touren-Optimierung, Rechnungs-Vorlauf-Daten, Performance-KPIs",
+        "notes": "Service-Schicht für Disposition, Track&Trace und Frachtrechnung. Bei TMS-Outage stehen mehrere Prozesse parallel still. Backup-Restore-Test mindestens vierteljährlich, Hersteller-Wartungsvertrag mit 24/7-SLA."
+      },
+      {
+        "id": "log_proc_zoll",
+        "title": "Zoll-Abfertigung und ATLAS-Anbindung (Import/Export, Zollanmeldungen)",
+        "ownerRole": "Zoll-Verantwortlicher",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "ATLAS-Schnittstelle (Deutsche Zollverwaltung), Zoll-Software (z.B. AEB, dbh), EORI-Nummer-Verwaltung, Gefahrgut-Klassifikation (ADR/IMDG/IATA)",
+        "outputs": "Zollanmeldungen, Ausfuhr-/Einfuhr-Begleitdokumente, Gefahrgut-Bescheinigungen, AEO-Status-Pflege",
+        "notes": "Pro Container ~300 Seiten Zoll-Dokumentation (Maersk-Quelle 2017) — manueller Notbetrieb mit Papier-Verfahren extrem aufwendig. ATLAS-Notmeldungs-Prozedur (Papier-Anmeldung an Zollstelle) als gesetzlicher Fallback dokumentiert."
+      },
+      {
+        "id": "log_proc_warehouse",
+        "title": "Lager-Betrieb und WMS (Warehouse Management, Kommissionierung)",
+        "ownerRole": "Lagerleitung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "4",
+        "dependencies": "WMS (Warehouse Management System), Scanner-Infrastruktur, Lager-Personal, Fördertechnik, Kunden-Auftrags-Schnittstellen",
+        "outputs": "Wareneingang, Kommissionier-Aufträge, Warenausgang, Bestands-Inventur, SLA-Reports",
+        "notes": "Schwerpunkt-Vorlage für 3PL/Kontraktlogistiker mit eigenem Lager-Betrieb. Klassische Speditionen ohne eigenes Lager können diese Vorlage als 'nicht anwendbar' markieren oder auf Umschlags-Hub-Nähe anpassen. Manuelle Kommissionierung mit Papier-Pickliste als Fallback."
+      },
+      {
+        "id": "log_proc_lastmile",
+        "title": "Last-Mile-Zustellung (Endkunden-Belieferung, Avisierung)",
+        "ownerRole": "Zustell-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "Routing-Software, Zustell-Scanner, Kunden-Avisierungs-Plattform (SMS, E-Mail), Endkunden-Adress-Daten, Fahrer-Mobile-App",
+        "outputs": "Zustellungen, Avisierungs-Nachrichten, Empfangsbestätigungen, Retouren-Aufnahme",
+        "notes": "Schwerpunkt-Vorlage für KEP-Dienstleister mit Last-Mile-Geschäft. Klassische Speditionen mit B2B-Versand ohne Endkunden-Belieferung können diese Vorlage entsprechend abschalten. DSGVO-Schicht: Endkunden-Adress-Daten sind besonders schutzwürdig."
+      },
+      {
+        "id": "log_proc_fuhrpark",
+        "title": "Fuhrpark-Management und Werkstatt (Fahrzeug-Wartung, Telematik, Tankstellen-Abrechnung)",
+        "ownerRole": "Fuhrpark-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Fuhrpark-Software (z.B. WebFleet, Fleetboard), Werkstatt-CMMS, Tankstellen-Karten-Anbindung (DKV, UTA, Aral), Telematik-Hardware",
+        "outputs": "Fahrzeug-Wartungs-Pläne, TÜV-/HU-Übersicht, Tankstellen-Abrechnung, Reifen-/Verschleiß-Management",
+        "notes": "72h-MTPD ist tolerabel, weil Werkstatt-Notbetrieb über Fremd-Werkstätten (Markenwerkstatt-Verbund) als Fallback funktioniert. Tankstellen-Karten-Ausfall durch Hersteller-Outage führt zu Bargeld-Tankstellen-Notbetrieb mit erhöhten Kosten."
+      },
+      {
+        "id": "log_proc_abrechnung",
+        "title": "Frachtrechnung und Abrechnung (Kunden-Rechnung, Frachtführer-Abrechnung)",
+        "ownerRole": "Buchhaltung",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Buchhaltungs-Software (DATEV / SAP Business One), TMS-Datenexport, Frachtführer-Vertragsdaten, Kunden-Stammdaten, Kreditoren-Buchhaltung",
+        "outputs": "Kunden-Rechnungen, Frachtführer-Abrechnungen, Gutschriften, Mahnwesen, Erlös-Reporting",
+        "notes": "Mittlere Kritikalität (Mittelweg-Verteilung 5/4/1) — Frachtrechnung hat mehrwöchige Pufferzeiten gegenüber Cash-Flow-Eskalation. 7-Tage-MTPD ist ehrlich. Cashflow-Eskalation tritt erst nach mehreren Wochen Abrechnungs-Verzug ein."
+      },
+      {
+        "id": "log_proc_personal_fahrer",
+        "title": "Personalverwaltung Fahrer und Lenkzeiten (Lenk-/Ruhezeiten-Compliance, Schichtplanung)",
+        "ownerRole": "Personalleitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "Lenkzeiten-Software (Tachograph-Auswertung), HR-System, Schichtplanungs-Software, Berufskraftfahrer-Qualifizierungs-Register, Tarifvertrag (BAG-V/BÖV)",
+        "outputs": "Schichtpläne, Lenkzeiten-Berichte, Compliance-Nachweise, Fahrer-Eintritte/-Austritte, Lohnabrechnungs-Vorlauf",
+        "notes": "Lenk- und Ruhezeiten-Compliance ist gesetzlich verpflichtend (VO (EG) Nr. 561/2006); Verstöße kosten 100-1.000 € pro Fall. Bei Schichtplanungs-System-Ausfall manuelle Tagesplanung mit Excel als Notbetrieb. Strukturelle Demografie: Fahrermangel als Zusatz-Risiko."
       }
     ],
     "dependencyTemplates": [
       {
         "id": "log_dep_tms",
-        "title": "Transport Management System",
-        "category": "it",
+        "title": "Transport Management System (Transics, Soloplan, BLU.LOG, INPOSIA)",
+        "category": "software",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Manuelle Tourenlisten und Telefonsteuerung",
-        "contractReference": "TMS-Support",
-        "notes": "Leitstellenfallback monatlich prüfen."
+        "fallback": "Manuelle Tourenlisten und Telefonsteuerung; Excel-Notbetrieb mit Backup-Stammdaten. Hersteller-Substitution mehrjähriges Migrations-Projekt.",
+        "contractReference": "TMS-Hersteller-Wartungsvertrag mit 24/7-SLA",
+        "notes": "Leitstellen-Fallback monatlich prüfen. Bei Ransomware-Vorfall mit verschlüsseltem TMS und kompromittiertem Backup droht 1-3 Wochen Notbetrieb (Maersk-NotPetya-Schablone 2017: 10 Tage komplett ohne IT, Expeditors 2022: 3 Wochen Stillstand)."
       },
       {
         "id": "log_dep_fuel",
-        "title": "Kraftstoffversorgung",
+        "title": "Kraftstoffversorgung (Tankkarten, Tankstellen-Verbund, Diesel-Lieferungen)",
         "category": "energie",
         "criticality": "hoch",
         "singlePointOfFailure": true,
-        "fallback": "Priorisierung kritischer Fahrten und Partnernetze",
-        "contractReference": "Tankkarten / Liefervertrag",
-        "notes": "Versorgungslimits beobachten."
+        "fallback": "Priorisierung kritischer Fahrten und Partnernetze; Bargeld-Tankstellen-Notbetrieb mit erhöhten Kosten. Backup-Tankkarten-Anbieter mit Rahmenvertrag.",
+        "contractReference": "Tankkarten-Vertrag (DKV, UTA, Aral) / Diesel-Lieferungen für Eigen-Tankanlage",
+        "notes": "Versorgungslimits beobachten. Tankkarten-Hersteller-Outage durch Cyber-Vorfall (z.B. Anbieter-Plattform-Ausfall) trifft Flotte sofort."
       },
       {
         "id": "log_dep_carrier",
-        "title": "Schlüsselfrachtführer",
+        "title": "Schlüsselfrachtführer / Subunternehmer-Pool",
         "category": "dienstleister",
         "criticality": "hoch",
         "singlePointOfFailure": true,
-        "fallback": "Alternativcarrier und Subunternehmerpool",
-        "contractReference": "Carrier-Rahmenvertrag",
-        "notes": "Notfallabruf definieren."
+        "fallback": "Alternativ-Carrier und Subunternehmer-Pool mit Rahmenvereinbarungen; bei Ausfall eines Schlüsselfrachtführers Aktivierung von Backup-Carrier binnen 24-48h.",
+        "contractReference": "Carrier-Rahmenvertrag mit Notfall-Abruf-Klausel",
+        "notes": "Notfall-Abruf definieren. Bei Tier-1-Carrier-Cyber-Vorfall (Carrier wird Mitbetroffener) ist Kapazitäts-Engpass realistisch — branchenweite Knappheit bei Großvorfällen wie Maersk 2017."
+      },
+      {
+        "id": "log_dep_telematik",
+        "title": "Telematik-System (Fahrzeug-Ortung, Lenkzeiten-Erfassung, Fernauslesung Tachograph)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Manuelle Tachograph-Auslesung mit USB/Karte alle 28 Tage gesetzlich Pflicht — bei System-Ausfall verschärfte Auslese-Disziplin. Backup-Hersteller-Wechsel mehrjähriges Projekt.",
+        "contractReference": "Telematik-Hersteller-Wartungsvertrag (WebFleet, Fleetboard, TomTom Telematics)",
+        "notes": "Kombiniert Fahrzeug-Ortung, Sendungs-Verfolgung und Lenkzeiten-Compliance. Bei Cyber-Vorfall mit Telematik-Hersteller (z.B. Provider-Plattform-Ransomware) sind alle angeschlossenen Flotten gleichzeitig betroffen."
+      },
+      {
+        "id": "log_dep_atlas",
+        "title": "Zoll-Schnittstelle ATLAS (Deutsche Zollverwaltung Anmelde-System)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "ATLAS-Notmeldungs-Prozedur (Papier-Anmeldung an zuständige Zollstelle) als gesetzlicher Fallback. Bei mehrtägigem Ausfall können Container nicht abgefertigt werden — Hafen-/Flughafen-Stau die Folge.",
+        "contractReference": "EORI-Nummer-Registrierung bei Zollverwaltung",
+        "notes": "Ausfälle der ATLAS-Plattform sind selten aber wirkungsvoll. Beispiel 2024 (mehrtägiger ATLAS-Ausfall): Hafen Hamburg + Bremen mit Container-Stau, Hunderte LKW konnten nicht abgefertigt werden. AEO-Status (Authorized Economic Operator) als Vereinfachungs-Hebel."
+      },
+      {
+        "id": "log_dep_niederlassung",
+        "title": "Hauptniederlassung-IT-Anbindung (zentrale Server, Standort-Verbindung VPN/MPLS)",
+        "category": "infrastructure",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Redundante Anbindung über zwei Carrier (VPN + LTE-Backup). Bei Verbindungs-Outage zur Hauptniederlassung sind alle dezentralen Niederlassungen gleichzeitig vom zentralen TMS abgeschnitten.",
+        "contractReference": "Carrier-Vertrag (Telekom, Vodafone Business) + Backup-Anbieter",
+        "notes": "Hub-and-Spoke-Topologie: Outage der Hauptniederlassung trifft alle 4-8 Niederlassungen gleichzeitig. Geografische Distribution macht den Tenant zum Netz, nicht Punkt."
+      },
+      {
+        "id": "log_dep_grosskunde",
+        "title": "Großkunde mit Vertragsstrafen-Klauseln (Just-in-time-OEM oder E-Commerce-Großkunde)",
+        "category": "kunde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei Verlust eines Großkunden mit > 30 % Umsatzanteil Geschäftskontinuitäts-Risiko hoch. Diversifikations-Strategie als langfristige Antwort.",
+        "contractReference": "Großkunden-Rahmenvertrag mit Liefer-Verpflichtungen und Cyber-Klauseln",
+        "notes": "Just-in-time-OEM-Verträge mit Vertragsstrafen 0,5-2 % des Liefer-Werts pro Tag Verzug. E-Commerce-Großkunden mit harten SLA für Last-Mile (z.B. Same-Day-Delivery). NIS2-Lieferketten-Pflicht: Großkunde fordert Cyber-Konformität auch von Mittelstands-Logistikern."
+      },
+      {
+        "id": "log_dep_bahn_reederei",
+        "title": "Bahnverbindung oder Container-Reederei (Multimodal-Verkehr, Hafen-Anbindung)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Alternative Verkehrsträger (Schiene → Straße bei Bahn-Streik, See → Luft bei See-Engpass). Bei Hafen-Streik oder Reederei-Cyber-Vorfall mehrwöchige Containerstau-Logistik mit Sondergebühren.",
+        "contractReference": "DB Cargo / Reederei-Slot-Vertrag (Maersk, MSC, Hapag-Lloyd, CMA CGM)",
+        "notes": "Suez-Kanal-2021-Schablone (Ever Given): 6 Tage Sperre, monatelange Hafen-Staus weltweit. Hamburg-Hafen-Streik 2022 als nicht-Cyber-Schablone. Multimodal-Verkehrsträger-Mix als Resilienz-Strategie."
+      },
+      {
+        "id": "log_dep_soc",
+        "title": "Cybersicherheits-Dienstleister (SOC, externe IT-Sicherheit, MDR)",
+        "category": "dienstleister",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-SOC-Anbieter mit Notfall-Abruf-Klausel; im Akut-Fall interne IT-Leitung als Erst-Verantwortliche. Bei MDR-Provider-Outage erhöhte Eigen-Aufmerksamkeit Pflicht.",
+        "contractReference": "SOC-/MDR-Rahmenvertrag mit 24/7-SLA",
+        "notes": "SOC-Anbindung über Standort-Sensoren + zentrale Auswertung. Bei BSI-NIS2-Verpflichtung (für KRITIS-Logistiker oder Tenants mit Großkunden-Auflagen) ist 24/7-Monitoring Mindeststandard."
       }
     ],
     "scenarioTemplates": [
       {
         "id": "log_scn_tms",
-        "title": "Ausfall des TMS",
-        "category": "IT-Ausfall",
-        "description": "Disposition und Tracking stehen nicht oder nur eingeschränkt zur Verfügung.",
-        "likelihood": 4,
-        "impact": 4,
-        "ownerRole": "Leitstelle",
+        "title": "TMS-Ausfall mit Disposition-Notbetrieb",
+        "category": "IT-Ausfall mit Disposition-Hebel",
+        "description": "TMS-Hauptsystem ist mehrere Stunden bis Tage nicht verfügbar (Hardware-Defekt, Software-Bug, Hersteller-Outage). Disposition, Tracking und Auftrags-Erfassung müssen auf Excel-Notbetrieb mit Telefon-Steuerung umgestellt werden. Nach Wiederinbetriebnahme aufwendige Daten-Nacherfassung.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Dispositions-Leitung / IT-Leitung Logistik",
         "linkedProcessTemplateIds": [
+          "log_proc_tms",
           "log_proc_dispatch",
-          "log_proc_hub"
+          "log_proc_hub",
+          "log_proc_track_trace"
         ],
         "linkedDependencyTemplateIds": [
           "log_dep_tms"
         ],
-        "playbook": "Manuelle Leitstelle aktivieren, Tourenlisten verteilen, Kunden priorisieren.",
+        "playbook": "Manuelle Leitstelle aktivieren, Tourenlisten via Excel und Telefon verteilen, Kunden priorisieren (Just-in-time vor Standard), Hersteller-Eskalation, Daten-Nacherfassung nach Wiederanlauf.",
         "exerciseTypeHint": "technical",
-        "notes": "Papierlisten und Kommunikationskette testen."
+        "notes": "Papierlisten und Kommunikationskette testen. Bei Hersteller-Cloud-Outage haben mehrere Mittelstands-Logistiker gleichzeitig Probleme — branchenweite Knappheit der Notbetriebs-Ressourcen."
       },
       {
         "id": "log_scn_fuel",
         "title": "Kraftstoffengpass",
-        "category": "Versorgung",
-        "description": "Kraftstoff steht kurzfristig nur eingeschränkt zur Verfügung.",
-        "likelihood": 3,
+        "category": "Versorgungsengpass",
+        "description": "Kraftstoff steht kurzfristig nur eingeschränkt zur Verfügung — Tankkarten-Anbieter-Cyber-Vorfall, regionale Lieferengpässe, Bauernproteste mit Tankstellen-Blockade. Flottenbetrieb muss priorisiert werden, kritische Touren vor Standard-Volumen.",
+        "likelihood": 2,
         "impact": 4,
-        "ownerRole": "Fuhrparkleitung",
+        "ownerRole": "Fuhrpark-Leitung / Dispositions-Leitung",
         "linkedProcessTemplateIds": [
-          "log_proc_dispatch"
+          "log_proc_dispatch",
+          "log_proc_fuhrpark"
         ],
         "linkedDependencyTemplateIds": [
           "log_dep_fuel",
           "log_dep_carrier"
         ],
-        "playbook": "Kritische Touren priorisieren, Alternativnetze aktivieren, Kunden abstimmen.",
+        "playbook": "Kritische Touren priorisieren, Alternativ-Tankkarten-Netze aktivieren, Bargeld-Notbetrieb mit Kostenkontrolle, Kunden abstimmen für Liefer-Verschiebung.",
         "exerciseTypeHint": "supplier",
-        "notes": "Priorisierung mit Vertrieb und Leitstelle abstimmen."
+        "notes": "Priorisierung mit Vertrieb und Leitstelle abstimmen. Backup-Tankkarten-Anbieter mit Rahmenvertrag als Resilienz-Maßnahme."
+      },
+      {
+        "id": "log_scn_ransomware_total",
+        "title": "Ransomware mit Total-Stillstand (Maersk-NotPetya-Schablone)",
+        "category": "Cyber-Angriff mit globalem Stillstand-Hebel",
+        "description": "Ransomware-Verschlüsselung aller IT-Systeme über mehrere Niederlassungen — TMS, ERP, Active Directory, Frachtrechnung. Alle Niederlassungen gleichzeitig betroffen wegen Hub-and-Spoke-Topologie. Manueller Notbetrieb mit Excel und WhatsApp wie Maersk 2017 oder Expeditors 2022.",
+        "likelihood": 4,
+        "impact": 5,
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Logistik",
+        "linkedProcessTemplateIds": [
+          "log_proc_tms",
+          "log_proc_dispatch",
+          "log_proc_hub",
+          "log_proc_track_trace",
+          "log_proc_warehouse",
+          "log_proc_zoll"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_tms",
+          "log_dep_telematik",
+          "log_dep_niederlassung"
+        ],
+        "playbook": "Sofortige Trennung infizierter Systeme an allen Niederlassungen, Krisenstab nach Maersk-Pattern. BSI-Meldung nach NIS2 §8d binnen 24h (für KRITIS-Logistiker oder Tenants mit Großkunden-Auflagen). Kunden-Information mit erwarteter Wiederherstellungs-Zeit (10 Tage Maersk-Schablone, 3 Wochen Expeditors-Schablone). Manueller Notbetrieb mit Excel-Touren-Listen, WhatsApp für Fahrer-Kommunikation, Papier-Auftragsannahme. Backup-Restore-Sequenz mit forensischer Bereinigung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Maersk 2017 (NotPetya, 45.000 PCs neu installiert, 80 % Volumen manuell, ~300 Mio USD Schaden), Expeditors 2022 (3 Wochen Stillstand, 60 Mio USD Schaden, 8+ Tage Kunden ohne Status-Information) als zentrale Schablonen. BSI-Lagebericht 2025: 950 Ransomware-Angriffe Juli 2024 – Juni 2025."
+      },
+      {
+        "id": "log_scn_verkehrsknoten",
+        "title": "Verkehrsknoten-Sperrung Großschadenslage",
+        "category": "Naturgefahr / Großschadenslage",
+        "description": "Sperrung eines kritischen Verkehrsknotens — Suez-Kanal-Blockade-Schablone, Rhein-Niedrigwasser, Großbrand-Tunnel-Sperrung (Gotthard, Tauern), Bahnstrecken-Sperrung nach Unwetter. Touren müssen großräumig umgeleitet werden, Lieferzeiten verschieben sich um Tage bis Wochen.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Dispositions-Leitung / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "log_proc_dispatch",
+          "log_proc_lastmile",
+          "log_proc_hub"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_carrier",
+          "log_dep_bahn_reederei"
+        ],
+        "playbook": "Sofortige Routen-Neuplanung mit alternativen Verkehrsträgern, Kunden-Information mit Liefer-Anpassungs-Vereinbarung statt Vertragsstrafe, Multimodal-Verkehrsträger-Wechsel (Schiene → Straße bei Bahn-Sperrung), Aktivierung Backup-Carrier.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Suez-Kanal 2021 (Ever Given, 6 Tage Sperre, monatelange Hafen-Staus, ~9 Mrd USD Welthandelsschaden) als Schablone. Rhein-Niedrigwasser 2018+2022 als Klima-Schablone. Bestand-ID `log_ex_route` verlinkt mit diesem Szenario."
+      },
+      {
+        "id": "log_scn_atlas_ausfall",
+        "title": "ATLAS-Zoll-Ausfall (mehrtägig)",
+        "category": "Behörden-Schnittstellen-Ausfall",
+        "description": "Mehrtägiger Ausfall der ATLAS-Zoll-Plattform durch Cyber-Vorfall oder Wartungs-Disruption auf Seiten des Zolls. Alle Container-Abfertigungen stehen still, Hafen-/Flughafen-Stau, Hunderte LKW können nicht abgefertigt werden.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Zoll-Verantwortlicher / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "log_proc_zoll",
+          "log_proc_hub"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_atlas"
+        ],
+        "playbook": "ATLAS-Notmeldungs-Prozedur (Papier-Anmeldung an zuständige Zollstelle) aktivieren — gesetzlich vorgesehener Fallback-Pfad. Pro Container ~300 Seiten Zoll-Dokumentation manuell erstellen. Kunden-Information mit zollbedingter Liefer-Verzögerung. AEO-Status (Authorized Economic Operator) als Vereinfachungs-Hebel falls vorhanden.",
+        "exerciseTypeHint": "alarm",
+        "notes": "ATLAS-Ausfall 2024 als Schablone (mehrtägig, Hamburg + Bremen Container-Stau). Selten aber wirkungsvoll. Hersteller-Disruption auf Bundes-Seite — Mittelstand-Logistiker hat keinen Eskalations-Hebel direkt zum Zoll."
+      },
+      {
+        "id": "log_scn_sendungsdaten",
+        "title": "Sendungsdaten-Datenpanne (Kunden-Adressdaten + Frachtdaten exfiltriert, DSGVO Art. 34)",
+        "category": "Datenschutz-Vorfall mit DSGVO-Härte",
+        "description": "Datenpannen-Vorfall mit Kunden-Adressdaten (DSGVO-relevant) und Frachtdaten (Geschäftsgeheimnis-relevant). Bei E-Commerce-Last-Mile besonders kritisch: Endkunden-Adressen + Bestell-Daten kompromittiert. DSGVO Art. 34 (Bürger-Benachrichtigung bei hohem Risiko) löst aus.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Logistik",
+        "linkedProcessTemplateIds": [
+          "log_proc_track_trace",
+          "log_proc_lastmile"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_telematik",
+          "log_dep_grosskunde"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34 binnen Stunden nach Entdeckung, Meldung an Aufsichtsbehörde 72 h, individuelle Bürger-Benachrichtigung bei E-Commerce-Last-Mile-Datenpannen, Schnittstelle zur Polizei (LKA Cyber). Großkunden-Information mit Vertraulichkeits-Klauseln-Aktivierung.",
+        "exerciseTypeHint": "technical",
+        "notes": "Bußgeld-Risiko gemäß DSGVO Art. 83 bis 4 % des Jahresumsatzes oder 20 Mio. €. Bei E-Commerce-Last-Mile-Tenants mit hunderttausenden Endkunden-Adressen ökonomisch eskalierend."
+      },
+      {
+        "id": "log_scn_hafenstreik",
+        "title": "Hafenstreik mit Container-Stau (Hamburg-Schablone 2022)",
+        "category": "Streik / Lieferketten-Disruption",
+        "description": "Streik in Haupt-Hafen (Hamburg, Bremerhaven, Rotterdam) oder bei Reederei-Personal. Container stauen sich tagelang, Liefer-Termine verschieben sich, Sondergebühren für Lager-Verlängerung. Mehrwöchige Nachwirkungen mit Kapazitäts-Engpass.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Geschäftsführung / Dispositions-Leitung",
+        "linkedProcessTemplateIds": [
+          "log_proc_hub",
+          "log_proc_zoll",
+          "log_proc_dispatch"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_bahn_reederei",
+          "log_dep_carrier"
+        ],
+        "playbook": "Alternative Häfen aktivieren (Rotterdam ↔ Hamburg ↔ Bremerhaven), Kunden-Information mit Verschiebungs-Vereinbarung, Container-Lager-Verlängerung mit Sondergebühren-Abstimmung, Streik-Verhandlungs-Status verfolgen.",
+        "exerciseTypeHint": "supplier",
+        "notes": "Hamburg-Hafen-Streiks 2022 als Schablone. Nicht-Cyber-Disruption, aber wirkungsvoll. Multimodal-Verkehrsträger-Mix als Resilienz-Strategie."
+      },
+      {
+        "id": "log_scn_fahrermangel",
+        "title": "Fahrermangel-Welle (kombiniert mit Krankheits-Welle, strukturelle Demografie)",
+        "category": "Personal-Engpass mit demografischem Hebel",
+        "description": "Strukturelle Demografie der Berufskraftfahrer (Durchschnittsalter > 50, Nachwuchs-Mangel) trifft kurzfristige Krankheits-Welle (Pandemie, Influenza). Bis zu 30 % Fahrer-Ausfall gleichzeitig, Touren können nicht besetzt werden, Kunden-Lieferungen stehen.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Personalleitung / Dispositions-Leitung",
+        "linkedProcessTemplateIds": [
+          "log_proc_dispatch",
+          "log_proc_personal_fahrer",
+          "log_proc_lastmile"
+        ],
+        "linkedDependencyTemplateIds": [
+          "log_dep_carrier"
+        ],
+        "playbook": "Subunternehmer-Pool aktivieren mit Notfall-Abruf-Klausel, Lenkzeiten-Management mit Schicht-Anpassung (innerhalb gesetzlicher Compliance), Kunden-Kommunikation mit reduzierter Liefer-Kapazität, Backup-Carrier mit höheren Tagessätzen kurzfristig.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Strukturelle Realität: Bundesverband Güterkraftverkehr Logistik und Entsorgung (BGL) meldet ~80.000 fehlende Fahrer in DE. Demografie-Welle trifft alle Mittelstands-Spediteure gleichzeitig — branchenweiter Engpass. Covid Q4 2022 als Krankheits-Schablone (30 % Ausfall)."
       }
     ],
     "exerciseTemplates": [
@@ -364,18 +649,45 @@
         "title": "TMS-Fallback-Test",
         "exerciseType": "technical",
         "scenarioTemplateId": "log_scn_tms",
-        "ownerRole": "Leitstelle / IT",
-        "cadenceMonths": 6,
-        "notes": "Disposition und Tracking im manuellen Betrieb nachstellen."
+        "ownerRole": "Dispositions-Leitung / IT-Leitung Logistik",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher technischer Test: Disposition und Tracking im manuellen Notbetrieb mit Excel und Telefon nachstellen, Daten-Nacherfassung nach simuliertem Wiederanlauf priorisiert pro Kunde. Bestand-ID; Cadence von 6 auf 12 Monate angepasst, konsistent zum Pack-Übungs-Pattern."
       },
       {
         "id": "log_ex_route",
         "title": "Verkehrsknoten-Sperrung Tabletop",
         "exerciseType": "tabletop",
-        "scenarioTemplateId": "log_scn_fuel",
-        "ownerRole": "Leitstelle",
+        "scenarioTemplateId": "log_scn_verkehrsknoten",
+        "ownerRole": "Dispositions-Leitung / Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop: Alternative Routen, Kunden-Information mit Liefer-Anpassung, Multimodal-Verkehrsträger-Wechsel (Schiene ↔ Straße), Backup-Carrier-Aktivierung. Bestand-ID; Verlinkung von log_scn_fuel auf log_scn_verkehrsknoten umgehängt (passender), Cadence von 12 auf 24 Monate."
+      },
+      {
+        "id": "log_ex_ransomware_total",
+        "title": "Ransomware-Total-Stillstand-Tabletop (Maersk-Schablone)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "log_scn_ransomware_total",
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Logistik",
         "cadenceMonths": 12,
-        "notes": "Alternative Routen, Kundeninfo und Carrier-Steuerung üben."
+        "notes": "Jährlicher Krisenstabs-Tabletop mit Geschäftsführung, IT-Leitung Logistik, Dispositions-Leitung, Hub-Leitung, Pressestelle. Maersk-NotPetya-Schablone 2017 als Drehbuch-Anhang. Manueller Notbetrieb mit Excel-Touren-Listen demonstrieren. Hub-and-Spoke-Topologie-Effekt: alle Niederlassungen gleichzeitig betroffen."
+      },
+      {
+        "id": "log_ex_zoll_notmeldung",
+        "title": "Zoll-Notmeldung-Walkthrough",
+        "exerciseType": "alarm",
+        "scenarioTemplateId": "log_scn_atlas_ausfall",
+        "ownerRole": "Zoll-Verantwortlicher / Dispositions-Leitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Walkthrough: ATLAS-Notmeldungs-Prozedur mit Papier-Anmeldung an zuständige Zollstelle, Container-Abfertigung mit ~300 Seiten Dokumentation manuell. AEO-Status-Vereinfachungs-Hebel demonstrieren. Stoppuhr durch Notmeldungs-Pfad."
+      },
+      {
+        "id": "log_ex_dsgvo_sendungsdaten",
+        "title": "DSGVO-Sendungsdaten-Funktionstest (Datenpanne 72 h)",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "log_scn_sendungsdaten",
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Logistik",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Funktions-Test: simulierte Datenpanne mit Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72-h-Frist). Bürger-Benachrichtigungs-Logistik (Art. 34) für E-Commerce-Last-Mile-Daten testen. Großkunden-Vertraulichkeits-Klauseln-Aktivierung üben."
       }
     ],
     "riskCatalogTemplates": [
