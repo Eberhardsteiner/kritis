@@ -1291,3 +1291,179 @@ describe('industry-core · Resilience-Skeleton (C5.5.3)', () => {
     expect(otProc?.notes).toMatch(/Reifegrad|Trennung der Rollen/i);
   });
 });
+
+describe('kmu-basis-core · Resilience-Skeleton (C5.5.4)', () => {
+  const module = kmuBasisPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates (Substanz-Tiefe)', () => {
+    const processes = module.processTemplates ?? [];
+    expect(processes.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    const deps = module.dependencyTemplates ?? [];
+    expect(deps.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    expect(exercises.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Mittelweg-Verteilung 6 kritisch / 3 hoch / 1 mittel', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(6);
+    expect(hoch).toBe(3);
+    expect(mittel).toBe(1);
+  });
+
+  it('Bestands-IDs (alle 12) bleiben erhalten — keine Migration', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    // 3 Bestand-Prozesse:
+    expect(processIds.has('kmu_proc_buchhaltung')).toBe(true);
+    expect(processIds.has('kmu_proc_kunden_service')).toBe(true);
+    expect(processIds.has('kmu_proc_lohnabrechnung')).toBe(true);
+    // 4 Bestand-Deps:
+    expect(depIds.has('kmu_dep_msp_mssp')).toBe(true);
+    expect(depIds.has('kmu_dep_cloud_provider')).toBe(true);
+    expect(depIds.has('kmu_dep_bank')).toBe(true);
+    expect(depIds.has('kmu_dep_grosskunde')).toBe(true);
+    // 3 Bestand-Szenarien:
+    expect(scnIds.has('kmu_scn_ransomware_msp')).toBe(true);
+    expect(scnIds.has('kmu_scn_schluesselperson_ausfall')).toBe(true);
+    expect(scnIds.has('kmu_scn_business_email_compromise')).toBe(true);
+    // 2 Bestand-Übungen:
+    expect(exIds.has('kmu_ex_ransomware_msp')).toBe(true);
+    expect(exIds.has('kmu_ex_schluesselperson_ausfall')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exercises = module.exerciseTemplates ?? [];
+    const orphans: string[] = [];
+    for (const exercise of exercises) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung (Verkettungstiefe)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    for (const scenario of scenarios) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('exerciseTemplates haben gemischte Kadenzen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const cadenceSet = new Set(exercises.map((e) => e.cadenceMonths));
+    expect(cadenceSet.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('exerciseTemplates haben gemischte Übungs-Typen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const typeSet = new Set(exercises.map((e) => e.exerciseType));
+    // KMU-Pack: tabletop + alarm (CEO-Fraud-Funktionstest) sind Mindeststandard
+    expect(typeSet.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('Querschnittlichkeits-Verifikation: kmu_proc_kerngeschaeft ist branchenneutral formuliert', () => {
+    const kerngeschaeft = (module.processTemplates ?? []).find((p) => p.id === 'kmu_proc_kerngeschaeft');
+    expect(kerngeschaeft).toBeDefined();
+    expect(kerngeschaeft!.title).toMatch(/branchenneutral/i);
+    // Notes erwähnen mehrere Branchen-Beispiele
+    expect(kerngeschaeft!.notes).toMatch(/Maschinenbau/i);
+    expect(kerngeschaeft!.notes).toMatch(/Beratung/i);
+    expect(kerngeschaeft!.notes).toMatch(/Software-Entwicklung|IT-H[äa]user/i);
+  });
+
+  it('Generationenwechsel-Triade-Verifikation: Senior 76 / Junior 41 / Buchhalterin 22 in Schlüsselperson-Szenario', () => {
+    const sp = (module.scenarioTemplates ?? []).find((s) => s.id === 'kmu_scn_schluesselperson_ausfall');
+    expect(sp).toBeDefined();
+    expect(sp!.description).toMatch(/76/);
+    expect(sp!.description).toMatch(/41/);
+    expect(sp!.description).toMatch(/22/);
+    expect(sp!.description).toMatch(/Senior/i);
+    expect(sp!.description).toMatch(/Junior/i);
+    expect(sp!.description).toMatch(/Buchhalterin/i);
+  });
+
+  it('NIS2-Marke-Verifikation: Großkunden-Audit-Szenario mit Investitions-Bandbreite 50-200 TEUR + Folgekosten', () => {
+    const audit = (module.scenarioTemplates ?? []).find((s) => s.id === 'kmu_scn_grosskunden_audit');
+    expect(audit).toBeDefined();
+    expect(audit!.description).toMatch(/NIS2/);
+    expect(audit!.playbook).toMatch(/50-200/);
+    expect(audit!.playbook).toMatch(/20-50/);
+  });
+
+  it('Schadens-Bandbreiten-Verifikation: Liquiditäts-Krise-Szenario nennt drei Skalen', () => {
+    const liq = (module.scenarioTemplates ?? []).find((s) => s.id === 'kmu_scn_liquiditaets_krise');
+    expect(liq).toBeDefined();
+    // Drei Skalen: typisch (100-500 TEUR), schwer (1-2 Mio), Worst-Case (5 Mio)
+    expect(liq!.description).toMatch(/100-500/);
+    expect(liq!.description).toMatch(/1-2 Mio|1\.67 Mio|1,67 Mio/);
+    expect(liq!.description).toMatch(/5 Mio/);
+  });
+
+  it('Cloud-Provider-Schärfung: kmu_dep_cloud_provider ist auf kritisch hochgestuft', () => {
+    const cloud = (module.dependencyTemplates ?? []).find((d) => d.id === 'kmu_dep_cloud_provider');
+    expect(cloud).toBeDefined();
+    expect(cloud!.criticality).toBe('kritisch');
+    expect(cloud!.singlePointOfFailure).toBe(false);
+  });
+
+  it('Drei separate Cloud-bezogene Szenarien (Ransomware-MSP, Cloud-Outage, Phishing-Welle)', () => {
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    expect(scnIds.has('kmu_scn_ransomware_msp')).toBe(true);
+    expect(scnIds.has('kmu_scn_cloud_outage')).toBe(true);
+    expect(scnIds.has('kmu_scn_phishing_welle')).toBe(true);
+  });
+
+  it('MSP-Doppel-Rolle: kmu_proc_it ownerRole als "IT-Verantwortlicher / MSP"', () => {
+    const it = (module.processTemplates ?? []).find((p) => p.id === 'kmu_proc_it');
+    expect(it).toBeDefined();
+    expect(it!.ownerRole).toMatch(/IT-Verantwortlicher.*MSP|MSP.*IT-Verantwortlicher/);
+    expect(it!.notes).toMatch(/MSP-Verstrickung|kmu_dep_msp_mssp|kmu_scn_ransomware_msp/);
+  });
+});

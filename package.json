@@ -1,7 +1,7 @@
 {
   "name": "krisenfest-app-produktpaket-p3",
   "private": true,
-  "version": "0.9.35",
+  "version": "0.9.36",
   "type": "module",
   "scripts": {
     "dev": "concurrently -n api,app -c auto \"node server/index.js\" \"vite --host 0.0.0.0\"",

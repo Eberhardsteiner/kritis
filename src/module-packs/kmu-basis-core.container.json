@@ -372,39 +372,123 @@
     "processTemplates": [
       {
         "id": "kmu_proc_buchhaltung",
-        "title": "Buchhaltung (Rechnungen, Lohn, Bank-Verkehr, Mahnwesen)",
+        "title": "Buchhaltung (Rechnungen, Mahnwesen, Bank-Verkehr)",
         "ownerRole": "Buchhaltung / kaufmännische Leitung",
         "criticality": "kritisch",
         "mtpdHours": "72",
-        "rtoHours": "48",
+        "rtoHours": "24",
         "rpoHours": "24",
-        "dependencies": "Buchhaltungs-Software (DATEV / Lexware / SAP Business One), Bank-Online-Banking, E-Mail-Server",
-        "outputs": "Rechnungen, Lohn-Auszahlungen, Bank-Transfers, Mahnungen",
-        "notes": "KMU-spezifisch: Buchhaltung ist oft Schlüsselperson-Risiko (eine Person, vollständiger Zugriff). Lohnzahlungen am Monatsende sind Existenz-kritisch — Notbetrieb mit manueller Überweisung als Fallback."
+        "dependencies": "Buchhaltungs-Software (DATEV / Lexware / SAP Business One), Bank-Online-Banking, E-Mail-Server, Steuerberater-Anbindung",
+        "outputs": "Rechnungen, Bank-Transfers, Mahnungen, Eingangs-Rechnungs-Buchungen, Forderungs-Management",
+        "notes": "KMU-spezifisch: Buchhaltung ist oft Schlüsselperson-Risiko (eine Person, vollständiger Zugriff). Lohnzahlungen am Monatsende sind Existenz-kritisch — Notbetrieb mit manueller Überweisung als Fallback. Vertretungs-Regelung mit Steuerberater-Kanzlei vor-vereinbart halten."
       },
       {
         "id": "kmu_proc_kunden_service",
         "title": "Kunden-Service (Auftrags-Annahme, Bestellungen, Reklamationen)",
-        "ownerRole": "Vertrieb / Geschäftsführung",
+        "ownerRole": "Vertriebsleitung / Geschäftsführung",
         "criticality": "kritisch",
         "mtpdHours": "24",
         "rtoHours": "8",
         "rpoHours": "4",
         "dependencies": "CRM-System, E-Mail-Server, Webshop (falls vorhanden), Telefonanlage",
-        "outputs": "Bestätigte Aufträge, Bestellungen, Reklamations-Fälle",
-        "notes": "Bei Webshop-Tenants ist die Verfügbarkeit besonders zeitkritisch (Kaufabbruch nach 3-Sekunden-Wartezeit). Notbetrieb mit Telefon-Auftragsannahme als Fallback."
+        "outputs": "Bestätigte Aufträge, Bestellungen, Reklamations-Fälle, Liefertermin-Zusagen",
+        "notes": "Bei Webshop-Tenants ist die Verfügbarkeit besonders zeitkritisch (Kaufabbruch nach 3-Sekunden-Wartezeit). Notbetrieb mit Telefon-Auftragsannahme als Fallback. Mittelweg-Kritikalität (gegen Spec-'hoch' bewusst Bestand-'kritisch' gehalten, weil Webshop-Tenants und B2B-Kunden mit harten Lieferterminen das Maximum verlangen)."
       },
       {
         "id": "kmu_proc_lohnabrechnung",
         "title": "Lohnabrechnung (monatlich)",
-        "ownerRole": "Buchhaltung / Personal",
+        "ownerRole": "Personalleitung / Buchhaltung",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Lohn-Abrechnungs-Software (DATEV LODAS / Lexware Lohn / SAP HCM), Bank-Online-Banking, Krankenkassen-Schnittstelle, Steuerberater-Anbindung",
+        "outputs": "Lohn-Auszahlungen, Lohn-Steuer-Anmeldung, SV-Beiträge, ELStAM-Meldungen",
+        "notes": "Lohnzahlungen am Monatsende sind existenz-kritisch für Mitarbeiter*innen, aber Pufferzeiten (1-2 Wochen) sind durch Krankenkassen-Fristen gedeckt — daher 'hoch' statt 'kritisch'. Bei Ausfall manuelle Überweisung über Bank-Notfall-Verfahren möglich; Steuerberater übernimmt Fallback-Berechnung."
+      },
+      {
+        "id": "kmu_proc_geschaeftsfuehrung",
+        "title": "Geschäftsführungs-Entscheidungen (Verträge, Investitionen, Bank-Vollmachten)",
+        "ownerRole": "Geschäftsführung",
         "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "E-Mail-Server, Bank-Online-Banking-Vollmachten, CRM/ERP für Vertrags-Vorlagen, Anwalts-/Steuerberater-Anbindung",
+        "outputs": "Vertrags-Freigaben, Investitionsentscheidungen, Bank-Anweisungen, Vollmachts-Erteilung, strategische Kommunikation",
+        "notes": "Im KMU-Mittelstand ist die Geschäftsführung oft Single-Point-of-Failure für Entscheidungs-Kompetenz. Vertretungs-Regelung mit Prokurist*in oder zweitem Geschäftsführer vor-vereinbart halten. Bank-Vollmachten in mindestens zwei Personen aufgeteilt (Vier-Augen-Prinzip Pflicht). Bei plötzlichem Ausfall (Krankheit, Tod) sofortige Notfall-Vertretung mit Anwalts-Beauftragung."
+      },
+      {
+        "id": "kmu_proc_vertrieb",
+        "title": "Vertriebs-Pipeline (Angebotserstellung, Auftragseingang, CRM)",
+        "ownerRole": "Vertriebsleitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "CRM-System (Salesforce, HubSpot, Microsoft Dynamics, branchenspezifisch), E-Mail-Server, ERP-Anbindung für Lieferzeit-Auskünfte, Kalkulations-Tools",
+        "outputs": "Angebote, Auftragsbestätigungen, Pipeline-Status, Kunden-Stammdaten, Forecasts",
+        "notes": "Bei mehrtägigem CRM-Ausfall droht Vergessen offener Vertriebs-Vorgänge — Excel-Notbetrieb mit Backup-Kontaktlisten als Fallback. Vertriebs-Pipeline ist Frühwarn-Indikator für Liquiditäts-Steuerung."
+      },
+      {
+        "id": "kmu_proc_it",
+        "title": "IT-Infrastruktur-Betrieb (E-Mail, Fileserver, Internet, Drucker)",
+        "ownerRole": "IT-Verantwortlicher / MSP",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "E-Mail-Server (Cloud oder on-prem), Fileserver, Internet-Anbindung, Active Directory, Drucker, MSP-Wartungsvertrag",
+        "outputs": "Authentifizierung, E-Mail-Verfügbarkeit, Fileserver-Freigaben, Drucker-Verfügbarkeit, Backup-Status",
+        "notes": "Service-Schicht für faktisch alle anderen KMU-Prozesse. KMU haben oft kein internes IT-Team — Verantwortung beim MSP (siehe kmu_dep_msp_mssp). Demo-Pointe: Bei MSP-Verstrickung (siehe kmu_scn_ransomware_msp) sitzt der Verantwortliche extern und ist gleichzeitig Mitbetroffener. MSP-Vertrag mit klaren Eskalations-Pfaden und 24/7-SLA."
+      },
+      {
+        "id": "kmu_proc_personal",
+        "title": "Personal-Management (Einstellungen, Austritte, Verträge, Krankmeldungen)",
+        "ownerRole": "Personalleitung / Geschäftsführung",
+        "criticality": "mittel",
         "mtpdHours": "120",
-        "rtoHours": "72",
-        "rpoHours": "48",
-        "dependencies": "Lohn-Abrechnungs-Software (DATEV LODAS / Lexware Lohn / SAP HCM), Bank-Online-Banking, Krankenkassen-Schnittstelle",
-        "outputs": "Lohn-Auszahlungen, Lohn-Steuer-Anmeldung, SV-Beiträge",
-        "notes": "Lohnzahlungen am Monatsende sind existenz-kritisch für Mitarbeiter*innen. Bei Ausfall manuelle Überweisung über Bank-Notfall-Verfahren möglich."
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HR-Software (Personio, sage HR, branchenspezifisch), Verträge-Vorlagen, Krankenkassen-Schnittstelle, ELStAM-Anbindung",
+        "outputs": "Arbeitsverträge, Austritts-Dokumente, Krankmeldungen, Probezeit-Bewertungen, Zeugnisse",
+        "notes": "Mittlere Kritikalität — Personal-Management hat meist 1-2 Wochen Pufferung, kritische Themen (Lohnabrechnung, Probezeit-Stichtag) sind separate Prozesse. Bei kleinen Mittelständlern oft Geschäftsführung als Mit-Verantwortliche."
+      },
+      {
+        "id": "kmu_proc_liquiditaet",
+        "title": "Liquiditäts-Steuerung (Cashflow-Planung, Bank-Linien)",
+        "ownerRole": "Geschäftsführung / kaufmännische Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Bank-Online-Banking, ERP/Buchhaltung für Forderungs-/Verbindlichkeits-Status, Excel-Cashflow-Plan, Bank-Berater-Anbindung",
+        "outputs": "Cashflow-Plan, Mahnstufen-Steuerung, Bank-Linien-Bewirtschaftung, Liquiditäts-Reports an Gesellschafter",
+        "notes": "Liquiditäts-Hebel ist im KMU-Mittelstand der ökonomische Eskalations-Faktor — bei Cyber-Vorfall mit 200-500 T€ Schaden droht binnen Wochen Insolvenz, falls Bank-Linie nicht angepasst wird. Hausbank-Vertrauen als Reserve-Reserve."
+      },
+      {
+        "id": "kmu_proc_steuern",
+        "title": "Steuer- und Behörden-Korrespondenz (ELSTER, Sozialversicherung)",
+        "ownerRole": "Buchhaltung / Steuerberater",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "ELSTER-Anbindung, DATEV-Schnittstellen, Krankenkassen-Schnittstelle, Sozialversicherungs-Träger, Finanzamt-Online-Portal",
+        "outputs": "Umsatzsteuer-Voranmeldung, Lohnsteuer-Anmeldung, SV-Meldungen, Jahresabschluss-Vorbereitung",
+        "notes": "Behörden-Fristen mit fixen Stichtagen (10. des Monats für USt-Voranmeldung, monatliche SV-Meldung). Pufferzeiten bei Verspätung 1-2 Wochen mit Säumniszuschlag. Steuerberater übernimmt Fallback bei Ausfall der internen Buchhaltung."
+      },
+      {
+        "id": "kmu_proc_kerngeschaeft",
+        "title": "Kerngeschäfts-Leistungserbringung (branchenneutral)",
+        "ownerRole": "Operative Leitung / Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Branchen-Software, IT-Infrastruktur, Schlüssel-Lieferanten, qualifiziertes Personal, Großkunden-Schnittstellen",
+        "outputs": "Branchen-spezifische Leistung — z.B. Auftragsfertigung, Mandanten-Beratungsleistung, Software-Entwicklungs-Sprint, Reparatur-/Wartungs-Auftrag, Engineering-Auslieferung",
+        "notes": "Querschnitts-Vorlage für KMU-Mittelstand. Tenant adoptiert diesen Prozess und konkretisiert je nach Geschäftsmodell — z.B. 'Auftragsfertigung Maschinenbau' (für Produktions-Tenants), 'Mandanten-Beratungsleistung' (für Beratungs-Tenants), 'Software-Entwicklung Projekte' (für IT-Häuser), 'Engineering-Lieferung' (für Ingenieur-Büros). MTPD/RTO/RPO als KMU-Standard gesetzt; Tenant kann je nach kritischer Frist verschärfen oder lockern."
       }
     ],
     "dependencyTemplates": [
@@ -422,11 +506,11 @@
         "id": "kmu_dep_cloud_provider",
         "title": "Cloud-Provider (Microsoft 365, Google Workspace, AWS, Azure, regionale Cloud)",
         "category": "dienstleister",
-        "criticality": "hoch",
+        "criticality": "kritisch",
         "singlePointOfFailure": false,
-        "fallback": "Multi-Cloud-Substitution möglich, aber Daten-Migration aufwändig. Offline-Kopien kritischer Daten als Backup. Multi-Region-Konfiguration für Hochverfügbarkeit (kostet aber Aufpreis).",
-        "contractReference": "Cloud-Provider-Verträge (Microsoft 365 EA, AWS Standard)",
-        "notes": "Azure-/AWS-Region-Outages sind selten aber wirkungsvoll — bei Single-Region-Konfiguration kann das Geschäft Stunden bis Tage stillstehen. Multi-Region kostet 30-100 % Aufpreis, daher in KMU oft nicht umgesetzt."
+        "fallback": "Multi-Cloud-Substitution möglich (Microsoft 365 ↔ Google Workspace), aber Daten-Migration aufwändig (mehrere Wochen). Offline-Kopien kritischer Daten als Backup. Multi-Region-Konfiguration für Hochverfügbarkeit (30-100 % Aufpreis, in KMU selten).",
+        "contractReference": "Cloud-Provider-Verträge (Microsoft 365 EA, AWS Standard, Google Workspace Enterprise)",
+        "notes": "Schärfung gegenüber Bestand-'hoch' auf 'kritisch' (C5.5.4): KMU-Microsoft-365-Outage trifft E-Mail, Office-Dokumente, Teams-Kollaboration gleichzeitig — bei Single-Region existenz-bedrohlich. Azure-/AWS-Region-Outages sind selten aber wirkungsvoll, Geschäft kann Stunden bis Tage stillstehen. SPOF=false weil Multi-Cloud-Substitution etabliert; bei Single-Cloud-Tenants tenant-spezifisch auf SPOF=true erhöhen."
       },
       {
         "id": "kmu_dep_bank",
@@ -446,7 +530,57 @@
         "singlePointOfFailure": false,
         "fallback": "Bei Verlust eines Großkunden mit > 30 % Umsatzanteil ist Geschäftskontinuität-Risiko hoch. Diversifikations-Strategie als langfristige Antwort.",
         "contractReference": "Großkunden-Rahmenvertrag mit Cyber-Klauseln",
-        "notes": "Konzerne fordern oft NIS2-/ISO-27001-/TISAX-Konformität von ihren Mittelstands-Lieferanten — Anforderungs-Updates können binnen Monaten Investitions-Bedarf von 50-200 T€ auslösen."
+        "notes": "Konzerne fordern oft NIS2-/ISO-27001-/TISAX-Konformität von ihren Mittelstands-Lieferanten — Anforderungs-Updates können binnen Monaten Investitions-Bedarf von 50-200 T€ einmalig plus 20-50 T€ jährliche Folgekosten auslösen. NIS2-Mittelstands-Schwelle: Tenant unterhalb der formalen NIS2-Schwelle wird durch Großkunden-Auflagen faktisch in den NIS2-Kreis gezogen."
+      },
+      {
+        "id": "kmu_dep_steuerberater",
+        "title": "Steuerberater-Kanzlei (DATEV-Anbindung, Lohnabrechnung, Jahresabschluss)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Steuerberater-Wechsel ist möglich (1-2 Monate Vorlauf für Mandats-Übergang), aber bei Stichtagen (Jahresabschluss-Fristen) eskalations-aufwändig. Backup-Steuerberater-Kontakt vorab mit Geheimhaltungsvereinbarung erfasst.",
+        "contractReference": "Steuerberater-Mandats-Vertrag",
+        "notes": "Bei Cyber-Vorfall im KMU übernimmt der Steuerberater oft Fallback-Funktionen für Buchhaltung und Lohn (siehe kmu_proc_buchhaltung, kmu_proc_lohnabrechnung). DATEV-Anbindung als Standard-Schnittstelle. Jahresabschluss-Fristen (für GmbH typisch 31. Mai des Folgejahres) sind harte Stichtage."
+      },
+      {
+        "id": "kmu_dep_internet",
+        "title": "Internet-Anbindung (typischerweise einfacher Anschluss, ohne Redundanz)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobilfunk-LTE-Backup-Router für Notbetrieb, eingeschränkte Bandbreite. Ein zweiter Festnetz-Anschluss als Redundanz ist im KMU-Mittelstand selten (Kosten-Argument), aber bei Cloud-Abhängigkeit ratsam.",
+        "contractReference": "Internet-Provider-Vertrag (Telekom, Vodafone, 1&1, Carrier mit Geschäftskunden-SLA)",
+        "notes": "Bei Cloud-Provider-Abhängigkeit (kmu_dep_cloud_provider) ist die Internet-Anbindung Single Point of Failure — Outage des Internet-Anschlusses unterbricht alle Cloud-Dienste gleichzeitig. Mobilfunk-Backup mit LTE-Router als Mindeststandard."
+      },
+      {
+        "id": "kmu_dep_branchensoftware",
+        "title": "Branchen-Software (CRM, ERP, branchenspezifische Lösung)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei Branchen-Software-Ausfall Excel-Notbetrieb mit Backup-Stammdaten möglich, aber stark verlangsamt. Hersteller-Substitution mehrjähriges Migrations-Projekt mit klinischer Daten-Übergabe.",
+        "contractReference": "Branchen-Software-Hersteller-Wartungsvertrag",
+        "notes": "Branchen-Software in KMUs ist oft 10-15 Jahre alt, mit eingeschränkter API-Modernisierungs-Fähigkeit. Cloud-Migration als Härtungs-Maßnahme + Modernisierungs-Schritt empfehlenswert. Beispiele: Salesforce / HubSpot (CRM), SAP Business One / Sage / proAlpha (ERP), branchenspezifisch (z.B. Tour-Planung für Logistiker, Mandantenverwaltung für Berater)."
+      },
+      {
+        "id": "kmu_dep_strom",
+        "title": "Energie- und Stromversorgung (typischerweise ohne Notstrom in KMU)",
+        "category": "energie",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "USV für 30-60 Minuten geordneter Shutdown der IT, danach Geschäftsbetrieb pausiert bis zur Strom-Wiederkehr. Notstrom-Aggregat in KMUs unter 100 Mitarbeitenden selten (Kosten-Argument).",
+        "contractReference": "Strom-Vertrag mit Stadtwerken / regionalem EVU",
+        "notes": "Im Gegensatz zu KRITIS-Branchen (Healthcare, Industry mit Notstrom) ist die KMU-Realität: Stromausfall = Geschäftsbetrieb-Pause. NRW 2024 als Schablone (mehrtägiger Stromausfall mit existenz-bedrohlichen Folgen für regionale Mittelständler). Cloud-Abhängigkeit verschärft das Problem — auch ohne lokalen Stromausfall ist Cloud nicht erreichbar bei Internet-Outage."
+      },
+      {
+        "id": "kmu_dep_lieferant",
+        "title": "Schlüssel-Lieferant (Single-Source kritischer Komponenten oder Dienstleistungen)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Lieferanten-Vereinbarung mit zweiter Quelle (oft Versicherung gegen Single-Source-Risiko). Sicherheitsbestand 2-4 Wochen für kritische Komponenten.",
+        "contractReference": "Lieferanten-Rahmenvertrag",
+        "notes": "Single-Source-Risiko in KMU oft strukturell — historisch gewachsene Beziehungen, niedrige Margen erlauben keine zweite Quelle. NIS2-Lieferketten-Pflicht: bei Großkunden-Auflagen muss Tenant Liefer-Risiko-Bewertung jährlich aktualisieren."
       }
     ],
     "scenarioTemplates": [
@@ -460,49 +594,162 @@
         "ownerRole": "Geschäftsführung / Externer MSP",
         "linkedProcessTemplateIds": [
           "kmu_proc_buchhaltung",
-          "kmu_proc_kunden_service"
+          "kmu_proc_kunden_service",
+          "kmu_proc_it",
+          "kmu_proc_kerngeschaeft"
         ],
         "linkedDependencyTemplateIds": [
-          "kmu_dep_msp_mssp"
+          "kmu_dep_msp_mssp",
+          "kmu_dep_cloud_provider",
+          "kmu_dep_internet"
         ],
-        "playbook": "MSP-Vertrags-Eskalation, BSI-NIS2-Erstmeldung 24 h, Bank-Information mit Liquiditäts-Klärung, Kunden-Kommunikation mit B2B-Vertrags-Klauseln, Lösegeld-Verweigerung mit BKA-Anzeige, Cyber-Police-Aktivierung.",
+        "playbook": "MSP-Vertrags-Eskalation, BSI-NIS2-Erstmeldung 24 h (falls Tenant in NIS2-Kreis durch Großkunden-Auflagen), Bank-Information mit Liquiditäts-Klärung, Kunden-Kommunikation mit B2B-Vertrags-Klauseln, Lösegeld-Verweigerung mit BKA-Anzeige, Cyber-Police-Aktivierung.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Kaseya VSA Juli 2021 als zentrale Schablone (REvil, ~1.000 MSP-Kunden direkt verschlüsselt)."
+        "notes": "Kaseya VSA Juli 2021 als zentrale Schablone (REvil, ~1.000 MSP-Kunden direkt verschlüsselt). BSI-Lagebericht 2025: 80 % der angezeigten Angriffe gegen KMU."
       },
       {
         "id": "kmu_scn_schluesselperson_ausfall",
-        "title": "Schlüsselperson-Ausfall mit Geschäftskontinuitäts-Krise",
+        "title": "Schlüsselperson-Ausfall mit Generationenwechsel-Triade",
         "category": "Operative Resilienz mit Mittelstands-Realität",
-        "description": "Die einzige Buchhalterin oder der einzige IT-Verantwortliche ist plötzlich ausgefallen (Krankheit, Kündigung, Streit). Niemand kennt die Passwörter, Verträge, Bank-Zugänge. Generationenwechsel oder Fachkräftemangel als Verschärfung.",
-        "likelihood": 4,
-        "impact": 4,
+        "description": "Drei klassische Schlüsselperson-Risiken im Mittelstand, die auch kombiniert auftreten können: (1) Senior, 76 Jahre — Geschäftsführer/Gesellschafter mit allen Bank-Vollmachten, Investitions-Entscheidungs-Kompetenz und 40-jährigem Kunden-Wissen; plötzlicher Ausfall durch Krankheit oder Tod ohne Nachfolge-Regelung. (2) Junior, 41 Jahre — IT-Verantwortlicher mit 25-jährigem System-Wissen, alle Passwörter im Kopf, kein Passwort-Manager; Ausfall durch Wechsel zur Konkurrenz mit aktiver Abwerbung oder durch Generationen-Streit mit Senior. (3) Buchhalterin, 22 Jahre — einzige Buchhaltungs-Kompetenz im Haus, frisch eingestellt, lange Eingewöhnung; Ausfall durch Long-Covid, Burnout, längere Krankheit oder Schwangerschaft mit Mutterschutz. Optional vierte Person: stille Wissens-Trägerin in Vertrieb oder Lager-Logistik mit jahrzehntealten Kunden-/Lieferanten-Beziehungen, deren Ausfall erst Wochen später bemerkt wird.",
+        "likelihood": 3,
+        "impact": 5,
         "ownerRole": "Geschäftsführung",
         "linkedProcessTemplateIds": [
+          "kmu_proc_geschaeftsfuehrung",
           "kmu_proc_buchhaltung",
-          "kmu_proc_lohnabrechnung"
+          "kmu_proc_lohnabrechnung",
+          "kmu_proc_it"
         ],
         "linkedDependencyTemplateIds": [],
-        "playbook": "Notfall-Vertretung mit externem Dienstleister (Anwalt, Steuer-Berater, externe Buchhaltungs-Firma), Passwort-Recovery-Strategie, Kunden-/Lieferanten-Information, Versicherungs-Aktivierung (D&O), Bank-Vollmachts-Klärung.",
+        "playbook": "Notfall-Vertretung mit externem Dienstleister (Anwalt, Steuerberater, externe Buchhaltungs-Firma — siehe kmu_dep_steuerberater), Passwort-Recovery-Strategie mit Notfall-Tresor und Backup-Admin-Zugängen, Kunden-/Lieferanten-Information, Versicherungs-Aktivierung (D&O), Bank-Vollmachts-Klärung mit Vier-Augen-Prinzip-Aktivierung.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Mittelstands-Realität — 91 % der KMU bewerten ihre Vertretungs-Disziplin als gut, Realität oft schlechter."
+        "notes": "Mittelstands-Realität gemäß Bitkom Wirtschaftsschutz 2025: KMU bewerten ihre Vertretungs-Disziplin überwiegend als gut, Realität liegt deutlich darunter — 87 % der Unternehmen waren 2025 von Datenklau, Spionage oder Sabotage betroffen, Vertretungs-Pläne wurden in den seltensten Fällen durchgespielt. KfW-Generationen-Studie zeigt strukturelles Risiko bei Familienunternehmen ohne klare Nachfolge."
       },
       {
         "id": "kmu_scn_business_email_compromise",
         "title": "Business Email Compromise (CEO-Fraud) mit Liquiditäts-Hebel",
         "category": "Cyber-physische Bedrohung mit Social-Engineering-Hebel",
-        "description": "Angreifer kompromittieren das E-Mail-Konto der Geschäftsführung oder fälschen es überzeugend. Buchhaltung erhält scheinbar legitime Zahlungs-Anweisung über 50-200 T€ an unbekannten Empfänger. Im Mittelstand sehr verbreitet.",
-        "likelihood": 4,
+        "description": "Angreifer kompromittieren das E-Mail-Konto der Geschäftsführung oder fälschen es überzeugend. Buchhaltung erhält scheinbar legitime Zahlungs-Anweisung über 50-200 T€ an unbekannten Empfänger. Im Mittelstand sehr verbreitet — Kompetenz-Strukturen und Liquidität liegen beieinander, was den Tenant zum perfekten Ziel macht.",
+        "likelihood": 3,
         "impact": 4,
         "ownerRole": "Buchhaltung / Geschäftsführung",
         "linkedProcessTemplateIds": [
-          "kmu_proc_buchhaltung"
+          "kmu_proc_buchhaltung",
+          "kmu_proc_geschaeftsfuehrung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_bank",
+          "kmu_dep_cloud_provider"
+        ],
+        "playbook": "Vier-Augen-Prinzip bei Zahlungen > 10 T€, Rückrufbestätigung bei ungewöhnlichen Anweisungen über bekannte Telefonnummer (nicht aus E-Mail kopiert), MFA für E-Mail-Konten, Bank-Sperre bei Verdacht, Strafanzeige beim LKA Cyber, Cyber-Police-Aktivierung.",
+        "exerciseTypeHint": "alarm",
+        "notes": "Bitkom-Wirtschaftsschutz 2025: CEO-Fraud bleibt einer der wirtschaftlich größten Schaden-Vektoren im Mittelstand. 70 % der Schäden durch Cyber, davon 34 % durch Ransomware — der Rest über Social-Engineering wie BEC. Vier-Augen-Prinzip mit Rückrufbestätigung als wirksamste Maßnahme."
+      },
+      {
+        "id": "kmu_scn_cloud_outage",
+        "title": "Cloud-Provider-Outage (Microsoft 365 mehrtägig)",
+        "category": "IT-Lieferketten-Disruption mit Office-Stillstand",
+        "description": "Microsoft 365 / Google Workspace / Azure / AWS hat einen mehrtägigen Region-Outage. E-Mail, Office-Dokumente, Teams-Kollaboration sind nicht erreichbar. Bei Single-Region-Konfiguration (KMU-Standard) steht das Geschäft still.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "IT-Verantwortlicher / MSP / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_it",
+          "kmu_proc_kunden_service",
+          "kmu_proc_kerngeschaeft",
+          "kmu_proc_vertrieb"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_internet"
+        ],
+        "playbook": "Cloud-Provider-Status-Seite und Twitter-Account beobachten, Kommunikation mit Kunden über alternative Kanäle (Telefon, SMS, Webseite), Notbetrieb mit Offline-Kopien kritischer Daten, ggf. temporärer Wechsel auf Backup-Cloud (Multi-Cloud-Substitution), Geschäftsführungs-Entscheidung über Wartezeit vs. Migration.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Cloud-Region-Outages sind selten aber wirkungsvoll. Microsoft 365 hatte zuletzt Anfang 2024 einen mehrstündigen globalen Outage. Multi-Region-Konfiguration kostet 30-100 % Aufpreis und ist daher in KMU selten."
+      },
+      {
+        "id": "kmu_scn_dsgvo_datenpanne",
+        "title": "DSGVO-Verstoß mit Datenpanne (Kunden-/Mitarbeiter-Daten in falsche Hände)",
+        "category": "Datenschutz-Vorfall mit DSGVO-Härte",
+        "description": "Versehentlicher oder vorsätzlicher Datenpannen-Vorfall — Verlust eines USB-Sticks, falsche Empfänger einer E-Mail mit Personalakten, Kompromittierung der HR-Software durch Cyber-Angriff. DSGVO Art. 33 (72-h-Meldefrist) und Art. 34 (Bürger-Benachrichtigung bei hohem Risiko) lösen aus.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r (intern oder extern) / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_buchhaltung",
+          "kmu_proc_personal",
+          "kmu_proc_kunden_service"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_branchensoftware"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34 binnen Stunden nach Entdeckung, Meldung an Aufsichtsbehörde (BfDI oder Landes-Datenschutzbehörde) binnen 72 h, individuelle Benachrichtigung der Betroffenen bei hohem Risiko, Schnittstelle zur Polizei (LKA Cyber). Externer Datenschutzbeauftragter als Eskalations-Pfad.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "KMU haben oft externen Datenschutzbeauftragten via Kanzlei-Vertrag (kmu_dep_steuerberater oder Datenschutz-Spezialist). Bußgeld-Risiko gemäß DSGVO Art. 83 bis 4 % des Jahresumsatzes oder 20 Mio. € — Mittelstands-Schaden in der Regel 50-200 T€."
+      },
+      {
+        "id": "kmu_scn_grosskunden_audit",
+        "title": "Großkunden-Cyber-Audit-Eskalation (NIS2-Kette für Mittelstand)",
+        "category": "Lieferketten-Risiko mit NIS2-Hebel",
+        "description": "Großkunde fordert NIS2-/ISO-27001-/TISAX-Konformität von Tenant — dieser ist formal unterhalb der NIS2-Schwelle, wird aber durch Großkunden-Auflage faktisch in den NIS2-Kreis gezogen. Drei Eskalations-Stufen typischerweise: (1) Self-Assessment-Fragebogen mit 100-200 Fragen, (2) Anforderungs-Update mit Investitions-Bedarf, (3) Audit-Termin mit Bestätigungs-Pflicht. Bei Nicht-Erfüllung droht Auftragsentzug.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Geschäftsführung / Vertriebsleitung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_geschaeftsfuehrung",
+          "kmu_proc_vertrieb",
+          "kmu_proc_it",
+          "kmu_proc_liquiditaet"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_grosskunde"
+        ],
+        "playbook": "Sofortige Einschätzung des Anforderungs-Katalogs mit IT-Leitung und Anwalt. Investitions-Plan über 3-12 Monate aufstellen (typisch 50-200 T€ einmalig + 20-50 T€ jährliche Folgekosten). Großkunden-Information über realistischen Zeitplan. Externe Beratung durch ISO-27001-Auditor oder Cyber-Security-Berater. Liquiditäts-Steuerung mit Hausbank klären (Investitions-Kredit-Anpassung).",
+        "exerciseTypeHint": "tabletop",
+        "notes": "NIS2-Kette ist die ökonomische Realität für Mittelstand: auch unterhalb der NIS2-Schwelle wird Konformität durch Großkunden-Hebel erzwungen. Großkundenanteil > 30 % Umsatz ist Schwellwert für Existenz-Risiko bei Auftragsentzug. Drei Eskalations-Stufen entsprechen typischen Konzern-Sourcing-Prozessen (Self-Assessment, Site-Visit, Re-Audit)."
+      },
+      {
+        "id": "kmu_scn_phishing_welle",
+        "title": "Phishing-Welle mit Konto-Übernahme (Office-365-Hijack mehrerer Mitarbeitende)",
+        "category": "Cyber-Bedrohung mit Konto-Hijack-Hebel",
+        "description": "Phishing-Welle trifft mehrere Mitarbeitende gleichzeitig — gefälschte Microsoft-Login-Seite, MFA-Müdigkeits-Angriff oder Adversary-in-the-Middle. Office-365-Konten werden übernommen, Angreifer richten Mail-Forwarding-Regeln ein und beobachten Geschäftsprozess. Häufiger Einstiegs-Vektor für CEO-Fraud (kmu_scn_business_email_compromise).",
+        "likelihood": 4,
+        "impact": 3,
+        "ownerRole": "IT-Verantwortlicher / MSP / Datenschutzbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_it",
+          "kmu_proc_buchhaltung",
+          "kmu_proc_kunden_service"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_msp_mssp"
+        ],
+        "playbook": "Sofortige Sperrung der betroffenen Konten, MFA-Token-Reset, Mail-Forwarding-Regeln auf allen Konten prüfen und löschen, Passwort-Reset für alle Mitarbeitende, Awareness-Training mit aktueller Phishing-Schablone, Strafanzeige beim LKA Cyber, Cyber-Police-Aktivierung. Microsoft 365 Audit-Log nach lateral movement durchsuchen.",
+        "exerciseTypeHint": "alarm",
+        "notes": "Phishing ist KMU-Realität — fast jeder Tenant wird mindestens einmal pro Jahr getroffen. MFA mit Number-Matching (gegen MFA-Müdigkeit) als Mindeststandard. Häufiger Einstiegs-Vektor für CEO-Fraud (BEC), daher Verlinkung zur kmu_scn_business_email_compromise."
+      },
+      {
+        "id": "kmu_scn_liquiditaets_krise",
+        "title": "Liquiditäts-Krise nach Cyber-Vorfall (Bandbreiten-Schaden 100 T€ bis 5 Mio €)",
+        "category": "Ökonomischer Folge-Schaden mit Insolvenz-Risiko",
+        "description": "Nach einem Cyber-Vorfall mit längerem Notbetrieb laufen Vorfall-Kosten plus Umsatz-Ausfall hoch. Drei realistische Schadens-Skalen: (1) typisch 100-500 T€ (kurzer Notbetrieb, Beratungs- und Versicherungs-Kosten gemäß GDV-Statistik), (2) schwerer Vorfall 1-2 Mio. € (mehrwöchiger Notbetrieb, Recovery-Kosten, Kunden-Verlust — entspricht BSI-Lagebericht-2025-Schnitt von 1,67 Mio. €), (3) Worst-Case bis 5 Mio. € (Insolvenz-Risiko, Großkunden-Verlust, Reputations-Schaden mit langfristiger Umsatz-Erosion). Cashflow-Einbruch wenn Bank-Linie nicht angepasst wird.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Geschäftsführung / kaufmännische Leitung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_liquiditaet",
+          "kmu_proc_geschaeftsfuehrung",
+          "kmu_proc_lohnabrechnung"
         ],
         "linkedDependencyTemplateIds": [
           "kmu_dep_bank"
         ],
-        "playbook": "Vier-Augen-Prinzip bei Zahlungen > 10 T€, Rückrufbestätigung bei ungewöhnlichen Anweisungen, MFA für E-Mail-Konten, Bank-Sperre bei Verdacht, Strafanzeige.",
+        "playbook": "Sofortige Liquiditäts-Bestandsaufnahme mit Buchhaltung, Hausbank-Notfall-Termin mit Bank-Berater zur Linien-Anpassung, Cyber-Police-Schaden-Anzeige, Verzögerung nicht-existenz-kritischer Zahlungen mit Lieferanten-Kommunikation, ggf. Stundungs-Vereinbarung mit Finanzamt und Sozialversicherungs-Trägern. Steuerberater einbinden für Bilanz-Bewertung.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Bitkom-Wirtschaftsschutz 2025: CEO-Fraud bleibt einer der wirtschaftlich größten Schaden-Vektoren im Mittelstand."
+        "notes": "Bandbreiten-Schadens-Schätzung gemäß GDV-Statistik (typisch 100-500 T€), BSI-Lagebericht 2025 (Durchschnittsschaden 1,67 Mio. € pro Mittelständler) und Bitkom Wirtschaftsschutz 2025 (Worst-Case-Insolvenz bei mehrwöchigem Stillstand). Cyber-Police mit Insolvenz-Schutz-Klausel als Mindeststandard."
       }
     ],
     "exerciseTemplates": [
@@ -511,18 +758,45 @@
         "title": "Ransomware-mit-MSP Tabletop",
         "exerciseType": "tabletop",
         "scenarioTemplateId": "kmu_scn_ransomware_msp",
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / Geschäftsführung",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung mit Geschäftsführung, IT-Dienstleister-Verantwortliche*r, Buchhaltung, externem MSP-Account-Manager, Anwalt, Cyber-Versicherung-Schadenregulierer."
+        "notes": "Jährliche Übung mit Geschäftsführung, IT-Dienstleister-Verantwortliche*r, Buchhaltung, externem MSP-Account-Manager, Anwalt, Cyber-Versicherung-Schadenregulierer. Kaseya-VSA-Schablone als Drehbuch-Anhang. Demo-Pointe: bei MSP-Verstrickung sitzt der IT-Verantwortliche extern und ist gleichzeitig Mitbetroffener."
       },
       {
         "id": "kmu_ex_schluesselperson_ausfall",
-        "title": "Schlüsselperson-Ausfall Tabletop",
+        "title": "Schlüsselperson-Ausfall Tabletop (Generationenwechsel-Triade)",
         "exerciseType": "tabletop",
         "scenarioTemplateId": "kmu_scn_schluesselperson_ausfall",
         "ownerRole": "Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop — bewusst Schlüsselperson „nicht erreichbar\" im Drill, Vertretung muss Passwort-Manager-Notfall-Zugang aktivieren. Triade-Drehbuch (Senior 76 / Junior 41 / Buchhalterin 22 — siehe kmu_scn_schluesselperson_ausfall) als Drehbuch-Variante. Cadence von 12 auf 24 Monate angepasst, weil Schlüsselperson-Risiko nicht jährlich neu bewertet werden muss; in dazwischen-liegenden Jahren reicht Tabletop-Update der Kontaktliste."
+      },
+      {
+        "id": "kmu_ex_ceo_fraud",
+        "title": "CEO-Fraud-Awareness-Funktionstest",
+        "exerciseType": "alarm",
+        "scenarioTemplateId": "kmu_scn_business_email_compromise",
+        "ownerRole": "Buchhaltung / Geschäftsführung",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung — bewusst Schlüsselperson „nicht erreichbar\" im Drill, Vertretung muss Passwort-Manager-Notfall-Zugang aktivieren."
+        "notes": "Jährlicher Funktions-Test mit gesamter Buchhaltung und Geschäftsführung: simulierte CEO-E-Mail mit Zahlungs-Anweisung (im Drill, mit Zustimmung der Geschäftsführung). Stoppuhr durch Vier-Augen-Prinzip-Pfad und Rückrufbestätigung. Schnelligkeit der Erkennung als Kennzahl. Phishing-Awareness-Training als Grund-Stufe."
+      },
+      {
+        "id": "kmu_ex_dsgvo_walkthrough",
+        "title": "DSGVO-Meldung-Walkthrough",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_dsgvo_datenpanne",
+        "ownerRole": "Datenschutzbeauftragte*r / Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Walkthrough mit Geschäftsführung und Datenschutzbeauftragtem (intern oder extern via Kanzlei-Vertrag). Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72-h-Frist). Bürger-Benachrichtigungs-Logistik (Art. 34) mit Brief-Vorlagen und Hotline-Skripten testen. Externe Anwalts-/Datenschutz-Berater einbeziehen."
+      },
+      {
+        "id": "kmu_ex_grosskunden_audit",
+        "title": "Großkunden-Cyber-Audit-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_grosskunden_audit",
+        "ownerRole": "Geschäftsführung / Vertriebsleitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop mit Geschäftsführung, Vertrieb, IT-Verantwortlichem, Anwalt. Drei-Stufen-Eskalations-Drehbuch: Self-Assessment-Fragebogen, Anforderungs-Update mit Investitions-Plan (50-200 T€ einmalig + 20-50 T€ jährlich), Audit-Termin mit Bestätigungs-Pflicht. Liquiditäts-Folgen mit Hausbank klären."
       }
     ],
     "riskCatalogTemplates": [
