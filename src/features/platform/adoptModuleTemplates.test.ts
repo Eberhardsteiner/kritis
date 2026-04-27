@@ -989,3 +989,144 @@ describe('defence-core.container.json · C5.3j Content-Gate', () => {
     expect(result.importedTabletopScenarios.length).toBe(result.counts.tabletopAdded);
   });
 });
+
+describe('healthcare-core · Resilience-Skeleton (C5.5.2)', () => {
+  const module = healthcarePack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates (Substanz-Tiefe)', () => {
+    const processes = module.processTemplates ?? [];
+    expect(processes.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    const deps = module.dependencyTemplates ?? [];
+    expect(deps.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates (Option A: 10 inkl. Bestand-Erhalt MANV + Sauerstoff)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    expect(exercises.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben gemischte Kritikalität (nicht alles "kritisch")', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBeGreaterThan(0);
+    expect(hoch).toBeGreaterThan(0);
+    expect(mittel).toBeGreaterThan(0);
+    // Healthcare ist kritikalitätsstark, aber nicht alles auf maximaler Stufe.
+    expect(kritisch).toBeLessThan(processes.length);
+  });
+
+  it('processTemplates haben gemischte MTPD/RTO-Werte inkl. Sub-Stunden für ITS', () => {
+    const processes = module.processTemplates ?? [];
+    const mtpdSet = new Set(processes.map((p) => p.mtpdHours));
+    const rtoSet = new Set(processes.map((p) => p.rtoHours));
+    expect(mtpdSet.size).toBeGreaterThanOrEqual(5);
+    expect(rtoSet.size).toBeGreaterThanOrEqual(4);
+    // Sub-Stunden-Wert für ITS: RTO 0.5h
+    const its = processes.find((p) => p.id === 'hc_proc_its');
+    expect(its).toBeDefined();
+    expect(parseFloat(its!.rtoHours ?? '0')).toBeLessThan(1);
+  });
+
+  it('Bestands-IDs hc_proc_er, hc_proc_or, hc_dep_kis, hc_dep_oxygen, hc_dep_staff bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    expect(processIds.has('hc_proc_er')).toBe(true);
+    expect(processIds.has('hc_proc_or')).toBe(true);
+    expect(depIds.has('hc_dep_kis')).toBe(true);
+    expect(depIds.has('hc_dep_oxygen')).toBe(true);
+    expect(depIds.has('hc_dep_staff')).toBe(true);
+  });
+
+  it('Bestands-Szenario-IDs hc_scn_kis, hc_scn_mci, hc_scn_oxygen bleiben erhalten (Option A)', () => {
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    expect(scnIds.has('hc_scn_kis')).toBe(true);
+    expect(scnIds.has('hc_scn_mci')).toBe(true);
+    expect(scnIds.has('hc_scn_oxygen')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exercises = module.exerciseTemplates ?? [];
+    const orphans: string[] = [];
+    for (const exercise of exercises) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung (Verkettungstiefe)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    for (const scenario of scenarios) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('exerciseTemplates haben gemischte Kadenzen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const cadenceSet = new Set(exercises.map((e) => e.cadenceMonths));
+    expect(cadenceSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('exerciseTemplates haben gemischte Übungs-Typen (Healthcare braucht tabletop+technical+simulation+alarm)', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const typeSet = new Set(exercises.map((e) => e.exerciseType));
+    // Healthcare-Pack profitiert von 4 Übungs-Typen: tabletop für Krisen-Theorie,
+    // technical für IT-Funktionstests, simulation für Live-Szenarien, alarm für MANV.
+    expect(typeSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('Healthcare-Spezifika verifiziert: KIS als Prozess UND als Dependency (nicht doppelt, sondern zwei Sichten)', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    // hc_proc_kis = operative Sicht (wer ist verantwortlich, MTPD/RTO/RPO)
+    // hc_dep_kis = Bedrohungs-Sicht (was passiert bei Ausfall)
+    expect(processIds.has('hc_proc_kis')).toBe(true);
+    expect(depIds.has('hc_dep_kis')).toBe(true);
+  });
+
+  it('ITS-Prozess hat Patientensicherheits-Disziplin als Notes-Kennzeichnung', () => {
+    const its = (module.processTemplates ?? []).find((p) => p.id === 'hc_proc_its');
+    expect(its).toBeDefined();
+    expect(its!.notes).toMatch(/Patientensicherheit/i);
+  });
+});

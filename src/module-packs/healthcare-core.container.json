@@ -277,136 +277,484 @@
     "processTemplates": [
       {
         "id": "hc_proc_er",
-        "title": "Notaufnahme und Triage",
-        "ownerRole": "Ärztliche Leitung",
+        "title": "Notaufnahme-Betrieb 24/7 (Triage, Erstversorgung, Verlegungs-Logistik)",
+        "ownerRole": "Notaufnahme-Leitung / Ärztliche Leitung",
         "criticality": "kritisch",
-        "mtpdHours": "2",
+        "mtpdHours": "4",
         "rtoHours": "1",
-        "rpoHours": "0",
-        "dependencies": "KIS, Kommunikation, Personal",
-        "outputs": "Erstversorgung und Priorisierung",
-        "notes": "Downtime-Verfahren bereithalten."
+        "rpoHours": "1",
+        "dependencies": "KIS, Patienten-Monitoring, Personal Schichtdienst, Kommunikation, Verlegungs-Logistik mit Rettungsdienst",
+        "outputs": "Erstversorgung, Triage-Klassifikation (ESI/MTS), Aufnahme- oder Verlegungs-Entscheidung, Notfall-Dokumentation",
+        "notes": "Downtime-Verfahren mit Papier-Triage und manueller Patientenidentifikation Pflicht. Düsseldorf 2020: bei KIS-Ausfall musste Notaufnahme abgemeldet werden, Patienten wurden nach Wuppertal (~25 km) verlegt — eine Patientin starb durch ~1 h Behandlungs-Verzögerung. Verlegungs-Liste mit aufnahmebereiten Nachbar-Kliniken vor-vereinbart halten."
       },
       {
         "id": "hc_proc_or",
-        "title": "OP-Programm und perioperative Versorgung",
+        "title": "OP-Saal-Betrieb (elektiv und Notfall)",
         "ownerRole": "OP-Management",
-        "criticality": "hoch",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "KIS, Medizintechnik (Anästhesie, OP-Lampen, OP-Roboter), Sterilgut, Personal, Sauerstoffversorgung",
+        "outputs": "OP-Freigaben, intraoperative Dokumentation, OP-Berichte, Sterilitäts-Nachweise",
+        "notes": "Priorisierung: Notfall- und onkologische OPs vor elektiv. Bei IT-Ausfall Papier-OP-Plan, manuelle Anästhesie-Dokumentation. Lukaskrankenhaus Neuss 2016: 15 % OP-Absage über mehrere Wochen."
+      },
+      {
+        "id": "hc_proc_its",
+        "title": "Intensivstation und Patienten-Monitoring",
+        "ownerRole": "ITS-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "1",
+        "rtoHours": "0.5",
+        "rpoHours": "0.25",
+        "dependencies": "Patientenmonitore, Beatmungsgeräte, Dialyse-Geräte, KIS-Anbindung, Sauerstoffversorgung, Stromversorgung mit Notstrom",
+        "outputs": "Vital-Parameter-Überwachung, Beatmungs-Steuerung, Medikamenten-Dosierung, Verlauf-Dokumentation",
+        "notes": "Sub-Stunden-MTPD ist medizinisch nicht verhandelbar — Patientensicherheit überlagert alle anderen Dimensionen. USV mit Failover binnen Sekunden, redundante Monitor-Verkabelung, regelmäßige Notbetriebs-Übung. Sub-Stunden-Werte (0,5h RTO, 0,25h RPO) als Dezimalwerte gepflegt; in Reports auf Minuten umrechenbar."
+      },
+      {
+        "id": "hc_proc_kis",
+        "title": "Krankenhaus-Informationssystem (KIS) inkl. PACS-Anbindung",
+        "ownerRole": "IT-Leitung Klinikum",
+        "criticality": "kritisch",
         "mtpdHours": "8",
         "rtoHours": "4",
-        "rpoHours": "2",
-        "dependencies": "KIS, Medizintechnik, Sterilgut",
-        "outputs": "OP-Freigaben und Versorgung",
-        "notes": "Priorisierung elektiver und dringlicher Eingriffe definieren."
+        "rpoHours": "1",
+        "dependencies": "KIS-Hauptsystem, PACS-Server, Active Directory, Backup-Infrastruktur, Hersteller-Wartungsvertrag",
+        "outputs": "Patientendokumentation, Befunde, Laborergebnisse, Bildgebung, OP-Berichte, Pflegedokumentation",
+        "notes": "Service-Schicht für faktisch alle anderen Klinik-Prozesse. BSI-Studie März 2026 zu KIS-Sicherheit kommt zu „alarmierenden\" Befunden bezüglich Härtungs-Stand. Backup-Restore-Fähigkeit binnen 4 h ist die Nicht-Verhandlungs-Grenze; Düsseldorf 2020 brauchte 13 Tage."
+      },
+      {
+        "id": "hc_proc_apotheke",
+        "title": "Medikamenten-Dispensierung und Apothekenversorgung",
+        "ownerRole": "Krankenhaus-Apotheke",
+        "criticality": "kritisch",
+        "mtpdHours": "12",
+        "rtoHours": "4",
+        "rpoHours": "4",
+        "dependencies": "Apotheken-Software, Pharma-Großhandel, Kühlkette für Biologika, Stationsmodul-Anbindung KIS",
+        "outputs": "Stations-Versorgung, individuelle Patienten-Dispensierung, Zytostatika-Zubereitung, Substitutionspläne",
+        "notes": "Kritische Medikamente (Zytostatika, parenterale Ernährung, Antibiotika für Sepsis) sind nicht ersetzbar. Apotheke muss mit Pharma-Großhandel ad-hoc-Lieferungen einleiten können; Medikamenten-Sicherheits-Disziplin (4-Augen-Prinzip) auch im Notbetrieb bewahren."
+      },
+      {
+        "id": "hc_proc_sterilgut",
+        "title": "Sterilgut-Versorgung und ZSVA-Betrieb",
+        "ownerRole": "Hygiene-/ZSVA-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "ZSVA-Anlagen (Reinigungs-/Sterilisations-Geräte), Sterilbarriere-Materialien, Hersteller-Wartungsvertrag, Externe Backup-Sterilgut-Dienstleister",
+        "outputs": "Sterile OP-Instrumente, Sterilgut-Dokumentation (Validierung, Chargen-Rückverfolgung)",
+        "notes": "OP-Saal-Betrieb hängt direkt von Sterilgut ab. ZSVA-Ausfall führt nach 24 h zur OP-Saal-Sperrung. Externe Backup-Sterilgut-Lieferanten als kompensierende Maßnahme vorhalten — Vertrag und Logistik vorab klären."
+      },
+      {
+        "id": "hc_proc_drg",
+        "title": "DRG-Abrechnung und Codierung",
+        "ownerRole": "Medizincontrolling",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "KIS-DRG-Modul, Codier-Software (ID DIACOS, eMS-Kodierung), Krankenkassen-Datenaustausch (DTA), MD-Prüfungs-Schnittstellen",
+        "outputs": "DRG-Codierung, Krankenkassen-Abrechnung, MD-Stellungnahmen, Erlös-Reporting",
+        "notes": "Abrechnungs-Fristen mit Krankenkassen haben mehrwöchige Pufferzeiten — 7-Tage-MTPD ist realistisch tolerabel. Cashflow-Eskalation tritt erst nach mehreren Wochen DRG-Verzug auf. MD-Prüfungs-Fristen mit eigenen Uhren beachten."
+      },
+      {
+        "id": "hc_proc_dienstplan",
+        "title": "Pflegekräfte-Dienstplanung und Personaleinsatz",
+        "ownerRole": "Pflegedirektion",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Dienstplanungs-Software (z.B. SP-Expert, ATOSS), HR-Anbindung, Springerpool-Datenbank, Tariflogik (TVöD-K)",
+        "outputs": "Schichtpläne, Springer-Einsatz, Bereitschaftsdienst-Steuerung, Stundenkonto-Pflege",
+        "notes": "Bei Pandemie-Wellen oder MANV ist die kurzfristige Dienstplan-Anpassung kritisch — bis zu 30 % Personalausfall (Covid-Schablone Q4 2022) möglich. Manuelle Notbetriebs-Pläne in Papierform mit Telefon-Eskalation als Fallback."
+      },
+      {
+        "id": "hc_proc_speisen",
+        "title": "Speisenversorgung und Diätküche",
+        "ownerRole": "Hauswirtschaft / Versorgungsmanagement",
+        "criticality": "mittel",
+        "mtpdHours": "12",
+        "rtoHours": "6",
+        "rpoHours": "6",
+        "dependencies": "Großküche, Diätküchen-Software, Lieferanten Lebensmittel, Kühlkette",
+        "outputs": "Patienten-Mahlzeiten, Diät-/Sonderkost (Allergiker, Diabetiker), Sondenernährung",
+        "notes": "Normal-Speisenversorgung mit Catering-Notbetrieb 12 h überbrückbar. ABER: Diätküche für Frühchen, ITS-Sondenernährung, onkologische Sonderkost und Allergiker-Diät hat höhere Kritikalität — Catering-Notbetrieb deckt diese Sondergruppen nicht automatisch ab und muss vorab separat vereinbart werden."
+      },
+      {
+        "id": "hc_proc_aufnahme",
+        "title": "Patientenaufnahme und Stammdaten-Erfassung",
+        "ownerRole": "Patientenmanagement",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "KIS-Aufnahme-Modul, Versicherten-Karten-Lesegeräte (eGK), Krankenkassen-Schnittstellen für Versicherungs-Status",
+        "outputs": "Patientenstammdaten, Aufnahme-Dokumentation, Wahlleistungs-Vereinbarungen, Behandlungs-Verträge",
+        "notes": "Notfall-Aufnahme dominiert das Profil (Patientensicherheit) — kritisch. Elektive Aufnahme kann 24 h tolerieren, weil planbar. Notbetrieb: Papier-Aufnahmebogen mit manueller Stammdaten-Erfassung; eGK-Lesegeräte unabhängig vom KIS funktionieren."
       }
     ],
     "dependencyTemplates": [
       {
         "id": "hc_dep_kis",
-        "title": "KIS / PACS",
-        "category": "it",
+        "title": "KIS-Hauptsystem inkl. PACS (SAP IS-H, Orbis, Cerner i.s.h.med, Dedalus, CGM)",
+        "category": "software",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Papier-Downtime-Verfahren",
-        "contractReference": "KIS-Betrieb",
-        "notes": "Patientenidentifikation und Dokumentation absichern."
+        "fallback": "Papier-Downtime-Verfahren mit manueller Patientenidentifikation, USB-Backup-Module für Befund-Versand. Hersteller-Substitution faktisch unmöglich (mehrjähriges Migrations-Projekt mit klinischer Akzeptanz-Schleife).",
+        "contractReference": "KIS-Hersteller-Wartungsvertrag mit 24/7-SLA",
+        "notes": "BSI-Studie März 2026: Hersteller-Härtungs-Stand alarmierend. Düsseldorf 2020: 13 Tage bis Wiederinbetriebnahme. Patch-Disziplin und Backup-Restore-Test als Mindeststandard. Eintritts-Vektor häufig: Citrix/VPN-Schwachstellen (CVE-2019-19781 „Shitrix\")."
+      },
+      {
+        "id": "hc_dep_strom",
+        "title": "Stromversorgung Klinikum mit Notstrom (Diesel-Aggregat, USV-Steuerung)",
+        "category": "energie",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Mehrere Notstrom-Aggregate redundant, USV mit Sub-Sekunden-Failover für ITS und OP, Treibstoff-Vorhaltung für 72 h, Liefer-Vertrag mit Tankstelle/THW für Nachschub.",
+        "contractReference": "Strom-Vertrag mit Stadtwerken / Wartungsvertrag Notstrom-Aggregat",
+        "notes": "ITS und OP fallen ohne Notstrom-Failover binnen Sekunden aus. Notstrom-Live-Übung Pflicht — Bestand oft jahrelang ungetestet, Diesel-Tanks häufig nicht voll. Treibstoff-Logistik mit getakteten Lieferfenstern für Mehr-Tages-Ausfälle vorbereiten."
       },
       {
         "id": "hc_dep_oxygen",
-        "title": "Sauerstoffversorgung",
+        "title": "Sauerstoffversorgung (zentrale Gasversorgung, Tank, Pumpsystem)",
         "category": "gebäude",
         "criticality": "kritisch",
         "singlePointOfFailure": false,
-        "fallback": "Mobile Flaschen und priorisierte Verteilung",
-        "contractReference": "Technische Gase",
-        "notes": "Verbrauch und Notfallumschaltung üben."
+        "fallback": "Mobile Sauerstoff-Flaschen für ITS-/OP-Priorität, Backup-Tank, separater Verbindungs-Pfad. Failure-Modi unabhängig von Stromversorgung (Tank-Leck, Pumpsystem-Defekt) — eigene Notfall-Logik.",
+        "contractReference": "Vertrag Technische Gase (Linde, Air Liquide, Westfalen)",
+        "notes": "Patientensicherheit: ITS-Patienten und Frühchen sind ohne Sauerstoff binnen Minuten gefährdet. Notfall-Umschaltung auf Backup-Tank regelmäßig üben. Verbrauchs-Telemetrie mit Schwellwert-Alarm in Hausalarmierung integrieren."
+      },
+      {
+        "id": "hc_dep_medizinprodukte",
+        "title": "Medizinprodukte-Hersteller-Wartung (Beatmungsgeräte, Patientenmonitore, OP-Roboter, Dialyse)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Geräte aus Reserve-Pool, Hersteller-Hotline für Remote-Diagnose, Liefer-Vertrag für Ersatz-Geräte binnen 24 h. Cyberangriff-Vektor: Geräte mit veralteter Firmware in geschlossenen Netzen.",
+        "contractReference": "Hersteller-Wartungsverträge pro Gerätetyp (Dräger, Philips, GE Healthcare, Mindray, Intuitive Surgical)",
+        "notes": "KHZG-Mittel ab 2021 für Härtung der Medizinprodukte-Anbindung. Vernetzte Beatmungsgeräte als Cyber-Risiko (BSI-Lagebericht 2025). Geräte-Patch-Management als 4-Augen-Prinzip wegen Patientensicherheits-Risiko."
+      },
+      {
+        "id": "hc_dep_pharma",
+        "title": "Pharma-Großhandel + Apotheken-Verbund (Phoenix, Sanacorp, GEHE, AEP, NOWEDA)",
+        "category": "lieferant",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Großhändler in zweiter Lieferanten-Schicht, Apotheken-Verbund-Anbindung für ad-hoc-Sondertransporte, Krankenhaus-Apotheke als Puffer für 48-72 h kritische Wirkstoffe.",
+        "contractReference": "Liefervertrag mit Pharma-Großhandel + Apotheken-Verbund-Vereinbarung",
+        "notes": "Wirkstoff-Engpässe (China, Indien) treffen alle Großhändler gleichzeitig — keine echte Substitution. Kritische Medikamente (Antibiotika für Sepsis, Zytostatika, parenterale Ernährung, Kinder-Medikation) sind nicht durch Generika ersetzbar."
+      },
+      {
+        "id": "hc_dep_sterilgut",
+        "title": "Sterilgut-Versorgungskette (intern ZSVA + externe Backup-Dienstleister)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Externe Sterilgut-Dienstleister (z.B. Vanguard, Bode-Hygiene) für Backup-Aufbereitung mit 48-h-Vorlauf. Bei ZSVA-Geräte-Ausfall: Notfall-Sterilisation mit Auslagerungs-Vertrag.",
+        "contractReference": "Wartungsvertrag ZSVA-Anlagen + Backup-Sterilgut-Dienstleister-Rahmenvertrag",
+        "notes": "ZSVA-Ausfall führt nach 24 h zur OP-Saal-Sperrung (Sterilgut-Vorrat begrenzt). Externe Backup-Lieferung mit Hygiene-Auflagen kompliziert — Vertrag, Logistik und Sterilbarriere-Validierung vorab klären."
       },
       {
         "id": "hc_dep_staff",
-        "title": "Pflegepersonal im Schichtdienst",
+        "title": "Pflegepersonal Schichtdienst (Stamm + Springerpool)",
         "category": "personal",
         "criticality": "hoch",
         "singlePointOfFailure": true,
-        "fallback": "Springerpool und Eskalationsstufen",
-        "contractReference": "Personalpool",
-        "notes": "Ausfallquoten und Abrufwege hinterlegen."
+        "fallback": "Springerpool mit ad-hoc-Aktivierung, Leiharbeitsfirmen für temporäre Verstärkung, gegenseitige Hilfe-Vereinbarungen mit Nachbar-Kliniken.",
+        "contractReference": "Tarifvertrag (TVöD-K), Springerpool-Vereinbarung, Leiharbeits-Rahmenverträge",
+        "notes": "Pandemie-Wellen (Covid Q4 2022): bis zu 30 % gleichzeitiger Personalausfall. Pflege-Personalmangel ist strukturell, nicht zyklisch — kein einfacher Markt-Substituent. Bereitschaftsdienst-Eskalation mit klarer Verantwortlichkeit (Pflegedirektion)."
+      },
+      {
+        "id": "hc_dep_internet",
+        "title": "Internet-Anbindung primär + Mobilfunk-Backup",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Redundante Internet-Anbindungen über zwei verschiedene Carrier (Telekom + Vodafone/1&1), Mobilfunk-Backup mit LTE-Router für KIS-Synchronisation und Verlegungs-Kommunikation.",
+        "contractReference": "Internet-Verträge mit primärem + sekundärem Carrier",
+        "notes": "Zentrale Voraussetzung für Telematik-Infrastruktur (TI), eGK-Validierung, Krankenkassen-Datenaustausch, ePA-Anbindung. Bei Carrier-Outage muss Mobilfunk-Backup binnen Minuten aktiv sein."
+      },
+      {
+        "id": "hc_dep_krankenkasse",
+        "title": "Krankenkassen-Datenaustausch (DTA-Schnittstellen, ePA-Anbindung)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Manuelle Abrechnungs-Einreichung bei Krankenkassen mit Papier-Beleg, Verzögerung um Tage bis Wochen tolerabel (DRG-Abrechnungs-Fristen mit Pufferzeiten).",
+        "contractReference": "DTA-Vereinbarung mit GKV-Spitzenverband + ePA-Anbindungs-Vertrag mit Gematik",
+        "notes": "MD-Prüfungs-Fristen mit eigenen Uhren beachten. ePA (elektronische Patientenakte) als zukünftiger Synchronisations-Punkt nach KHZG-Förderung. Telematik-Infrastruktur (TI)-Anbindung über Konnektoren mit eigener Wartungs-Logik."
       }
     ],
     "scenarioTemplates": [
       {
         "id": "hc_scn_kis",
-        "title": "KIS-Ausfall im Klinikbetrieb",
-        "category": "IT-Ausfall",
-        "description": "Patientenverwaltung und Dokumentation sind gestört.",
+        "title": "Ransomware mit KIS-Ausfall (Düsseldorf-Schablone)",
+        "category": "Cyber-Angriff mit Patientensicherheits-Hebel",
+        "description": "Tenant-weite Verschlüsselung des KIS-Hauptsystems analog Düsseldorf 2020 (DoppelPaymer via Citrix-Schwachstelle CVE-2019-19781). Notaufnahme muss abgemeldet werden, OP-Programm gekürzt, ITS auf Papier-Dokumentation. 13 Tage bis Wiederinbetriebnahme realistisch — eine 78-jährige Patientin starb durch Verlegung nach Wuppertal.",
         "likelihood": 4,
         "impact": 5,
-        "ownerRole": "IT / Medizincontrolling",
+        "ownerRole": "IT-Leitung Klinikum / Ärztlicher Direktor / Krisenstab",
         "linkedProcessTemplateIds": [
+          "hc_proc_kis",
+          "hc_proc_aufnahme",
           "hc_proc_er",
+          "hc_proc_or",
+          "hc_proc_its",
+          "hc_proc_drg",
+          "hc_proc_dienstplan"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_kis",
+          "hc_dep_internet"
+        ],
+        "playbook": "Sofortige Trennung infizierter Systeme. Krisenstab nach Düsseldorf-Pattern. Notaufnahme-Abmeldung mit Verlegungs-Logistik zu Nachbar-Kliniken. BSI-Meldung nach NIS2 §8d innerhalb 24 h. Patientensicherheits-Maßnahmen: Papier-Dokumentation auf ITS, Notbetrieb mit eGK-Lesegeräten unabhängig vom KIS, Medikamenten-Sicherheits-Disziplin manuell.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Düsseldorf 2020 (Patientensterben durch Verlegung), Lukaskrankenhaus Neuss 2016 (15 % OP-Absage, ~1 Mio € Schaden), Bezirkskliniken Mittelfranken 2025 (Verschlüsselung + Datenextraktion) als Schablonen."
+      },
+      {
+        "id": "hc_scn_datenpanne",
+        "title": "Datenpanne mit DSGVO Art. 34-Pflicht (bis zu 180.000 Patientenakten)",
+        "category": "Cyber-Bedrohung mit DSGVO-Härte (Art. 9-Daten)",
+        "description": "Daten-Exfiltration aus dem KIS oder den abrechnungs-relevanten Schnittstellen. Bis zu 180.000 Patientendatensätze (analog real beobachteter Vorfälle 2024/25, z.B. MVZ Hamburg-Bergedorf 12.000, Bezirkskliniken Mittelfranken). DSGVO Art. 9 (Gesundheitsdaten als besonders schutzwürdig) löst Art. 34-Schwelle automatisch aus — individuelle Bürger-Benachrichtigung Pflicht.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Datenschutzbeauftragte*r / Klinikleitung / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "hc_proc_kis",
+          "hc_proc_aufnahme",
+          "hc_proc_drg"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_kis",
+          "hc_dep_krankenkasse"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34, BfDI/Landes-Datenschutzbehörde-Meldung 72 h, individuelle Patienten-Benachrichtigung (Brief, ggf. Hotline für Rückfragen), Schnittstelle zur Polizei (LKA Cyber). Spezial-Schicht für Diagnosen + SCHUFA-Daten-Kombinationen, weil Identitäts-Diebstahl-Risiko erhöht.",
+        "exerciseTypeHint": "technical",
+        "notes": "180.000-Skala ist skalierbar — Tenant kann auf seine Patienten-Größe anpassen. Kommunikations-Vorlagen Pflicht (Bürger-Brief, Hotline-Skript, FAQ-Webseite)."
+      },
+      {
+        "id": "hc_scn_stromausfall",
+        "title": "Stromausfall mit Notstrom-Versagen",
+        "category": "Infrastruktur-Ausfall mit ITS-Hebel",
+        "description": "Längerer Stromausfall am Klinik-Standort (24-72 h), Diesel-Notstrom-Aggregat fällt nach 8 h aus (Tank leer, Wartung versäumt, oder thermische Überlastung). ITS-Patienten ohne Monitoring und Beatmung in akuter Lebensgefahr.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Technische Leitung / IT-Leitung Klinikum / Krisenstab",
+        "linkedProcessTemplateIds": [
+          "hc_proc_its",
+          "hc_proc_or",
+          "hc_proc_kis",
+          "hc_proc_apotheke"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_strom",
+          "hc_dep_oxygen"
+        ],
+        "playbook": "Geordnete Verlegung von ITS-Patienten zu Nachbar-Kliniken über Rettungsdienst-Koordination. Treibstoff-Nachschub für Notstrom-Aggregat (THW-Vertrag, Tankstelle-Zugang). Lichtmanagement und mobile Beleuchtung. Akku-betriebene mobile Beatmungsgeräte und Pulsoxymeter aus Notfall-Pool aktivieren.",
+        "exerciseTypeHint": "simulation",
+        "notes": "NRW 2024 als Vorlage (mehrere Kliniken mit leeren Diesel-Tanks). Nur Live-Übung gegen den Trockenfall validiert das Notstrom-Konzept."
+      },
+      {
+        "id": "hc_scn_oxygen",
+        "title": "Störung der zentralen Sauerstoffversorgung",
+        "category": "Technische Infrastruktur",
+        "description": "Tank-Leck, Pumpsystem-Defekt oder Verteiler-Versagen der zentralen Sauerstoffversorgung. ITS-Patienten und Frühchen sind binnen Minuten gefährdet. Failure-Modus unabhängig von Stromversorgung — eigene Notfall-Logik.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Technische Leitung / Klinikleitung",
+        "linkedProcessTemplateIds": [
+          "hc_proc_or",
+          "hc_proc_its"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_oxygen",
+          "hc_dep_strom"
+        ],
+        "playbook": "Sofortige Aktivierung mobiler Sauerstoff-Flaschen für ITS- und OP-Priorität. Backup-Tank in Betrieb nehmen. Verbrauch priorisieren (lebenserhaltende Beatmung vor Routine-Anwendung). Hersteller-Hotline (Linde, Air Liquide, Westfalen) und THW-Eskalation parallel.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Kritische Bereiche und Ersatzlogik dokumentieren. Verbrauchs-Telemetrie mit Schwellwert-Alarm in Hausalarmierung integrieren — Frühwarnung statt Schadens-Erkennung."
+      },
+      {
+        "id": "hc_scn_pharma_lieferkette",
+        "title": "Medikamenten-Lieferketten-Disruption (Wirkstoff-Engpass)",
+        "category": "Lieferketten-Risiko mit Patienten-Hebel",
+        "description": "Wirkstoff-Engpass bei Pharma-Großhändlern (Ursache China/Indien-Produktions-Stopp, Logistik-Disruption). Kritische Antibiotika für Sepsis-Behandlung, Zytostatika oder parenterale Ernährung nicht lieferbar — alle Großhändler gleichzeitig betroffen.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Krankenhaus-Apotheke / Ärztliche Leitung / Einkauf",
+        "linkedProcessTemplateIds": [
+          "hc_proc_apotheke",
+          "hc_proc_its",
           "hc_proc_or"
         ],
         "linkedDependencyTemplateIds": [
+          "hc_dep_pharma"
+        ],
+        "playbook": "Substitutionsplan mit klinischer Pharmazie aktivieren (Generika, alternative Wirkstoffe). Krankenhaus-Apotheke-Puffer prüfen, ad-hoc-Sondertransporte über Apotheken-Verbund. Kritische OPs verschieben (elektive Onkologie ggf. um Tage). Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM) als Eskalation für Importgenehmigungen.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Wirkstoff-Engpass für Antibiotika und Zytostatika ist seit 2022 strukturell. Krankenhaus-Apotheke als Puffer für 48-72 h, danach Substitutions-Disziplin Pflicht."
+      },
+      {
+        "id": "hc_scn_pandemie",
+        "title": "Pandemie-Welle mit Personalausfall (Covid-Schablone Q4 2022)",
+        "category": "Personalausfall mit Versorgungs-Hebel",
+        "description": "Pandemie-Welle (SARS-CoV-2-Variante, Influenza-Epidemie oder neuer Erreger) mit bis zu 30 % gleichzeitigem Personalausfall (Erkrankung, Quarantäne, Pflege-Verpflichtungen). Pflegekräfte-Mangel kollidiert mit erhöhtem Patienten-Aufkommen.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Pflegedirektion / Krisenstab / Ärztliche Leitung",
+        "linkedProcessTemplateIds": [
+          "hc_proc_er",
+          "hc_proc_dienstplan",
+          "hc_proc_apotheke",
+          "hc_proc_speisen"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_staff",
+          "hc_dep_pharma"
+        ],
+        "playbook": "Springerpool-Aktivierung, Leiharbeitsfirmen-Eskalation, gegenseitige Hilfe-Vereinbarungen mit Nachbar-Kliniken. Elektiv-Programm reduzieren oder verschieben. Hygiene-Disziplin in Akut-Bereichen verschärfen. Kommunikation zur Belegschaft mit Belastungs-Akzeptanz.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Covid Q4 2022 als Schablone: 30 % Ausfall traf gleichzeitig Pflege, Ärzteschaft und Hauswirtschaft. Pflege-Personalmangel ist strukturell — Markt-Substitution begrenzt."
+      },
+      {
+        "id": "hc_scn_medizinprodukte_cyber",
+        "title": "Cyberangriff auf Medizinprodukte (Beatmungsgeräte, OP-Roboter)",
+        "category": "Cyber-Bedrohung mit Patientensicherheits-Hebel",
+        "description": "Cyberangriff auf vernetzte Medizinprodukte (Beatmungsgeräte, Patientenmonitore, OP-Roboter, Dialyse-Geräte) mit veralteter Firmware. Eintritt über Geräte-Netzwerk-Segmentierung-Lücke. Manipulation oder Lahmlegung lebenserhaltender Geräte möglich.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "IT-Leitung Klinikum / Medizintechnik / Ärztliche Leitung",
+        "linkedProcessTemplateIds": [
+          "hc_proc_its",
+          "hc_proc_or",
+          "hc_proc_kis"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_medizinprodukte",
           "hc_dep_kis"
         ],
-        "playbook": "Downtime-Verfahren aktivieren, Patientensicherheit absichern, Prioritäten steuern.",
-        "exerciseTypeHint": "technical",
-        "notes": "Papierformulare und Eskalation trainieren."
+        "playbook": "Geräte vom Netz trennen, manuelle Überwachung mit Backup-Geräten aus Reserve-Pool. Hersteller-Hotline und BSI-CERT-Bund parallel. Patienten-Monitoring per Stationspersonal mit erhöhter Beobachtungs-Frequenz. Forensik mit Hersteller und LKA Cyber.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Eintritt unwahrscheinlich (geschlossene Netze, Hersteller-Hardening), aber Wirkung extrem (Patientensterben). KHZG-Mittel ab 2021 für Härtung der Medizinprodukte-Anbindung. BSI-Lagebericht 2025 nennt vernetzte Beatmungsgeräte als Hot-Spot."
+      },
+      {
+        "id": "hc_scn_op_hygiene",
+        "title": "OP-Saal-Hygienevorfall mit Sperrung",
+        "category": "Hygiene-Vorfall mit OP-Stillstand",
+        "description": "Hygienevorfall im OP-Saal (kontaminiertes Sterilgut, Lüftungs-Defekt mit Keim-Eintrag, MRSA-/Acinetobacter-Häufung). Mehrere OP-Säle müssen gesperrt und aufwendig saniert werden — OP-Programm fällt für 1-2 Wochen aus.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Hygiene-Leitung / OP-Management / Klinikleitung",
+        "linkedProcessTemplateIds": [
+          "hc_proc_or",
+          "hc_proc_sterilgut"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_sterilgut"
+        ],
+        "playbook": "Sofortige Sperrung der betroffenen OP-Säle, mikrobiologische Untersuchung, Sterilgut-Chargen-Rückverfolgung. Externe Sterilgut-Backup-Dienstleister aktivieren. Elektives OP-Programm verlegen (Nachbar-Klinik-Vereinbarung). Notfall-OPs in verbleibenden Sälen oder mit Verlegung.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Patienten-Sicherheit + Reputations-Schaden + RKI-Meldepflicht bei nosokomialen Ausbrüchen. Hygiene-Qualitäts-System (KISS) als Frühwarn-Indikator."
+      },
+      {
+        "id": "hc_scn_brand_evakuierung",
+        "title": "Brand auf Bettenstation mit Evakuierung",
+        "category": "Brand mit Patienten-Evakuierung",
+        "description": "Brand auf einer Bettenstation (häufiger Auslöser: technischer Defekt, Patienten-Selbstgefährdung). Vollständige Evakuierung der Station mit Verlegung in nicht-betroffene Bereiche oder Nachbar-Klinik. Rauchgas-Risiko für angrenzende Bereiche.",
+        "likelihood": 1,
+        "impact": 5,
+        "ownerRole": "Krisenstab / Pflegedirektion / Brandschutzbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "hc_proc_er",
+          "hc_proc_its",
+          "hc_proc_dienstplan"
+        ],
+        "linkedDependencyTemplateIds": [
+          "hc_dep_strom"
+        ],
+        "playbook": "Sofortige Evakuierung gemäß Brandschutz-Ordnung (horizontal, dann vertikal). Feuerwehr-Koordination, Patienten-Verlegung in geschützte Bereiche. Beatmete und ITS-Patienten mit besonderem Aufwand (mobile Beatmungsgeräte, Akku-Pulsoxymeter). Personal-Einsatz-Plan für Patienten-Begleitung.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Sehr seltenes Ereignis, aber Worst-Case bei Eintritt. Brandschutz-Übung in Klinik gesetzlich vorgeschrieben (Bauordnung, Krankenhausgesetz). Evakuierung von ITS-Patienten ist die schwierigste Sub-Übung."
       },
       {
         "id": "hc_scn_mci",
-        "title": "Massenanfall von Verletzten",
-        "category": "Lagebetrieb",
-        "description": "Die Klinik muss einen sprunghaften Zustrom von Patientinnen und Patienten bewältigen.",
+        "title": "Massenanfall von Verletzten (MANV)",
+        "category": "Großschadenslage mit Patienten-Zustrom",
+        "description": "Sprunghafter Patienten-Zustrom durch Großschadenslage (Verkehrsunfall mit Bus, Brand-Großereignis, Naturkatastrophe, Anschlag). Triage-Erweiterung Pflicht, Bettensteuerung kritisch, OP-Programm muss schnell skaliert werden.",
         "likelihood": 2,
         "impact": 5,
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / Notaufnahme-Leitung",
         "linkedProcessTemplateIds": [
-          "hc_proc_er"
+          "hc_proc_er",
+          "hc_proc_or",
+          "hc_proc_its",
+          "hc_proc_dienstplan"
         ],
         "linkedDependencyTemplateIds": [
           "hc_dep_staff"
         ],
-        "playbook": "Triage erweitern, Bettensteuerung und interne Alarmierung auslösen.",
+        "playbook": "MANV-Alarm auslösen, erweiterte Triage (rot/gelb/grün/schwarz), Bettenstation-Freisteuerung durch Verlegung elektiver Patienten, Springerpool aktivieren. Schnittstellen mit Rettungsdienst, Leitstelle, Polizei. Bei länger anhaltender Lage Eskalation an Land (Sanitätsdienst, Bundeswehr).",
         "exerciseTypeHint": "alarm",
-        "notes": "Schnittstellen mit Rettungsdienst und Leitstelle üben."
-      },
-      {
-        "id": "hc_scn_oxygen",
-        "title": "Störung der Sauerstoffversorgung",
-        "category": "Technische Infrastruktur",
-        "description": "Zentrale Gasversorgung ist beeinträchtigt.",
-        "likelihood": 2,
-        "impact": 5,
-        "ownerRole": "Technische Leitung",
-        "linkedProcessTemplateIds": [
-          "hc_proc_or"
-        ],
-        "linkedDependencyTemplateIds": [
-          "hc_dep_oxygen"
-        ],
-        "playbook": "Verbrauch priorisieren, mobile Versorgung verteilen, technische Eskalation.",
-        "exerciseTypeHint": "simulation",
-        "notes": "Kritische Bereiche und Ersatzlogik dokumentieren."
+        "notes": "Schnittstellen mit Rettungsdienst und Leitstelle üben. Krankenhaus-Alarm-Plan (KAEP) als Pflicht-Dokument. Externe Triage-Sichtungs-Karten und Bettensteuerung auf Papier üben."
       }
     ],
     "exerciseTemplates": [
       {
         "id": "hc_ex_kis",
-        "title": "KIS-Downtime-Übung",
-        "exerciseType": "technical",
+        "title": "Ransomware-KIS-Tabletop Klinikum",
+        "exerciseType": "tabletop",
         "scenarioTemplateId": "hc_scn_kis",
-        "ownerRole": "IT / Stationsmanagement",
-        "cadenceMonths": 6,
-        "notes": "Aufnahme, Diagnostik und Dokumentation im Downtime-Modus testen."
+        "ownerRole": "Krisenstab / IT-Leitung Klinikum",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Krisenstabs-Tabletop mit Klinikleitung, IT-Leitung, Ärztlicher Direktor, Pflegedirektion, DSB, Pressestelle. Düsseldorf-2020-Lessons-Learned als Drehbuch-Anhang. Verlegungs-Logistik mit Nachbar-Kliniken und Rettungsdienst-Koordination üben. Papier-Downtime-Verfahren auf ITS und in Notaufnahme demonstrieren."
+      },
+      {
+        "id": "hc_ex_dsgvo",
+        "title": "DSGVO Art. 34-Funktionstest (Datenpanne 72 h)",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "hc_scn_datenpanne",
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Klinikum",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Funktions-Test: simulierte Datenpanne mit Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72 h-Frist). Inkl. Test der Patienten-Benachrichtigungs-Logistik (Art. 34) mit Brief-Vorlagen und Hotline-Skripten. Spezial-Schicht für Diagnosen + SCHUFA-Daten-Kombinationen üben."
+      },
+      {
+        "id": "hc_ex_notstrom_live",
+        "title": "Notstrom-Live-Übung Vollausfall Klinikum",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "hc_scn_stromausfall",
+        "ownerRole": "Technische Leitung / IT-Leitung Klinikum",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Live-Übung: echte Last-Abschaltung mit USV-Failover-Test, Notstrom-Aggregat-Start, Treibstoff-Nachschub-Prozess. ITS-Patienten-Sicherheits-Disziplin: vorab koordinierte Verlegung simulieren oder Akku-betriebene Geräte aktivieren. Erst nach erfolgreichem Live-Test gilt das Notstrom-Konzept als belastbar."
+      },
+      {
+        "id": "hc_ex_pandemie",
+        "title": "Pandemie-Krisenstab-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "hc_scn_pandemie",
+        "ownerRole": "Krisenstab / Pflegedirektion",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop mit Pflegedirektion, Ärztlicher Leitung, Klinikleitung, Hauswirtschaft. Covid-Q4-2022-Schablone (30 % Personalausfall) als Drehbuch. Springerpool-Aktivierung, Leiharbeitsfirmen-Eskalation, gegenseitige Hilfe-Vereinbarungen mit Nachbar-Kliniken durchspielen. Elektiv-Programm-Reduktion entscheiden."
+      },
+      {
+        "id": "hc_ex_brand_evakuierung",
+        "title": "Großschadenslage-Übung Brand + Evakuierung Bettenstation",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "hc_scn_brand_evakuierung",
+        "ownerRole": "Krisenstab / Brandschutzbeauftragte*r",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung: echte Evakuierung einer Bettenstation (mit Patienten-Statisten oder Puppen), Feuerwehr-Beteiligung, Verlegung in geschützte Bereiche. Sub-Übung mit ITS-Beatmungs-Patient (mobile Beatmungsgeräte aus Notfall-Pool, Akku-Pulsoxymeter). Brandschutz-Ordnung der Klinik gegen reale Lage testen."
       },
       {
         "id": "hc_ex_mci",
-        "title": "MANV-Alarmübung",
+        "title": "MANV-Alarmübung Klinikum",
         "exerciseType": "alarm",
         "scenarioTemplateId": "hc_scn_mci",
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / Notaufnahme-Leitung",
         "cadenceMonths": 12,
-        "notes": "Alarmierung, Triage und Lagekommunikation gemeinsam üben."
+        "notes": "Jährliche Alarmübung mit Rettungsdienst und Leitstelle. Erweiterte Triage (rot/gelb/grün/schwarz), Bettenstation-Freisteuerung, Springerpool-Aktivierung. Krankenhaus-Alarm-Plan (KAEP) gegen reale Lage testen. Externe Triage-Sichtungs-Karten und Bettensteuerung auf Papier üben."
       }
     ],
     "riskCatalogTemplates": [
