@@ -1467,3 +1467,155 @@ describe('kmu-basis-core · Resilience-Skeleton (C5.5.4)', () => {
     expect(it!.notes).toMatch(/MSP-Verstrickung|kmu_dep_msp_mssp|kmu_scn_ransomware_msp/);
   });
 });
+
+describe('logistics-core · Resilience-Skeleton (C5.5.5)', () => {
+  const module = logisticsPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates (Substanz-Tiefe)', () => {
+    const processes = module.processTemplates ?? [];
+    expect(processes.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    const deps = module.dependencyTemplates ?? [];
+    expect(deps.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    expect(exercises.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 5 kritisch / 4 hoch / 1 mittel', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(5);
+    expect(hoch).toBe(4);
+    expect(mittel).toBe(1);
+  });
+
+  it('Bestands-IDs (alle 9) bleiben erhalten — keine Migration', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    // 2 Bestand-Prozesse:
+    expect(processIds.has('log_proc_dispatch')).toBe(true);
+    expect(processIds.has('log_proc_hub')).toBe(true);
+    // 3 Bestand-Deps:
+    expect(depIds.has('log_dep_tms')).toBe(true);
+    expect(depIds.has('log_dep_fuel')).toBe(true);
+    expect(depIds.has('log_dep_carrier')).toBe(true);
+    // 2 Bestand-Szenarien:
+    expect(scnIds.has('log_scn_tms')).toBe(true);
+    expect(scnIds.has('log_scn_fuel')).toBe(true);
+    // 2 Bestand-Übungen:
+    expect(exIds.has('log_ex_tms')).toBe(true);
+    expect(exIds.has('log_ex_route')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exercises = module.exerciseTemplates ?? [];
+    const orphans: string[] = [];
+    for (const exercise of exercises) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    for (const scenario of scenarios) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('exerciseTemplates haben gemischte Übungs-Typen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const typeSet = new Set(exercises.map((e) => e.exerciseType));
+    expect(typeSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('Maersk-Schablone konzentriert im Ransomware-Total-Stillstand-Szenario', () => {
+    const ransomware = (module.scenarioTemplates ?? []).find((s) => s.id === 'log_scn_ransomware_total');
+    expect(ransomware).toBeDefined();
+    expect(ransomware!.description).toMatch(/Maersk|NotPetya/);
+    expect(ransomware!.notes).toMatch(/Maersk|Expeditors/);
+  });
+
+  it('Spedition-Disposition: log_proc_dispatch mit Doppel-Rolle "Dispositions-Leitung / Leitstelle"', () => {
+    const dispatch = (module.processTemplates ?? []).find((p) => p.id === 'log_proc_dispatch');
+    expect(dispatch).toBeDefined();
+    expect(dispatch!.ownerRole).toMatch(/Dispositions-Leitung.*Leitstelle|Leitstelle.*Dispositions-Leitung/);
+  });
+
+  it('KEP/3PL-Querschnitt-Verifikation: log_proc_warehouse + log_proc_lastmile haben Querschnitt-Notes', () => {
+    const warehouse = (module.processTemplates ?? []).find((p) => p.id === 'log_proc_warehouse');
+    const lastmile = (module.processTemplates ?? []).find((p) => p.id === 'log_proc_lastmile');
+    expect(warehouse).toBeDefined();
+    expect(lastmile).toBeDefined();
+    // Warehouse als 3PL-Schwerpunkt
+    expect(warehouse!.notes).toMatch(/3PL|Kontraktlogistik/i);
+    // Last-Mile als KEP-Schwerpunkt
+    expect(lastmile!.notes).toMatch(/KEP|Last-Mile/i);
+  });
+
+  it('Frachtrechnung als mittel (Mittelweg-Verteilung 5/4/1)', () => {
+    const abrechnung = (module.processTemplates ?? []).find((p) => p.id === 'log_proc_abrechnung');
+    expect(abrechnung).toBeDefined();
+    expect(abrechnung!.criticality).toBe('mittel');
+  });
+
+  it('OT-Anker fehlt — Logistics ist IT-/Behörden-zentriert (kein OT-Schwerpunkt wie Industry)', () => {
+    const otDeps = (module.dependencyTemplates ?? []).filter((d) => d.category === 'ot');
+    // Logistics-Pack hat keinen OT-Schwerpunkt — alle Deps sind software/dienstleister/etc.
+    expect(otDeps.length).toBe(0);
+  });
+
+  it('ATLAS-Zoll-Schicht verifiziert: log_dep_atlas + log_proc_zoll + log_scn_atlas_ausfall', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    expect(processIds.has('log_proc_zoll')).toBe(true);
+    expect(depIds.has('log_dep_atlas')).toBe(true);
+    expect(scnIds.has('log_scn_atlas_ausfall')).toBe(true);
+  });
+});
