@@ -376,39 +376,123 @@
     "processTemplates": [
       {
         "id": "adm_proc_buergeramt",
-        "title": "Bürgeramt-Service (Pass, Personalausweis, Meldung, Beglaubigung)",
-        "ownerRole": "Bürgeramt-Leitung",
+        "title": "Bürger-Service-Frontoffice (Bürgerbüro, Pass, Personalausweis, Meldung, Beglaubigung)",
+        "ownerRole": "Hauptamt / Bürgeramt-Leitung",
         "criticality": "kritisch",
-        "mtpdHours": "48",
-        "rtoHours": "24",
+        "mtpdHours": "24",
+        "rtoHours": "8",
         "rpoHours": "4",
-        "dependencies": "Fachverfahren MESO/MOIN/AKDB-Lösungen, Personenstandsregister, Druck-Infrastruktur",
+        "dependencies": "Fachverfahren MESO/MOIN/AKDB-Lösungen, Personenstandsregister, Druck-Infrastruktur, OZG-Portal",
         "outputs": "Bürger-Identitäts-Dokumente, Meldungs-Bestätigungen, Beglaubigungen",
         "notes": "Notbetrieb mit Papier-Verfahren möglich (Anhalt-Bitterfeld-Schablone), aber stark begrenzte Throughput. Bei Wahlen oder Feriensaison sehr empfindlich."
       },
       {
-        "id": "adm_proc_sozialamt",
-        "title": "Sozialamt-Leistungen (Bürgergeld, Wohngeld, Sozialhilfe)",
-        "ownerRole": "Sozialamt-Leitung",
-        "criticality": "kritisch",
-        "mtpdHours": "72",
-        "rtoHours": "48",
-        "rpoHours": "24",
-        "dependencies": "Fachverfahren OPEN/PROSOZ/AKDB, Auszahlungs-System, Bürger-Daten-Register",
-        "outputs": "Sozialleistungs-Auszahlungen, Bewilligungs-Bescheide",
-        "notes": "Anhalt-Bitterfeld-Lehre: Sozialleistungen konnten für mindestens eine Woche nicht ausgezahlt werden — direkter Bürger-Existenz-Bezug. Notbetrieb mit Papier-Anträgen + manuelle Bundesbank-Überweisung als Worst-Case."
-      },
-      {
         "id": "adm_proc_standesamt",
-        "title": "Standesamt (Geburts-, Heirats-, Sterbe-Beurkundung)",
+        "title": "Personenstands-Verwaltung (Geburts-, Heirats-, Sterbe-Beurkundung)",
         "ownerRole": "Standesamt-Leitung",
         "criticality": "kritisch",
-        "mtpdHours": "24",
-        "rtoHours": "12",
-        "rpoHours": "0",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "24",
         "dependencies": "Personenstandsregister-Fachverfahren AutiSta, Druck-Infrastruktur, Beglaubigungs-Stempel",
         "outputs": "Geburts-, Heirats-, Sterbeurkunden — rechtlich verbindlich, oft zeitkritisch",
         "notes": "Sterbe-Beurkundung ist gesetzlich binnen 3 Werktagen Pflicht (PStG § 28) und für Bestattung notwendig — Notbetrieb mit Papier-Beurkundung Pflicht."
+      },
+      {
+        "id": "adm_proc_steueramt",
+        "title": "Steuer- und Abgabenwesen (Grundsteuer, Gewerbesteuer, Bescheid-Erstellung)",
+        "ownerRole": "Stadtkasse / Steueramt-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HKR-Fachverfahren (Doppik), Druckdienstleister Massenbescheid, OZG-Portal-Anbindung",
+        "outputs": "Steuer-/Abgaben-Bescheide, Säumniszuschläge, Vollstreckungs-Vorlagen",
+        "notes": "Quartalsstichtage (Grundsteuer-Hauptveranlagung, Gewerbesteuer-Vorauszahlung) sind Hochlast-Fenster. Notbetrieb mit Papier-Bescheid-Druck nur stark begrenzt skalierbar (Massenbescheid-Versand). Kämmerei muss Cashflow-Risiko kennen."
+      },
+      {
+        "id": "adm_proc_sozialamt",
+        "title": "Sozialhilfe und Jugendamt (Leistungsanträge, Auszahlungen)",
+        "ownerRole": "Sozialamt-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Fachverfahren OPEN/PROSOZ/AKDB, Auszahlungs-System, Bürger-Daten-Register, HKR-Zahlungsverkehr",
+        "outputs": "Sozialleistungs-Auszahlungen, Bewilligungs-Bescheide, Jugendhilfe-Verfügungen",
+        "notes": "Anhalt-Bitterfeld-Lehre: Sozialleistungen konnten für mindestens eine Woche nicht ausgezahlt werden — direkter Bürger-Existenz-Bezug. Notbetrieb mit Papier-Anträgen + manuelle Bundesbank-Überweisung als Worst-Case."
+      },
+      {
+        "id": "adm_proc_bauamt",
+        "title": "Bauamt-Verfahren (Bauanträge, Genehmigungen, Bauleitplanung)",
+        "ownerRole": "Bauamt-Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "Bau-Fachverfahren ProBauG/eVerwaltung, GIS-System, OZG-Portal-Anbindung, Architekt-PDF-Anhänge",
+        "outputs": "Bau-Genehmigungen, Ablehnungs-Bescheide, Bauleitplanung-Beschlüsse",
+        "notes": "Fristen-Logik (Genehmigungsfiktion nach 3 Monaten gem. § 36 BauGB) macht IT-Ausfall haftungsrelevant. Investoren-Frust eskaliert politisch."
+      },
+      {
+        "id": "adm_proc_ordnungsamt",
+        "title": "Ordnungsamt-Vollzug (Gewerbeüberwachung, Verkehrsüberwachung)",
+        "ownerRole": "Ordnungsamt-Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Gewerbe-Fachverfahren, Verwarngeld-System, Kommunaler Vollzugsdienst, Polizei-Schnittstelle",
+        "outputs": "Verwarngeld-Bescheide, Gewerbe-Untersagungen, Vollzugs-Verfügungen",
+        "notes": "Verkehrsüberwachung mit Knöllchen-Stillstand erträglich, aber Verwarngeld-Einnahmen-Ausfall trifft Kämmerei. Gewerbe-Vollzug bei Gefahrenabwehr (Lebensmittel, Veterinär) zeitkritisch."
+      },
+      {
+        "id": "adm_proc_ratsinformation",
+        "title": "Ratsinformations- und Sitzungsdienst (Vorlagen, Beschlüsse, öffentliche Bekanntmachungen)",
+        "ownerRole": "Hauptamt / Ratsbüro",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "Ratsinformations-System (Session/SD.NET/ALLRIS), Webserver Bekanntmachungen, E-Mail-Verteiler Ratsmitglieder",
+        "outputs": "Ratsvorlagen, Beschlussprotokolle, öffentliche Bekanntmachungen, Wahl-Bekanntmachungen",
+        "notes": "Vor Wahltagen und großen Ratssitzungen extrem empfindlich. Öffentliche Bekanntmachungen sind oft Wirksamkeits-Voraussetzung (Bauleitplan, Satzungen)."
+      },
+      {
+        "id": "adm_proc_personalamt",
+        "title": "Personalverwaltung und Lohnabrechnung",
+        "ownerRole": "Personalamt-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "336",
+        "rtoHours": "168",
+        "rpoHours": "24",
+        "dependencies": "Lohn-Fachverfahren KIDICAP/LOGA/dvv-Personal, HKR-Zahlungsverkehr, Zeiterfassungs-System",
+        "outputs": "Lohnzahlungen Mitarbeiter, Beihilfe-Abrechnungen, Sozialversicherungs-Meldungen",
+        "notes": "Monatlicher Lohnlauf zum 15./25./Monatsletzter ist hartes Stichtags-Risiko. Bei Ausfall muss manuelle Vorab-Auszahlung über Bundesbank/Stadtkasse möglich sein (DTAUS/SEPA-XML manuell)."
+      },
+      {
+        "id": "adm_proc_finanzbuchhaltung",
+        "title": "Finanzbuchhaltung und Zahlungsverkehr (HKR-System, SEPA-Lauf)",
+        "ownerRole": "Kämmerei / Finanzverwaltung",
+        "criticality": "kritisch",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HKR-Fachverfahren (Doppik), Banking-Schnittstelle (FinTS/EBICS), Bundesbank-Anbindung",
+        "outputs": "SEPA-Sammler, Bescheid-Buchungen, Jahresabschluss, Liquiditätsplanung",
+        "notes": "Tägliche SEPA-Sammler-Versendung an Hausbank ist zeitkritisch — Zinsausfall + Mahnverfahren bei Lieferanten als Folgekosten. Kämmerer-persönliche Haftung in einigen Bundesländern."
+      },
+      {
+        "id": "adm_proc_itbetrieb",
+        "title": "IT-Betrieb und Verwaltungsnetz (Active Directory, E-Akte, Fileserver)",
+        "ownerRole": "IT-Amt / IT-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Active-Directory-Wartungsvertrag, ITDZ-Verbund-Hosting, Netzwerk-Hardware, Backup-Infrastruktur",
+        "outputs": "Authentifizierung, E-Akte-Verfügbarkeit, Fileserver-Freigaben, alle Fachverfahren-Voraussetzung",
+        "notes": "Single Point of Failure für faktisch alle anderen Verwaltungs-Prozesse. Backup-Restore-Fähigkeit binnen 8h ist die Nicht-Verhandlungs-Grenze (Anhalt-Bitterfeld: 207 Tage Notbetrieb, weil Backup-Konzept versagt hat)."
       }
     ],
     "dependencyTemplates": [
@@ -423,8 +507,18 @@
         "notes": "Südwestfalen-IT-Schablone Oktober 2023: 72 Kommunen mit 1,7 Mio. Einwohnern wochenlang im Notbetrieb. Eskalations-Pfade müssen vor-vertraglich auf 24/7-SLA gebunden sein."
       },
       {
+        "id": "adm_dep_hkr",
+        "title": "HKR-Fachverfahren / Doppik-System (Infoma newsystem / SAP-KOSO / KIRP / kommunale ERP)",
+        "category": "software",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Lokale, manuelle Verbuchung mit Excel und Bundesbank-Schnittstelle als Notbetrieb möglich, aber massiv verlangsamt. Wechsel des HKR-Herstellers ist faktisch unmöglich (mehrjähriges Migrations-Projekt mit politischer Beschluss-Pflicht).",
+        "contractReference": "HKR-Hersteller-Wartungsvertrag",
+        "notes": "Bei Doppik-Pflicht (alle Bundesländer außer Bayern, Schleswig-Holstein) ist das HKR-System die zentrale Daten-Quelle für Jahresabschluss. Cloud-Anbindung der modernen Versionen ist Sicherheits-Hotspot."
+      },
+      {
         "id": "adm_dep_fachverfahren_msb",
-        "title": "Fachverfahren-Hersteller (MESO/MOIN, OPEN/PROSOZ, AutiSta, SAP-KOSO, AKDB-Lösungen)",
+        "title": "Fachverfahren-Hersteller (MESO/MOIN, OPEN/PROSOZ, AutiSta, ProBauG, AKDB-Lösungen)",
         "category": "software",
         "criticality": "hoch",
         "singlePointOfFailure": false,
@@ -433,8 +527,28 @@
         "notes": "Verwaltungs-Fachverfahren oft 10-20 Jahre alt, mit eingeschränkter API-Modernisierungs-Fähigkeit. Hersteller-Outage trifft alle Tenants gleichzeitig."
       },
       {
+        "id": "adm_dep_ozg_portal",
+        "title": "OZG-Portal-Anbindung (Bund-ID, BayernID, Servicekonto Land)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Online-Antragstellung wird auf Papier-/Vor-Ort-Verfahren zurückgeschwenkt — funktioniert, aber stark verlangsamt. Bürger-Erwartung an Online-Verfahren steigt mit OZG-Reife schnell.",
+        "contractReference": "Anbindungs-Vereinbarung mit Land/FITKO",
+        "notes": "OZG-Reife unterschiedlich pro Bundesland. Authentifizierungs-Backbone (Servicekonto Bund / Bund-ID) ist Cross-Sector-Abhängigkeit. NIS2-Bezug: § 8d Meldepflicht greift bei Datenschutz-Vorfall in OZG-Pfad."
+      },
+      {
+        "id": "adm_dep_strom_rathaus",
+        "title": "Stromversorgung Rathaus / Verwaltungsstandort",
+        "category": "energie",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "USV für 30-60 Minuten geordneter Shutdown der IT, Diesel-Notstrom-Aggregat (mit getanktem Tank!) für 24-72h Verwaltungs-Notbetrieb. Notstrom-Live-Übung Pflicht — Bestand oft jahrelang ungetestet.",
+        "contractReference": "Strom-Vertrag mit Stadtwerken / Wartungsvertrag Notstrom-Aggregat",
+        "notes": "Nordrhein-Westfalen 2024: mehrere Rathäuser bei Stromausfall ohne Notbetrieb, weil Diesel-Aggregat-Tanks leer waren. Treibstoff-Vorhaltung muss in Wartungs-Routinen verankert sein."
+      },
+      {
         "id": "adm_dep_tk_anbieter",
-        "title": "Telekommunikations-Anbieter (Festnetz, Mobilfunk, Internet)",
+        "title": "Internet- und Telekommunikations-Anbieter (Festnetz, Mobilfunk, Internet primär)",
         "category": "dienstleister",
         "criticality": "hoch",
         "singlePointOfFailure": false,
@@ -443,14 +557,34 @@
         "notes": "Cross-Sector-Bezug zum IT/Telekom-Pack — bei TK-Sektor-Vorfall (BGP-Hijacking, Submarine-Cable-Schaden) sind Verwaltungs-Tenants über die TK-Abhängigkeit betroffen."
       },
       {
+        "id": "adm_dep_buerger_telefonie",
+        "title": "Bürger-Telefonie (Hotline, Vermittlung, Behörden-115)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobilfunk-Hotline mit 0800-Nummer als Backup; Behörden-115-Verbund kann bei lokalem Ausfall Anrufe nicht übernehmen, weil regionale Routing-Logik fehlt.",
+        "contractReference": "TK-Anbieter-Vertrag, Behörden-115-Verbund-Vereinbarung",
+        "notes": "Bei IT-Vorfällen ist die Telefonie der erste Bürger-Eskalations-Kanal. Wenn auch Telefonie ausfällt (z.B. SIP-Trunk auf gleicher Infrastruktur), eskaliert Druck auf Pressestelle und Bürgermeister-Büro extrem schnell."
+      },
+      {
+        "id": "adm_dep_druckdienstleister",
+        "title": "Druckdienstleister Massenbescheid-Versand (Steuern, Sozialleistungen)",
+        "category": "lieferant",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Eigener Hauspost-Druck für kleine Auflagen; bei Massenbescheid-Saison (Grundsteuer-Hauptveranlagung) Substitution durch Backup-Druckdienstleister möglich, aber Vorlauf-Zeit von 1-2 Wochen.",
+        "contractReference": "Rahmenvertrag mit Druckdienstleister (Lettershop)",
+        "notes": "Druckdienstleister sind oft selbst NIS2-relevant (kritische Lieferketten-Abhängigkeit). Bei Datenschutz-Vorfall beim Dienstleister haftet die Verwaltung mit (Auftragsverarbeitungs-Vertrag DSGVO Art. 28)."
+      },
+      {
         "id": "adm_dep_landes_cio",
-        "title": "Land-CIO / Landesbehörden-Verbund",
+        "title": "Cybersicherheitsagentur Land / Land-CIO (LSI Bayern, IT.NRW, ekom21 Hessen)",
         "category": "behoerde",
         "criticality": "mittel",
         "singlePointOfFailure": false,
         "fallback": "Eskalations-Pfad bei systemischen IT-Vorfällen. Cybersicherheitsagenturen Bayern (LSI), Hessen, Niedersachsen, NRW als sektorale CERT-Strukturen für kommunale Anbindung.",
         "contractReference": "Verwaltungs-Abkommen mit Landesbehörden",
-        "notes": "Bei Bayern: LSI als Landesamt für Sicherheit in der Informationstechnik. Bei NRW: IT.NRW. Bei Hessen: ekom21. Pro Bundesland eigene Strukturen."
+        "notes": "Bei Bayern: LSI als Landesamt für Sicherheit in der Informationstechnik. Bei NRW: IT.NRW. Bei Hessen: ekom21. Pro Bundesland eigene Strukturen — Eskalations-Liste mit Telefonnummern in Krisen-Handbuch verankern."
       }
     ],
     "scenarioTemplates": [
@@ -463,17 +597,20 @@
         "impact": 5,
         "ownerRole": "Bürgermeister*in / Landrat / IT-Leitung",
         "linkedProcessTemplateIds": [
+          "adm_proc_itbetrieb",
           "adm_proc_buergeramt",
           "adm_proc_sozialamt",
-          "adm_proc_standesamt"
+          "adm_proc_standesamt",
+          "adm_proc_finanzbuchhaltung"
         ],
         "linkedDependencyTemplateIds": [
           "adm_dep_itdz_kommunal",
-          "adm_dep_fachverfahren_msb"
+          "adm_dep_fachverfahren_msb",
+          "adm_dep_hkr"
         ],
-        "playbook": "Notstandserklärung-Bewertung, ITDZ-Eskalation, BSI-CERT-Bund-Aktivierung, Bürger-Kommunikation Multi-Kanal, Notbetrieb mit Papier-Verfahren, Verbund-Solidarität.",
+        "playbook": "Sofortige Trennung infizierter Systeme. Krisenstab nach Anhalt-Bitterfeld-Pattern. BSI-Meldung nach NIS2 §8d innerhalb 24h. Bürger-Information über alternative Kanäle (Pressestelle, Behörden-115, Aushang). Notbetrieb mit Papier-Antrags-Annahme. Notstandserklärung durch Bürgermeister/Landrat als politische Eskalations-Stufe.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Anhalt-Bitterfeld 2021, Witten 2022, Rhein-Pfalz-Kreis 2024 als Schablonen."
+        "notes": "Anhalt-Bitterfeld 2021 (207 Tage Notbetrieb), Witten 2022, Rhein-Pfalz-Kreis 2024 als Schablonen."
       },
       {
         "id": "adm_scn_itdz_outage",
@@ -481,11 +618,14 @@
         "category": "Interdependenz auf regionaler Ebene",
         "description": "Zentraler IT-Verbund-Dienstleister hat einen Outage, mehrere angeschlossene Kommunen gleichzeitig betroffen, Wahltag oder Steuer-Stichtag droht. Operative Resilienz, kein Cyber-Vorfall.",
         "likelihood": 3,
-        "impact": 4,
+        "impact": 5,
         "ownerRole": "IT-Leitung / Bürgermeister*in",
         "linkedProcessTemplateIds": [
           "adm_proc_buergeramt",
-          "adm_proc_sozialamt"
+          "adm_proc_sozialamt",
+          "adm_proc_steueramt",
+          "adm_proc_finanzbuchhaltung",
+          "adm_proc_itbetrieb"
         ],
         "linkedDependencyTemplateIds": [
           "adm_dep_itdz_kommunal"
@@ -493,6 +633,48 @@
         "playbook": "ITDZ-Eskalations-Hotline, Notbetrieb mit Papier-Verfahren, Bürger-Information mit Multi-Kanal, Verbund-Solidarität mit benachbarten Kommunen, Land-CIO-Eskalation.",
         "exerciseTypeHint": "tabletop",
         "notes": "Südwestfalen-IT-Schablone Oktober 2023 (72 Kommunen, 1,7 Mio. Einwohner)."
+      },
+      {
+        "id": "adm_scn_hochwasser_rathaus",
+        "title": "Hochwasser am Rathaus-Standort (Bayern-Donau, NRW-Erft, Sachsen-Mulde)",
+        "category": "Naturgefahr mit Standort-Unterbrechung",
+        "description": "Hochwasser- oder Starkregen-Ereignis flutet das Rathaus-Untergeschoss inkl. Server-Raum und Aktenarchiv. Verwaltungsstandort für 1-2 Wochen nicht nutzbar; physische Akten teilweise vernichtet.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Hauptamt / Bürgermeister*in / Bauamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_buergeramt",
+          "adm_proc_ratsinformation",
+          "adm_proc_ordnungsamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_strom_rathaus",
+          "adm_dep_druckdienstleister"
+        ],
+        "playbook": "Auslagerungs-Standort aktivieren (z.B. Schule, VHS, Bürgerhaus). Mobile IT-Anbindung über LTE. Akten-Rettung (Trocknung) durch Restaurations-Dienstleister. Krisenkommunikation zur Bürgerschaft mit alternativen Anlaufstellen.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Erft-Hochwasser Juli 2021 (Stolberg, Bad Münstereifel, Erftstadt), Donau-Hochwasser Bayern 2024 als Schablonen. Klimawandel-Szenario mit steigender Eintrittswahrscheinlichkeit."
+      },
+      {
+        "id": "adm_scn_stromausfall",
+        "title": "Stromausfall mit Notstrom-Versagen",
+        "category": "Infrastruktur-Ausfall mit IT-Kaskade",
+        "description": "Längerer Stromausfall (24-72h) am Verwaltungsstandort, Diesel-Notstrom-Aggregat fällt nach 8h aus (Tank leer / Wartung versäumt). IT-Komplettausfall, Bürger-Service nicht arbeitsfähig.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "IT-Leitung / Bauamt / Hauptamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_itbetrieb",
+          "adm_proc_buergeramt",
+          "adm_proc_finanzbuchhaltung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_strom_rathaus",
+          "adm_dep_itdz_kommunal"
+        ],
+        "playbook": "Geordneter Shutdown der IT (USV-Phase). Treibstoff-Nachschub für Notstrom-Aggregat (Vertrag mit Tankstelle / THW). Auslagerung kritischer Bürger-Service-Funktionen an benachbarte Kommunen. Strom-Wiederkehr-Sequenz mit IT-Cold-Start.",
+        "exerciseTypeHint": "simulation",
+        "notes": "NRW 2024: mehrere Rathäuser bei Stromausfall ohne Notbetrieb wegen leerer Diesel-Tanks. Reine Live-Übung als einzig vertrauenswürdiger Test."
       },
       {
         "id": "adm_scn_buerger_daten_exfiltration",
@@ -504,34 +686,126 @@
         "ownerRole": "Datenschutzbeauftragte*r / Bürgermeister*in / IT-Leitung",
         "linkedProcessTemplateIds": [
           "adm_proc_sozialamt",
-          "adm_proc_standesamt"
+          "adm_proc_standesamt",
+          "adm_proc_personalamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_fachverfahren_msb",
+          "adm_dep_ozg_portal"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34, BfDI/Landes-Datenschutzbehörde-Meldung 72 h, Bürger-Benachrichtigung individuell, Schnittstelle zur Polizei (LKA Cyber).",
+        "exerciseTypeHint": "technical",
+        "notes": "Heinrich-Heine-Universität-Schablone, Frankfurt-Universität 2024."
+      },
+      {
+        "id": "adm_scn_wahltag_cyber",
+        "title": "Wahltag-Cyber-Vorfall (Wahlleiter-System, Wahlbenachrichtigungen)",
+        "category": "Cyber-Bedrohung an demokratie-relevantem Stichtag",
+        "description": "Cyber-Vorfall am Wahlsonntag oder in der Auszählungs-Phase: Manipulation oder Outage des Wahlleiter-Fachverfahrens, der Wahlbenachrichtigungs-Druckstrasse oder der öffentlichen Bekanntmachung der Ergebnisse.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Wahlleiter*in / Bürgermeister*in / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_ratsinformation",
+          "adm_proc_itbetrieb",
+          "adm_proc_buergeramt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_itdz_kommunal",
+          "adm_dep_ozg_portal"
+        ],
+        "playbook": "Sofortige Eskalation an Landeswahlleiter und Bundeswahlleiter, Verfassungsschutz-Liaison, Pressestelle Multi-Kanal. Auszählung manuell mit Doppel-Bestätigung. Wahl-Wiederholung als juristische Worst-Case-Option.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Vor jeder Wahl Krisenstabs-Probe Pflicht. BSI hat eigene Wahl-Hardening-Checkliste. Reputations-Schaden für Demokratie-Vertrauen ist hoch."
+      },
+      {
+        "id": "adm_scn_hkr_ausfall",
+        "title": "HKR-System-Ausfall (Lohnzahlungs-Verzug, SEPA-Sammler-Stop)",
+        "category": "IT-Ausfall mit Liquiditäts-Hebel",
+        "description": "HKR-Doppik-System fällt mehrere Tage aus, monatlicher Lohnlauf droht zu kippen, SEPA-Lauf an Lieferanten gestoppt, Mahnverfahren von Lieferanten gegen die Verwaltung absehbar.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Kämmerei / IT-Leitung / Personalamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_finanzbuchhaltung",
+          "adm_proc_personalamt",
+          "adm_proc_sozialamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_hkr",
+          "adm_dep_itdz_kommunal"
+        ],
+        "playbook": "Manuelle SEPA-XML-Erzeugung mit Excel + Bundesbank-Schnittstelle als Notbetrieb. Lieferanten-Kommunikation bei Zahlungs-Verzug (Bürgermeister-Brief). Lohnlauf-Vorab-Auszahlung über Bundesbank/Stadtkasse, falls nötig.",
+        "exerciseTypeHint": "technical",
+        "notes": "In einigen Bundesländern (z.B. NRW) persönliche Haftung des Kämmerers bei Liquiditäts-Engpass. Cashflow-Risiko für Lieferanten-Beziehungen langfristig schädlich."
+      },
+      {
+        "id": "adm_scn_insider_datendiebstahl",
+        "title": "Insider-Datendiebstahl (Personenstand, Sozialdaten, Personalakten)",
+        "category": "Personeller Risiko-Vektor mit DSGVO-Pflicht",
+        "description": "Mitarbeiter mit erweiterten Rechten exfiltriert vor seinem/ihrem Ausscheiden Bürger-Datensätze (Personenstand, Sozialdaten, Personalakten) — entweder vorsätzlich oder im Auftrag Dritter.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / Personalamt / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_sozialamt",
+          "adm_proc_standesamt",
+          "adm_proc_personalamt",
+          "adm_proc_steueramt"
         ],
         "linkedDependencyTemplateIds": [
           "adm_dep_fachverfahren_msb"
         ],
-        "playbook": "DSGVO-Bewertung Art. 33/34, BfDI/Landes-Datenschutzbehörde-Meldung 72 h, Bürger-Benachrichtigung individuell, Schnittstelle zur Polizei (LKA Cyber).",
+        "playbook": "Schnelle Account-Sperrung beim Verlassen-Prozess (Personalamt-IT-Workflow). Logging-Auswertung für Exfiltrations-Nachweis. DSGVO-Meldung 72h falls Bürger-Daten betroffen. Disziplinar-/Strafverfahren mit Polizei.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Heinrich-Heine-Universität-Schablone, Frankfurt-Universität 2024."
+        "notes": "Häufigster nicht-medialer Insider-Fall. Joiner-Mover-Leaver-Prozesse in der Verwaltung oft schwach (Beamtentum, Kündigungsschutz). Berechtigungs-Reviews quartalsweise als Mindeststandard."
       }
     ],
     "exerciseTemplates": [
       {
         "id": "adm_ex_ransomware_stillstand",
-        "title": "Ransomware-Stillstand Tabletop",
+        "title": "Ransomware-Tabletop Verwaltung",
         "exerciseType": "tabletop",
         "scenarioTemplateId": "adm_scn_ransomware_stillstand",
-        "ownerRole": "Krisenstab",
-        "cadenceMonths": 6,
-        "notes": "Halbjährliche Übung mit Bürgermeister/Landrat persönlich, IT-Leitung, DSB, Pressesprecher, Land-CIO-Liaison. Anhalt-Bitterfeld-Lessons-Learned-Drehbuch als Pflicht-Anhang."
+        "ownerRole": "Krisenstab / Bürgermeister*in",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Krisenstabs-Übung mit Bürgermeister/Landrat persönlich, IT-Leitung, DSB, Pressesprecher, Land-CIO-Liaison, Hauptamt, Pressestelle. Anhalt-Bitterfeld-Lessons-Learned-Drehbuch als Pflicht-Anhang."
       },
       {
         "id": "adm_ex_itdz_outage",
-        "title": "ITDZ-Verbund-Outage Tabletop",
+        "title": "ITDZ-Ausfall-Walkthrough",
         "exerciseType": "tabletop",
         "scenarioTemplateId": "adm_scn_itdz_outage",
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / IT-Leitung",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung mit ITDZ-Liaison-Person, benachbarten Kommunen für Verbund-Solidaritäts-Test, Land-CIO-Eskalation."
+        "notes": "Jährliche Walkthrough-Übung mit ITDZ-Liaison-Person, benachbarten Kommunen für Verbund-Solidaritäts-Test, Land-CIO-Eskalation. Übungs-Format als Walkthrough (kein Vollstandby) — Fokus auf Eskalations-Pfade und Notbetriebs-Prozeduren."
+      },
+      {
+        "id": "adm_ex_dsgvo_meldung",
+        "title": "DSGVO-Meldung-Funktionstest (Datenpanne 72h)",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "adm_scn_buerger_daten_exfiltration",
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Funktions-Test: simulierte Datenpanne, mit Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72h-Frist). Inkl. Test der Bürger-Benachrichtigungs-Logistik (Art. 34) und Kommunikations-Vorlagen."
+      },
+      {
+        "id": "adm_ex_notstrom_live",
+        "title": "Notstrom-Live-Übung Rathaus",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "adm_scn_stromausfall",
+        "ownerRole": "IT-Leitung / Bauamt",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung: echte Last-Abschaltung, Notstrom-Aggregat startet, IT-Cold-Start-Sequenz, Treibstoff-Nachschub-Prozess. Wichtigste Übung gegen den NRW-2024-Trockenfall. Erst nach erfolgreichem Live-Test gilt das Notstrom-Konzept als belastbar."
+      },
+      {
+        "id": "adm_ex_wahltag_krisenstab",
+        "title": "Wahltag-Krisenstab-Probe",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "adm_scn_wahltag_cyber",
+        "ownerRole": "Wahlleiter*in / Krisenstab",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Tabletop (Spec sah 48 Monate vor jeder Bundeswahl vor; Schema-Limit der Plattform liegt bei 36 Monaten — daher zusätzlich vor jeder Bundes-/Landtagswahl ad-hoc proben). Krisenstab + Wahlleitung + Pressestelle + Verfassungsschutz-Liaison. BSI-Wahl-Hardening-Checkliste als Drehbuch-Basis."
       }
     ],
     "riskCatalogTemplates": [

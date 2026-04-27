@@ -703,6 +703,113 @@ describe('administration-core.container.json · C5.3h Content-Gate', () => {
   });
 });
 
+describe('administration-core · Resilience-Skeleton (C5.5.1 Pilot)', () => {
+  const module = administrationPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates (Substanz-Tiefe)', () => {
+    const processes = module.processTemplates ?? [];
+    expect(processes.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    const deps = module.dependencyTemplates ?? [];
+    expect(deps.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    expect(exercises.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben gemischte Kritikalität (nicht alles "kritisch")', () => {
+    const processes = module.processTemplates ?? [];
+    const kritischCount = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hochCount = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittelCount = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritischCount).toBeGreaterThan(0);
+    expect(hochCount).toBeGreaterThan(0);
+    expect(mittelCount).toBeGreaterThan(0);
+    // Keine 100%-kritisch-Verteilung — nicht alles auf maximaler Stufe.
+    expect(kritischCount).toBeLessThan(processes.length);
+  });
+
+  it('processTemplates haben realistische MTPD/RTO/RPO-Werte (nicht alles 1h)', () => {
+    const processes = module.processTemplates ?? [];
+    const mtpdSet = new Set(processes.map((p) => p.mtpdHours));
+    const rtoSet = new Set(processes.map((p) => p.rtoHours));
+    // Mindestens 4 unterschiedliche MTPD-Werte und 3 unterschiedliche RTO-Werte
+    // — wenn alle gleich wären, wären die Vorlagen nicht differenziert genug.
+    expect(mtpdSet.size).toBeGreaterThanOrEqual(4);
+    expect(rtoSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exercises = module.exerciseTemplates ?? [];
+    const orphans: string[] = [];
+    for (const exercise of exercises) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung (Verkettungstiefe)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    for (const scenario of scenarios) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('exerciseTemplates haben gemischte Kadenzen (nicht alles 12 Monate)', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const cadenceSet = new Set(exercises.map((e) => e.cadenceMonths));
+    expect(cadenceSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('exerciseTemplates haben gemischte Übungs-Typen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const typeSet = new Set(exercises.map((e) => e.exerciseType));
+    // Mindestens 2 unterschiedliche Übungs-Typen (tabletop, simulation,
+    // technical) — Diversität in der Übungs-Praxis.
+    expect(typeSet.size).toBeGreaterThanOrEqual(2);
+  });
+});
+
 describe('kmu-basis-core.container.json · C5.3i Content-Gate', () => {
   const module = kmuBasisPack.module as unknown as SectorModuleDefinition;
 
