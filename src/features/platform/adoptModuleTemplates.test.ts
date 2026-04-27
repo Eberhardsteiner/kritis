@@ -1130,3 +1130,164 @@ describe('healthcare-core · Resilience-Skeleton (C5.5.2)', () => {
     expect(its!.notes).toMatch(/Patientensicherheit/i);
   });
 });
+
+describe('industry-core · Resilience-Skeleton (C5.5.3)', () => {
+  const module = industryPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates (Substanz-Tiefe)', () => {
+    const processes = module.processTemplates ?? [];
+    expect(processes.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    const deps = module.dependencyTemplates ?? [];
+    expect(deps.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates (Option A: 9 inkl. Bestand-Erhalt manu_scenario_ot_remote_compromise)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    expect(scenarios.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    expect(exercises.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben gemischte Kritikalität (Spec-Verteilung 4 kritisch / 4 hoch / 2 mittel)', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBeGreaterThan(0);
+    expect(hoch).toBeGreaterThan(0);
+    expect(mittel).toBeGreaterThan(0);
+    // Industry: Just-in-time-Druck macht viele Prozesse kritisch, aber nicht alle.
+    expect(kritisch).toBeLessThan(processes.length);
+  });
+
+  it('processTemplates haben gemischte MTPD/RTO-Werte', () => {
+    const processes = module.processTemplates ?? [];
+    const mtpdSet = new Set(processes.map((p) => p.mtpdHours));
+    const rtoSet = new Set(processes.map((p) => p.rtoHours));
+    expect(mtpdSet.size).toBeGreaterThanOrEqual(5);
+    expect(rtoSet.size).toBeGreaterThanOrEqual(4);
+  });
+
+  it('Bestands-IDs (mfg_*-Mix + manu_*-Mix) bleiben erhalten — keine Migration', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    // Bestand-Prozesse:
+    expect(processIds.has('mfg_proc_line')).toBe(true);
+    expect(processIds.has('mfg_proc_shipping')).toBe(true);
+    expect(processIds.has('manu_process_quality_release')).toBe(true);
+    // Bestand-Deps:
+    expect(depIds.has('mfg_dep_power')).toBe(true);
+    expect(depIds.has('mfg_dep_mes')).toBe(true);
+    expect(depIds.has('mfg_dep_supplier')).toBe(true);
+    expect(depIds.has('manu_dep_automation_vendor')).toBe(true);
+    // Bestand-Szenarien:
+    expect(scnIds.has('mfg_scn_blackout')).toBe(true);
+    expect(scnIds.has('mfg_scn_mes')).toBe(true);
+    expect(scnIds.has('mfg_scn_supplier')).toBe(true);
+    expect(scnIds.has('manu_scenario_ot_remote_compromise')).toBe(true);
+    // Bestand-Übungen:
+    expect(exIds.has('mfg_ex_blackout')).toBe(true);
+    expect(exIds.has('mfg_ex_mes')).toBe(true);
+    expect(exIds.has('manu_exercise_ot_failover')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scenarios = module.scenarioTemplates ?? [];
+    const orphans: string[] = [];
+    for (const scenario of scenarios) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exercises = module.exerciseTemplates ?? [];
+    const orphans: string[] = [];
+    for (const exercise of exercises) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung (Verkettungstiefe)', () => {
+    const scenarios = module.scenarioTemplates ?? [];
+    for (const scenario of scenarios) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('exerciseTemplates haben gemischte Kadenzen', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const cadenceSet = new Set(exercises.map((e) => e.cadenceMonths));
+    expect(cadenceSet.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('exerciseTemplates haben gemischte Übungs-Typen (Industry braucht tabletop+technical+simulation)', () => {
+    const exercises = module.exerciseTemplates ?? [];
+    const typeSet = new Set(exercises.map((e) => e.exerciseType));
+    // Mindestens 3 unterschiedliche Übungs-Typen für Industry-Pack
+    expect(typeSet.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it('OT-Schwerpunkt-Verifikation: mfg_proc_ot existiert als eigener Prozess', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    expect(processIds.has('mfg_proc_ot')).toBe(true);
+    const otProc = (module.processTemplates ?? []).find((p) => p.id === 'mfg_proc_ot');
+    expect(otProc?.criticality).toBe('kritisch');
+  });
+
+  it('OT-Schwerpunkt-Verifikation: mindestens 2 Dependencies mit category="ot"', () => {
+    const otDeps = (module.dependencyTemplates ?? []).filter((d) => d.category === 'ot');
+    expect(otDeps.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('OT-Schwerpunkt-Verifikation: mindestens 3 OT-Cyber-Szenarien (Ransomware-OT-IT, ICS-Malware, Fernwartung)', () => {
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    expect(scnIds.has('mfg_scn_ransomware_ot_it')).toBe(true);
+    expect(scnIds.has('mfg_scn_ics_malware')).toBe(true);
+    expect(scnIds.has('manu_scenario_ot_remote_compromise')).toBe(true);
+  });
+
+  it('Wirtschaftsspionage-Disziplin: F&E-Prozess hat Continental-2022-Notes-Kennzeichnung', () => {
+    const rd = (module.processTemplates ?? []).find((p) => p.id === 'mfg_proc_rd');
+    expect(rd).toBeDefined();
+    expect(rd!.notes).toMatch(/Continental|Wirtschaftsspionage/i);
+  });
+
+  it('OT-Verantwortungs-Rolle: realistisch als "IT-Leitung mit OT-Verantwortung"', () => {
+    const otProc = (module.processTemplates ?? []).find((p) => p.id === 'mfg_proc_ot');
+    expect(otProc?.ownerRole).toMatch(/IT-Leitung mit OT-Verantwortung/);
+    // Reife-Indikator-Hinweis im Notes-Feld
+    expect(otProc?.notes).toMatch(/Reifegrad|Trennung der Rollen/i);
+  });
+});
