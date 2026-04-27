@@ -374,38 +374,122 @@
       {
         "id": "it_proc_backbone",
         "title": "Backbone-/BGP-Routing-Betrieb",
-        "ownerRole": "NOC",
+        "ownerRole": "NOC / Routing-Team",
         "criticality": "kritisch",
         "mtpdHours": "2",
         "rtoHours": "1",
         "rpoHours": "0",
-        "dependencies": "Border-Router, Upstream-Provider, RPKI-Validatoren, BGP-Monitoring",
-        "outputs": "Routing-Tabellen, Verfügbarkeit für Endkunden",
-        "notes": "BGP-Notfall-Filter (Bogon-Liste, RPKI-Override) müssen binnen 5 min aktivierbar sein."
+        "dependencies": "Border-Router, Upstream-Provider (Multi-Homing), RPKI-Validatoren, BGP-Monitoring (BGPMon, RIPE Stat), eigene AS-Nummer",
+        "outputs": "Routing-Tabellen (RIB/FIB), Internet-Konnektivität, Verfügbarkeit für Endkunden",
+        "notes": "BGP-Notfall-Filter (Bogon-Liste, RPKI-Override) müssen binnen 5 min aktivierbar sein. RPO 0 reflektiert Echtzeit-Natur des Routing-State (BGP-Session-Restart liefert Routen aus Peers, nicht aus Replikations-DB). MANRS-Initiative und RPKI-ROV als Compliance-Schicht. Out-of-Band-Zugang zu Border-Routern PFLICHT (Facebook-2021-Lehre: ohne OOB-Zugang ist BGP-Withdraw-Fehler nicht in-band reparabel)."
+      },
+      {
+        "id": "it_proc_mobilfunk",
+        "title": "Mobilfunk-Netz-Betrieb (RAN, Core, IMS, eSIM)",
+        "ownerRole": "Mobilfunk-NOC",
+        "criticality": "kritisch",
+        "mtpdHours": "2",
+        "rtoHours": "1",
+        "rpoHours": "0.5",
+        "dependencies": "Basisstationen (RAN), Mobile Core Network (5GC/EPC), IMS für VoLTE/VoNR, HSS/UDM, eSIM-Plattform, Backhaul-Glasfaser, BNetzA-Frequenzlizenzen",
+        "outputs": "Sprach- und Datenverbindungen, SMS, MMS, Mobile-Internet, Roaming-Schnittstellen",
+        "notes": "Cell-Broadcast-Schnittstelle für Bevölkerungs-Warnung (NINA, MoWaS) in Mobilfunk-Core integriert. Bei Mobilfunk-Vollausfall TKG-Anzeigepflicht und BNetzA-Eskalation. Frequenz-Lizenz-Ausfall (Lizenz-Verlust, Funk-Stör-Ereignis) sektor-spezifisches Restrisiko."
+      },
+      {
+        "id": "it_proc_endkunden",
+        "title": "Festnetz-/DSL-/Glasfaser-Anschlüsse (Endkunden-Versorgung B2C)",
+        "ownerRole": "Technische Anschluss-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Backbone, RZ, DNS, Authentifizierungs-Stack (RADIUS), DSLAM/OLT-Infrastruktur, Glasfaser-Anschluss-Leitungen",
+        "outputs": "Festnetz-Telefonie (auch VoIP), DSL/VDSL/Glasfaser-Internet, IPTV",
+        "notes": "Bei Massen-Ausfall TKG-Auskunfts-Pflichten gegenüber Endkunden und BNetzA. KRITIS-Schwelle bei 100.000 versorgten Anschlüssen typischerweise erreicht. MTPD 4h / RTO 2h reflektiert KRITIS-Telekom-SLA-Erwartung im Sub-Stunden-Bereich (Spec-Werte gegenüber Bestand 6h/3h verschärft)."
+      },
+      {
+        "id": "it_proc_notrufnummern",
+        "title": "Notrufnummern und Alarmierung (110, 112, 116, Cell Broadcast, NINA)",
+        "ownerRole": "NOC / BNetzA-Verantwortlicher",
+        "criticality": "kritisch",
+        "mtpdHours": "1",
+        "rtoHours": "0.5",
+        "rpoHours": "0.25",
+        "dependencies": "Festnetz-Vermittlungsstellen, Mobilfunk-Core, Notruf-Routing-System (NRS), Cell-Broadcast-Center, NINA-/MoWaS-Anbindung, BNetzA-Schnittstelle, Polizei-/Feuerwehr-/Rettungs-Leitstellen",
+        "outputs": "Erreichbarkeit von 110, 112, 116 117 (KV-Bereitschaftsdienst), 116 116 (Sperr-Notruf), Cell-Broadcast-Bevölkerungs-Warnung",
+        "notes": "Schärfste MTPD/RTO im gesamten Pack: 1h MTPD reflektiert die Sub-Stunden-Eskalations-Pflicht bei Notrufnummern-Ausfall. BNetzA-Eskalation binnen 1 h, BSI-Meldung nach §8b BSIG. DB-Trasse-Sabotage-Schablone 08.10.2022: Glasfaser-Kabel der DB-Bahnfunk-Strecke an zwei Stellen (Berlin-Karow, Herne) durchtrennt, GSM-R-Funkverkehr norddeutschland 3 h ausgefallen — Bahn-Notrufe und Disposition betroffen. Notruf-Routing-Failover-Übung jährlich PFLICHT."
+      },
+      {
+        "id": "it_proc_it",
+        "title": "Werks-IT-Betrieb (ERP, CRM, Office-IT)",
+        "ownerRole": "IT-Leitung Carrier",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Active Directory, ERP-System (SAP), Kunden-Datenbank/CRM, E-Mail, Office-Dokumenten-Management, Backup-Infrastruktur",
+        "outputs": "Funktionsfähige Office-IT, Stammdaten-Pflege, ERP-Buchungen, Vertriebs-Workflow",
+        "notes": "Bewusste Trennung von Netzbetrieb (operative Echtzeit-Welt — Prozesse 1–4) und Werks-IT (Verwaltungs-Welt). Bei Cyber-Vorfall: Werks-IT kann tagelang ausfallen ohne Versorgungs-Konsequenz, aber Netzbetrieb-Ausfall ist sofortig-eskalativ. Saubere Segmentierung als Schutz beider Welten — siehe it_proc_backbone und it_proc_mobilfunk. Backups offline und immutable. NIS2-Meldung bei IT-Vorfall mit Querverbindung zur Netz-Welt binnen 24 h."
+      },
+      {
+        "id": "it_proc_customer",
+        "title": "Endkunden-Hotline und Customer Service",
+        "ownerRole": "Customer-Service-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "ACD-/Contact-Center-Infrastruktur, CRM, Wissens-Datenbank, IVR-System, Vertrags-/Tarif-System, Außendienst-Disposition",
+        "outputs": "Störungs-Annahme, Tarif- und Vertrags-Auskunft, Außendienst-Beauftragung, Kunden-Eskalations-Bearbeitung",
+        "notes": "Bei Massen-Störung skaliert Hotline-Last um Faktor 10–50 — vorab abgestimmte Krisen-Skripte und Notfall-IVR-Ansagen. TKG-Reaktionsfristen für Endkunden-Störung. Bei Cyber-Vorfall mit Datenexfiltration ist Hotline erste Anlaufstelle für betroffene Kunden — DSGVO-Art. 34-Pflichtinformation und ggf. Bonitäts-Schutz-Angebot."
+      },
+      {
+        "id": "it_proc_soc",
+        "title": "Security Operations Center (DDoS-Abwehr, Incident Response, Threat Intel, RPKI)",
+        "ownerRole": "SOC-Leitung / CISO",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "SIEM, IDS/IPS, DDoS-Mitigation-Stack (Scrubbing-Center, Upstream-RTBH), Threat-Intel-Feeds, RPKI-Validierungs-Infrastruktur, BSI-/CERT-Bund-Kontakt",
+        "outputs": "DDoS-Abwehr, Incident-Response-Tickets, Threat-Intelligence-Reports, RPKI-Zertifizierungs-Pflege, BSI-Meldungen nach §8b BSIG",
+        "notes": "Brücken-Funktion zwischen Netzbetrieb (it_proc_backbone, it_proc_mobilfunk) und Werks-IT (it_proc_it) — SOC verantwortet Sicherheit beider Welten. 24/7-Schicht-Betrieb. Threat-Hunting-Disziplin auch ohne akuten Vorfall. RPKI-ROV-Pflege als kontinuierliche Compliance-Schicht (MANRS-Initiative)."
       },
       {
         "id": "it_proc_cloud_ops",
         "title": "Cloud-Operations / Multi-Region-Service",
-        "ownerRole": "Cloud-Operations",
+        "ownerRole": "Cloud-Operations-Leitung",
         "criticality": "kritisch",
         "mtpdHours": "8",
         "rtoHours": "4",
         "rpoHours": "1",
-        "dependencies": "Hyperscaler-API, Control-Plane-Replikation, DNS-Provider, Identitäts-Service",
-        "outputs": "B2B- und Endkunden-Cloud-Services nach SLA",
-        "notes": "Bei Region-Outage Migration in Backup-Region binnen RTO."
+        "dependencies": "Hyperscaler-API (AWS/Azure/GCP) oder eigene OpenStack-/Kubernetes-Plattform, Control-Plane-Replikation, DNS-Provider, Identitäts-Service, Multi-Region-Netzwerk-Backbone",
+        "outputs": "B2B- und Endkunden-Cloud-Services nach SLA, IaaS/PaaS/SaaS-Lieferung, API-Verfügbarkeit",
+        "notes": "Schwerpunkt-Vorlage für Cloud-Provider und IaaS/SaaS-Tenants. Reine Carrier ohne Cloud-Geschäft können als nicht anwendbar markieren. MTPD 8 / RTO 4 (Bestand) reflektiert Multi-Region-Failover-Komplexität: DNS-TTL-Propagation, asynchroner State-Sync, Application-Layer-Health-Checks. Bei Region-Outage Migration in Backup-Region binnen RTO. AWS-Region-Outage als Schablone."
       },
       {
-        "id": "it_proc_endkunden",
-        "title": "Endkunden-Versorgung (Festnetz / Mobilfunk / Internet)",
-        "ownerRole": "Customer-Service",
+        "id": "it_proc_datacenter",
+        "title": "Datacenter-Betrieb (Server-Hosting, Klimatisierung, physische Sicherheit)",
+        "ownerRole": "Datacenter-Leitung",
         "criticality": "kritisch",
-        "mtpdHours": "6",
-        "rtoHours": "3",
+        "mtpdHours": "4",
+        "rtoHours": "2",
         "rpoHours": "1",
-        "dependencies": "Backbone, RZ, DNS, Authentifizierungs-Stack",
-        "outputs": "Festnetz-Telefonie, Mobilfunk, Internet-Zugang, IPTV",
-        "notes": "Bei Massen-Ausfall TKG-Auskunfts-Pflichten gegenüber Endkunden und BNetzA."
+        "dependencies": "Stromversorgung (USV + Notstrom), Kühlsystem, Brandschutz, Zutritts-Kontrolle, Server-Hardware, Netzwerk-Verkabelung, Lieferanten-Wartungs-Verträge",
+        "outputs": "Server-Hosting für interne und externe Workloads, sichere physische Umgebung, Co-Location-Service",
+        "notes": "Schwerpunkt-Vorlage für Datacenter-Operatoren. Reine MVNOs oder ISPs ohne eigenes Datacenter können als nicht anwendbar markieren. Hitzewellen-Vorbereitung (> 35 °C Lufttemperatur): Lastreduktion in nicht-kritischen Workloads. Zutritts-Sicherheit: Zwei-Faktor-Türsystem mit Out-of-Band-Failover (Facebook-2021-Lehre: Badge-System darf nicht von der ausgefallenen Plattform abhängen)."
+      },
+      {
+        "id": "it_proc_abrechnung",
+        "title": "Abrechnung und Forderungsmanagement",
+        "ownerRole": "Kaufmännische Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Abrechnungssystem (Billing), Vertragssystem, SEPA-Lastschrift-Schnittstelle, Bank-API, Mahn-Workflow, B2B-SLA-Reporting-Tool",
+        "outputs": "Endkunden-Rechnungen (B2C), B2B-SLA-Abrechnung, Forderungs-Buchführung, Mahnungen, Inkasso-Übergaben",
+        "notes": "Mehrwöchige Pufferzeit durch monatliche Abrechnungs-Rhythmen — bei Ausfall keine unmittelbare Versorgungs-Lücke. Bei Cyber-Vorfall mit Stammdaten-Exfiltration (Adressen, IBAN, TKG-Verkehrsdaten) DSGVO Art. 33/34-Meldung und ggf. Bonitäts-Schutz für Betroffene anbieten. TKG/TKDSG-Sondervorschriften für Verkehrsdaten zusätzlich zu DSGVO beachten."
       }
     ],
     "dependencyTemplates": [
@@ -417,7 +501,7 @@
         "singlePointOfFailure": false,
         "fallback": "USV (15-30 min) + Notstromaggregat (72 h Diesel-Vorrat) + Zweiteinspeisung",
         "contractReference": "EVU-Liefervertrag, Notstrom-Wartungsvertrag",
-        "notes": "Monatlicher Notstrom-Testlauf; Diesel-Lieferverträge mit garantierter 24-h-Nachlieferung."
+        "notes": "Monatlicher Notstrom-Testlauf; Diesel-Lieferverträge mit garantierter 24-h-Nachlieferung. Notstrom-Disziplin in deutschen KRITIS-Datacentern 2024+ deutlich verbessert — Notstrom-Versagen ist seltenes Mehrfach-Versagen."
       },
       {
         "id": "it_dep_cooling",
@@ -427,7 +511,7 @@
         "singlePointOfFailure": false,
         "fallback": "N+1-Kältemaschinen, Free-Cooling im Winter, Mobile-Kühlanlagen-Vertrag",
         "contractReference": "HVAC-Wartungsvertrag",
-        "notes": "Bei Hitzewelle (Lufttemperatur > 35 °C) Lastreduktion in nicht-kritischen Workloads."
+        "notes": "Bei Hitzewelle (Lufttemperatur > 35 °C) Lastreduktion in nicht-kritischen Workloads. Klimawandel-relevant: Hitzeperioden in DE strukturell länger und häufiger."
       },
       {
         "id": "it_dep_upstream",
@@ -437,7 +521,7 @@
         "singlePointOfFailure": false,
         "fallback": "Multi-Provider-Upstream mit BGP-Multihoming, Notfall-Peering-Vereinbarungen",
         "contractReference": "Upstream-/Carrier-Rahmenverträge",
-        "notes": "Bei Submarine-Cable-Schaden Notfall-Routing in 30 min möglich."
+        "notes": "Bei Submarine-Cable-Schaden Notfall-Routing in 30 min möglich. Bei BGP-Vorfall Upstream-Eskalation als erste Eindämmungs-Stufe (RTBH, Prefix-Filter)."
       },
       {
         "id": "it_dep_hardware",
@@ -447,7 +531,57 @@
         "singlePointOfFailure": true,
         "fallback": "Mindestbestand 90 Tage für Standard-Komponenten, Zweitlieferanten für kritische Spezial-Hardware",
         "contractReference": "Hardware-Rahmenverträge",
-        "notes": "Halbleiter-Engpässe 2021–2024 zeigten Single-Source-Risiken; Diversifikation in Asien und Europa."
+        "notes": "Halbleiter-Engpässe 2021–2024 zeigten Single-Source-Risiken; Diversifikation in Asien und Europa. Bei Sanktions-Risiken (China-Taiwan, Russland-Sanktions-Liste) Lieferketten kontinuierlich neu bewerten."
+      },
+      {
+        "id": "it_dep_glasfaser",
+        "title": "Eigene Backbone-Glasfaser-Trasse",
+        "category": "infrastruktur",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Diversitäre Trassen-Führung (geographisch getrennte Wege), Ringtopologie statt Stern, Notfall-Richtfunk für Punkt-zu-Punkt-Überbrückung",
+        "contractReference": "Trassen-Mietvertrag, Wegerecht mit Kommunen, Wartungs-Rahmenvertrag",
+        "notes": "DB-Trasse-Sabotage 08.10.2022-Schablone: Glasfaser-Kabel der DB-Bahnfunk-Strecke an zwei Stellen (Berlin-Karow, Herne) durchtrennt — GSM-R-Funkverkehr 3 h ausgefallen. Sabotage-Hintergrund nie eindeutig geklärt. Trassen-Diversität ist die einzige strukturelle Mitigation."
+      },
+      {
+        "id": "it_dep_frequenz",
+        "title": "Mobilfunk-Frequenzlizenz und BNetzA-Erlaubnis",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Roaming-Vereinbarung mit anderem Lizenznehmer als Notfall-Pfad (rechtlich komplex), kein technischer Fallback bei Lizenz-Verlust",
+        "contractReference": "BNetzA-Frequenz-Zuteilungsbescheid, Auflagen, Verlängerungs-Antrag",
+        "notes": "Lizenz-Laufzeit-Ende und Verlängerungs-Antrag mit ≥ 3 Jahren Vorlauf bei BNetzA. Auflagen-Compliance (Mindest-Versorgung, Roaming-Pflichten) kontinuierlich überwachen. Funk-Stör-Ereignisse bei BNetzA melden."
+      },
+      {
+        "id": "it_dep_cellbroadcast",
+        "title": "Cell-Broadcast- und NINA-/MoWaS-Anbindung",
+        "category": "behoerde",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobilfunk-Provider-Verbund-Failover (alle DE-Carrier müssen Cell Broadcast unterstützen), zusätzlich klassische Sirenen-Auslösung über Behörden",
+        "contractReference": "Cell-Broadcast-Vereinbarung mit BBK/MoWaS, NINA-App-Schnittstelle",
+        "notes": "Cell-Broadcast-Pflicht nach EU-Richtlinie 2018/1972 seit 2022 auch in Deutschland. Bundesweiter Warntag jährlich (typisch September) als Live-Test der Schnittstelle. Bei Ausfall der Cell-Broadcast-Schnittstelle Eskalation an BBK + BNetzA."
+      },
+      {
+        "id": "it_dep_submarine",
+        "title": "Submarine-Cable-Verbindung (internationale Backbone)",
+        "category": "infrastruktur",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Mehrere Untersee-Kabel-Routen (Atlantik, Mittelmeer, Ostsee), Re-Routing über Land-Trassen Asien/Europa, Multi-Carrier-Diversität",
+        "contractReference": "Konsortium-Beteiligung an Untersee-Kabeln (TAT-14, EllaLink, BCS East-West), IRU-Vereinbarungen",
+        "notes": "Ostsee-Sabotage-Schablonen: BCS East-West Interlink (SE-EE) und C-Lion1 (FI-DE) am 17.–18.11.2024 durchtrennt (Verdacht *Yi Peng 3*, CN); Estlink-2 + Datenkabel FI-EE am 25.12.2024 (Verdacht *Eagle-S*, russische Schattenflotte). Geopolitische Bedrohung — EU-Resilienz-Strategie für kritische Untersee-Infrastruktur (KRIS-Initiative 2024)."
+      },
+      {
+        "id": "it_dep_bnetza",
+        "title": "Bundesnetzagentur und CERT-Bund (KRITIS-Meldewege)",
+        "category": "behoerde",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalation an BSI (NIS2-Meldung), CERT-Bund (technische Koordination), Landeskriminalamt bei strafrechtlich relevanten Vorfällen",
+        "contractReference": "Meldewege nach §109 TKG, §8b BSIG (NIS2), KRITIS-Verordnung",
+        "notes": "Notrufnummern-Ausfall: BNetzA-Eskalation binnen 1 h. Cyber-Vorfall: BSI-Meldung binnen 24 h (NIS2). TKG-Verkehrsdaten-Datenpanne: BfDI/Landesdatenschutz binnen 72 h. Kontakte aktuell halten — Ansprechpartner-Wechsel jährlich verifizieren."
       }
     ],
     "scenarioTemplates": [
@@ -455,56 +589,163 @@
         "id": "it_scn_bgp",
         "title": "BGP-Hijacking durch fremden ASN",
         "category": "Cyber / Routing",
-        "description": "Ein fremder ASN kündigt unsere Präfixe oder Teil-Präfixe an und zieht Traffic ab.",
+        "description": "Ein fremder ASN kündigt unsere Präfixe oder Teil-Präfixe (z. B. /32-Spezial-Routen) an und zieht Traffic ab. Cloudflare 1.1.1.1-Schablone vom 27.06.2024: AS267613 (BR) kündigte 1.1.1.1/32 als eigenen Bereich an, 300 Netze in 70 Ländern betroffen — die /32-Ankündigung schlug RPKI-ROV nicht überall, weil ROV-Disziplin unter den Carriern lückenhaft ist. Rostelecom-2022-Pattern als zweite Schablone (massive AS-Path-Manipulation russischer Provider).",
         "likelihood": 4,
         "impact": 5,
-        "ownerRole": "NOC",
+        "ownerRole": "NOC / Routing-Team",
         "linkedProcessTemplateIds": [
-          "it_proc_backbone"
+          "it_proc_backbone",
+          "it_proc_soc"
         ],
         "linkedDependencyTemplateIds": [
           "it_dep_upstream"
         ],
-        "playbook": "Notfall-BGP-Filter aktivieren, Upstream-Provider eskalieren, RIPE/ARIN-Notification, RPKI-Status prüfen.",
+        "playbook": "Notfall-BGP-Filter aktivieren (binnen 5 min), Upstream-Provider eskalieren mit RTBH-Anforderung, RIPE/ARIN-Notification, RPKI-ROV-Status prüfen, eigene ROAs (Route Origin Authorizations) verifizieren, BGPMon-/RIPE-Stat-Alerts validieren, MANRS-Kontakte zu Peering-Partnern aktivieren, BSI-Meldung nach §8b BSIG bei wesentlicher Beeinträchtigung, Pressestelle bei Dauer > 1 h.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Cloudflare 1.1.1.1-Schablone."
+        "notes": "Cloudflare-1.1.1.1-Schablone (27.06.2024) plus Rostelecom-2022-Pattern. Demo-Pointe: ohne RPKI-ROV ist ein /32-Hijack erfolgreich; mit ROV wird er gefiltert. Tenant ohne eigenen ASN ist nur indirekt über Upstream betroffen."
       },
       {
         "id": "it_scn_rz_power",
         "title": "Rechenzentrums-Stromausfall mit Notstrom-Versagen",
         "category": "Infrastruktur",
-        "description": "Stromversorgung des Hauptrechenzentrums fällt aus, USV überbrückt 15 Minuten, Notstromaggregat startet nicht.",
-        "likelihood": 3,
+        "description": "Stromversorgung des Hauptrechenzentrums fällt aus, USV überbrückt 15 Minuten, Notstromaggregat startet nicht — mehrfaches Versagen (z. B. Diesel-Filter zugesetzt + Notstart-Batterie leer + Wartungs-Versäumnis).",
+        "likelihood": 2,
         "impact": 5,
-        "ownerRole": "RZ-Leitung",
+        "ownerRole": "Datacenter-Leitung",
         "linkedProcessTemplateIds": [
+          "it_proc_datacenter",
           "it_proc_cloud_ops",
           "it_proc_endkunden"
         ],
         "linkedDependencyTemplateIds": [
-          "it_dep_power"
+          "it_dep_power",
+          "it_dep_cooling"
         ],
-        "playbook": "Sofort-Migration kritischer Workloads in Backup-Region, SLA-Kommunikation, Wiederanlauf-Priorität nach Kritikalität.",
+        "playbook": "Sofort-Migration kritischer Workloads in Backup-Region (Cloud-Ops), SLA-Kommunikation an B2B-Kunden, BNetzA-Anzeige bei Versorgungs-Beeinträchtigung, Wiederanlauf-Priorität nach Kritikalität, Forensik der Notstrom-Kette (Wartungs-Logs, Diesel-Probe), Lehre für künftige Notstrom-Disziplin.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Wartungs-Versäumnis-Pattern."
+        "notes": "L2 reflektiert die in 2024+ verbesserte Notstrom-Disziplin in deutschen KRITIS-Datacentern (monatliche Tests, 72h Diesel, redundante USV). Szenario lebt vom Mehrfach-Versagen-Pattern."
       },
       {
         "id": "it_scn_submarine_cable",
         "title": "Submarine-Cable-Schaden in der Ostsee",
-        "category": "Infrastruktur",
-        "description": "Eines unserer Untersee-Kabel ist durchtrennt, internationale Anbindung reduziert.",
+        "category": "Infrastruktur / Geopolitik",
+        "description": "Eines unserer Untersee-Kabel ist durchtrennt, internationale Anbindung reduziert. Konkrete Schablonen: BCS East-West Interlink (SE-EE) und C-Lion1 (FI-DE) am 17.–18.11.2024 durchtrennt, Verdacht auf chinesisches Schiff *Yi Peng 3* (Ankerschleifen). Plus Estlink-2 + Datenkabel FI-EE am 25.12.2024 durch *Eagle-S* (Cook-Islands-Flagge, russische Schattenflotte). Ermittlungen laufen in Finnland, Estland, Schweden, Litauen, Deutschland.",
         "likelihood": 3,
         "impact": 4,
-        "ownerRole": "NOC",
+        "ownerRole": "NOC / Geschäftsführung",
         "linkedProcessTemplateIds": [
           "it_proc_backbone"
         ],
         "linkedDependencyTemplateIds": [
+          "it_dep_upstream",
+          "it_dep_submarine"
+        ],
+        "playbook": "Notfall-Routing über Alternativ-Pfade (Atlantik-Route, Land-Trasse via Polen/Tschechien), Carrier-Eskalation, BNetzA-Information bei Versorgungs-Beeinträchtigung, Reparatur-Schiff anfordern (Lieferzeit Wochen), EU-KRIS-Initiative-Kontakt für Resilienz-Koordination, Pressestelle.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Yi-Peng-3- und Eagle-S-Schablonen 2024. Geopolitische Bedrohungs-Schicht: mutmaßliche staatliche Sabotage durch chinesische bzw. russische Schiffe. EU-Resilienz-Strategie für kritische Untersee-Infrastruktur."
+      },
+      {
+        "id": "it_scn_facebook_self",
+        "title": "Self-Inflicted-BGP-Withdraw (Facebook-2021-Klasse)",
+        "category": "Cyber / Self-Inflicted",
+        "description": "Ein eigener Konfigurationsfehler — kein Cyber-Angriff — führt zu einem BGP-Withdraw aller Präfixe. Schablone Facebook/Meta 04.10.2021: fehlerhafter Wartungsbefehl bei Backbone-Kapazitätsbewertung, Route-Withdrawal aller Präfixe, ca. 6 h globaler Ausfall, ca. 60–100 Mio. USD Umsatzausfall. Verheerend: das Badge-System der Mitarbeiter lief über die ausgefallene Plattform (interne Auth-Dienste), Mitarbeiter konnten Rechenzentren physisch nicht betreten — Reparatur stark verzögert.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "NOC / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "it_proc_backbone",
+          "it_proc_it",
+          "it_proc_datacenter"
+        ],
+        "linkedDependencyTemplateIds": [
           "it_dep_upstream"
         ],
-        "playbook": "Notfall-Routing über Alternativ-Pfade, Carrier-Eskalation, BNetzA-Information bei Versorgungs-Beeinträchtigung.",
+        "playbook": "Out-of-Band-Zugang zu Border-Routern aktivieren (Konsolen-Server mit eigener Stromversorgung und Mobilfunk-Backup), Konfiguration zurückrollen, BGP-Sessions wieder aufbauen, Badge-/Zutritts-System mit Out-of-Band-Failover prüfen (Facebook-Lehre), Change-Management-Disziplin im Nachgang aufrüsten (Vier-Augen-Prinzip für Backbone-Configs, Canary-Deployment, automatischer Rollback).",
         "exerciseTypeHint": "tabletop",
-        "notes": "Eagle-S-/Yi-Peng-3-Schablone."
+        "notes": "Demo-Pointe: kein Cyber-Angriff, sondern eigener Konfigurationsfehler. Lehre 1: Out-of-Band-Zugang ist Pflicht. Lehre 2: Badge-System darf NICHT von der gleichen Plattform abhängen, die ausfallen kann. Lehre 3: Change-Management-Disziplin ist ebenso wichtig wie Cyber-Abwehr."
+      },
+      {
+        "id": "it_scn_crowdstrike",
+        "title": "Sicherheits-Software-Supply-Chain-Bug (CrowdStrike-2024-Klasse)",
+        "category": "Cyber / Supply-Chain",
+        "description": "Ein fehlerhafter Patch einer weit verbreiteten Sicherheits-Software führt zu globalem Outage von Windows-Endgeräten und Servern. Schablone CrowdStrike 19.07.2024: Channel File 291 für Falcon-Sensor-Treiber `csagent.sys` enthielt Out-of-bounds-Memory-Read-Bug, BSOD auf ca. 8,5 Mio. Windows-Maschinen weltweit (Microsoft-Angabe). Betroffen: Luftfahrt (Delta, United, Lufthansa — tausende Flugausfälle), Banken, Krankenhäuser, Börsen. Schadensschätzung ca. 5,4 Mrd. USD allein für Fortune-500 (Parametrix); Delta meldete 500 Mio. USD.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "SOC / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "it_proc_it",
+          "it_proc_soc",
+          "it_proc_cloud_ops"
+        ],
+        "linkedDependencyTemplateIds": [
+          "it_dep_hardware"
+        ],
+        "playbook": "Patch-Verteilung sofort stoppen (sofern noch nicht ausgerollt), bei betroffenen Endpunkten Boot in Safe Mode + manuelle Datei-Löschung (CrowdStrike-Anweisung Juli 2024), Recovery-Reihenfolge nach Kritikalität, BitLocker-Recovery-Keys bereitstellen, Hersteller-Support eskalieren, Lehre: Canary-Deployment auch für Sicherheits-Software, kein Same-Day-Rollout auf 100 % der Flotte.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Demo-Pointe: Sicherheits-Software selbst als Risiko-Vektor. NIS2-Risiko-Management muss auch die Sicherheits-Tools selbst einbeziehen. Vendor-Lock-In als Resilienz-Risiko. Lehre für SOC-Patch-Disziplin: nie auf 100 % der Flotte gleichzeitig."
+      },
+      {
+        "id": "it_scn_ddos_tbps",
+        "title": "Volumetric DDoS-Welle in Tbps-Größe",
+        "category": "Cyber / DDoS",
+        "description": "Mehrtägige volumetrische Distributed-Denial-of-Service-Attacke in Tbps-Größenordnung gegen unseren Backbone und Endkunden-Stack. Quelle: globales Botnet (Mirai-Variante mit IoT-Routern, Kameras, Druckern). Cloudflare-Quartalsberichte 2024–2025 dokumentieren regelmäßig Attacken im 1–5-Tbps-Bereich, einzelne Spitzen über 10 Tbps. Tendenz strukturell steigend wegen wachsender IoT-Geräte-Zahl.",
+        "likelihood": 4,
+        "impact": 4,
+        "ownerRole": "SOC-Leitung / NOC",
+        "linkedProcessTemplateIds": [
+          "it_proc_backbone",
+          "it_proc_soc",
+          "it_proc_endkunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "it_dep_upstream"
+        ],
+        "playbook": "DDoS-Mitigation-Stack aktivieren (Scrubbing-Center, BGP-Flowspec, Upstream-RTBH), Anycast-Verteilung verifizieren, Anti-DDoS-Provider eskalieren, Quell-IP-Blacklist mit Threat-Intel-Feeds aktualisieren, bei Tbps-Welle Upstream-Provider mit RTBH-Anweisung beauftragen, BSI-Meldung bei Beeinträchtigung kritischer Dienste, Pressestelle, Endkunden-Hotline mit IVR-Notfall-Ansage skalieren.",
+        "exerciseTypeHint": "technical",
+        "notes": "Mirai-Botnet-Variante als typische Quelle. DDoS-Mitigations-Funktionstest jährlich PFLICHT — kein reines Tabletop, sondern echter Lasttest mit Upstream-Provider. Telekom-Router-Bot 2016 (900.000 Speedport-Router) als historischer Anker für IoT-Botnet-Risiko."
+      },
+      {
+        "id": "it_scn_notruf_outage",
+        "title": "Notrufnummern-Ausfall mit BNetzA-Eskalation",
+        "category": "Versorgung / Regulatorik",
+        "description": "Notrufnummern (110, 112, 116 117) regional oder bundesweit nicht erreichbar wegen Glasfaser-Schaden, Routing-Fehler oder Vermittlungsstellen-Ausfall. Hauptschablone: DB-Trasse-Sabotage 08.10.2022, Glasfaser-Kabel der DB-Bahnfunk-Strecke an zwei Stellen (Berlin-Karow und Herne) parallel durchtrennt, GSM-R-Funkverkehr in Norddeutschland 3 h ausgefallen — Bahn-Notrufe und Disposition betroffen, parallele Beeinträchtigung weiterer Glasfaser-Trassen. Sabotage-Hintergrund nie eindeutig geklärt (Klimaprotest? Russland?).",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "NOC / BNetzA-Verantwortlicher",
+        "linkedProcessTemplateIds": [
+          "it_proc_notrufnummern",
+          "it_proc_backbone",
+          "it_proc_endkunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "it_dep_glasfaser",
+          "it_dep_bnetza",
+          "it_dep_cellbroadcast"
+        ],
+        "playbook": "BNetzA-Eskalation binnen 1 h (Notrufnummern-Pflicht), Notruf-Routing-Failover über Alternativ-Vermittlungsstellen, Cell-Broadcast-Bevölkerungs-Information mit Hinweis auf Ersatz-Wege, Polizei-/Feuerwehr-/Rettungs-Leitstellen kontaktieren mit Empfehlung zu manuellen Funk-Pfaden, BSI-Meldung nach §8b BSIG, Pressestelle, Reparatur-Trupp einsetzen.",
+        "exerciseTypeHint": "technical",
+        "notes": "DB-Trasse-Sabotage 08.10.2022 als Hauptschablone. Lokale Großstörungen bei großen Carriern (z. B. regionale Vodafone-Disruptionen 2023, Telekom-Glasfaser-Vorfälle in mehreren Bundesländern) sind in den Pressemitteilungen der jeweiligen Anbieter dokumentiert. Tenants mit eigenen Erfahrungen können diese als Tenant-Schablone in das Szenario einfügen. Notruf-Failover-Live-Übung alle 36 Monate PFLICHT."
+      },
+      {
+        "id": "it_scn_data_exfil",
+        "title": "Massendaten-Exfiltration mit DSGVO+TKG-Pflicht",
+        "category": "Cyber / Datenschutz",
+        "description": "Ransomware-Gruppe oder gezielter Angreifer exfiltriert Endkunden-Datenbank: Stammdaten (Name, Adresse, IBAN), TKG-Verkehrsdaten (Verbindungs-Metadaten — wer mit wem wann), ggf. Vertragsdaten und Authentifizierungs-Hashes. Schadensbild: DSGVO Art. 33/34-Pflicht binnen 72 h, plus TKG-/TKDSG-Sondervorschriften für Verkehrsdaten (Telekommunikations-Geheimnis, §3 TTDSG), plus Bonitäts-Risiko für Endkunden, plus Reputations-Schaden, plus regulatorische Bußgelder.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "CISO / Datenschutzbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "it_proc_it",
+          "it_proc_soc",
+          "it_proc_customer",
+          "it_proc_abrechnung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "it_dep_bnetza"
+        ],
+        "playbook": "Werks-IT vom Netz trennen, OT-Segmentierung verifizieren (Netzbetrieb läuft weiter), Backup-Wiederherstellung aus Offline-/Immutable-Backups, BSI-Meldung nach NIS2 binnen 24 h, DSGVO Art. 33-Meldung an Landesdatenschutzbeauftragte binnen 72 h, Betroffenen-Information nach DSGVO Art. 34, TKG/TKDSG-Sonder-Eskalation an BfDI wegen Verkehrsdaten, Hotline für Kundenanfragen skalieren, ggf. Bonitäts-Schutz für Betroffene anbieten, Pressestelle-Statement, Strafanzeige.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "TKG/TKDSG-Sondervorschriften zusätzlich zu DSGVO: Verkehrsdaten unterliegen dem Telekommunikations-Geheimnis (§3 TTDSG), Datenpanne mit Verkehrsdaten ist verschärft. Cross-Funktions-Übung mit IT, SOC, Customer-Service, Datenschutz, Pressestelle. Saubere Netzbetrieb-/Werks-IT-Segmentierung als Schutz: Netzbetrieb läuft weiter, auch wenn Werks-IT verschlüsselt wird."
       }
     ],
     "exerciseTemplates": [
@@ -515,7 +756,7 @@
         "scenarioTemplateId": "it_scn_bgp",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Mit NOC, SOC, CISO, Pressesprecher durchführen."
+        "notes": "Mit NOC, SOC, CISO, Pressesprecher durchführen. Cloudflare-1.1.1.1-Schablone (27.06.2024) als Drehbuch-Grundlage. RPKI-ROV-Disziplin als Hauptlernziel."
       },
       {
         "id": "it_ex_rz_power",
@@ -523,8 +764,35 @@
         "exerciseType": "tabletop",
         "scenarioTemplateId": "it_scn_rz_power",
         "ownerRole": "Krisenstab",
+        "cadenceMonths": 24,
+        "notes": "Mit Datacenter-Leitung, Cloud-Operations, B2B-Vertrieb, BNetzA-Schnittstelle. Kadenz 24 Monate (statt 12) reflektiert L2-Wahrscheinlichkeit des Szenarios — methodisch korrekt: Übungs-Frequenz richtet sich an Szenario-Wahrscheinlichkeit aus."
+      },
+      {
+        "id": "it_ex_ddos_test",
+        "title": "DDoS-Mitigations-Funktionstest",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "it_scn_ddos_tbps",
+        "ownerRole": "SOC-Leitung",
         "cadenceMonths": 12,
-        "notes": "Mit RZ-Leitung, Cloud-Operations, B2B-Vertrieb, BNetzA-Schnittstelle."
+        "notes": "Funktionstest (kein reines Tabletop): echter Lasttest mit Upstream-Provider-Beteiligung, Scrubbing-Center-Aktivierung, BGP-Flowspec-Failover, RTBH-Routing-Test. Threat-Intel-Feed-Integration verifizieren. Mit SOC, NOC und Upstream-Provider."
+      },
+      {
+        "id": "it_ex_notruf_failover",
+        "title": "Notrufnummern-Failover Live-Übung",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "it_scn_notruf_outage",
+        "ownerRole": "NOC / BNetzA-Verantwortlicher",
+        "cadenceMonths": 36,
+        "notes": "Live-Vollübung mit BNetzA-Koordination: Failover des Notruf-Routings auf Alternativ-Vermittlungsstellen, Cell-Broadcast-Test (im Verbund mit Bundeswarntag), Eskalations-Kette an Polizei/Feuerwehr/Rettungs-Leitstellen. DB-Trasse-Sabotage 08.10.2022 als Drehbuch-Grundlage. NOC plus BNetzA plus Krisenstab."
+      },
+      {
+        "id": "it_ex_supplychain_patch",
+        "title": "Supply-Chain-Patch-Tabletop (CrowdStrike-Klasse)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "it_scn_crowdstrike",
+        "ownerRole": "SOC-Leitung",
+        "cadenceMonths": 24,
+        "notes": "CrowdStrike-2024-Drehbuch: fehlerhafter Patch einer Sicherheits-Software trifft 100 % der Flotte. Übungs-Lernziele: Boot-in-Safe-Mode-Recovery-Disziplin, BitLocker-Recovery-Key-Verfügbarkeit, Canary-Deployment-Disziplin, Vendor-Lock-In als Resilienz-Risiko. Mit SOC, IT-Leitung, Werks-IT-Operations, Geschäftsführung."
       }
     ],
     "riskCatalogTemplates": [
