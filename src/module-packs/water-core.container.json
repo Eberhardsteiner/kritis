@@ -376,24 +376,96 @@
         "title": "Trinkwasser-Aufbereitung",
         "ownerRole": "Wassermeister",
         "criticality": "kritisch",
-        "mtpdHours": "12",
-        "rtoHours": "4",
+        "mtpdHours": "4",
+        "rtoHours": "2",
         "rpoHours": "1",
-        "dependencies": "SCADA, Aufbereitungs-Chemikalien, Energie, Labor",
-        "outputs": "Trinkwasser nach TrinkwV-Qualitätsparametern",
-        "notes": "Manueller Notbetrieb mit Hand-Dosierung definieren."
+        "dependencies": "SCADA-Leitsystem, Aufbereitungs-Chemikalien (Chlor, Aluminat, Aktivkohle, Phosphat), Energie, akkreditiertes Labor, Brunnen-/Talsperren-Rohwasser",
+        "outputs": "Trinkwasser nach TrinkwV-Qualitätsparametern (mikrobiologisch, chemisch, sensorisch)",
+        "notes": "Manueller Notbetrieb mit Hand-Dosierung dokumentiert. Plausibilitäts-Korridore und Vier-Augen-Regel oberhalb sprunghafter Sollwert-Änderungen (Oldsmar-Schablone: NaOH 100→11.100 ppm verhindert durch Operator-Beobachtung). Bei mikrobiologischem Vorfall TrinkwV § 16 Anzeigepflicht binnen 24 h an Gesundheitsamt."
       },
       {
         "id": "water_proc_distribution",
         "title": "Verteilnetz-Betrieb",
         "ownerRole": "Netzleitstelle",
         "criticality": "kritisch",
-        "mtpdHours": "6",
+        "mtpdHours": "4",
         "rtoHours": "2",
-        "rpoHours": "0",
-        "dependencies": "Pumpwerke, Druckhalter, Hochbehälter, Energie",
-        "outputs": "Druck, Fluss, Verfügbarkeit",
-        "notes": "Bei Druckverlust Eskalations-Kaskade: Hochbehälter-Reserve, Notbrunnen, Tankwagen."
+        "rpoHours": "1",
+        "dependencies": "Pumpwerke, Druckhalter, Hochbehälter, Energie, SCADA-Verteilnetz, Rohrnetz-Karte",
+        "outputs": "Druck, Fluss, Verfügbarkeit, Hygiene-Stabilität an Übergabepunkten",
+        "notes": "Bei Druckverlust Eskalations-Kaskade: Hochbehälter-Reserve (8–24 h), Notbrunnen, Tankwagen. Bei Sog-Effekt Hygiene-Risiko über Hausanschlüsse — DVGW W 405-Notwasserkonzept aktivieren."
+      },
+      {
+        "id": "water_proc_scada",
+        "title": "SCADA- und OT-Betrieb",
+        "ownerRole": "OT-Sicherheit / Leitwart-Schicht",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Leitsystem-Server, Engineering-Workstations, Jump-Hosts, MFA-Backend, OT-Netz-Segmentierung, Fernwartungs-Zugänge (Siemens, Rittmeyer, ABB)",
+        "outputs": "Betriebssichere Steuerung der Aufbereitung, Pumpwerke und Hochbehälter; auditierte Fernzugriffe",
+        "notes": "OT strikt vom IT-Office-Netz getrennt (siehe water_proc_it). Keine Remote-Desktop-Tools (TeamViewer, AnyDesk) auf SCADA-Workstations. Operator-Awareness-Pflicht: jede sprunghafte Sollwert-Änderung verlangt Vier-Augen-Bestätigung. Quartals-Audit der OT-IT-Übergänge."
+      },
+      {
+        "id": "water_proc_it",
+        "title": "Werks-IT und Office-Betrieb",
+        "ownerRole": "IT-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Office-Netz, Active Directory, E-Mail, Dokumenten-Management, GIS-System, Kunden-CRM, Backup-Infrastruktur",
+        "outputs": "Funktionsfähige IT-Arbeitsplätze, dokumentierte Prozesse, GIS-Netzdokumentation, Kunden-Datenhaltung",
+        "notes": "Strikt getrennt von OT (siehe water_proc_scada). Ransomware-Vorfälle wie South Staffs Water 2022 (Cl0p, 1,6 Mio. Kundendaten exfiltriert, 5 TB) treffen typischerweise zuerst die IT — saubere Segmentierung verhindert OT-Übergriff. Backups offline und immutable. NIS2-Meldung bei IT-Vorfall mit OT-Querverbindung binnen 24 h."
+      },
+      {
+        "id": "water_proc_hygiene",
+        "title": "Trinkwasser-Hygiene und Qualitätssicherung",
+        "ownerRole": "Hygiene-Beauftragte*r (TrinkwV)",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Akkreditiertes Labor, Probennahme-Stellen, Gesundheitsamt, Schnelltest-Vorrat, TrinkwV-Anzeige-Wege",
+        "outputs": "TrinkwV-konforme Wasserqualität, Probenpläne, Anzeigen nach § 16 TrinkwV, Abkochanordnungs-Vorbereitung",
+        "notes": "Bei E.coli-/Legionellen-Befund unverzügliche Anzeige an Gesundheitsamt und Vorbereitung Abkochanordnung. Probenfristen nach TrinkwV strikt einhalten. Bei Verdacht auf SCADA-Manipulation Out-of-Band-Stichprobe (Hand-Probennahme + externes Labor) zur Plausibilisierung der Sensor-Werte."
+      },
+      {
+        "id": "water_proc_notbetrieb",
+        "title": "Notwasserversorgung",
+        "ownerRole": "Technische Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Tankwagen-Rahmenverträge, Notbrunnen, mobile Aufbereitungsanlagen (THW), Bevölkerungs-Verteilstellen, untere Wasserbehörde",
+        "outputs": "Mindestversorgung der Bevölkerung mit Trink- und Brauchwasser bei Vollausfall der Hauptversorgung",
+        "notes": "DVGW W 405 als Maßstab. Ahrtal 2021-Schablone: Pumpwerk Schuld komplett zerstört, THW-Notbetrieb mit 4 mobilen Aufbereitungsanlagen plus Tankwagen-Logistik über 3 Standorte. Aktivierungs-SLA mit Tankwagen-Dienstleister vertraglich fixiert. Jährliche Notwasser-Übung mit echter Verteilung an Stichproben-Adresse."
+      },
+      {
+        "id": "water_proc_kunden",
+        "title": "Kunden- und Bevölkerungs-Kommunikation",
+        "ownerRole": "Vertriebsleitung / Pressestelle",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Kunden-Hotline, NINA-Warnapp-Anbindung, Lautsprecher-Wagen-Kontakt, kommunale Pressestelle, Webseite, Social-Media-Kanäle",
+        "outputs": "Erreichbarkeit für Kunden, Krisen-Kommunikation, Abkochanordnungs-Bekanntmachung, Tarif- und Abrechnungs-Auskünfte",
+        "notes": "Bei Trinkwasser-Sperre oder Abkochanordnung Bevölkerungs-Warnung über NINA-App, Sirenen, Lautsprecher-Wagen und kommunale Pressestelle. Hotline-Skripte für häufige Krisen-Szenarien vorbereitet. Bei Cyber-Vorfall mit Kundendaten-Exfiltration (South Staffs-Schablone) Betroffenen-Information nach DSGVO Art. 34 binnen 72 h."
+      },
+      {
+        "id": "water_proc_abrechnung",
+        "title": "Abrechnung und Forderungs-Management",
+        "ownerRole": "Kaufmännische Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Abrechnungssystem, Zähler-Ablesung (digital/manuell), SEPA-Lastschrift, Bank-Schnittstelle, Mahn-Workflow",
+        "outputs": "Verbrauchs-Abrechnung, Abschlagszahlungen, Forderungs-Buchführung, Mahnungen",
+        "notes": "Mehrere Wochen Pufferzeit durch monatlich-quartalsweise Abrechnungs-Rhythmen — bei Ausfall keine unmittelbare Versorgungs-Lücke. Bei Cyber-Vorfall mit Stammdaten-Exfiltration (Adressen, IBAN) DSGVO-Meldung und ggf. Bonitäts-Schutz für Betroffene anbieten."
       },
       {
         "id": "water_proc_wastewater",
@@ -401,11 +473,23 @@
         "ownerRole": "Klärwerks-Leitung",
         "criticality": "hoch",
         "mtpdHours": "24",
-        "rtoHours": "8",
+        "rtoHours": "12",
         "rpoHours": "4",
-        "dependencies": "Belebungsbecken, Faulturm, Phosphor-Fällung, Klärschlamm-Entsorgung",
-        "outputs": "Gereinigtes Abwasser nach WHG-Auflagen, Klärschlamm",
-        "notes": "Bei Starkregen Mischwasser-Überlauf-Plan mit unterer Wasserbehörde."
+        "dependencies": "Belebungsbecken, Faulturm, Phosphor-Fällung, Klärschlamm-Behandlung, Stromversorgung, untere Wasserbehörde, Wasserschutzpolizei",
+        "outputs": "Gereinigtes Abwasser nach WHG-Auflagen, Faulgas, Klärschlamm-Roh",
+        "notes": "Bei Starkregen Mischwasser-Überlauf-Plan mit unterer Wasserbehörde abgestimmt. Bei Phosphor-Fällung-Ausfall WHG-Anzeige; Klärbiologie-Wiederaufbau nach Stoßbelastung 2–6 Wochen. Bei Industrie-Einleiter-Stoßbelastung Vor-Ort-Probennahme und ggf. Einleitstop."
+      },
+      {
+        "id": "water_proc_sludge",
+        "title": "Klärschlamm-Verwertung und DüV-Compliance",
+        "ownerRole": "Umweltbeauftragte*r",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "Klärschlamm-Entsorger, Verbrennungsanlage, landwirtschaftliche Verwertungs-Pfade, DüV-Dokumentation, untere Bodenschutzbehörde",
+        "outputs": "Verwerteter oder entsorgter Klärschlamm, DüV-konforme Aufbringungs-Nachweise, Phosphor-Rückgewinnungs-Quoten",
+        "notes": "Mehrwöchige Zwischenlagerungs-Kapazität puffert Entsorger-Engpässe. DüV-Verstöße (Phosphor-/Nitrat-Überschreitung) führen zu Bußgeld plus reputativer Folge. Phosphor-Rückgewinnungs-Pflicht ab 2029 für Klärwerke > 50.000 EW vorbereiten."
       }
     ],
     "dependencyTemplates": [
@@ -417,7 +501,7 @@
         "singlePointOfFailure": true,
         "fallback": "Notstrom-Aggregat, Hochbehälter-Reserve für 8–24 h Druckhaltung",
         "contractReference": "EVU-Liefervertrag, Notstrom-Wartungsvertrag",
-        "notes": "Notstrom-Testlauf monatlich; Diesel-Vorrat 72 h."
+        "notes": "Notstrom-Testlauf monatlich; Diesel-Vorrat 72 h. Bei Stromausfall > 72 h Übergang in Notwasserversorgung (water_proc_notbetrieb)."
       },
       {
         "id": "water_dep_chemicals",
@@ -427,7 +511,7 @@
         "singlePointOfFailure": true,
         "fallback": "Mindestbestand 14 Tage, Zweitlieferant für Chlor und Aluminat",
         "contractReference": "Chemikalien-Rahmenvertrag",
-        "notes": "Aktivkohle, Chlor, Aluminat, Phosphat — Lieferzeit kritisch."
+        "notes": "Aktivkohle, Chlor, Aluminat, Phosphat — Lieferzeit kritisch. Bei Lieferengpass Hand-Dosierung als Übergangs-Maßnahme, parallel Zweitlieferant-Aktivierung."
       },
       {
         "id": "water_dep_lab",
@@ -437,7 +521,7 @@
         "singlePointOfFailure": false,
         "fallback": "Eigene Schnelltests + Zweit-Akkreditiertes-Labor",
         "contractReference": "Labor-Rahmenvertrag",
-        "notes": "Probenfrist nach TrinkwV beachten."
+        "notes": "Probenfrist nach TrinkwV beachten. Bei Verdacht auf Sensor-Manipulation Out-of-Band-Stichprobe (Hand-Probe + externes Labor) zur Plausibilisierung."
       },
       {
         "id": "water_dep_sludge",
@@ -447,7 +531,57 @@
         "singlePointOfFailure": true,
         "fallback": "Zwischenlager-Kapazität, Alternativ-Verbrennungsanlage",
         "contractReference": "Entsorgungs-Rahmenvertrag",
-        "notes": "Bei Engpass Düngemittel-Verwertungs-Pfad prüfen."
+        "notes": "Bei Engpass Düngemittel-Verwertungs-Pfad prüfen. Phosphor-Rückgewinnungs-Pflicht ab 2029 für Klärwerke > 50.000 EW vorbereiten."
+      },
+      {
+        "id": "water_dep_scada",
+        "title": "SCADA-Leitsystem (Aufbereitung, Pumpwerke, Hochbehälter)",
+        "category": "ot",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Manueller Notbetrieb mit Hand-Dosierung und Vor-Ort-Schaltung; Zweit-Leitwarte falls vorhanden; ausgedruckte Sollwert-Tabellen und Schaltpläne",
+        "contractReference": "OEM-Wartungsvertrag mit Siemens / Rittmeyer / ABB; Software-Pflege; Notfall-Hotline 24/7",
+        "notes": "Oldsmar-Schablone: TeamViewer-Fernzugriff war Eintrittspforte — strikt eliminieren. Jump-Host-Zwang für jede Fernsitzung, MFA, Session-Recording. Bei Vollausfall des Leitsystems Übergang in Hand-Betrieb mit Operator-Awareness als letzte Verteidigungs-Linie."
+      },
+      {
+        "id": "water_dep_brunnen",
+        "title": "Brunnen-/Talsperren-Wasserrechte und Rohwasser-Zugang",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Zweitbrunnen-Feld, Talsperren-Reserve, Verbund mit Nachbar-Versorger über Notleitungs-Verbindung",
+        "contractReference": "Wasserrechtliche Erlaubnis nach WHG; Verbund-Vertrag mit Nachbar-Versorger",
+        "notes": "Bei Trockenheit oder Kontamination des Rohwassers Aktivierung Zweitbrunnen oder Verbund-Bezug. Wasserrechte-Ablauf langfristig im Blick — Verlängerungs-Antrag mit 3 Jahren Vorlauf bei unterer Wasserbehörde."
+      },
+      {
+        "id": "water_dep_tankwagen",
+        "title": "Tankwagen-Dienstleister (Notwasserversorgung)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Mehrere Rahmenverträge mit regionalen Anbietern; THW-Anforderung über Landratsamt; mobile Aufbereitungsanlagen-Verbund",
+        "contractReference": "Tankwagen-Rahmenvertrag mit Aktivierungs-SLA (max. 6 h)",
+        "notes": "Ahrtal 2021-Schablone: 4 mobile Aufbereitungsanlagen plus Tankwagen-Logistik über 3 Standorte; THW-Federführung. Aktivierungs-SLA jährlich praxisnah testen."
+      },
+      {
+        "id": "water_dep_aufsichtsbehoerde",
+        "title": "Untere Wasserbehörde und Gesundheitsamt",
+        "category": "behoerde",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalation an Bezirksregierung / Landesumweltamt; bei Trinkwasser-Vorfall direkt Landesgesundheitsamt",
+        "contractReference": "Anzeige-Wege nach TrinkwV § 16 und WHG; Meldepflichten BSI-KritisV",
+        "notes": "Untere Wasserbehörde für WHG-Themen (Klärwerk, Mischwasser-Überlauf), Gesundheitsamt für TrinkwV (Trinkwasser-Qualität, Abkochanordnung). Bei NIS2-Vorfall zusätzlich BSI binnen 24 h. Kontakte aktuell halten — Ansprechpartner-Wechsel jährlich verifizieren."
+      },
+      {
+        "id": "water_dep_ot_wartung",
+        "title": "OT-Wartungs-Dienstleister (Siemens, Rittmeyer, ABB)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Eigene OT-Werkstatt für Soforthilfe; Zweit-Dienstleister mit Cross-Training; OEM-Hotline 24/7",
+        "contractReference": "OT-Wartungs-Rahmenvertrag mit jeweiligem OEM; Fernwartungs-Vereinbarung mit Jump-Host-Disziplin",
+        "notes": "Fernwartungs-Zugänge nur über Jump-Host mit MFA und Session-Recording. Operator anwesend, Sitzungen protokolliert. Tureby-Alkestrup 2024 und Muleshoe Texas 2024-Schablonen: kompromittierter Fernwartungs-Zugang als Eintrittspforte für OT-Angriff."
       }
     ],
     "scenarioTemplates": [
@@ -455,55 +589,169 @@
         "id": "water_scn_scada",
         "title": "SCADA-Manipulation in der Aufbereitung",
         "category": "Cyber / OT",
-        "description": "Angreifer manipuliert Soll-Werte für Chlor- oder Natronlauge-Dosierung.",
+        "description": "Angreifer manipuliert Soll-Werte für Chlor- oder Natronlauge-Dosierung im Aufbereitungs-Leitsystem.",
         "likelihood": 3,
         "impact": 5,
         "ownerRole": "OT-Sicherheit / Wassermeister",
         "linkedProcessTemplateIds": [
-          "water_proc_treatment"
+          "water_proc_treatment",
+          "water_proc_scada",
+          "water_proc_hygiene"
         ],
-        "linkedDependencyTemplateIds": [],
-        "playbook": "Sofortige Sperre der Aufnahme, Verifikation der Soll-Werte, Probennahme, ggf. Trinkwasser-Sperre, Bevölkerungs-Warnung.",
+        "linkedDependencyTemplateIds": [
+          "water_dep_scada",
+          "water_dep_ot_wartung"
+        ],
+        "playbook": "Sofortige Sperre der Aufnahme im Verteilnetz, Verifikation der Soll-Werte gegen Plausibilitäts-Korridore, Out-of-Band-Hand-Probennahme + externes Labor, ggf. Trinkwasser-Sperre, Bevölkerungs-Warnung über NINA-App, TrinkwV § 16-Anzeige an Gesundheitsamt binnen 24 h, BSI-Meldung nach NIS2.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Oldsmar-Schablone."
+        "notes": "Allgemeine SCADA-Manipulations-Schablone (Sollwert-Vektor). Spezifisch auf Remote-Tool-Vektor siehe water_scn_oldsmar."
       },
       {
         "id": "water_scn_flood",
         "title": "Hochwasser am Wasserwerk und Klärwerk",
         "category": "Naturgefahr",
-        "description": "Hochwasser flutet Schaltanlagen und gefährdet Klärwerk-Mischwasser-Überlauf.",
+        "description": "Hochwasser flutet Schaltanlagen und gefährdet Klärwerk-Mischwasser-Überlauf; Pumpwerks-Schäden bis hin zu Total-Ausfall (Ahrtal-Pattern).",
         "likelihood": 4,
         "impact": 5,
         "ownerRole": "Geschäftsführung / Wassermeister",
         "linkedProcessTemplateIds": [
           "water_proc_treatment",
-          "water_proc_wastewater"
+          "water_proc_distribution",
+          "water_proc_wastewater",
+          "water_proc_notbetrieb"
         ],
         "linkedDependencyTemplateIds": [
-          "water_dep_power"
+          "water_dep_power",
+          "water_dep_tankwagen"
         ],
-        "playbook": "Notbetrieb, Notwasserversorgung aktivieren, Bevölkerungs-Information, Klärwerk-Notabschaltung oder kontrollierter Überlauf.",
+        "playbook": "Notbetrieb, Notwasserversorgung über Tankwagen und mobile Aufbereitungsanlagen aktivieren (Ahrtal-Schablone: 4 Anlagen + 3 Standorte), Bevölkerungs-Information, Klärwerk-Notabschaltung oder kontrollierter Überlauf nach Abstimmung mit unterer Wasserbehörde, THW-Anforderung über Landratsamt.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Süddeutschland-2024-Schablone."
+        "notes": "L4-Wahrscheinlichkeit reflektiert die strukturell gestiegene Hochwasser-Häufigkeit (Ahrtal 2021, Bayern 2024, Niedersachsen 2023, Saarland 2024 – vier deutsche Großschadens-Ereignisse innerhalb 42 Monaten). Tenants in Auenlagen können auf L5 anheben, Tenants in höhergelegenen Lagen auf L3 abschwächen."
       },
       {
         "id": "water_scn_power",
         "title": "Stromausfall mit Notstrom-Limit",
         "category": "Versorgung",
-        "description": "Externer Stromausfall überschreitet 72-h-Notstrom-Reichweite.",
+        "description": "Externer Stromausfall überschreitet 72-h-Notstrom-Reichweite des Wasserwerks.",
         "likelihood": 2,
         "impact": 5,
         "ownerRole": "Technische Leitung",
         "linkedProcessTemplateIds": [
           "water_proc_treatment",
+          "water_proc_distribution",
+          "water_proc_notbetrieb"
+        ],
+        "linkedDependencyTemplateIds": [
+          "water_dep_power",
+          "water_dep_tankwagen"
+        ],
+        "playbook": "Hochbehälter-Reserve managen (8–24 h Druckhaltung), kritische Versorgungs-Inseln identifizieren (Krankenhaus, Pflegeheim), Tankwagen-Notversorgung aktivieren, Diesel-Nachschub für Notstrom-Aggregat sicherstellen, Krisenstab-Aktivierung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Kaskade aus Energie-Sektor — Cross-Sektor-Übung mit lokalem Verteilnetz-Betreiber empfohlen."
+      },
+      {
+        "id": "water_scn_oldsmar",
+        "title": "Fernzugriff-Übernahme Aufbereitungs-Workstation (Oldsmar-Klasse)",
+        "category": "Cyber / OT",
+        "description": "Angreifer nutzt schwach gesicherten Fernzugriff (TeamViewer-Pattern, schwaches Passwort, ungepatchtes Windows) auf Aufbereitungs-Workstation und verschiebt Sollwerte sprunghaft. Schablone Oldsmar Florida 5.2.2021: Bruce T. Haddock Water Treatment Plant, 15.000 versorgte Personen, Natronlauge-Dosierung von 100 ppm auf 11.100 ppm geändert via TeamViewer-Fernzugriff. Nur die unmittelbare Operator-Beobachtung (auffällige Maus-Bewegung am Bildschirm) verhinderte den Schaden — das Wasser wäre nach 24–36 h tödlich gewesen.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "OT-Sicherheit / Leitwart-Schicht",
+        "linkedProcessTemplateIds": [
+          "water_proc_scada",
+          "water_proc_treatment",
+          "water_proc_hygiene"
+        ],
+        "linkedDependencyTemplateIds": [
+          "water_dep_scada",
+          "water_dep_ot_wartung"
+        ],
+        "playbook": "Operator-Awareness als letzte Verteidigungs-Linie. Wachsamkeit gegenüber abweichenden Sollwerten und unerklärten Maus-Bewegungen am Bildschirm. Keine reine Technik-Lösung, sondern Operator als Mensch-im-Loop. Sofort: Workstation vom Netz trennen, Sollwerte auf letzte verifizierte Werte zurücksetzen, Hand-Probennahme zur Plausibilisierung, Plausibilitäts-Korridore und Sprung-Begrenzung in der Leitsystem-Logik aktivieren, Vier-Augen-Prinzip oberhalb definierter Schwellen erzwingen, Fernwartungs-Zugang sperren, Forensik durch OT-Sicherheits-Dienstleister, BSI-Meldung nach NIS2 binnen 24 h, CISA-Advisory AA21-042A als Referenz für Hardening.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Operator-Awareness im Drehbuch der Übung explizit machen. Eintrittspforten waren bei Oldsmar: schwache Passwörter, ungepatchtes Windows 7, Remote-Tool (TeamViewer) auf der gleichen Workstation wie das SCADA-System. Hardening-Standard: Jump-Host-Zwang, MFA, keine Remote-Desktop-Tools auf SCADA-Workstations, Quartals-Audit der OT-IT-Übergänge."
+      },
+      {
+        "id": "water_scn_kontamination",
+        "title": "Mikrobiologische Trinkwasser-Kontamination",
+        "category": "Hygiene / Qualität",
+        "description": "Mikrobiologischer Befund (E.coli, Coliforme, Legionellen) im Verteilnetz oder am Hausanschluss-Übergang. Auslöser können Sog-Effekt nach Druckverlust, Verkeimung im Hochbehälter, Verunreinigung am Brunnen-Standort oder Übergangs-Hygiene nach Bauarbeiten sein.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Hygiene-Beauftragte*r / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "water_proc_hygiene",
+          "water_proc_kunden",
+          "water_proc_notbetrieb",
           "water_proc_distribution"
         ],
         "linkedDependencyTemplateIds": [
-          "water_dep_power"
+          "water_dep_lab",
+          "water_dep_aufsichtsbehoerde"
         ],
-        "playbook": "Hochbehälter-Reserve managen, kritische Versorgungs-Inseln identifizieren, Tankwagen-Notversorgung aktivieren.",
+        "playbook": "TrinkwV § 16-Anzeige an Gesundheitsamt unverzüglich, Abkochanordnung vorbereiten und in Abstimmung mit Gesundheitsamt verkünden, Bevölkerungs-Warnung über NINA-App + Sirenen + Lautsprecher-Wagen + Pressestelle, betroffenen Netzbereich isolieren, Spülung und Chlorung, Wiederholungs-Probennahme bis zwei aufeinanderfolgende negative Proben, Aufhebungs-Anordnung mit Gesundheitsamt.",
+        "exerciseTypeHint": "alarm",
+        "notes": "Abkochanordnungs-Übung mindestens alle 24 Monate; Bevölkerungs-Warnungs-Kette (NINA, Sirenen, Lautsprecher) im Live-Test mit Stichprobe verifizieren."
+      },
+      {
+        "id": "water_scn_ransomware_water",
+        "title": "Ransomware mit Kundendaten-Exfiltration (South-Staffs-Klasse)",
+        "category": "Cyber / IT",
+        "description": "Ransomware-Gruppe verschlüsselt Werks-IT und exfiltriert Kundendaten. Schablone South Staffs Water 2022 (UK): Cl0p-Gruppe, 1,6 Mio. Kunden im Datenschutz-Vorfall, davon 249.000 mit Adresse + IBAN exfiltriert, ca. 5 TB Datenvolumen. OT blieb in diesem Fall durch saubere Segmentierung unberührt — die Trinkwasser-Aufbereitung lief weiter; der Schaden lag in IT-Verfügbarkeit, Datenschutz und Reputation.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "IT-Leitung / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "water_proc_it",
+          "water_proc_kunden",
+          "water_proc_abrechnung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "water_dep_aufsichtsbehoerde"
+        ],
+        "playbook": "OT-Segmentierung verifizieren — keine Querverbindung zur SCADA-Welt, Aufbereitung läuft unverändert weiter. Werks-IT vom Netz trennen, Backup-Wiederherstellung aus Offline-/Immutable-Backups, BSI-Meldung nach NIS2 binnen 24 h, DSGVO Art. 33-Meldung an Landesdatenschutzbeauftragte binnen 72 h, Betroffenen-Information nach DSGVO Art. 34, Hotline für Kundenanfragen, ggf. Bonitäts-Schutz für Betroffene anbieten, Pressestelle-Statement, Strafanzeige.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Kaskade aus Energie-Sektor — Cross-Sektor-Übung empfohlen."
+        "notes": "Cross-Funktions-Übung mit IT, Vertrieb, Datenschutz, Pressestelle. South Staffs-Schablone als Lehrstück für saubere OT-IT-Segmentierung — der Klassiker, dass IT brennen kann, ohne dass die Trinkwasser-Aufbereitung beeinträchtigt ist."
+      },
+      {
+        "id": "water_scn_trockenheit",
+        "title": "Trockenheit und Rohwasser-Knappheit",
+        "category": "Naturgefahr",
+        "description": "Anhaltende Trockenphase senkt Grundwasser-Stand oder Talsperren-Pegel; Brunnen-Förderleistung sinkt; Rohwasser-Qualität verschlechtert sich. Schablone Niedersachsen 2018–2020: drei aufeinanderfolgende Trockenjahre senkten Grundwasser-Stände regional um mehr als 1 Meter, einzelne Versorger mussten Verbund-Bezug aktivieren oder Verbrauchsreduktions-Aufrufe an die Bevölkerung richten.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Wassermeister / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "water_proc_treatment",
+          "water_proc_notbetrieb",
+          "water_proc_kunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "water_dep_brunnen",
+          "water_dep_tankwagen"
+        ],
+        "playbook": "Förderleistung der Brunnen überwachen, Verbund-Bezug mit Nachbar-Versorger aktivieren, Verbrauchsreduktions-Aufruf an Bevölkerung (Garten, Pool, Auto), bei industriellen Großverbrauchern Bezugsbeschränkung verhandeln, untere Wasserbehörde einbinden für Wasserrechts-Anpassung, langfristig Zweitbrunnen-Erschließung oder Verbund-Ausbau planen.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Klimawandel-relevant — Wahrscheinlichkeit könnte mittelfristig steigen. Cross-Sektor-Übung mit Landwirtschafts-Verband empfohlen, weil Bewässerungs-Bedarf und Trinkwasser-Bedarf konkurrieren können."
+      },
+      {
+        "id": "water_scn_klaerwerk_vorfall",
+        "title": "Klärwerks-Vorfall mit DüV-Verstoß",
+        "category": "Umwelt / Compliance",
+        "description": "Phosphor-Fällung-Ausfall, Klärbiologie-Stoßbelastung oder Faulturm-Heizungs-Defekt führt zu ungereinigtem oder unzureichend gereinigtem Abwasser im Vorfluter. WHG-Verstoß und mögliche DüV-Verstoß (Phosphor-/Nitrat-Überschreitung in Klärschlamm-Verwertung), Anzeige bei unterer Wasserbehörde, Wasserschutzpolizei-Ermittlung, Bußgeld.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Klärwerks-Leitung / Umweltbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "water_proc_wastewater",
+          "water_proc_sludge"
+        ],
+        "linkedDependencyTemplateIds": [
+          "water_dep_aufsichtsbehoerde",
+          "water_dep_sludge"
+        ],
+        "playbook": "Vorfluter-Probennahme verstärken, Industrie-Einleiter bei Stoßbelastung identifizieren und ggf. Einleitstop, untere Wasserbehörde unverzüglich anzeigen, Wasserschutzpolizei-Kontakt vorbereiten, Klärbiologie-Wiederaufbau (2–6 Wochen bei Schlammflora-Kollaps), Klärschlamm-Verwertungs-Pfad bei DüV-Überschreitung umstellen auf Verbrennungs-Pfad, Pressestelle-Statement, Bußgeld-Verfahren begleiten.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Cross-Sektor-Übung mit unterer Wasserbehörde und Wasserschutzpolizei — klassische Compliance-Kette mit klarem Eskalations-Korridor."
       }
     ],
     "exerciseTemplates": [
@@ -514,7 +762,7 @@
         "scenarioTemplateId": "water_scn_scada",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Oldsmar-Schablone, mit OT-Sicherheit und Wassermeister durchführen."
+        "notes": "Allgemeine SCADA-Manipulations-Übung mit OT-Sicherheit und Wassermeister durchführen. Operator-Awareness im Drehbuch (Hand-Probennahme zur Plausibilisierung der Sensor-Werte)."
       },
       {
         "id": "water_ex_flood",
@@ -522,8 +770,35 @@
         "exerciseType": "tabletop",
         "scenarioTemplateId": "water_scn_flood",
         "ownerRole": "Krisenstab",
+        "cadenceMonths": 24,
+        "notes": "Mit Geschäftsführung, Wassermeister, Klärwerks-Leitung und unterer Wasserbehörde. Ahrtal-Schablone als Drehbuch-Grundlage; Tankwagen-Logistik und mobile Aufbereitungsanlagen-Anforderung üben."
+      },
+      {
+        "id": "water_ex_oldsmar",
+        "title": "Fernzugriff-Übernahme Tabletop (Operator-Awareness-Fokus)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "water_scn_oldsmar",
+        "ownerRole": "OT-Sicherheit / Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Mit Geschäftsführung, Wassermeister, Klärwerks-Leitung und unterer Wasserbehörde."
+        "notes": "Operator-Awareness als Kernlehrwert. Drehbuch: Übungsleiter zeigt Operator unangekündigt eine sprunghafte Sollwert-Änderung am Bildschirm; bewertet wird, wie schnell Operator reagiert, Workstation isoliert und Hand-Probennahme einleitet. Eintrittspforten Oldsmar-2021 (TeamViewer, schwaches Passwort, Windows 7) im Nachgespräch durchgehen."
+      },
+      {
+        "id": "water_ex_abkochanordnung",
+        "title": "Abkochanordnung Live-Alarm",
+        "exerciseType": "alarm",
+        "scenarioTemplateId": "water_scn_kontamination",
+        "ownerRole": "Hygiene-Beauftragte*r / Pressestelle",
+        "cadenceMonths": 24,
+        "notes": "Live-Alarm-Übung: NINA-App-Test-Auslösung (mit Behörden-Abstimmung), Sirenen-Probelauf, Lautsprecher-Wagen-Stichprobe in einem Stadtteil, Hotline-Erreichbarkeits-Test, Pressestellen-Statement binnen 30 Minuten, Gesundheitsamt-Kontakt während des Alarms."
+      },
+      {
+        "id": "water_ex_tankwagen_live",
+        "title": "Tankwagen-Notwasserversorgung Live-Übung",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "water_scn_flood",
+        "ownerRole": "Technische Geschäftsführung",
+        "cadenceMonths": 36,
+        "notes": "Echte Live-Übung: Tankwagen-Dienstleister aktivieren (mit Vorabsprache), eine Stichproben-Adresse echt versorgen, Verteilstelle aufbauen, Bevölkerungs-Information üben. Cross-Sektor mit THW und Landratsamt. DVGW W 405 als Maßstab."
       }
     ],
     "riskCatalogTemplates": [

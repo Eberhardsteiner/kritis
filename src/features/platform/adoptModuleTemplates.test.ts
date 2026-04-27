@@ -1787,3 +1787,233 @@ describe('energy-core · Resilience-Skeleton (C5.5.6)', () => {
     expect(uenb!.singlePointOfFailure).toBe(true);
   });
 });
+
+describe('water-core · Resilience-Skeleton (C5.5.7)', () => {
+  const module = waterPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates', () => {
+    expect((module.processTemplates ?? []).length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    expect((module.dependencyTemplates ?? []).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    expect((module.scenarioTemplates ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    expect((module.exerciseTemplates ?? []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 5 kritisch / 3 hoch / 2 mittel', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(5);
+    expect(hoch).toBe(3);
+    expect(mittel).toBe(2);
+  });
+
+  it('Bestands-IDs (alle 9) bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    expect(processIds.has('water_proc_treatment')).toBe(true);
+    expect(processIds.has('water_proc_distribution')).toBe(true);
+    expect(processIds.has('water_proc_wastewater')).toBe(true);
+    expect(depIds.has('water_dep_power')).toBe(true);
+    expect(depIds.has('water_dep_chemicals')).toBe(true);
+    expect(depIds.has('water_dep_lab')).toBe(true);
+    expect(depIds.has('water_dep_sludge')).toBe(true);
+    expect(scnIds.has('water_scn_scada')).toBe(true);
+    expect(scnIds.has('water_scn_flood')).toBe(true);
+    expect(scnIds.has('water_scn_power')).toBe(true);
+    expect(exIds.has('water_ex_scada')).toBe(true);
+    expect(exIds.has('water_ex_flood')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const orphans: string[] = [];
+    for (const exercise of module.exerciseTemplates ?? []) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    for (const scenario of module.scenarioTemplates ?? []) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('OT-IT-Trennung-Verifikation: water_proc_scada (kritisch OT) + water_proc_it (hoch IT) als getrennte Prozesse', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    expect(processIds.has('water_proc_scada')).toBe(true);
+    expect(processIds.has('water_proc_it')).toBe(true);
+    const scada = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_scada');
+    const it = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_it');
+    expect(scada?.criticality).toBe('kritisch');
+    expect(it?.criticality).toBe('hoch');
+    // Querverweise in Notes — gegenseitige Erwähnung der Trennung
+    expect(scada?.notes).toMatch(/water_proc_it|IT-Office|Office-Netz/);
+    expect(it?.notes).toMatch(/water_proc_scada|OT/);
+  });
+
+  it('Hochwasser-L4-Beibehaltung mit Klimawandel-Notes (Ahrtal/Bayern/Niedersachsen/Saarland)', () => {
+    const flood = (module.scenarioTemplates ?? []).find((s) => s.id === 'water_scn_flood');
+    expect(flood).toBeDefined();
+    expect(flood!.likelihood).toBe(4);
+    expect(flood!.impact).toBe(5);
+    expect(flood!.notes).toMatch(/Klimawandel|strukturell gestiegen|gestiegene Hochwasser/);
+    expect(flood!.notes).toMatch(/Ahrtal/);
+    expect(flood!.notes).toMatch(/Bayern/);
+    expect(flood!.notes).toMatch(/Niedersachsen/);
+    expect(flood!.notes).toMatch(/Saarland/);
+    expect(flood!.notes).toMatch(/42 Monaten/);
+  });
+
+  it('Oldsmar-Szenario L2 (Score 10) mit Operator-Awareness im Playbook', () => {
+    const oldsmar = (module.scenarioTemplates ?? []).find((s) => s.id === 'water_scn_oldsmar');
+    expect(oldsmar).toBeDefined();
+    expect(oldsmar!.likelihood).toBe(2);
+    expect(oldsmar!.impact).toBe(5);
+    // Operator-Awareness als letzte Verteidigungs-Linie wörtlich
+    expect(oldsmar!.playbook).toMatch(/Operator-Awareness als letzte Verteidigungs-Linie/);
+    expect(oldsmar!.playbook).toMatch(/Mensch-im-Loop/);
+    // Oldsmar-Faktendetails in description
+    expect(oldsmar!.description).toMatch(/Oldsmar/);
+    expect(oldsmar!.description).toMatch(/100 ppm/);
+    expect(oldsmar!.description).toMatch(/11\.100 ppm/);
+    expect(oldsmar!.description).toMatch(/TeamViewer/);
+    expect(oldsmar!.description).toMatch(/5\.2\.2021|2021/);
+  });
+
+  it('South-Staffs-Schablone in Ransomware-Szenario (Cl0p, 1,6 Mio., 5 TB)', () => {
+    const ransomware = (module.scenarioTemplates ?? []).find((s) => s.id === 'water_scn_ransomware_water');
+    expect(ransomware).toBeDefined();
+    expect(ransomware!.description).toMatch(/South Staffs/);
+    expect(ransomware!.description).toMatch(/Cl0p/);
+    expect(ransomware!.description).toMatch(/1,6 Mio/);
+    expect(ransomware!.description).toMatch(/5 TB/);
+    expect(ransomware!.description).toMatch(/2022/);
+  });
+
+  it('Trinkwasser-Hygiene-Prozess mit TrinkwV + Abkochanordnung', () => {
+    const hygiene = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_hygiene');
+    expect(hygiene).toBeDefined();
+    expect(hygiene!.criticality).toBe('kritisch');
+    expect(hygiene!.notes).toMatch(/Abkochanordnung|TrinkwV/);
+    expect(hygiene!.outputs).toMatch(/TrinkwV/);
+  });
+
+  it('Notwasserversorgungs-Prozess mit Ahrtal-Schablone und DVGW W 405', () => {
+    const notbetrieb = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_notbetrieb');
+    expect(notbetrieb).toBeDefined();
+    expect(notbetrieb!.criticality).toBe('kritisch');
+    expect(notbetrieb!.notes).toMatch(/Ahrtal/);
+    expect(notbetrieb!.notes).toMatch(/DVGW W 405|W 405/);
+    expect(notbetrieb!.notes).toMatch(/Tankwagen/);
+  });
+
+  it('Klärwerks-Aufteilung: water_proc_wastewater (hoch) + water_proc_sludge (mittel)', () => {
+    const wastewater = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_wastewater');
+    const sludge = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_sludge');
+    expect(wastewater).toBeDefined();
+    expect(sludge).toBeDefined();
+    expect(wastewater!.criticality).toBe('hoch');
+    expect(sludge!.criticality).toBe('mittel');
+    // sludge-Notes erwähnen DüV oder Phosphor-Rückgewinnung
+    expect(sludge!.notes).toMatch(/DüV|Phosphor/);
+  });
+
+  it('Abrechnung als mittel (Mittelweg-Verteilung)', () => {
+    const abrechnung = (module.processTemplates ?? []).find((p) => p.id === 'water_proc_abrechnung');
+    expect(abrechnung).toBeDefined();
+    expect(abrechnung!.criticality).toBe('mittel');
+  });
+
+  it('SCADA-Dependency mit category="ot" (OT-Pattern)', () => {
+    const scada = (module.dependencyTemplates ?? []).find((d) => d.id === 'water_dep_scada');
+    expect(scada).toBeDefined();
+    expect(scada!.category).toBe('ot');
+    expect(scada!.criticality).toBe('kritisch');
+    expect(scada!.singlePointOfFailure).toBe(true);
+  });
+
+  it('Brunnen-Dependency als kritisch (Wasserrechte) mit category="behoerde"', () => {
+    const brunnen = (module.dependencyTemplates ?? []).find((d) => d.id === 'water_dep_brunnen');
+    expect(brunnen).toBeDefined();
+    expect(brunnen!.category).toBe('behoerde');
+    expect(brunnen!.criticality).toBe('kritisch');
+  });
+
+  it('Aufsichtsbehörden-Dependency mit Untere Wasserbehörde + Gesundheitsamt', () => {
+    const aufsicht = (module.dependencyTemplates ?? []).find((d) => d.id === 'water_dep_aufsichtsbehoerde');
+    expect(aufsicht).toBeDefined();
+    expect(aufsicht!.category).toBe('behoerde');
+    expect(aufsicht!.title).toMatch(/Wasserbehörde/);
+    expect(aufsicht!.title).toMatch(/Gesundheitsamt/);
+  });
+
+  it('Übungs-Mix: tabletop + alarm + simulation', () => {
+    const exerciseTypes = new Set((module.exerciseTemplates ?? []).map((e) => e.exerciseType));
+    expect(exerciseTypes.has('tabletop')).toBe(true);
+    expect(exerciseTypes.has('alarm')).toBe(true);
+    expect(exerciseTypes.has('simulation')).toBe(true);
+  });
+
+  it('Abkochanordnungs-Übung als alarm-Typ verlinkt mit Kontaminations-Szenario', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'water_ex_abkochanordnung');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('alarm');
+    expect(ex!.scenarioTemplateId).toBe('water_scn_kontamination');
+  });
+
+  it('Tankwagen-Live-Übung als simulation-Typ mit 36-Monats-Kadenz', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'water_ex_tankwagen_live');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('simulation');
+    expect(ex!.cadenceMonths).toBe(36);
+  });
+
+  it('Oldsmar-Übung mit Operator-Awareness im Drehbuch (Notes)', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'water_ex_oldsmar');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.scenarioTemplateId).toBe('water_scn_oldsmar');
+    expect(ex!.notes).toMatch(/Operator-Awareness|Operator/);
+  });
+});
