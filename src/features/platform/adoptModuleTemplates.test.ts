@@ -2017,3 +2017,309 @@ describe('water-core · Resilience-Skeleton (C5.5.7)', () => {
     expect(ex!.notes).toMatch(/Operator-Awareness|Operator/);
   });
 });
+
+describe('it-telecom-core · Resilience-Skeleton (C5.5.8)', () => {
+  const module = itTelecomPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates', () => {
+    expect((module.processTemplates ?? []).length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    expect((module.dependencyTemplates ?? []).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    expect((module.scenarioTemplates ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    expect((module.exerciseTemplates ?? []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 7 kritisch / 2 hoch / 1 mittel (sektor-typisch scharf)', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(7);
+    expect(hoch).toBe(2);
+    expect(mittel).toBe(1);
+  });
+
+  it('Bestands-IDs (alle 12) bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    expect(processIds.has('it_proc_backbone')).toBe(true);
+    expect(processIds.has('it_proc_cloud_ops')).toBe(true);
+    expect(processIds.has('it_proc_endkunden')).toBe(true);
+    expect(depIds.has('it_dep_power')).toBe(true);
+    expect(depIds.has('it_dep_cooling')).toBe(true);
+    expect(depIds.has('it_dep_upstream')).toBe(true);
+    expect(depIds.has('it_dep_hardware')).toBe(true);
+    expect(scnIds.has('it_scn_bgp')).toBe(true);
+    expect(scnIds.has('it_scn_rz_power')).toBe(true);
+    expect(scnIds.has('it_scn_submarine_cable')).toBe(true);
+    expect(exIds.has('it_ex_bgp')).toBe(true);
+    expect(exIds.has('it_ex_rz_power')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const orphans: string[] = [];
+    for (const exercise of module.exerciseTemplates ?? []) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    for (const scenario of module.scenarioTemplates ?? []) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('Netzbetrieb-Werks-IT-Trennung: it_proc_backbone (kritisch) + it_proc_it (hoch) als getrennte Prozesse mit Querverweisen', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    expect(processIds.has('it_proc_backbone')).toBe(true);
+    expect(processIds.has('it_proc_it')).toBe(true);
+    const backbone = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_backbone');
+    const it = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_it');
+    expect(backbone?.criticality).toBe('kritisch');
+    expect(it?.criticality).toBe('hoch');
+    // Querverweise: it_proc_it.notes erwähnt Netzbetrieb-Trennung
+    expect(it?.notes).toMatch(/Netzbetrieb|it_proc_backbone|it_proc_mobilfunk/);
+  });
+
+  it('Sieben Telekom-Prozesse + drei Cloud-/Datacenter-Querschnitt-Prozesse', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    // Telekom-zentriert (7)
+    expect(processIds.has('it_proc_backbone')).toBe(true);
+    expect(processIds.has('it_proc_mobilfunk')).toBe(true);
+    expect(processIds.has('it_proc_endkunden')).toBe(true);
+    expect(processIds.has('it_proc_notrufnummern')).toBe(true);
+    expect(processIds.has('it_proc_it')).toBe(true);
+    expect(processIds.has('it_proc_customer')).toBe(true);
+    expect(processIds.has('it_proc_soc')).toBe(true);
+    // Cloud-/Datacenter-Querschnitt (3)
+    expect(processIds.has('it_proc_cloud_ops')).toBe(true);
+    expect(processIds.has('it_proc_datacenter')).toBe(true);
+    expect(processIds.has('it_proc_abrechnung')).toBe(true);
+  });
+
+  it('Cloud-/Datacenter-Querschnitt-Prozesse mit Tenant-Adoption-Hinweis in Notes', () => {
+    const cloudOps = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_cloud_ops');
+    const datacenter = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_datacenter');
+    expect(cloudOps?.notes).toMatch(/nicht anwendbar|Schwerpunkt|Cloud-Provider/);
+    expect(datacenter?.notes).toMatch(/nicht anwendbar|Schwerpunkt|MVNO|Datacenter-Operatoren/);
+  });
+
+  it('Backbone RPO 0h beibehalten (Echtzeit-Routing-State)', () => {
+    const backbone = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_backbone');
+    expect(backbone).toBeDefined();
+    expect(parseFloat(backbone!.rpoHours ?? '99')).toBe(0);
+  });
+
+  it('Cloud-Operations MTPD 8h / RTO 4h beibehalten (Multi-Region-Failover-Komplexität)', () => {
+    const cloudOps = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_cloud_ops');
+    expect(cloudOps).toBeDefined();
+    expect(parseFloat(cloudOps!.mtpdHours ?? '0')).toBe(8);
+    expect(parseFloat(cloudOps!.rtoHours ?? '0')).toBe(4);
+  });
+
+  it('Endkunden MTPD 4h / RTO 2h verschärft (sektor-typische Sub-Stunden-SLA)', () => {
+    const endkunden = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_endkunden');
+    expect(endkunden).toBeDefined();
+    expect(parseFloat(endkunden!.mtpdHours ?? '0')).toBe(4);
+    expect(parseFloat(endkunden!.rtoHours ?? '0')).toBe(2);
+  });
+
+  it('Notrufnummern-Prozess mit schärfster MTPD/RTO im Pack (1h/0.5h/0.25h)', () => {
+    const notruf = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_notrufnummern');
+    expect(notruf).toBeDefined();
+    expect(notruf!.criticality).toBe('kritisch');
+    expect(parseFloat(notruf!.mtpdHours ?? '99')).toBe(1);
+    expect(parseFloat(notruf!.rtoHours ?? '99')).toBe(0.5);
+    expect(parseFloat(notruf!.rpoHours ?? '99')).toBe(0.25);
+    expect(notruf!.notes).toMatch(/BNetzA-Eskalation|110|112/);
+    expect(notruf!.notes).toMatch(/DB-Trasse|08\.10\.2022/);
+  });
+
+  it('BGP-Szenario L4 beibehalten + Cloudflare-2024-Schablone in Description', () => {
+    const bgp = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_bgp');
+    expect(bgp).toBeDefined();
+    expect(bgp!.likelihood).toBe(4);
+    expect(bgp!.impact).toBe(5);
+    expect(bgp!.description).toMatch(/Cloudflare/);
+    expect(bgp!.description).toMatch(/27\.06\.2024|2024/);
+    expect(bgp!.description).toMatch(/AS267613|1\.1\.1\.1/);
+    expect(bgp!.description).toMatch(/RPKI|ROV/);
+  });
+
+  it('RZ-Stromausfall-Szenario L2 (gelockert von Bestand L3, aktuelle Notstrom-Disziplin)', () => {
+    const rz = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_rz_power');
+    expect(rz).toBeDefined();
+    expect(rz!.likelihood).toBe(2);
+    expect(rz!.impact).toBe(5);
+  });
+
+  it('Facebook-2021-Szenario mit Self-Inflicted-Pointe und Badge-Lockout-Detail', () => {
+    const fb = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_facebook_self');
+    expect(fb).toBeDefined();
+    expect(fb!.likelihood).toBe(2);
+    expect(fb!.impact).toBe(5);
+    expect(fb!.description).toMatch(/Facebook|Meta/);
+    expect(fb!.description).toMatch(/04\.10\.2021|2021/);
+    expect(fb!.description).toMatch(/Badge|Auth/);
+    expect(fb!.playbook).toMatch(/Out-of-Band/);
+  });
+
+  it('CrowdStrike-2024-Szenario mit Channel-File-Detail und Schadenshöhe', () => {
+    const cs = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_crowdstrike');
+    expect(cs).toBeDefined();
+    expect(cs!.likelihood).toBe(2);
+    expect(cs!.impact).toBe(4);
+    expect(cs!.description).toMatch(/CrowdStrike/);
+    expect(cs!.description).toMatch(/19\.07\.2024|2024/);
+    expect(cs!.description).toMatch(/Channel File|csagent\.sys|Falcon/);
+    expect(cs!.description).toMatch(/8,5 Mio|8\.5 Mio/);
+  });
+
+  it('DDoS-Szenario L4 mit Tbps-Größenordnung und Mirai-Botnet-Schablone', () => {
+    const ddos = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_ddos_tbps');
+    expect(ddos).toBeDefined();
+    expect(ddos!.likelihood).toBe(4);
+    expect(ddos!.impact).toBe(4);
+    expect(ddos!.description).toMatch(/Tbps/);
+    expect(ddos!.description).toMatch(/Mirai/);
+    expect(ddos!.notes).toMatch(/Telekom-Router-Bot|900\.000|Speedport/);
+  });
+
+  it('Notruf-Outage-Szenario mit DB-Trasse-Sabotage 08.10.2022 als Hauptschablone', () => {
+    const notruf = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_notruf_outage');
+    expect(notruf).toBeDefined();
+    expect(notruf!.likelihood).toBe(2);
+    expect(notruf!.impact).toBe(5);
+    expect(notruf!.description).toMatch(/DB-Trasse|08\.10\.2022/);
+    expect(notruf!.description).toMatch(/Berlin-Karow|Herne/);
+    expect(notruf!.description).toMatch(/GSM-R|Bahnfunk/);
+    expect(notruf!.description).toMatch(/3 h|drei Stunden/i);
+    expect(notruf!.playbook).toMatch(/BNetzA-Eskalation|1 h|binnen.*1/);
+  });
+
+  it('Submarine-Cable-Szenario mit Yi-Peng-3 + Eagle-S 2024-Schablonen', () => {
+    const sub = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_submarine_cable');
+    expect(sub).toBeDefined();
+    expect(sub!.description).toMatch(/Yi Peng 3|Yi-Peng-3/);
+    expect(sub!.description).toMatch(/Eagle-S|Eagle S/);
+    expect(sub!.description).toMatch(/2024/);
+    expect(sub!.description).toMatch(/BCS East-West|C-Lion1|Estlink/);
+  });
+
+  it('Daten-Exfiltration-Szenario mit DSGVO + TKG/TKDSG-Sondervorschriften', () => {
+    const exfil = (module.scenarioTemplates ?? []).find((s) => s.id === 'it_scn_data_exfil');
+    expect(exfil).toBeDefined();
+    expect(exfil!.likelihood).toBe(3);
+    expect(exfil!.impact).toBe(4);
+    expect(exfil!.description).toMatch(/TKG|TKDSG|TTDSG/);
+    expect(exfil!.description).toMatch(/Verkehrsdaten/);
+    expect(exfil!.description).toMatch(/DSGVO|Art\. 33|Art\. 34/);
+  });
+
+  it('Glasfaser-Dependency als kritisch SPOF mit DB-Trasse-Sabotage-Schablone', () => {
+    const glasfaser = (module.dependencyTemplates ?? []).find((d) => d.id === 'it_dep_glasfaser');
+    expect(glasfaser).toBeDefined();
+    expect(glasfaser!.category).toBe('infrastruktur');
+    expect(glasfaser!.criticality).toBe('kritisch');
+    expect(glasfaser!.singlePointOfFailure).toBe(true);
+    expect(glasfaser!.notes).toMatch(/DB-Trasse|08\.10\.2022/);
+  });
+
+  it('BNetzA-Frequenz-Dependency als behoerde, kritisch (Mobilfunk-Voraussetzung)', () => {
+    const frequenz = (module.dependencyTemplates ?? []).find((d) => d.id === 'it_dep_frequenz');
+    expect(frequenz).toBeDefined();
+    expect(frequenz!.category).toBe('behoerde');
+    expect(frequenz!.criticality).toBe('kritisch');
+  });
+
+  it('Cell-Broadcast-Dependency mit NINA/MoWaS-Anbindung', () => {
+    const cb = (module.dependencyTemplates ?? []).find((d) => d.id === 'it_dep_cellbroadcast');
+    expect(cb).toBeDefined();
+    expect(cb!.title).toMatch(/Cell-Broadcast|NINA|MoWaS/);
+  });
+
+  it('Abrechnung als mittel (Mittelweg-Verteilung)', () => {
+    const abrechnung = (module.processTemplates ?? []).find((p) => p.id === 'it_proc_abrechnung');
+    expect(abrechnung).toBeDefined();
+    expect(abrechnung!.criticality).toBe('mittel');
+    // TKG/TKDSG-Sondervorschrift in Notes erwähnen
+    expect(abrechnung!.notes).toMatch(/TKG|TKDSG|TTDSG|Verkehrsdaten/);
+  });
+
+  it('Übungs-Mix: tabletop + technical', () => {
+    const exerciseTypes = new Set((module.exerciseTemplates ?? []).map((e) => e.exerciseType));
+    expect(exerciseTypes.has('tabletop')).toBe(true);
+    expect(exerciseTypes.has('technical')).toBe(true);
+  });
+
+  it('RZ-Stromausfall-Übung mit gelockerter Kadenz 24 Monate (passend zu L2)', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'it_ex_rz_power');
+    expect(ex).toBeDefined();
+    expect(ex!.cadenceMonths).toBe(24);
+  });
+
+  it('DDoS-Funktionstest als technical mit 12-Monats-Kadenz', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'it_ex_ddos_test');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('technical');
+    expect(ex!.cadenceMonths).toBe(12);
+    expect(ex!.scenarioTemplateId).toBe('it_scn_ddos_tbps');
+  });
+
+  it('Notruf-Failover-Live-Übung als technical mit 36-Monats-Kadenz', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'it_ex_notruf_failover');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('technical');
+    expect(ex!.cadenceMonths).toBe(36);
+    expect(ex!.scenarioTemplateId).toBe('it_scn_notruf_outage');
+    expect(ex!.notes).toMatch(/BNetzA/);
+  });
+
+  it('Supply-Chain-Patch-Tabletop verlinkt mit CrowdStrike-Szenario', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'it_ex_supplychain_patch');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.scenarioTemplateId).toBe('it_scn_crowdstrike');
+    expect(ex!.cadenceMonths).toBe(24);
+  });
+});
