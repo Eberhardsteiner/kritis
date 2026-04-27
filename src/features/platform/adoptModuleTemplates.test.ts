@@ -2323,3 +2323,325 @@ describe('it-telecom-core · Resilience-Skeleton (C5.5.8)', () => {
     expect(ex!.cadenceMonths).toBe(24);
   });
 });
+
+describe('finance-core · Resilience-Skeleton (C5.5.9)', () => {
+  const module = financePack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates', () => {
+    expect((module.processTemplates ?? []).length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    expect((module.dependencyTemplates ?? []).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    expect((module.scenarioTemplates ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    expect((module.exerciseTemplates ?? []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 4 kritisch / 5 hoch / 1 mittel', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(4);
+    expect(hoch).toBe(5);
+    expect(mittel).toBe(1);
+  });
+
+  it('Bestands-IDs (alle 12) bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    expect(processIds.has('fin_proc_online_banking')).toBe(true);
+    expect(processIds.has('fin_proc_settlement')).toBe(true);
+    expect(processIds.has('fin_proc_compliance')).toBe(true);
+    expect(depIds.has('fin_dep_core_banking')).toBe(true);
+    expect(depIds.has('fin_dep_sepa_swift')).toBe(true);
+    expect(depIds.has('fin_dep_bundesbank')).toBe(true);
+    expect(depIds.has('fin_dep_ddos_mitigation')).toBe(true);
+    expect(scnIds.has('fin_scn_online_banking_ddos')).toBe(true);
+    expect(scnIds.has('fin_scn_core_banking_outage')).toBe(true);
+    expect(scnIds.has('fin_scn_insider_trading')).toBe(true);
+    expect(exIds.has('fin_ex_online_banking_ddos')).toBe(true);
+    expect(exIds.has('fin_ex_core_banking_outage')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const orphans: string[] = [];
+    for (const exercise of module.exerciseTemplates ?? []) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    for (const scenario of module.scenarioTemplates ?? []) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('Banken-/Versicherungs-Aufteilung: 7 Banken-zentriert + 3 Versicherungs-Querschnitt', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    // Banken-zentriert (7)
+    expect(processIds.has('fin_proc_online_banking')).toBe(true);
+    expect(processIds.has('fin_proc_settlement')).toBe(true);
+    expect(processIds.has('fin_proc_filiale')).toBe(true);
+    expect(processIds.has('fin_proc_it')).toBe(true);
+    expect(processIds.has('fin_proc_compliance')).toBe(true);
+    expect(processIds.has('fin_proc_third_party')).toBe(true);
+    expect(processIds.has('fin_proc_treasury')).toBe(true);
+    // Versicherungs-Querschnitt (3)
+    expect(processIds.has('fin_proc_schaden')).toBe(true);
+    expect(processIds.has('fin_proc_bestand')).toBe(true);
+    expect(processIds.has('fin_proc_vertrieb')).toBe(true);
+  });
+
+  it('Versicherungs-Querschnitt-Prozesse mit Tenant-Adoption-Hinweis (Reine Banken können als nicht anwendbar markieren)', () => {
+    const schaden = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_schaden');
+    const bestand = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_bestand');
+    const vertrieb = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_vertrieb');
+    expect(schaden?.notes).toMatch(/Versicherungs-Tenants|nicht anwendbar/);
+    expect(bestand?.notes).toMatch(/Versicherungs-Tenants|nicht anwendbar/);
+    expect(vertrieb?.notes).toMatch(/Versicherungs-Tenants|nicht anwendbar/);
+  });
+
+  it('DORA-Schicht in zwei Prozessen verankert: Compliance + Third-Party-Risk', () => {
+    const compliance = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_compliance');
+    const thirdParty = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_third_party');
+    expect(compliance).toBeDefined();
+    expect(thirdParty).toBeDefined();
+    expect(compliance!.notes).toMatch(/DORA-Säule erkennbar/);
+    expect(compliance!.notes).toMatch(/17\.01\.2025/);
+    expect(thirdParty!.notes).toMatch(/DORA-Säule erkennbar/);
+    expect(thirdParty!.notes).toMatch(/Säule 5|Third-Party/);
+  });
+
+  it('Compliance-Prozess kritisch (verschärft gegenüber Bestand hoch wegen DORA Art. 19 4h-Frist)', () => {
+    const compliance = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_compliance');
+    expect(compliance).toBeDefined();
+    expect(compliance!.criticality).toBe('kritisch');
+    expect(compliance!.notes).toMatch(/4 h|Art\. 19/);
+  });
+
+  it('Online-Banking RPO 0h beibehalten (Echtzeit-Transaktionen)', () => {
+    const ob = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_online_banking');
+    expect(ob).toBeDefined();
+    expect(parseFloat(ob!.rpoHours ?? '99')).toBe(0);
+  });
+
+  it('Settlement MTPD/RTO 4h/2h verschärft (gegenüber Bestand 8h/4h, ICBC-Schablone)', () => {
+    const settlement = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_settlement');
+    expect(settlement).toBeDefined();
+    expect(parseFloat(settlement!.mtpdHours ?? '0')).toBe(4);
+    expect(parseFloat(settlement!.rtoHours ?? '0')).toBe(2);
+    expect(settlement!.notes).toMatch(/ICBC|USB-Stick|08\.11\.2023/);
+  });
+
+  it('Treasury als kritisch mit ELA-Bezug', () => {
+    const treasury = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_treasury');
+    expect(treasury).toBeDefined();
+    expect(treasury!.criticality).toBe('kritisch');
+    expect(treasury!.notes).toMatch(/ELA|EZB-Notfall/);
+  });
+
+  it('Vertrieb als mittel (einzige mittel-Stufe)', () => {
+    const vertrieb = (module.processTemplates ?? []).find((p) => p.id === 'fin_proc_vertrieb');
+    expect(vertrieb).toBeDefined();
+    expect(vertrieb!.criticality).toBe('mittel');
+  });
+
+  it('Online-Banking-DDoS-Szenario L4/I5 (Bestand) mit SVB-Twitter-Schablone', () => {
+    const ddos = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_online_banking_ddos');
+    expect(ddos).toBeDefined();
+    expect(ddos!.likelihood).toBe(4);
+    expect(ddos!.impact).toBe(5);
+    expect(ddos!.description).toMatch(/SVB|09\.03\.2023/);
+    expect(ddos!.description).toMatch(/42 Mrd|Twitter/);
+  });
+
+  it('Insider-Trading-Szenario L2/I4 gelockert (Bestand L3/I5 zu Spec L2/I4)', () => {
+    const insider = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_insider_trading');
+    expect(insider).toBeDefined();
+    expect(insider!.likelihood).toBe(2);
+    expect(insider!.impact).toBe(4);
+    expect(insider!.description).toMatch(/Société Générale|Kerviel|2008/);
+  });
+
+  it('Core-Banking-Szenario mit ICBC-2023 + FI-Panne-2019 als zwei deutsche Pattern', () => {
+    const cb = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_core_banking_outage');
+    expect(cb).toBeDefined();
+    expect(cb!.description).toMatch(/ICBC|08\.11\.2023/);
+    expect(cb!.description).toMatch(/FI-Panne|Dezember 2019|Helaba/);
+    expect(cb!.description).toMatch(/USB-Stick|CitrixBleed/);
+  });
+
+  it('DORA-TLPT-Szenario mit TLPT-Pflicht-Differenzierung (G-SIIs vs. Mittelstand)', () => {
+    const tlpt = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_dora_tlpt');
+    expect(tlpt).toBeDefined();
+    expect(tlpt!.likelihood).toBe(3);
+    expect(tlpt!.impact).toBe(4);
+    expect(tlpt!.description).toMatch(/TLPT/);
+    expect(tlpt!.description).toMatch(/G-SIIs|O-SIIs/);
+    expect(tlpt!.description).toMatch(/3 Jahre/);
+    expect(tlpt!.description).toMatch(/Mittelständische|nicht TLPT-pflichtig/);
+    expect(tlpt!.description).toMatch(/Pillar 3|jährlich/);
+    expect(tlpt!.notes).toMatch(/RTS EU 2025\/1190|18\.06\.2025|UVM/);
+  });
+
+  it('MOVEit-Szenario mit Cl0p + Capital-One-WAF-SSRF-Korrektur', () => {
+    const moveit = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_moveit_data_exfil');
+    expect(moveit).toBeDefined();
+    expect(moveit!.description).toMatch(/MOVEit/);
+    expect(moveit!.description).toMatch(/Cl0p/);
+    expect(moveit!.description).toMatch(/CVE-2023-34362/);
+    expect(moveit!.description).toMatch(/Deutsche Bank|ING|Postbank|Comdirect/);
+    expect(moveit!.description).toMatch(/Majorel/);
+    // Capital-One-Korrektur: WAF-SSRF, NICHT S3-Misconfig
+    expect(moveit!.description).toMatch(/Capital One/);
+    expect(moveit!.description).toMatch(/SSRF|Server-Side-Request-Forgery/);
+    expect(moveit!.description).toMatch(/WAF/);
+    expect(moveit!.description).toMatch(/Paige Thompson|Ex-AWS/);
+  });
+
+  it('Atruvia/FI-Outage-Szenario L2 mit drei deutschen Schablonen', () => {
+    const atruvia = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_atruvia_fi_outage');
+    expect(atruvia).toBeDefined();
+    expect(atruvia!.likelihood).toBe(2);
+    expect(atruvia!.impact).toBe(5);
+    // FI-Panne Dezember 2019
+    expect(atruvia!.description).toMatch(/FI-Panne|Dezember 2019|Helaba/);
+    // FI-TS Januar 2020
+    expect(atruvia!.description).toMatch(/FI-TS|Januar 2020|DKB/);
+    // Deutsche Leasing 2023
+    expect(atruvia!.description).toMatch(/Deutsche Leasing|03\.06\.2023|2\.500 MA/);
+  });
+
+  it('Bank-Run-Twitter-Szenario L3/I4 ohne Cyber-Trigger (SVB-Klasse)', () => {
+    const br = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_bank_run_twitter');
+    expect(br).toBeDefined();
+    expect(br!.likelihood).toBe(3);
+    expect(br!.impact).toBe(4);
+    expect(br!.description).toMatch(/SVB|09\.03\.2023/);
+    expect(br!.description).toMatch(/42 Mrd/);
+    expect(br!.description).toMatch(/KEIN Cyber/);
+    expect(br!.playbook).toMatch(/Krisen-Kommunikations-Steuerung|Pressestelle/);
+    expect(br!.playbook).toMatch(/vorab-textierte/i);
+    expect(br!.playbook).toMatch(/ELA/);
+  });
+
+  it('AML-Eskalation-Szenario L2/I4 mit FIU + BaFin', () => {
+    const aml = (module.scenarioTemplates ?? []).find((s) => s.id === 'fin_scn_aml_eskalation');
+    expect(aml).toBeDefined();
+    expect(aml!.likelihood).toBe(2);
+    expect(aml!.impact).toBe(4);
+    expect(aml!.description).toMatch(/FIU|goAML/);
+    expect(aml!.description).toMatch(/BaFin|GwG/);
+  });
+
+  it('BaFin-Dependency als kritisch behoerde mit DORA Art. 19 4h-Frist', () => {
+    const bafin = (module.dependencyTemplates ?? []).find((d) => d.id === 'fin_dep_bafin');
+    expect(bafin).toBeDefined();
+    expect(bafin!.category).toBe('behoerde');
+    expect(bafin!.criticality).toBe('kritisch');
+    expect(bafin!.notes).toMatch(/4 h|Art\. 19/);
+  });
+
+  it('EZB-Dependency als kritisch behoerde mit ELA-Anker', () => {
+    const ezb = (module.dependencyTemplates ?? []).find((d) => d.id === 'fin_dep_ezb');
+    expect(ezb).toBeDefined();
+    expect(ezb!.category).toBe('behoerde');
+    expect(ezb!.criticality).toBe('kritisch');
+    expect(ezb!.fallback).toMatch(/ELA/);
+  });
+
+  it('Cloud-DORA-Dependency mit DORA Art. 28 + Capital-One-WAF-SSRF in Notes', () => {
+    const cloud = (module.dependencyTemplates ?? []).find((d) => d.id === 'fin_dep_cloud_dora');
+    expect(cloud).toBeDefined();
+    expect(cloud!.category).toBe('dienstleister');
+    expect(cloud!.notes).toMatch(/DORA-Säule 5|Art\. 28/);
+    expect(cloud!.notes).toMatch(/Capital One|SSRF/);
+  });
+
+  it('Rückversicherer-Dependency für Versicherungs-Tenants mit Tenant-Hinweis', () => {
+    const rueck = (module.dependencyTemplates ?? []).find((d) => d.id === 'fin_dep_rueck');
+    expect(rueck).toBeDefined();
+    expect(rueck!.category).toBe('dienstleister');
+    expect(rueck!.criticality).toBe('hoch');
+    expect(rueck!.notes).toMatch(/Versicherungs-Tenants|nicht anwendbar/);
+  });
+
+  it('Online-Banking-DDoS-Übung mit 6-Monats-Kadenz (Bestand wegen Bank-Run-Risiko)', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'fin_ex_online_banking_ddos');
+    expect(ex).toBeDefined();
+    expect(ex!.cadenceMonths).toBe(6);
+    expect(ex!.notes).toMatch(/halbjährlich|Bank-Run/i);
+  });
+
+  it('DORA-TLPT-Übung als technical mit 36-Monats-Kadenz und TLPT-vs-internem-Testing-Differenzierung', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'fin_ex_dora_tlpt');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('technical');
+    expect(ex!.cadenceMonths).toBe(36);
+    expect(ex!.scenarioTemplateId).toBe('fin_scn_dora_tlpt');
+    expect(ex!.notes).toMatch(/externem TLPT|internem.*Resilience-Testing|G-SIIs/);
+    expect(ex!.notes).toMatch(/UVM|jährlich|Mittelstand/);
+  });
+
+  it('Bank-Run-Übung als tabletop mit 24-Monats-Kadenz', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'fin_ex_bank_run');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.cadenceMonths).toBe(24);
+    expect(ex!.scenarioTemplateId).toBe('fin_scn_bank_run_twitter');
+  });
+
+  it('Third-Party-Outage-Übung als tabletop mit 24-Monats-Kadenz und Drei-Schablonen-Drehbuch', () => {
+    const ex = (module.exerciseTemplates ?? []).find((e) => e.id === 'fin_ex_third_party');
+    expect(ex).toBeDefined();
+    expect(ex!.exerciseType).toBe('tabletop');
+    expect(ex!.cadenceMonths).toBe(24);
+    expect(ex!.scenarioTemplateId).toBe('fin_scn_atruvia_fi_outage');
+    expect(ex!.notes).toMatch(/FI-Panne|FI-TS|Deutsche Leasing/);
+  });
+
+  it('Übungs-Mix: tabletop + technical', () => {
+    const exerciseTypes = new Set((module.exerciseTemplates ?? []).map((e) => e.exerciseType));
+    expect(exerciseTypes.has('tabletop')).toBe(true);
+    expect(exerciseTypes.has('technical')).toBe(true);
+  });
+});
