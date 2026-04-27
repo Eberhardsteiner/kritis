@@ -21,6 +21,15 @@ import { releaseStatus } from '../data/releaseStatus';
 interface SidebarProps {
   activeView: ViewKey;
   onChange: (view: ViewKey) => void;
+  /**
+   * Wird beim Klick auf das Brand-Logo („KF Krisenfestigkeit Monitor") aufgerufen.
+   * Die App-Shell setzt darin `showSplash` auf true, sodass der UVM-Splash
+   * als „Zurück zur Startseite"-Anker erneut erscheint. Die `sessionStorage`-
+   * Markierung bleibt bewusst erhalten — der User kann den Splash über
+   * „Plattform öffnen" einfach wieder schließen, ohne dass beim nächsten
+   * Reload erneut der Splash erscheint.
+   */
+  onLogoClick?: () => void;
 }
 
 /**
@@ -54,16 +63,31 @@ const items: Array<{
   { key: 'control', label: 'Steuerung & Rechte', icon: SlidersHorizontal, admin: true },
 ];
 
-export function Sidebar({ activeView, onChange }: SidebarProps) {
+export function Sidebar({ activeView, onChange, onLogoClick }: SidebarProps) {
+  const brandContent = (
+    <>
+      <div className="brand-mark">KF</div>
+      <div className="sidebar-brand-text">
+        <p className="eyebrow">{releaseStatus.currentSprintLabel}</p>
+        <h1>Krisenfestigkeit Monitor</h1>
+      </div>
+    </>
+  );
+
   return (
     <aside className="sidebar">
-      <div className="sidebar-brand">
-        <div className="brand-mark">KF</div>
-        <div>
-          <p className="eyebrow">{releaseStatus.currentSprintLabel}</p>
-          <h1>Krisenfestigkeit Monitor</h1>
-        </div>
-      </div>
+      {onLogoClick ? (
+        <button
+          type="button"
+          className="sidebar-brand sidebar-brand-button"
+          onClick={onLogoClick}
+          aria-label="Zurück zur Splash-Startseite"
+        >
+          {brandContent}
+        </button>
+      ) : (
+        <div className="sidebar-brand">{brandContent}</div>
+      )}
 
       <nav className="sidebar-nav">
         {items.map((item) => {

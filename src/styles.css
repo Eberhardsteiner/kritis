@@ -104,6 +104,38 @@ ul {
   gap: 14px;
 }
 
+/*
+ * Wenn die Sidebar-Brand als Button gerendert wird (klickbar als Anker
+ * zum Splash-Screen), Standard-Button-Styles zurücksetzen und Hover-Akzent
+ * hinzufügen. Layout (display/align/gap) erbt von `.sidebar-brand` oben —
+ * diese Regel ergänzt nur die Button-spezifischen Resets.
+ */
+.sidebar-brand-button {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  width: fit-content;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.sidebar-brand-button:hover,
+.sidebar-brand-button:focus-visible {
+  background: rgba(196, 57, 96, 0.08);
+  border-color: rgba(196, 57, 96, 0.35);
+  outline: none;
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
 .brand-mark {
   width: 48px;
   height: 48px;

@@ -97,6 +97,18 @@ function AppShell() {
     setShowSplash(false);
   }, []);
 
+  /*
+   * Klick auf das Sidebar-Logo "KF Krisenfestigkeit Monitor" als „Zurück
+   * zur Startseite"-Anker. `sessionStorage` wird bewusst NICHT gelöscht —
+   * anders als beim Demo-Reset (Ctrl+Shift+S). Der User kommt schnell zur
+   * Splash zurück; nach dem nächsten „Plattform öffnen"-Klick ist alles
+   * wie vorher, und ein Reload zeigt den Splash nicht erneut. Wer einen
+   * vollständigen Demo-Reset will, nutzt weiterhin Ctrl+Shift+S.
+   */
+  const handleShowSplash = useCallback(() => {
+    setShowSplash(true);
+  }, []);
+
   // Demo-Reset via Tastenkürzel Ctrl+Shift+S — bewusst unauffällig,
   // damit Dr. Steiner für eine UVM-Demo den Splash zurücksetzen kann
   // ohne den Browser komplett zu schließen.
@@ -711,7 +723,11 @@ function AppShell() {
 
   return (
     <div className="app-shell">
-      <Sidebar activeView={state.activeView} onChange={setActiveView} />
+      <Sidebar
+        activeView={state.activeView}
+        onChange={setActiveView}
+        onLogoClick={handleShowSplash}
+      />
 
       <div className="main-shell">
         <ProjectTopbar {...projectTopbarProps} />
