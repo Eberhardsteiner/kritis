@@ -405,185 +405,469 @@
     "processTemplates": [
       {
         "id": "mfg_proc_line",
-        "title": "Betrieb der Kernfertigungslinie",
+        "title": "Anlagen-Betrieb Hauptproduktion (Lackierstraße, Schweißerei, Montagelinie)",
         "ownerRole": "Produktionsleitung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "MES, OT-Netz, SPS-Steuerungen, Stromversorgung Werk, Druckluft, Schichtpersonal, Tier-1-Zulieferer Hauptkomponenten",
+        "outputs": "Fertigung kritischer Aufträge, Stückzahl-Erfüllung gemäß OEM-Plan, Qualitäts-Doku",
+        "notes": "Norsk-Hydro-Schablone 2019: Bei Cyber-Vorfall mussten Aluminium-Potlines 6 Wochen manuell betrieben werden. Manueller Notbetrieb pro Anlagentyp dokumentieren — Lackierstraße, Schweißerei, Montagelinie haben jeweils eigene Notbetriebs-Logiken. Anlagen-Wiederanlauf-Sequenz mit Aufwärm-Phase und Werkstoff-Verlust beachten."
+      },
+      {
+        "id": "mfg_proc_mes",
+        "title": "MES-System-Betrieb (Auftragssteuerung, Stücklisten, Qualitätsmanagement)",
+        "ownerRole": "IT-Leitung Produktion",
+        "criticality": "kritisch",
+        "mtpdHours": "12",
+        "rtoHours": "4",
+        "rpoHours": "1",
+        "dependencies": "MES-Hauptsystem, ERP-Anbindung, Active Directory, OT-Netz für SPS-Daten, Hersteller-Wartungsvertrag",
+        "outputs": "Auftragssteuerung, Stücklisten-Verwaltung, QM-Doku, Schichtprotokolle, Performance-KPIs",
+        "notes": "Service-Schicht für Produktions-Steuerung. Bei MES-Ausfall: Papier-basierte Auftragsfreigabe und manuelle QM-Erfassung als Notbetrieb. Daten-Nacherfassung nach Wiederanlauf — RPO 1h begrenzt Daten-Verlust auf eine Schicht-Übergangs-Periode."
+      },
+      {
+        "id": "mfg_proc_ot",
+        "title": "OT-Netz-Betrieb und Anlagen-Sicherheit (SPS, ICS, Anlagen-Netz-Segmentierung)",
+        "ownerRole": "IT-Leitung mit OT-Verantwortung",
         "criticality": "kritisch",
         "mtpdHours": "8",
         "rtoHours": "4",
-        "rpoHours": "0",
-        "dependencies": "MES, Energie, Schichtpersonal",
-        "outputs": "Fertigung kritischer Aufträge",
-        "notes": "Manueller Notbetrieb der Linie definieren."
+        "rpoHours": "1",
+        "dependencies": "SPS-Steuerungen, OT-Netz-Infrastruktur (Profibus/Profinet/OPC-UA), Wartungsdienstleister Hauptanlagen, IT-OT-Segmentierungs-Firewall",
+        "outputs": "OT-Netz-Verfügbarkeit, SPS-Logik-Integrität, Anlagen-Steuerungs-Kommunikation, OT-Sicherheits-Monitoring",
+        "notes": "Im deutschen Mittelstand oft nicht eigenständig besetzt; OT-Verantwortung liegt typischerweise bei der IT-Leitung. Reifegrad-Indikator: Trennung der Rollen (eigenständige OT-Sicherheits-Funktion) zeigt höhere OT-Sicherheits-Reife. NIS2 verlangt explizit eine OT-Sicherheits-Funktion, ohne sie organisatorisch festzulegen. BSI-Lagebericht 2025: 78 % der deutschen Industrie haben ungeschützte OT-Systeme."
       },
       {
         "id": "mfg_proc_shipping",
-        "title": "Versandfreigabe und Warenausgang",
-        "ownerRole": "Logistikleitung",
-        "criticality": "hoch",
-        "mtpdHours": "12",
+        "title": "Just-in-time-Lieferung an OEM-Kunden (Versand-Logistik, Spediteur-Anbindung, EDI)",
+        "ownerRole": "Versandleitung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
         "rtoHours": "8",
         "rpoHours": "4",
-        "dependencies": "ERP, Etikettierung, Carrier",
-        "outputs": "Lieferfähigkeit an Schlüsselkunden",
-        "notes": "Fallback für Freigabe und Dokumentendruck vorsehen."
+        "dependencies": "ERP-Versand-Modul, EDI-Schnittstellen zu OEM-Kunden, Spediteur-Anbindung, Etikettierung, Zoll-Schnittstellen",
+        "outputs": "Lieferfähigkeit an Schlüsselkunden (Automotive-OEMs, Industrie-Endkunden), Lieferscheine, Zoll-Dokumentation",
+        "notes": "Vorgelagerte Stufe: Wareneingang und Lagerlogistik (siehe mfg_proc_warehouse). Ausfall der Vorlagerung kaskadiert in Versand-Verzug innerhalb von 1-2 Tagen. Just-in-time-Vertragsstrafen mit OEM-Kunden bei Lieferverzug ökonomisch eskalierend (Tagessatz-Strafen üblich). Fallback: manuelle Versand-Freigabe und Etiketten-Druck mit Backup-Workflow."
       },
       {
-        "id": "manu_process_quality_release",
-        "title": "Material- und Qualitätsfreigabe im Engpass",
-        "ownerRole": "Qualität",
+        "id": "mfg_proc_warehouse",
+        "title": "Wareneingang und Lagerlogistik (Zulieferer-Annahme, Lagerverwaltung)",
+        "ownerRole": "Logistik-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "Lager-Verwaltungs-System (LVS), Tier-1-Zulieferer, Stapler/Förderbänder, Wareneingangs-Prüfung",
+        "outputs": "Eingangs-Erfassung, Lager-Verwaltung, Material-Bereitstellung für Produktionslinien",
+        "notes": "Just-in-time-Toyotismus mit minimalem Lager-Puffer: Wareneingang-Ausfall trifft Produktion innerhalb von 1-2 Tagen. 48h-MTPD ist die realistische Schwelle, danach kippt die Lieferkette zur Produktionslinie. Backup: Notfall-Wareneingang mit Papier-Lieferscheinen und manueller Material-Verteilung."
+      },
+      {
+        "id": "mfg_proc_it",
+        "title": "Werks-IT-Betrieb (ERP, Active Directory, Fileserver, Office-IT)",
+        "ownerRole": "IT-Leitung Werk",
         "criticality": "hoch",
         "mtpdHours": "24",
         "rtoHours": "8",
-        "rpoHours": "0",
-        "dependencies": "Labor, QS, Lieferant, Werkzeuganpassung",
-        "outputs": "Freigabestatus, Prüfentscheid, Serienfreigabe",
-        "notes": "Kritisch bei Lieferantenwechsel und Ersatzmaterialien."
+        "rpoHours": "4",
+        "dependencies": "ERP-System, Active Directory, Fileserver, Backup-Infrastruktur, Office-IT-Anbindung, Internet-Anbindung",
+        "outputs": "Authentifizierung, ERP-Verfügbarkeit, Office-Dokumente, E-Mail, Backup-Status",
+        "notes": "Service-Schicht für faktisch alle Verwaltungs-Prozesse (Bestellung, Buchhaltung, Personalverwaltung, F&E). Norsk Hydro 2019 zeigt: AD-Compromise als Eintritts-Pfad für OT-IT-Übergriff via LockerGoga. Patch-Disziplin und Backup-Restore-Test als Mindeststandard."
+      },
+      {
+        "id": "manu_process_quality_release",
+        "title": "Qualitätssicherung und Prüflabor (Wareneingangsprüfung, Endkontrolle, Messtechnik)",
+        "ownerRole": "Qualitätsleitung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "8",
+        "dependencies": "QM-Software (CAQ), Labor, Messtechnik (Koordinatenmessgeräte), Lieferant-Wareneingangs-Schnittstellen, Werkzeug-Anpassungs-Werkstatt",
+        "outputs": "Freigabestatus, Prüfentscheid, Serienfreigabe, MD-Anweisungen, Wareneingangs-Befunde, Endkontroll-Protokolle",
+        "notes": "Kritisch bei Lieferantenwechsel und Ersatzmaterialien. Bei Tier-1-Ausfall (Single-Source-Bauteile) wird Qualitätsfreigabe für Zweitlieferant zum Engpass. Bestand-ID erhalten (manu_*-Mix vor-Pilot)."
+      },
+      {
+        "id": "mfg_proc_maintenance",
+        "title": "Werkstattnahe Instandhaltung (Reparatur, Ersatzteil-Bevorratung)",
+        "ownerRole": "Instandhaltungsleitung",
+        "criticality": "mittel",
+        "mtpdHours": "72",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Instandhaltungs-Software (CMMS), Ersatzteil-Lager, Werkzeug-Anpassungs-Werkstatt, Hersteller-Service-Verträge",
+        "outputs": "Anlagen-Reparatur, geplante Wartung, Ersatzteil-Bereitstellung, Wartungs-Doku",
+        "notes": "Operativer Puffer: 72h-MTPD ist tolerabel, weil Anlagen mit redundanten Komponenten 2-3 Tage ohne Reparatur-Eskalation laufen. Tenant-spezifisch: bei Single-Maschinen-Linien ist die Kritikalität höher (auf 'hoch' anheben)."
+      },
+      {
+        "id": "mfg_proc_rd",
+        "title": "Forschung und Entwicklung (Konstruktion, CAD-Systeme, Prototypenbau)",
+        "ownerRole": "Entwicklungsleitung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "CAD-System (CATIA, NX, SolidWorks), PLM-System (Teamcenter, Windchill), Prototypen-Werkstatt, F&E-Fileserver mit Konstruktionsdaten",
+        "outputs": "Konstruktionszeichnungen, Stücklisten für neue Produkte, Prototypen, Patente, Versuchs-Protokolle",
+        "notes": "Operativ mittlere Kritikalität (Produktion läuft weiter), aber Konstruktionsdaten sind Wirtschaftsspionage-Hochrisiko-Asset (siehe Continental 2022, 40 TB exfiltrierte Konstruktionsdaten). Ausfall-Kritikalität niedriger als Vertraulichkeits-Kritikalität — beide Dimensionen separat bewerten. F&E-Server-Segmentierung von Office-IT als Härtungs-Maßnahme."
+      },
+      {
+        "id": "mfg_proc_personnel",
+        "title": "Personalverwaltung und Schichtplanung (Drei-Schicht-Betrieb, Lohnabrechnung, Zeiterfassung)",
+        "ownerRole": "Personalleitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "HR-Software (SAP HR, Personio, andere), Zeiterfassungs-System, Lohnabrechnungs-System, Tariflogik (Metall/IG-Metall)",
+        "outputs": "Schichtpläne, Lohnzahlungen, Zeiterfassung, Bereitschaftsdienst-Steuerung, Stundenkonto-Pflege",
+        "notes": "Drei-Schicht-Betrieb mit kurzfristiger Schichtplan-Anpassung erforderlich. Bei Saison- und Modellwechsel-Lastspitzen erhöhte Kritikalität, ggf. tenant-spezifisch auf 'kritisch' anheben. Automotive-Modellwechsel-Phasen + Lebensmittel-Erntezeit + Spielwaren-Weihnachts-Saison als typische Lastspitzen."
       }
     ],
     "dependencyTemplates": [
       {
+        "id": "mfg_dep_mes",
+        "title": "MES-Hauptsystem (SAP MES, ProAlpha, Siemens Opcenter, ERP-Integration)",
+        "category": "software",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Papierbasierte Auftragsfreigabe und manuelle Erfassung; Daten-Nacherfassung nach Wiederanlauf binnen einer Schicht. Hersteller-Substitution faktisch unmöglich (mehrjähriges Migrations-Projekt mit Anpassung an Anlagen-Spezifika).",
+        "contractReference": "MES-Hersteller-Wartungsvertrag mit 24/7-SLA",
+        "notes": "Service-Schicht für Produktions-Steuerung. Bei MES-Outage stehen Auftragssteuerung, Stücklisten-Management und QM-Doku still. Offline-Formulare vorbereiten für mehrtägige Notbetriebs-Phasen."
+      },
+      {
+        "id": "mfg_dep_sps",
+        "title": "SPS-Steuerungen Hauptlinie (Siemens S7, Rockwell ControlLogix, Mitsubishi MELSEC)",
+        "category": "ot",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Manuelle Anlagen-Bedienung über Bedien-Terminals (HMI), bei vollständigem SPS-Ausfall Anlagen-Stillstand mit Hersteller-Eskalation. SPS-Backup-Programme als wiederherstellbare Steuerungs-Logik.",
+        "contractReference": "SPS-Hersteller-Wartungsvertrag (Siemens, Rockwell, Mitsubishi)",
+        "notes": "Stuxnet-2010-Klasse-Risiko: Spezialisierte Malware kann SPS-Logik manipulieren mit physischen Anlagen-Schäden (bis zu 1.000 Centrifugen in Natanz zerstört). SPS-Programme regelmäßig auf Code-Integrität prüfen, Patch-Disziplin innerhalb der Hersteller-Update-Fenster."
+      },
+      {
+        "id": "mfg_dep_ot_network",
+        "title": "OT-Netz-Infrastruktur (Profibus, Profinet, OPC-UA-Server, IT-OT-Segmentierungs-Firewall)",
+        "category": "ot",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Redundante Netz-Pfade mit Ring-Topologie (Profinet), Backup-Server für OPC-UA-Datenaustausch. Bei Netz-Segmentierungs-Bruch sofortige Trennung IT-OT als Erste-Hilfe.",
+        "contractReference": "Netz-Wartungsvertrag (Hirschmann, Belden, Phoenix Contact)",
+        "notes": "OT-Protokolle (Profibus seit 1993, Modbus seit 1979) sind selten verschlüsselt — historischer Grund: deterministische Echtzeit ohne Krypto-Overhead. IT-OT-Segmentierung über Firewall mit DPI-Funktionalität (Deep Packet Inspection) ist Mindeststandard. BSI-Lagebericht 2025: Eintritts-Vektor für Ransomware-OT-IT-Übergriffe häufig OT-Netz-Schwächen."
+      },
+      {
         "id": "mfg_dep_power",
-        "title": "Stromversorgung Werk",
+        "title": "Stromversorgung Werk mit Notstrom für ITS-/OT-kritische Anlagen",
         "category": "energie",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Lastabwurf und Notstrom für Engpassanlagen",
-        "contractReference": "EVU / Netzbetreiber",
-        "notes": "Schaltreihenfolge und Prioritäten definieren."
-      },
-      {
-        "id": "mfg_dep_mes",
-        "title": "MES und Produktionsdatenerfassung",
-        "category": "it",
-        "criticality": "kritisch",
-        "singlePointOfFailure": true,
-        "fallback": "Papierbasierte Erfassung und manuelle Freigabe",
-        "contractReference": "MES-Supportvertrag",
-        "notes": "Offline-Formulare vorbereiten."
+        "fallback": "Lastabwurf und Notstrom für Engpassanlagen (Lackierstraße, Ofenanlagen, kritische Steuerung). USV mit Sub-Sekunden-Failover für OT-Layer, Diesel-Aggregat für 24-72 h. Wärme-Anlagen (Lackiertrockner, Ofen) müssen geordnet abgekühlt werden, sonst Werkstoff-Verlust.",
+        "contractReference": "EVU / Netzbetreiber + Wartungsvertrag Notstrom-Aggregat",
+        "notes": "Schaltreihenfolge und Prioritäten definieren. Anlagen-Wiederanlauf-Sequenz (Lackierstraße braucht 2-4 h Aufwärm-Phase, Schweißerei sofort verfügbar) muss in Notstrom-Plan stehen."
       },
       {
         "id": "mfg_dep_supplier",
-        "title": "Schlüsselzulieferer für Kernkomponente",
+        "title": "Tier-1-Zulieferer Hauptkomponente (Single Source kritischer Bauteile)",
         "category": "lieferant",
-        "criticality": "hoch",
+        "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Zweitlieferant und Sicherheitsbestand",
-        "contractReference": "Rahmenvertrag A-Lieferant",
-        "notes": "Single Source monatlich überprüfen."
+        "fallback": "Zweitlieferant und Sicherheitsbestand (typisch 1-2 Wochen Pufferung). Bei Tier-1-Insolvenz oder Brand mehrwöchige Substitutions-Phase mit OEM-Abstimmung der Bauteil-Freigabe.",
+        "contractReference": "Rahmenvertrag A-Lieferant + ggf. Backup-Lieferanten-Rahmenvertrag",
+        "notes": "Single Source monatlich überprüfen. Halbleiter-Engpass 2021/22 zeigt: bei branchenweiten Engpässen helfen Backup-Lieferanten nicht — alle Lieferanten gleichzeitig betroffen. NIS2-Lieferketten-Pflicht: Risiko-Bewertung der Tier-1-Lieferanten."
+      },
+      {
+        "id": "mfg_dep_logistics",
+        "title": "Spediteur Just-in-time-Anbindung (EDI-Schnittstelle, Vertrags-OEM-Logistik)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Spediteur über zweiten Rahmenvertrag, manuelle Versand-Beauftragung über Telefon/E-Mail bei EDI-Ausfall. Kurz-Linie zur OEM-Logistik-Steuerung für Ausnahme-Genehmigungen.",
+        "contractReference": "Spediteurs-Rahmenverträge (DB Schenker, Dachser, DHL, etc.)",
+        "notes": "Just-in-time-Vertragsstrafen mit OEM-Kunden bei Lieferverzug ökonomisch eskalierend (Tagessatz-Strafen üblich, oft 0,5-2 % des Liefer-Werts pro Tag). EDI-Schnittstellen oft proprietär (VDA-Standards Automotive)."
+      },
+      {
+        "id": "mfg_dep_erp",
+        "title": "ERP-System (SAP S/4HANA, Microsoft Dynamics 365, andere)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei ERP-Ausfall Workflow-Fortführung über Excel-Listen, Lieferschein-Druck via Backup-Server, Buchungs-Nacherfassung nach Wiederanlauf. Hersteller-Substitution mehrjähriges Projekt.",
+        "contractReference": "ERP-Hersteller-Wartungsvertrag",
+        "notes": "Continental 2022: ERP-Anbindung als Eintritts-Pfad für Datenexfiltration genutzt (40 TB inkl. Konstruktionsdaten und Personalakten). Anbindung an HR, Buchhaltung, Bestellung, Einkauf — branchenweite Datenfülle."
+      },
+      {
+        "id": "mfg_dep_utilities",
+        "title": "Druckluft- und Wasser-Versorgung Werk (interne Infrastruktur)",
+        "category": "gebäude",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Redundante Kompressoren für Druckluft, Backup-Wasser-Anschluss bei Lebensmittel-/Pharma-Tenants. Bei Ausfall Anlagen-Notstop, weil pneumatische Steuerungs-Elemente und Kühlung nicht verfügbar.",
+        "contractReference": "Wartungsverträge Kompressoren + Stadtwerke Wasser-Anschluss",
+        "notes": "Druckluft ist in Maschinenbau-Werken oft kritischer als angenommen — pneumatische Werkzeuge, Steuerungs-Ventile, Lackier-Düsen brauchen verlässliche 6-8 bar. Wasser-Versorgung kritisch für Kühlung von Schmiede-/Schweiß-Anlagen."
       },
       {
         "id": "manu_dep_automation_vendor",
-        "title": "Automatisierungsintegrator / OEM-Support",
+        "title": "Wartungsdienstleister Hauptanlagen / Automatisierungsintegrator (Hersteller-Service)",
         "category": "dienstleister",
         "criticality": "hoch",
         "singlePointOfFailure": true,
-        "fallback": "Zweitintegrator oder dokumentierte Eskalation mit Fernwartungsersatzverfahren",
-        "contractReference": "OT-Rahmenvertrag / SLA",
-        "notes": "Relevant für PLC-, SCADA- und Robotik-Störungen."
+        "fallback": "Zweitintegrator oder dokumentierte Eskalation mit Fernwartungs-Ersatzverfahren. Bei Hersteller-Outage interne Ersatzteil-Bevorratung der wichtigsten Komponenten.",
+        "contractReference": "OT-Rahmenvertrag / SLA mit Anlagen-Hersteller",
+        "notes": "Relevant für PLC-, SCADA- und Robotik-Störungen. Fernwartungs-Zugänge sind häufig genutzte Eintritts-Vektoren für OT-Cyber-Vorfälle (siehe manu_scenario_ot_remote_compromise). Bestand-ID erhalten (manu_*-Mix vor-Pilot)."
       }
     ],
     "scenarioTemplates": [
       {
-        "id": "mfg_scn_blackout",
-        "title": "Stromausfall im Werk",
-        "category": "Blackout",
-        "description": "Die Kernfertigung steht durch Stromausfall still.",
-        "likelihood": 3,
+        "id": "mfg_scn_ransomware_ot_it",
+        "title": "Ransomware mit OT-IT-Übergriff (Norsk-Hydro-Schablone)",
+        "category": "Cyber-Angriff mit OT-IT-Konvergenz-Hebel",
+        "description": "Ransomware-Eintritt über IT-Schicht (Phishing, Browser-Compromise, AD-Exploit), Übergriff via OT-IT-Konvergenz-Lücke auf OT-Netz und SPS-Steuerungen. Norsk Hydro 2019: LockerGoga via gestohlene AD-Anmeldedaten, 22.000 Computer in 170 Standorten betroffen, Aluminium-Potlines manuell betrieben — 6 Wochen Notbetrieb, USD 70-84 Mio. Schaden.",
+        "likelihood": 4,
         "impact": 5,
-        "ownerRole": "Produktionsleitung",
+        "ownerRole": "Krisenstab / IT-Leitung Werk / Produktionsleitung",
         "linkedProcessTemplateIds": [
           "mfg_proc_line",
-          "mfg_proc_shipping"
+          "mfg_proc_mes",
+          "mfg_proc_ot",
+          "mfg_proc_it",
+          "mfg_proc_shipping",
+          "manu_process_quality_release"
         ],
         "linkedDependencyTemplateIds": [
-          "mfg_dep_power"
+          "mfg_dep_mes",
+          "mfg_dep_erp",
+          "mfg_dep_ot_network"
         ],
-        "playbook": "Sicheres Herunterfahren, Prioritäten für Wiederanlauf und Kundenkommunikation auslösen.",
+        "playbook": "Sofortige Trennung IT-OT-Segmentierung. Krisenstab nach Norsk-Hydro-Pattern aktivieren. BSI-Meldung nach NIS2 §8d innerhalb 24h. Manueller Notbetrieb der Anlagen mit Papier-Auftragssteuerung. OEM-Kommunikation zur Liefer-Verzögerungs-Vereinbarung mit Kulanz statt Vertragsstrafe. Backup-Restore-Sequenz mit forensischer Bereinigung.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Wiederanlaufzeiten der Engpassanlagen messen."
+        "notes": "Norsk Hydro 2019 (6 Wochen Notbetrieb), Continental 2022 (4 Wochen unbemerkter Zugang) als Schablonen. BSI-Lagebericht 2025: produzierendes Gewerbe = Top-1-Sektor mit 267 Vorfällen, +12 % YoY."
       },
       {
-        "id": "mfg_scn_mes",
-        "title": "Ausfall des MES",
-        "category": "IT-Ausfall",
-        "description": "Produktionssteuerung und Datenerfassung stehen nicht zur Verfügung.",
-        "likelihood": 4,
-        "impact": 4,
-        "ownerRole": "IT / Produktion",
+        "id": "mfg_scn_ics_malware",
+        "title": "ICS-Malware-Angriff auf SPS-Steuerung (Stuxnet-/Industroyer-Schablone)",
+        "category": "OT-Cyber-Bedrohung mit physischem Anlagen-Schaden",
+        "description": "Spezialisierte ICS-Malware kompromittiert SPS-Steuerungs-Logik mit physischen Auswirkungen — Anlagen werden außerhalb sicherer Betriebs-Parameter gesteuert (Drehzahl-Manipulation, Temperatur-Überlastung). Stuxnet 2010: bis zu 1.000 Centrifugen in Natanz physisch zerstört durch SPS-Manipulation.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "IT-Leitung mit OT-Verantwortung / Produktionsleitung / Krisenstab",
         "linkedProcessTemplateIds": [
-          "mfg_proc_line"
+          "mfg_proc_line",
+          "mfg_proc_ot"
         ],
         "linkedDependencyTemplateIds": [
-          "mfg_dep_mes"
+          "mfg_dep_sps",
+          "mfg_dep_ot_network"
         ],
-        "playbook": "Papierbasierte Freigabe aktivieren, Daten nacherfassen, Eskalation an IT.",
+        "playbook": "Sofortige Anlagen-Notabschaltung, SPS-Programme auf Code-Integrität prüfen (Vergleich gegen verifizierte Backup-Programme), forensische Beweis-Sicherung. BSI-CERT-Bund parallel zur Hersteller-Eskalation. Wiederanlauf nur nach forensischer Freigabe und SPS-Programm-Reset.",
         "exerciseTypeHint": "technical",
-        "notes": "Fallback-Formulare und Rollen testen."
+        "notes": "Stuxnet 2010 (Natanz), Industroyer 2016 (Ukraine-Stromnetz), Triton 2017 (Petrochemie-Sicherheits-Systeme) als Familie. Eintritt selten (geschlossene OT-Netze), aber Wirkung katastrophal — physische Anlagen-Schäden, lange Wiederbeschaffungs-Phasen, Insolvenz-Risiko."
       },
       {
         "id": "mfg_scn_supplier",
-        "title": "Ausfall eines Schlüsselzulieferers",
-        "category": "Lieferkette",
-        "description": "Eine kritische Komponente fällt kurzfristig aus.",
+        "title": "Tier-1-Zulieferer-Ausfall (Brand, Insolvenz, Cyber-Vorfall beim Zulieferer)",
+        "category": "Lieferketten-Risiko mit Single-Source-Hebel",
+        "description": "Tier-1-Zulieferer mit Single-Source-Bauteilen fällt aus — Brand am Zulieferer-Standort, Insolvenz, oder Cyber-Vorfall mit längerer Liefer-Unterbrechung. Sicherheitsbestand reicht typisch 1-2 Wochen, danach Liefer-Engpass an OEM-Kunden mit Vertragsstrafe.",
         "likelihood": 3,
-        "impact": 4,
-        "ownerRole": "Einkauf",
+        "impact": 5,
+        "ownerRole": "Einkauf / Produktionsleitung / Geschäftsführung",
         "linkedProcessTemplateIds": [
-          "mfg_proc_line"
+          "mfg_proc_line",
+          "mfg_proc_warehouse",
+          "mfg_proc_shipping"
         ],
         "linkedDependencyTemplateIds": [
           "mfg_dep_supplier"
         ],
-        "playbook": "Bestände priorisieren, Zweitquelle aktivieren, Kunden informieren.",
+        "playbook": "Bestände priorisieren, Zweitquelle aktivieren, OEM-Kunden frühzeitig informieren mit Liefer-Anpassung. Bei Insolvenz: Insolvenzverwalter-Eskalation für Werkzeug-Herausgabe. Bei Brand: Versicherungs-Schaden parallel zu Substitutions-Logistik bewältigen.",
         "exerciseTypeHint": "supplier",
-        "notes": "Engpass-Backlog mit Vertrieb abstimmen."
+        "notes": "Halbleiter-Engpass 2021/22 als branchenweite Schablone — alle Lieferanten gleichzeitig betroffen, Backup-Lieferanten halfen nicht. NIS2-Lieferketten-Pflicht: Tier-1-Risiko-Bewertung mindestens jährlich aktualisieren."
       },
       {
-        "id": "manu_scenario_ot_remote_compromise",
-        "title": "Kompromittierter Fernwartungszugang in der Produktion",
-        "category": "Cyber / OT",
-        "description": "Ein externer Wartungszugang wird missbraucht oder führt zu einem Maschinenstillstand in einer kritischen Linie.",
-        "likelihood": 3,
+        "id": "mfg_scn_blackout",
+        "title": "Stromausfall mit Anlagen-Notstop und langem Wiederanlauf",
+        "category": "Infrastruktur-Ausfall mit Werkstoff-Verlust-Hebel",
+        "description": "Längerer Stromausfall am Werks-Standort (8-72 h), Notstrom-Aggregat reicht nicht für alle Anlagen. Lackieröfen, Schmelze-Anlagen, kontinuierliche Linien werden außerhalb sicherer Parameter gestoppt — Werkstoff-Verlust und mehrstündige Wiederanlauf-Phase mit Aufwärm-Sequenzen.",
+        "likelihood": 2,
         "impact": 5,
-        "ownerRole": "IT / OT-Sicherheit",
+        "ownerRole": "Produktionsleitung / Technische Leitung / IT-Leitung mit OT-Verantwortung",
         "linkedProcessTemplateIds": [
+          "mfg_proc_line",
+          "mfg_proc_ot",
+          "mfg_proc_it",
+          "mfg_proc_mes"
+        ],
+        "linkedDependencyTemplateIds": [
+          "mfg_dep_power",
+          "mfg_dep_utilities"
+        ],
+        "playbook": "Lastabwurf gemäß Notfall-Plan: ITS-/OT-kritische Anlagen via USV halten, Wärme-Anlagen geordnet abkühlen (sonst Werkstoff-Verlust), nicht-kritische Anlagen sofort abschalten. Treibstoff-Nachschub für Notstrom-Aggregat. Anlagen-Wiederanlauf-Sequenz mit Aufwärm-Phase (Lackier-Trockner 2-4h, Ofen 6-12h).",
+        "exerciseTypeHint": "simulation",
+        "notes": "Wiederanlaufzeiten der Engpassanlagen messen. NRW 2024: mehrere Maschinenbau-Werke mit unzureichender Notstrom-Vorbereitung — Treibstoff-Tanks leer, Aggregate nicht durchgetestet."
+      },
+      {
+        "id": "mfg_scn_datenexfiltration",
+        "title": "Datenexfiltration Konstruktionsdaten (Wirtschaftsspionage, Continental-Schablone)",
+        "category": "Cyber-Bedrohung mit Wirtschaftsspionage-Hebel",
+        "description": "Datenexfiltration aus F&E-Servern und ERP-System — Konstruktionszeichnungen, Stücklisten, Patent-Vorbereitungen, Kunden-spezifische Bauteil-Daten. Continental 2022: 40 TB exfiltriert via LockBit 3.0, 4 Wochen unbemerkter Zugang. OEM-Vertraulichkeitsbruch führt zu Auftragsentzug und Wettbewerbs-Nachteil.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Werk / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "mfg_proc_rd",
+          "mfg_proc_it"
+        ],
+        "linkedDependencyTemplateIds": [
+          "mfg_dep_erp"
+        ],
+        "playbook": "Sofortige Trennung der F&E-Server vom Office-IT-Netz. Forensik mit Hersteller und LKA Cyber. DSGVO-Bewertung Art. 33/34 für Personalakten-Anteil. OEM-Kunden-Information bei Konstruktionsdaten-Verlust mit Vertraulichkeits-Beziehung. Patent-Anwalt-Eskalation bei Patent-relevanten Vorlauf-Daten.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Continental 2022 (40 TB, LockBit 3.0, 50 Mio. USD Erpressung) als Schablone. Eintritts-Vektoren: unautorisierte Browser-Installationen, Phishing, AD-Compromise. F&E-Server-Segmentierung von Office-IT als Härtungs-Maßnahme."
+      },
+      {
+        "id": "mfg_scn_mes",
+        "title": "MES-System-Ausfall ohne Backup",
+        "category": "IT-Ausfall mit Produktions-Steuerungs-Hebel",
+        "description": "MES-Ausfall durch Software-Bug, Hardware-Defekt oder Cyber-Vorfall ohne aktivierbares Backup. Auftragssteuerung, Stücklisten-Management und QM-Doku stehen still. Papier-Notbetrieb möglich, aber Daten-Nacherfassung nach Wiederanlauf zeitaufwändig.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "IT-Leitung Produktion / Produktionsleitung",
+        "linkedProcessTemplateIds": [
+          "mfg_proc_mes",
+          "mfg_proc_line",
           "manu_process_quality_release"
         ],
         "linkedDependencyTemplateIds": [
-          "manu_dep_automation_vendor"
+          "mfg_dep_mes"
         ],
-        "playbook": "Fernzugang sperren, Segment isolieren, Ersatzbetrieb prüfen, Hersteller- und Krisenstab aktivieren.",
+        "playbook": "Papierbasierte Freigabe aktivieren, Schicht-Protokolle manuell führen, MES-Hersteller-Eskalation parallel zu Backup-Restore. Daten-Nacherfassung nach Wiederanlauf priorisiert pro Auftrag.",
         "exerciseTypeHint": "technical",
-        "notes": "Schnittstelle zwischen Cyberabwehr und Produktionssteuerung."
+        "notes": "Fallback-Formulare und Rollen testen. Bei mehrtägigem Ausfall Anlagen-Werkstoff-Tracking ohne MES schwierig — Qualitäts-Folgen bei Charge-Verfolgung beachten."
+      },
+      {
+        "id": "mfg_scn_halbleiter_engpass",
+        "title": "Lieferketten-Disruption Halbleiter / strategische Bauteile",
+        "category": "Branchenweite Lieferketten-Disruption",
+        "description": "Branchenweiter Engpass kritischer Bauteile (Halbleiter, Spezial-Stahl, seltene Erden) durch geopolitische Disruption, Naturkatastrophe an Hauptproduktions-Standort, oder Pandemie-Welle. Backup-Lieferanten helfen nicht — alle gleichzeitig betroffen. Produktion muss Auftrags-Reihenfolge umstellen oder reduzieren.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Einkauf / Geschäftsführung / Vertrieb",
+        "linkedProcessTemplateIds": [
+          "mfg_proc_line",
+          "mfg_proc_warehouse",
+          "mfg_proc_shipping"
+        ],
+        "linkedDependencyTemplateIds": [
+          "mfg_dep_supplier"
+        ],
+        "playbook": "Auftrags-Reihenfolge mit Vertrieb umstellen (margenstarke Aufträge priorisieren). OEM-Kommunikation für Liefer-Anpassungs-Vereinbarungen. Backup-Lieferanten-Markt-Recherche, ggf. mit OEM-Engineering Substitutions-Bauteil-Freigabe. Lager-Bestände rationieren über mehrere Wochen.",
+        "exerciseTypeHint": "supplier",
+        "notes": "Halbleiter-Engpass 2021/22 als Schablone. Suez-Kanal-Blockade 2021 (Ever Given) als nicht-Cyber-Schablone für globale Lieferketten-Disruption. Branchen-Realität für Automotive."
+      },
+      {
+        "id": "mfg_scn_brand",
+        "title": "Brand in Hauptproduktionshalle (mit Werkzeug- und Anlagen-Verlust)",
+        "category": "Naturgefahr / Brand mit Anlagen-Substanz-Verlust",
+        "description": "Brand in Hauptproduktionshalle durch technischen Defekt (Lackier-Anlage, Schweiß-Funkenflug, Elektronik-Brand) oder Brandstiftung. Werkzeug-, Anlagen- und Werkstoff-Verlust. Versicherungs-Wiederbeschaffung 6-18 Monate, in der Zeit Produktion an Standort gestoppt oder verlagert.",
+        "likelihood": 1,
+        "impact": 5,
+        "ownerRole": "Krisenstab / Produktionsleitung / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "mfg_proc_line",
+          "mfg_proc_maintenance"
+        ],
+        "linkedDependencyTemplateIds": [
+          "mfg_dep_power",
+          "mfg_dep_utilities"
+        ],
+        "playbook": "Sofortige Evakuierung gemäß Brandschutz-Plan, Feuerwehr-Koordination. Versicherungs-Schaden-Aufnahme parallel zur Schadens-Begrenzung. Auslagerung der Produktion an Schwesterstandort oder Kooperations-Partner. OEM-Kunden-Information mit Liefer-Verschiebungs-Plan.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Sehr seltenes Ereignis (Score 5), aber Worst-Case bei Eintritt. Brandschutz-Übung gesetzlich vorgeschrieben (Bauordnung, Versicherer-Auflagen). Werkzeug-Wiederbeschaffung oft monatelang — bei Single-Werkzeugen für OEM-spezifische Bauteile existenzbedrohend."
+      },
+      {
+        "id": "manu_scenario_ot_remote_compromise",
+        "title": "Kompromittierter Fernwartungs-Zugang in der Produktion",
+        "category": "OT-Cyber-Bedrohung über Fernwartungs-Vektor",
+        "description": "Externer Wartungs-Zugang (typischerweise via VPN oder Hersteller-Tools) wird missbraucht oder führt zu Maschinenstillstand in einer kritischen Linie. Häufiger OT-Eintritts-Vektor — Hersteller-Mitarbeiter mit privilegierten Zugängen, oft ohne Multi-Faktor-Authentisierung.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "IT-Leitung mit OT-Verantwortung / Produktionsleitung",
+        "linkedProcessTemplateIds": [
+          "mfg_proc_ot",
+          "mfg_proc_line",
+          "manu_process_quality_release"
+        ],
+        "linkedDependencyTemplateIds": [
+          "manu_dep_automation_vendor",
+          "mfg_dep_ot_network"
+        ],
+        "playbook": "Fernwartungs-Zugang sperren, OT-Segment isolieren, Ersatzbetrieb prüfen, Hersteller- und Krisenstab aktivieren. Forensik der Fernwartungs-Sitzungen (welche Befehle, welche Anlagen). Wiederinbetriebnahme nur nach forensischer Freigabe und Multi-Faktor-Aktivierung des Wartungs-Zugangs.",
+        "exerciseTypeHint": "technical",
+        "notes": "Schnittstelle zwischen Cyber-Abwehr und Produktions-Steuerung. Bestand-ID erhalten (manu_*-Mix vor-Pilot). Häufigster OT-Eintritts-Vektor laut BSI-Lagebericht 2025 — Multi-Faktor-Authentisierung für Fernwartungs-Zugänge ist Mindeststandard."
       }
     ],
     "exerciseTemplates": [
       {
-        "id": "mfg_ex_blackout",
-        "title": "Blackout-Tabletop Produktion",
+        "id": "mfg_ex_ransomware_ot_it",
+        "title": "Ransomware-OT-IT-Tabletop Produktion",
         "exerciseType": "tabletop",
-        "scenarioTemplateId": "mfg_scn_blackout",
-        "ownerRole": "Krisenstab",
+        "scenarioTemplateId": "mfg_scn_ransomware_ot_it",
+        "ownerRole": "Krisenstab / Produktionsleitung / IT-Leitung",
         "cadenceMonths": 12,
-        "notes": "Mit Produktion, Instandhaltung und Kommunikation durchführen."
+        "notes": "Jährlicher Krisenstabs-Tabletop mit Geschäftsführung, IT-Leitung Werk, IT-Leitung Produktion, Produktionsleitung, OT-Sicherheit, Pressesprecher, Datenschutzbeauftragte. Norsk-Hydro-2019-Lessons-Learned als Drehbuch-Anhang. OEM-Kunden-Kommunikation mit Vertragsstrafe-Vermeidung üben. Manueller Notbetrieb der Anlagen demonstrieren."
+      },
+      {
+        "id": "mfg_ex_ot_segmentation",
+        "title": "OT-Netz-Segmentierung-Funktionstest",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "mfg_scn_ics_malware",
+        "ownerRole": "IT-Leitung mit OT-Verantwortung",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Funktions-Test der IT-OT-Segmentierungs-Firewall: simulierter Eintritts-Versuch von IT-Netz auf OT-Netz, DPI-Funktionalität (Deep Packet Inspection) gegen Modbus/Profibus/OPC-UA-Protokolle. SPS-Programm-Code-Integrität mit Hash-Vergleich gegen verifizierte Backup-Programme."
+      },
+      {
+        "id": "mfg_ex_supplier",
+        "title": "Tier-1-Ausfall-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "mfg_scn_supplier",
+        "ownerRole": "Einkauf / Produktionsleitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop mit Einkauf, Produktionsleitung, Vertrieb. Brand-Insolvenz-Cyber-Eskalations-Pfade üben. OEM-Kommunikation mit Liefer-Anpassungs-Vereinbarung statt Vertragsstrafe. Backup-Lieferanten-Markt-Recherche-Prozess durchspielen."
+      },
+      {
+        "id": "mfg_ex_blackout",
+        "title": "Anlagen-Wiederanlauf-Vollübung Stromausfall",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "mfg_scn_blackout",
+        "ownerRole": "Krisenstab / Produktionsleitung / Technische Leitung",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung: echte Last-Abschaltung mit USV-Failover-Test, Notstrom-Aggregat-Start, Anlagen-Aufwärm-Sequenzen (Lackier-Trockner 2-4h, Ofen 6-12h). Treibstoff-Nachschub-Prozess. Werkstoff-Verlust-Bewertung. Erst nach erfolgreichem Live-Test gilt das Notstrom-Konzept als belastbar. Bestand-ID; Cadence von 12 auf 36 Monate angepasst, weil Vollübung ressourcenintensiv."
+      },
+      {
+        "id": "mfg_ex_datenexfiltration",
+        "title": "Wirtschaftsspionage-Awareness-Walkthrough",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "mfg_scn_datenexfiltration",
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Werk / Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Walkthrough mit Geschäftsführung, IT-Leitung Werk, F&E-Leitung, Patent-Anwalt, Datenschutzbeauftragte. Continental-2022-Schablone (40 TB Konstruktionsdaten, 4 Wochen unbemerkter Zugang) als Drehbuch. F&E-Server-Segmentierung als Härtungs-Maßnahme demonstrieren. OEM-Kunden-Information bei Vertraulichkeitsbruch mit Auftragsentzugs-Risiko üben."
       },
       {
         "id": "mfg_ex_mes",
         "title": "MES-Fallback-Test",
         "exerciseType": "technical",
         "scenarioTemplateId": "mfg_scn_mes",
-        "ownerRole": "IT / Produktion",
-        "cadenceMonths": 6,
-        "notes": "Offline-Erfassung und Nacherfassung gemeinsam testen."
+        "ownerRole": "IT-Leitung Produktion",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher technischer Test: Offline-Erfassung mit Papier-Formularen, Daten-Nacherfassung nach simuliertem Wiederanlauf priorisiert pro Auftrag. Bestand-ID; Cadence von 6 auf 12 Monate angepasst, konsistent zur Pack-Übungs-Kadenzen-Struktur."
       },
       {
         "id": "manu_exercise_ot_failover",
         "title": "Übung OT-Fernwartungsausfall und Linienwiederanlauf",
         "exerciseType": "technical",
         "scenarioTemplateId": "manu_scenario_ot_remote_compromise",
-        "ownerRole": "IT / OT-Sicherheit",
+        "ownerRole": "IT-Leitung mit OT-Verantwortung",
         "cadenceMonths": 12,
-        "notes": "Testet Isolation, Eskalation und Wiederanlauf der Linie nach Fernzugriffsproblem."
+        "notes": "Jährlicher Funktions-Test: Isolation der Fernwartungs-Zugänge, Eskalation und Linie-Wiederanlauf nach Fernzugriffs-Problem. Multi-Faktor-Authentisierung für Wartungs-Zugänge demonstrieren. Bestand-ID erhalten (manu_*-Mix vor-Pilot)."
       }
     ],
     "riskCatalogTemplates": [
