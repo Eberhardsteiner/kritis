@@ -370,38 +370,122 @@
       {
         "id": "fin_proc_online_banking",
         "title": "Online-Banking-Frontend-Betrieb",
-        "ownerRole": "IT-Operations / NOC",
+        "ownerRole": "Online-Banking-Leitung / IT-Leitung Bank",
         "criticality": "kritisch",
         "mtpdHours": "2",
         "rtoHours": "1",
         "rpoHours": "0",
-        "dependencies": "Core-Banking-Provider, DDoS-Mitigation, Customer-Authentifizierung",
-        "outputs": "Customer-Sicht auf Konto, Transaktionen, Online-Überweisungen",
-        "notes": "Bei DDoS-Lawine Mitigation-Aktivierung binnen 5 min, parallel Customer-Kommunikations-Kette aktivieren."
+        "dependencies": "Core-Banking-Provider, DDoS-Mitigation, Customer-Authentifizierung (TAN/PSD2-SCA), Web-/Mobile-Frontend, BaFin-Reporting",
+        "outputs": "Customer-Sicht auf Konto, Transaktionen, Online-Überweisungen, Mobile-Banking-API",
+        "notes": "RPO 0 reflektiert Echtzeit-Charakteristik von Banking-Transaktionen — synchrone Replikation Standard, nicht Sonderfall. Jeder Datenverlust bedeutet falscher Saldo, fehlgeschlagene Wire-Transfers, BaFin-Eskalation. Bei DDoS-Lawine Mitigation-Aktivierung binnen 5 min, parallel Customer-Kommunikations-Kette aktivieren. SVB-2023-Schablone: Bank-Run via Twitter binnen Stunden möglich — vorab-textierte Customer-Kommunikations-Vorlagen Pflicht."
       },
       {
         "id": "fin_proc_settlement",
-        "title": "Settlement und Zahlungsverkehr",
-        "ownerRole": "Settlement-Operations",
+        "title": "Settlement und Zahlungsverkehr (SEPA, SWIFT, T2/TIPS, Instant)",
+        "ownerRole": "Zahlungsverkehrs-Leitung",
         "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Core-Banking-System, SEPA-/SWIFT-Gateway, Bundesbank-T2/TIPS-Schnittstelle, EBA Clearing, Instant-Payments-Infrastruktur",
+        "outputs": "Tagesendverarbeitung, SEPA-Lastschriften, SWIFT-Übermittlungen, SEPA-Instant binnen 10 Sekunden, T2/TIPS-Slot-konforme Settlement",
+        "notes": "MTPD/RTO Spec-verschärft (gegenüber Bestand 8h/4h) auf 4h/2h: T2/TIPS-Slot-Disziplin und SEPA-Instant 10-Sekunden-SLA sind regulatorisch verankert. ICBC USA 08.11.2023-Schablone: nach LockBit-Ransomware (CitrixBleed CVE-2023-4966) musste die Bank Settlement per USB-Stick und Bote in Manhattan abwickeln — Failover muss schnell sein. Manueller Settlement-Modus dokumentiert."
+      },
+      {
+        "id": "fin_proc_filiale",
+        "title": "Filialbetrieb und Geldautomaten",
+        "ownerRole": "Filial-Leitung / Bargeld-Logistik",
+        "criticality": "hoch",
         "mtpdHours": "8",
         "rtoHours": "4",
-        "rpoHours": "1",
-        "dependencies": "Core-Banking-System, SEPA-/SWIFT-Gateway, Bundesbank-Schnittstelle",
-        "outputs": "Tagesendverarbeitung, SEPA-Lastschriften, SWIFT-Übermittlungen",
-        "notes": "Manueller Settlement-Modus bei Cyber-Vorfall (USB-Stick-Pattern wie ICBC 2023)."
+        "rpoHours": "2",
+        "dependencies": "Filial-IT (Schalter-Terminals), Geldautomaten-Netz (ATM), Bargeld-Logistik (Werttransport), Kunden-Authentifizierung, Filial-Telekom",
+        "outputs": "Bargeld-Versorgung an Schaltern und ATMs, Filial-Beratung, Bargeld-Einzahlung/-Auszahlung, EC-/Kredit-Karten-Transaktionen",
+        "notes": "Bei Online-Banking-Ausfall ist Filial-Bargeld-Versorgung der Notbetrieb-Kanal — DKB-Pattern (Mehrtägiger Banking-Outage zwingt Customer in Filiale). Bargeld-Reserve in Filial-Tresoren für 24-48 h Versorgung. Bei ATM-Netz-Ausfall (z. B. nach Atruvia-Outage) Verbund-Notfall-Hotline aktivieren."
+      },
+      {
+        "id": "fin_proc_it",
+        "title": "Werks-IT-Betrieb (ERP, Office, getrennt von Banking-Systemen)",
+        "ownerRole": "IT-Leitung Bank",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Active Directory, ERP-System, Mitarbeiter-IT, E-Mail, Office-Dokumenten-Management, Backup-Infrastruktur",
+        "outputs": "Funktionsfähige Mitarbeiter-IT, ERP-Buchungen, Vertriebs-Workflow, interne Kommunikation",
+        "notes": "Bewusste Trennung von Banking-Systemen (Core-Banking, Settlement, Online-Banking — Echtzeit-Welt) und Werks-IT (Office-Welt). Bei Cyber-Vorfall: Werks-IT kann tagelang ausfallen ohne Versorgungs-Konsequenz, aber Banking-System-Ausfall ist sofortig-eskalativ. Backups offline und immutable. NIS2/DORA-Meldung bei IT-Vorfall mit Querverbindung zur Banking-Welt binnen 24 h (DORA Art. 19 Major-ICT-Incident-Report)."
       },
       {
         "id": "fin_proc_compliance",
-        "title": "GwG-/MaRisk-Compliance-Betrieb",
-        "ownerRole": "Compliance / Geldwäsche-Beauftragte*r",
+        "title": "DORA-/MaRisk-/GwG-Compliance-Betrieb",
+        "ownerRole": "Compliance-Leitung / Geldwäsche-Beauftragte*r",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Transaktions-Monitoring-System, FIU-Meldeportal (goAML), BaFin-Reporting-Schnittstelle, DORA-Incident-Reporting-Tool, MaRisk-Dokumentations-System, Geldwäsche-Aufsichts-Tool",
+        "outputs": "DORA Major-ICT-Incident-Reports binnen 4 h initial / 1 Monat final (Art. 19), GwG-Verdachtsmeldungen an FIU, MaRisk-Berichte, BaFin-Anfragen-Bearbeitung, Aufsichts-Eskalationen",
+        "notes": "DORA-Säule erkennbar — DORA-Compliance ist seit 17.01.2025 in Kraft, fünf Pillar-Anforderungen (ICT-Risk-Management, ICT-Incident-Management, Operational-Resilience-Testing, Third-Party-Risk-Management, Information-Sharing). RTS EU 2025/1190 vom 18.06.2025 anwendbar ab 08.07.2025. Kritikalität 'kritisch' verschärft (gegenüber Bestand 'hoch'): DORA Art. 19 verlangt Major-ICT-Incident-Report binnen 4 h initial — Echtzeit-eskalativ, nicht Backoffice. Compliance-Funktion in DORA-Welt umfasst auch Krisen-Kommunikation (Pillar 2 Stakeholder-Kommunikation). Bei Compliance-Officer-Ausfall Vertretungs-Kette dokumentiert."
+      },
+      {
+        "id": "fin_proc_third_party",
+        "title": "ICT-Third-Party-Risk-Management (DORA-Säule 5)",
+        "ownerRole": "Auslagerungs-Beauftragte*r / CISO",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Lieferanten-Register, Cloud-Outsourcing-Verträge, Sub-Outsourcing-Aufsicht, BaFin-Auslagerungs-Anzeigen, DORA-Register-of-Information (RoI)",
+        "outputs": "Lieferanten-Register-Pflege, Cloud-Outsourcing-Vertrags-Reviews, Sub-Outsourcing-Aufsicht, BaFin-Auslagerungs-Anzeigen, DORA-RoI-Pflege, Audit-Klausel-Überwachung",
+        "notes": "DORA-Säule erkennbar — DORA-Compliance ist seit 17.01.2025 in Kraft. Säule 5 (Third-Party-Risk-Management) ist eigene Säule mit hoher Komplexität: Register-of-Information (RoI) als zentrales Lieferanten-Verzeichnis, systemrelevante Drittanbieter nach Art. 28 mit besonderen Audit-/Exit-Klauseln. Governance-Funktion mit Tagen-Pufferzeit — bei einem konkreten Drittanbieter-Vorfall eskaliert nicht das Third-Party-Risk-Management selbst, sondern die operativen Prozesse, die von dem Drittanbieter abhängen (Online-Banking, Settlement)."
+      },
+      {
+        "id": "fin_proc_treasury",
+        "title": "Treasury und Liquiditäts-Steuerung",
+        "ownerRole": "Treasury-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Bundesbank-Konto, EZB-Einlagefazilität, Refinanzierungs-Linien, Geldmarkt-Schnittstellen, Cash-Management-System, Devisen-Handelsplattform",
+        "outputs": "Cash-Management, Refinanzierung, EZB-Hauptrefinanzierungs-Geschäfte, Liquiditäts-Steuerung, Mindestreserve-Erfüllung, Devisen-Hedging",
+        "notes": "Bei Bank-Run-Szenario (SVB-Klasse) ist Treasury-Funktion sofort eskalativ — Liquiditäts-Lücke binnen Stunden möglich, EZB-Notfall-Liquiditäts-Hilfe (ELA) als letzter Anker. Cash-Reserve und Refinanzierungs-Linien tagesaktuell überwachen. Bei Atruvia/FI-Outage Settlement-Cascade-Risiko — Treasury muss Counterparty-Exposure neu bewerten."
+      },
+      {
+        "id": "fin_proc_schaden",
+        "title": "Schadensregulierung und Schadens-IT",
+        "ownerRole": "Schaden-Leitung",
         "criticality": "hoch",
         "mtpdHours": "24",
         "rtoHours": "12",
-        "rpoHours": "1",
-        "dependencies": "Transaktions-Monitoring-System, FIU-Meldeportal, BaFin-Reporting",
-        "outputs": "GwG-Verdachtsmeldungen, MaRisk-Berichte, BaFin-Anfragen",
-        "notes": "Bei Compliance-Officer-Ausfall Vertretungs-Kette dokumentiert."
+        "rpoHours": "4",
+        "dependencies": "Schadens-IT-System, Sachverständigen-Netzwerk, Auszahlungs-Schnittstelle (SEPA), Versicherungs-Stammdaten, Rückversicherer-Anbindung, Betrugs-Erkennung",
+        "outputs": "Schadens-Annahme, Schadens-Begutachtung, Auszahlungs-Bescheide, Rückversicherer-Meldungen, Betrugs-Verdachts-Verfolgung",
+        "notes": "Schwerpunkt-Vorlage für Versicherungs-Tenants. Reine Banken können als nicht anwendbar markieren. Tenants mit Versicherungs-Sparte adoptieren mit ggf. tenant-spezifischer MTPD-Schärfung (z. B. bei Lebens-/Sach-Großschadens-Welle nach Naturereignis). Bei Großschadens-Lage (Hochwasser, Hagel) Skalierungs-Disziplin mit externer Sachverständigen-Reserve."
+      },
+      {
+        "id": "fin_proc_bestand",
+        "title": "Bestandsverwaltung und Versicherungs-IT",
+        "ownerRole": "Versicherungs-IT-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "Polizzen-Verwaltungs-System, Beitrags-Inkasso (SEPA-Lastschrift), Lebensversicherungs-Bestand, Aktuariat, Datenbank-Replikation",
+        "outputs": "Polizzen-Verwaltung, Beitrags-Inkasso, Lebensversicherungs-Bestands-Pflege, Aktuariats-Auswertungen, Stammdaten-Pflege",
+        "notes": "Schwerpunkt-Vorlage für Versicherungs-Tenants. Reine Banken können als nicht anwendbar markieren. Bei Cyber-Vorfall mit Stammdaten-Exfiltration (Adressen, IBAN, Gesundheitsdaten) DSGVO Art. 33/34-Pflicht — Lebens-/Krankenversicherer mit zusätzlicher Sensitivität (Gesundheitsdaten als besondere Kategorie nach DSGVO Art. 9)."
+      },
+      {
+        "id": "fin_proc_vertrieb",
+        "title": "Versicherungs-Vertrieb und Maklerportal",
+        "ownerRole": "Vertriebsleitung",
+        "criticality": "mittel",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "Online-Antragstrecke, Vermittler-/Makler-Portal, Lead-Management-System, Tarif-Rechner, CRM, Provisions-Abrechnung",
+        "outputs": "Neugeschäft-Antrags-Verarbeitung, Makler-Provisions-Abrechnung, Lead-Verteilung, Online-Tarif-Berechnung",
+        "notes": "Schwerpunkt-Vorlage für Versicherungs-Tenants. Reine Banken können als nicht anwendbar markieren. Mehrere Tage Pufferzeit durch Antrags-Bearbeitungs-Rhythmen — bei Ausfall keine unmittelbare Versorgungs-Lücke. Bei Cyber-Vorfall im Maklerportal Reputations-Risiko gegenüber Vertriebs-Partnern (Multiplikator-Effekt)."
       }
     ],
     "dependencyTemplates": [
@@ -411,9 +495,9 @@
         "category": "dienstleister",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Im Sektor faktisch nicht ersetzbar — abhängig von Provider-eigener Resilienz",
+        "fallback": "Im Sektor faktisch nicht ersetzbar — abhängig von Provider-eigener Resilienz; bei Vollausfall Notbetrieb-Skripte (Filial-Bargeld-Versorgung, manueller Settlement-Modus, Customer-Hotline-Skalierung)",
         "contractReference": "Atruvia-Rahmenvertrag bzw. Finanz Informatik (Sparkassen-Verbund)",
-        "notes": "Systemrelevanter Drittanbieter nach DORA Art. 28; Audit-Klauseln + Exit-Strategie pflegen."
+        "notes": "Systemrelevanter Drittanbieter nach DORA Art. 28; Audit-Klauseln + Exit-Strategie pflegen. Schablonen-Cluster aus deutscher Banken-IT-Verbund-Realität: FI-Panne Dez 2019 (technischer Defekt, Helaba-Sparkassen, kein Cyber); FI-TS Cyber-Angriff Jan 2020 (DKB als Outsourcing-Kunde betroffen); Deutsche Leasing 03.06.2023 (S-Finanzgruppe-Tochter, Cyber, 2.500 MA nach Hause)."
       },
       {
         "id": "fin_dep_sepa_swift",
@@ -421,19 +505,19 @@
         "category": "infrastruktur",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Manueller Settlement-Modus (USB-Übergabe analog ICBC-Schablone)",
+        "fallback": "Manueller Settlement-Modus (USB-Übergabe analog ICBC-Schablone vom 08.11.2023, Bote in Manhattan), Notfall-Peering-Vereinbarungen mit Korrespondenz-Banken",
         "contractReference": "EBA Clearing / SWIFT-Mitgliedschaft",
-        "notes": "SEPA-Pause = Customer-sichtbare Liquiditätslücke, SWIFT-Pause = internationale Settlement-Cascade."
+        "notes": "SEPA-Pause = Customer-sichtbare Liquiditätslücke, SWIFT-Pause = internationale Settlement-Cascade. SEPA-Instant 10-Sekunden-SLA seit 2024 regulatorisch verankert — Failover muss schnell sein."
       },
       {
         "id": "fin_dep_bundesbank",
-        "title": "Bundesbank-Schnittstelle (TARGET2 / TIPS)",
+        "title": "Bundesbank-Schnittstelle (T2/TIPS)",
         "category": "infrastruktur",
         "criticality": "kritisch",
         "singlePointOfFailure": false,
-        "fallback": "Manueller Settlement-Modus, gegebenenfalls verzögerter Übertrag",
+        "fallback": "Manueller Settlement-Modus, gegebenenfalls verzögerter Übertrag, Bundesbank-Notfall-Hotline",
         "contractReference": "Bundesbank-Mitgliedschaft",
-        "notes": "TARGET2 ist seit März 2023 abgelöst durch T2/TIPS — Bundesbank-Notfall-Hotline dokumentiert halten."
+        "notes": "TARGET2 ist seit März 2023 abgelöst durch T2/TIPS — Bundesbank-Notfall-Hotline dokumentiert halten. Bei Settlement-Cascade EZB-Liquiditäts-Notfall-Hilfe (ELA) als letzter Anker."
       },
       {
         "id": "fin_dep_ddos_mitigation",
@@ -441,9 +525,59 @@
         "category": "dienstleister",
         "criticality": "hoch",
         "singlePointOfFailure": false,
-        "fallback": "Zweit-Anbieter mit Failover-Vertrag",
+        "fallback": "Zweit-Anbieter mit Failover-Vertrag, Upstream-Provider-RTBH-Eskalation, Anycast-Verteilung",
         "contractReference": "DDoS-Mitigation-Rahmenvertrag",
-        "notes": "§ 3 BSIG-qualifizierter Anbieter empfohlen; quartalsweise Aktivierungs-Übung."
+        "notes": "§ 3 BSIG-qualifizierter Anbieter empfohlen; halbjährliche Aktivierungs-Übung wegen Bank-Run-Risiko (SVB-2023-Schablone: Online-Banking-Ausfall kann Bank-Run binnen Stunden triggern)."
+      },
+      {
+        "id": "fin_dep_ezb",
+        "title": "EZB- und ESCB-Anbindung (T2S, Notenbankgeld, ELA)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalation an Bundesbank als nationale Zentralbank; EZB-Notfall-Liquiditäts-Hilfe (ELA) bei Liquiditäts-Krise; Korrespondenz-Banken-Settlement",
+        "contractReference": "ESCB-Konto, T2S-Mitgliedschaft, EZB-Hauptrefinanzierungs-Geschäfte",
+        "notes": "Bei Bank-Run-Szenario ist EZB-ELA der letzte Liquiditäts-Anker. Mindestreserve-Erfüllung tagesaktuell überwachen. T2S für Wertpapier-Settlement (seit 2017 zentral) zusätzlich zu T2/TIPS für Geld-Settlement."
+      },
+      {
+        "id": "fin_dep_bafin",
+        "title": "BaFin-Meldewege und Sonderprüfungs-Bereitschaft",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalation an EBA bei systemrelevanten Vorfällen, BSI bei Cyber-Querverbindung, Bundesbank für Liquiditäts-Themen",
+        "contractReference": "Meldewege nach DORA Art. 19, BAIT/VAIT-Reporting, MaRisk-Berichtspflichten, KWG-§ 25a/24c",
+        "notes": "DORA Art. 19 Major-ICT-Incident-Report binnen 4 h initial, 1 Monat final. BaFin-Sonderprüfungs-Anordnung möglich, Geschäftsleitungs-Haftung mit persönlicher Konsequenz. Andere Sektoren haben Aufsichts-Behörden, aber BaFin hat besondere Eingriffstiefe (Personalvorschläge, Geschäftsverbote möglich)."
+      },
+      {
+        "id": "fin_dep_cloud_dora",
+        "title": "Cloud-Provider mit DORA-Compliance",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Multi-Cloud-Strategie, On-Premise-Fallback für regulatorisch sensitive Workloads, Multi-Region-Failover",
+        "contractReference": "DORA-konformer Outsourcing-Vertrag mit Audit-Klausel, Sub-Outsourcing-Aufsicht, Exit-Strategie",
+        "notes": "DORA-Säule 5 erkennbar — systemrelevante Drittanbieter nach Art. 28 mit besonderen Audit-/Exit-Klauseln. Capital-One-2019-Schablone als Demo-Anker: Server-Side-Request-Forgery (SSRF) gegen WAF-Konfiguration, Zugriff auf AWS-Metadata-Service, Ableitung von temporären IAM-Credentials, Exfiltration von 100 Mio. US- + 6 Mio. CA-Datensätzen aus S3-Buckets. Täterin Paige Thompson (Ex-AWS-Mitarbeiterin) — Insider-Wissen zur Cloud-Konfigurations-Mechanik."
+      },
+      {
+        "id": "fin_dep_wp_iks",
+        "title": "Wirtschaftsprüfer und externes IKS (MaRisk-Prüfer)",
+        "category": "dienstleister",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Wechsel des Wirtschaftsprüfers nach KWG-Pflicht-Rotation, Notfall-Prüfer-Bestellung durch BaFin",
+        "contractReference": "Wirtschaftsprüfer-Mandatsvertrag, IKS-Audit-Rahmenvertrag",
+        "notes": "Jährlicher Jahresabschluss-Prüfer plus MaRisk-IKS-Prüfer. Bei Sonderprüfung durch BaFin ist Wirtschaftsprüfer Eskalations-Partner. Pflicht-Rotation alle 10 Jahre nach KWG."
+      },
+      {
+        "id": "fin_dep_rueck",
+        "title": "Rückversicherer-Anbindung (Munich Re, Hannover Rück, Swiss Re)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Zweit-Rückversicherer mit Failover-Quote, Versicherungs-Pool-Beteiligung, Retention-Erhöhung als Notbetrieb",
+        "contractReference": "Quotenrückversicherungs-Vertrag, Schadenexzedenten-Vertrag, Stop-Loss-Vereinbarung",
+        "notes": "Schwerpunkt-Vorlage für Versicherungs-Tenants. Reine Banken können als nicht anwendbar markieren. Bei Großschadens-Lage (Hochwasser, Hagel, Pandemie) Rückversicherer-Schadens-Meldung binnen Tagen, Rückversicherer-Auszahlungs-Frist nach Vertrag."
       }
     ],
     "scenarioTemplates": [
@@ -451,55 +585,167 @@
         "id": "fin_scn_online_banking_ddos",
         "title": "DDoS-Angriff auf Online-Banking mit Bank-Run-Risiko",
         "category": "Cyber / Customer-Trust",
-        "description": "Online-Banking-Frontend ist nicht erreichbar, Customer-Sorgen verbreiten sich über Twitter/WhatsApp, Bank-Run-Risiko steigt mit jeder Stunde.",
+        "description": "Volumetrische DDoS-Welle gegen Online-Banking-Frontend und Mobile-Banking-API. Online-Banking nicht erreichbar, Customer-Sorgen verbreiten sich über Twitter/WhatsApp/Slack, Bank-Run-Risiko steigt mit jeder Stunde. Schablone SVB 09.03.2023: $42 Mrd. Abhebungen in einem Tag, 'first Twitter-fueled bank run' (Fed-Barr-Testimony, McHenry) — bei SVB ohne Cyber-Trigger; bei einem DDoS-Vorfall wirkt der Trigger zusätzlich.",
         "likelihood": 4,
         "impact": 5,
         "ownerRole": "Vorstand / CISO",
         "linkedProcessTemplateIds": [
-          "fin_proc_online_banking"
+          "fin_proc_online_banking",
+          "fin_proc_treasury",
+          "fin_proc_compliance"
         ],
         "linkedDependencyTemplateIds": [
-          "fin_dep_ddos_mitigation"
+          "fin_dep_ddos_mitigation",
+          "fin_dep_bafin"
         ],
-        "playbook": "DDoS-Mitigation aktivieren, parallel Customer-Kommunikations-Kette starten, BaFin DORA Art. 19-Meldung vorbereiten.",
+        "playbook": "DDoS-Mitigation binnen 5 min aktivieren, parallel Customer-Kommunikations-Kette starten (vorab-textierte Twitter-/Social-Media-Vorlagen, Pressestelle-Statement, Hotline-Kapazitäten skalieren mit externem Call-Center-Backup), BaFin DORA Art. 19 Major-ICT-Incident-Report binnen 4 h initial, Bundesbank-Information bei Liquiditäts-Auffälligkeiten, EZB-ELA-Bereitschaft prüfen bei Bank-Run-Anzeichen, Vorstand-Pressemitteilung mit Solvenz-Bestätigung.",
         "exerciseTypeHint": "tabletop",
-        "notes": "SVB-Twitter-Bank-Run-Schablone."
+        "notes": "SVB-Twitter-Bank-Run-Schablone. Halbjährliche Übung wegen Bank-Run-Risiko."
       },
       {
         "id": "fin_scn_core_banking_outage",
         "title": "Core-Banking-Provider-Outage mit Settlement-Cascade",
-        "category": "Infrastruktur",
-        "description": "Atruvia oder Finanz Informatik haben einen Software-Update-Bug, Settlement steht, ATM-Netz teilweise gestört.",
+        "category": "Infrastruktur / Drittanbieter",
+        "description": "Atruvia oder Finanz Informatik haben einen Software-Update-Bug oder einen Cyber-Vorfall. Settlement steht, ATM-Netz teilweise gestört, Online-Banking gestört. Hauptschablone ICBC USA 08.11.2023: LockBit-Ransomware, CitrixBleed CVE-2023-4966, Settlement per USB-Stick und Bote in Manhattan, US-Treasury-Clearing temporär gestört. Deutsche Schablone FI-Panne Dezember 2019: technischer Defekt zentrale Zahlungskomponente, Helaba-Sparkassen, zehntausende Sparkassenkunden — kein Cyberangriff, sondern Engineering-Fehler. Didaktischer Wert: nicht alles ist Cyber.",
         "likelihood": 3,
         "impact": 5,
         "ownerRole": "Vorstand / IT-Leitung",
         "linkedProcessTemplateIds": [
           "fin_proc_settlement",
-          "fin_proc_online_banking"
+          "fin_proc_online_banking",
+          "fin_proc_filiale"
         ],
         "linkedDependencyTemplateIds": [
           "fin_dep_core_banking",
-          "fin_dep_sepa_swift"
+          "fin_dep_sepa_swift",
+          "fin_dep_bundesbank"
         ],
-        "playbook": "Manuellen Settlement-Modus aktivieren, Customer-Kommunikation, Bundesbank informieren, BaFin DORA-Meldung.",
+        "playbook": "Manuellen Settlement-Modus aktivieren (USB-Stick-Pattern wie ICBC), Filial-Bargeld-Versorgung als Notbetrieb-Kanal aktivieren (DKB-Pattern: Customer auf Filiale lenken), Customer-Kommunikation mit vorab-textierten Vorlagen, Bundesbank-Notfall-Hotline informieren, BaFin DORA Art. 19-Meldung binnen 4 h, Verbund-Koordination mit anderen Sparkassen/Genossenschaftsbanken, Wiederanlauf-Priorität Settlement vor Reporting.",
         "exerciseTypeHint": "tabletop",
-        "notes": "ICBC-2023-Schablone."
+        "notes": "ICBC-2023-Schablone (Cyber, USB-Stick-Bote) plus FI-Panne-2019-Schablone (technischer Defekt, kein Cyber) — zwei Pattern für deutschen Kontext."
       },
       {
         "id": "fin_scn_insider_trading",
         "title": "Insider mit Trading-Zugang missbraucht Privilegien",
         "category": "Insider",
-        "description": "Mitarbeiter*in mit Trading-Zugang führt unautorisierte Trades aus oder exfiltriert Customer-Daten.",
+        "description": "Mitarbeiter*in mit Trading-Zugang führt unautorisierte Trades aus oder exfiltriert Customer-Daten. Société-Générale-Kerviel-2008-Schablone als historischer Großvorfall (4,9 Mrd. EUR Verlust durch Jérôme Kerviel mit unauthorisierten Positions-Aufbauten) — Mittelständische Banken haben strukturell kleinere Insider-Risiken, der Schaden ist meist auf einzelne Trades limitiert.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "CISO / Compliance",
+        "linkedProcessTemplateIds": [
+          "fin_proc_compliance",
+          "fin_proc_treasury"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_bafin"
+        ],
+        "playbook": "Sofortige Account-Sperrung, Forensik-Initiierung, BaFin-Meldung nach KWG § 24c (Verdacht auf Marktmanipulation), Strafanzeige nach § 38 WpHG bei Insider-Handel, Personal-Maßnahmen (Suspendierung, ggf. fristlose Kündigung), Schadens-Bezifferung mit M2M-Bewertung, ggf. Pressemitteilung bei Großvorfall, IKS-Schwächen-Analyse durch Wirtschaftsprüfer.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "L2/I4-Klassifikation (gegenüber Bestand L3/I5 gelockert): Vorfälle dieser Größe sind tatsächlich selten; Insider-Risiko ist ohnehin durch Compliance-Prozess (jetzt kritisch) abgedeckt — eine zweite L3/I5-Bewertung wäre Doppel-Belastung."
+      },
+      {
+        "id": "fin_scn_dora_tlpt",
+        "title": "DORA-TLPT-Befund mit BaFin-Eskalation",
+        "category": "Regulatorik / DORA",
+        "description": "Threat-Led Penetration Testing (TLPT) nach DORA-Säule 3 (Operational-Resilience-Testing) identifiziert eine kritische Lücke in der ICT-Resilienz — z. B. unsegmentierte Banking-/Werks-IT-Brücke, fehlende Backup-Wiederherstellungs-Disziplin, unzureichende Third-Party-Risk-Aufsicht. BaFin wird informiert, Sonderprüfungs-Anordnung möglich, Geschäftsleitungs-Haftung mit persönlicher Konsequenz. TLPT-Pflicht: alle 3 Jahre für G-SIIs, O-SIIs und systemrelevante Zahlungsdienstleister/E-Geld-Institute oberhalb EBA-Schwellen. Mittelständische Sparkassen sind in der Regel NICHT TLPT-pflichtig, müssen aber Operational-Resilience-Testing nach DORA-Pillar 3 jährlich durchführen (intern oder mit externen Beratern).",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "CISO / Vorstand",
+        "linkedProcessTemplateIds": [
+          "fin_proc_compliance",
+          "fin_proc_third_party",
+          "fin_proc_it"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_bafin",
+          "fin_dep_cloud_dora"
+        ],
+        "playbook": "TLPT-Befund mit externer Penetration-Tester-Firma dokumentieren, Maßnahmenplan mit Eskalations-Stufen erstellen, BaFin nach DORA Art. 26 Information vorbereiten (TLPT-Reporting), Geschäftsleitung über Aufsichts-Risiko informieren, Sonderprüfungs-Bereitschaft prüfen, Maßnahmen-Umsetzung mit messbaren Meilensteinen, Wirtschaftsprüfer-Information bei IKS-relevanten Befunden, ggf. Versicherungs-Schutz (Cyber-Versicherung, D&O) prüfen.",
+        "exerciseTypeHint": "technical",
+        "notes": "RTS EU 2025/1190 vom 18.06.2025 (anwendbar ab 08.07.2025) als regulatorischer Anker. UVM-Demo-Pointe für Mittelstandsberatung: jährliches Resilience-Testing als angebotsfähige Leistung — nicht jede Sparkasse braucht TLPT, aber alle brauchen Pillar-3-Testing."
+      },
+      {
+        "id": "fin_scn_moveit_data_exfil",
+        "title": "Massendaten-Exfiltration (MOVEit + Capital-One-Schablone)",
+        "category": "Cyber / Datenschutz",
+        "description": "Drittanbieter-Software-Bug oder Cloud-Misconfiguration führt zu Massendaten-Exfiltration: Customer-Stammdaten (Name, Adresse, IBAN), Kontoumsätze, ggf. Bonitäts-/Gesundheitsdaten bei Versicherern. Hauptschablone MOVEit ab 27.05.2023 (Cl0p-Ransomware, CVE-2023-34362): bis Okt 2023 ~2.559 Organisationen / ~66 Mio. Personen weltweit; deutsche Banken Deutsche Bank, ING, Postbank, Comdirect via Drittanbieter Majorel betroffen. Zweite Schablone Capital One 2019: Server-Side-Request-Forgery (SSRF) gegen WAF-Konfiguration, Zugriff auf AWS-Metadata-Service, Ableitung von temporären IAM-Credentials, Exfiltration von 100 Mio. US- + 6 Mio. CA-Datensätzen aus S3-Buckets. Täterin Paige Thompson (Ex-AWS-Mitarbeiterin) — Insider-Wissen zur AWS-Konfigurations-Mechanik. Demo-Pointe: SSRF gegen Cloud-Metadata-Service als technisch konkreter Angriffsvektor.",
         "likelihood": 3,
         "impact": 5,
-        "ownerRole": "CISO / Compliance",
+        "ownerRole": "CISO / Datenschutzbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "fin_proc_online_banking",
+          "fin_proc_it",
+          "fin_proc_compliance",
+          "fin_proc_bestand"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_core_banking",
+          "fin_dep_cloud_dora",
+          "fin_dep_bafin"
+        ],
+        "playbook": "Werks-IT vom Netz trennen, Banking-System-Segmentierung verifizieren (Online-Banking läuft weiter), Backup-Wiederherstellung aus Offline-/Immutable-Backups, BaFin DORA Art. 19 Major-ICT-Incident-Report binnen 4 h, BSI-Meldung nach NIS2 binnen 24 h, DSGVO Art. 33-Meldung an Landesdatenschutzbeauftragte binnen 72 h, Betroffenen-Information nach DSGVO Art. 34, bei Versicherer-Tenants TKG/DSGVO Art. 9 Sonder-Eskalation wegen Gesundheitsdaten, Hotline für Kundenanfragen mit externem Call-Center-Backup skalieren, ggf. Bonitäts-Schutz für Betroffene anbieten, Strafanzeige.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Cross-Funktions-Übung mit IT, Datenschutz, Compliance, Pressestelle, Customer-Service. Demo-Pointe: saubere Banking-Werks-IT-Segmentierung als Schutz."
+      },
+      {
+        "id": "fin_scn_atruvia_fi_outage",
+        "title": "Banken-IT-Verbund-Kaskade (FI Dez 2019 + FI-TS Jan 2020 + Deutsche Leasing 2023)",
+        "category": "Drittanbieter / Verbund",
+        "description": "Atruvia (Genossenschafts-Verbund) oder Finanz Informatik (Sparkassen-Verbund) haben einen Vorfall mit Verbund-Kaskade — viele Banken gleichzeitig betroffen. Drei deutsche Schablonen mit unterschiedlichen Charakteristiken: (1) FI-Panne Dezember 2019: technischer Defekt zentrale Zahlungskomponente, Helaba-Sparkassen, zehntausende Sparkassenkunden, kein Cyberangriff. (2) FI-TS Januar 2020: Cyber-Angriff auf FI-Tochter, DKB als Outsourcing-Kunde betroffen. (3) Deutsche Leasing 03.06.2023: S-Finanzgruppe-Tochter, Cyberangriff, 2.500 MA nach Hause, Notfallplan aktiviert. Demo-Pointe: deutscher Banken-IT-Verbund hat mehrere Realitäts-Anker mit unterschiedlichen Charakteristiken, die kombiniert eskalieren können — technischer Defekt, Cyber-Verbund, Cyber-Tochter.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Vorstand / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "fin_proc_online_banking",
+          "fin_proc_settlement",
+          "fin_proc_compliance",
+          "fin_proc_third_party"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_core_banking"
+        ],
+        "playbook": "Verbund-Notfall-Hotline aktivieren, Provider-eigene Kommunikation mit Customer abgleichen (kein Schwarzschwarz-Schwarz), Filial-Bargeld-Versorgung als Notbetrieb-Kanal, Customer-Hotline-Skalierung, BaFin DORA Art. 19-Meldung binnen 4 h, Wirtschaftsprüfer-Information bei IKS-Querverbindung, Sub-Outsourcing-Aufsicht prüfen (Welche Tochter-Strukturen sind betroffen?), Auslagerungs-Beauftragte*r informiert Vorstand über DORA-Säule-5-Kontext.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "L2 reflektiert Sektor-Realität: drei dokumentierte Vorfälle in 4 Jahren sind als Cluster zu lesen, nicht als 'regelmäßig'. Demonstrativer Hebel kommt aus der Schablonen-Tiefe (drei Pattern), nicht aus inflationiertem L-Wert."
+      },
+      {
+        "id": "fin_scn_bank_run_twitter",
+        "title": "Bank-Run via Social-Media (SVB-Klasse, ohne Cyber-Trigger)",
+        "category": "Reputations / Liquiditäts-Run",
+        "description": "Online-Banking ist verfügbar, aber eine virale Sozialmedien-Welle 'Ist die Bank pleite?' triggert Massen-Abhebungen. Schablone SVB 09.03.2023: $42 Mrd. Abhebungen in einem Tag (Fed-Barr-Testimony), 'first Twitter-fueled bank run' (McHenry), Trigger 08.03.2023 Wertpapierverkaufs-Ankündigung + Kapitalerhöhung — KEIN Cyber-Trigger, reine Solvenz-Gerüchte plus Social-Media-Geschwindigkeit. Wichtige Abgrenzung zu fin_scn_online_banking_ddos: dort DDoS getriggert mit Bank-Run als Folge; hier rein psychologisches Phänomen.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Vorstand / Treasury-Leitung",
+        "linkedProcessTemplateIds": [
+          "fin_proc_online_banking",
+          "fin_proc_treasury",
+          "fin_proc_compliance"
+        ],
+        "linkedDependencyTemplateIds": [
+          "fin_dep_bafin",
+          "fin_dep_ezb"
+        ],
+        "playbook": "Krisen-Kommunikations-Steuerung durch Pressestelle plus Vorstands-Kommunikation. Vorab-textierte Twitter-/Social-Media-Vorlagen verfügbar. Customer-Hotline mit zusätzlichen Kapazitäten besetzen, ggf. mit externem Call-Center-Backup. Filial-Kommunikation durch Filialleiter mit zentraler Sprachregelung. Bargeld-Reserve in Filialen aufstocken (Werttransport-Eskalation). Treasury-Liquiditäts-Steuerung tagesaktuell, Refinanzierungs-Linien aktivieren, EZB-ELA-Bereitschaft prüfen bei Liquiditäts-Lücke. BaFin-Information binnen 4 h bei systemischer Eskalation. Vorstand-Pressemitteilung mit Solvenz-Bestätigung. KEINE Bestätigung von Spekulationen, klare Faktenlage kommunizieren.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Krisen-Kommunikations-Funktion ist im Pack über Compliance-Prozess (DORA Pillar 2 Stakeholder-Kommunikation) abgedeckt — kein eigener Customer-Service-Prozess. Demonstrativer Hebel: Bank-Run-Mechanik als psychologisches Phänomen über Cyber-Vorfall hinaus."
+      },
+      {
+        "id": "fin_scn_aml_eskalation",
+        "title": "Geldwäsche-Verdachts-Mass-Eskalation",
+        "category": "Compliance / GwG",
+        "description": "Häufung von Geldwäsche-Verdachtsmeldungen (FIU-Reports nach goAML), z. B. nach systematischer Strohmann-Konto-Eröffnung oder Fintech-Provider-Schwachstelle bei Identitäts-Prüfung. BaFin-Sonderprüfung-Anordnung möglich, Geschäftsleitungs-Haftung mit persönlicher Konsequenz, Sanktions-Risiko nach GwG bis 5 Mio. EUR oder 10 % Jahresumsatz. EU-AMLR (Anti-Money-Laundering Regulation 2024) als zusätzliche Komplexitätsschicht.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Geldwäsche-Beauftragte*r / Vorstand",
         "linkedProcessTemplateIds": [
           "fin_proc_compliance"
         ],
-        "linkedDependencyTemplateIds": [],
-        "playbook": "Sofortige Account-Sperrung, Forensik-Initiierung, BaFin-Meldung, Strafanzeige (§ 38 WpHG).",
+        "linkedDependencyTemplateIds": [
+          "fin_dep_bafin"
+        ],
+        "playbook": "FIU-Verdachtsmeldung nach § 43 GwG sofort, Konto-Sperrung der verdächtigen Konten, Forensik mit Transaktions-Monitoring-Daten, BaFin-Eskalation nach KWG § 24c, Strafanzeige bei substanzieller Geldwäsche-Verdachts-Lage, IKS-Schwächen-Analyse durch Wirtschaftsprüfer, ggf. Onboarding-Prozess (KYC) verschärfen, Pressemitteilung bei Großvorfall, EU-AMLR-Konformitäts-Review.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Société Générale Kerviel 2008 / abgewandelte Patterns."
+        "notes": "EU-AMLR-Verordnung 2024 als zusätzliche Komplexitätsschicht zur GwG. AMLA (EU-Geldwäsche-Behörde) startet operativ ab 2026 — Drei-Behörden-Eskalations-Logik (BaFin, FIU, AMLA)."
       }
     ],
     "exerciseTemplates": [
@@ -510,7 +756,7 @@
         "scenarioTemplateId": "fin_scn_online_banking_ddos",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 6,
-        "notes": "Halbjährliche Übung wegen Bank-Run-Risiko; mit Marketing/Pressesprecher."
+        "notes": "Halbjährliche Übung wegen Bank-Run-Risiko (L4/I5=20-Szenario verdient höhere Übungs-Frequenz); mit Marketing/Pressesprecher, vorab-textierte Twitter/Social-Media-Vorlagen, SVB-2023-Schablone als Drehbuch-Grundlage."
       },
       {
         "id": "fin_ex_core_banking_outage",
@@ -519,7 +765,34 @@
         "scenarioTemplateId": "fin_scn_core_banking_outage",
         "ownerRole": "Krisenstab",
         "cadenceMonths": 12,
-        "notes": "Jährliche Übung mit Settlement-Operations + Compliance + IT-Leitung."
+        "notes": "Jährliche Übung mit Settlement-Operations + Compliance + IT-Leitung. Drehbuch alterniert zwischen ICBC-2023-Cyber-Pattern (USB-Stick-Settlement) und FI-Panne-2019-technischer-Defekt-Pattern."
+      },
+      {
+        "id": "fin_ex_dora_tlpt",
+        "title": "DORA Operational-Resilience-Testing",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "fin_scn_dora_tlpt",
+        "ownerRole": "CISO / Auslagerungs-Beauftragte*r",
+        "cadenceMonths": 36,
+        "notes": "Tenant wählt zwischen externem TLPT (für G-SIIs/O-SIIs/systemrelevante Zahlungsdienstleister, alle 3 Jahre Pflicht nach DORA) und internem Operational-Resilience-Testing (für Mittelstand, jährlich nach DORA-Pillar 3). UVM-Demo-Pointe für Mittelstandsberatung: jährliches internes Resilience-Testing als angebotsfähige Leistung. Mit externer Penetration-Tester-Firma plus SOC plus CISO. RTS EU 2025/1190 als regulatorischer Anker."
+      },
+      {
+        "id": "fin_ex_bank_run",
+        "title": "Bank-Run-Kommunikations-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "fin_scn_bank_run_twitter",
+        "ownerRole": "Vorstand / Pressestelle",
+        "cadenceMonths": 24,
+        "notes": "SVB-2023-Drehbuch ohne Cyber-Trigger: virale Sozialmedien-Welle, Vorstand plus Pressestelle plus Treasury plus Compliance. Übungs-Lernziele: vorab-textierte Twitter-/Social-Media-Vorlagen, Vorstand-Pressemitteilung mit Solvenz-Bestätigung, Treasury-Liquiditäts-Steuerung tagesaktuell, EZB-ELA-Bereitschaft. KEINE Bestätigung von Spekulationen, klare Faktenlage."
+      },
+      {
+        "id": "fin_ex_third_party",
+        "title": "Third-Party-Outage-Tabletop (Atruvia/FI-Verbund-Kaskade)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "fin_scn_atruvia_fi_outage",
+        "ownerRole": "IT-Leitung / Auslagerungs-Beauftragte*r",
+        "cadenceMonths": 24,
+        "notes": "Drei-Schablonen-Drehbuch (FI-Panne Dez 2019 technischer Defekt, FI-TS Cyber Jan 2020, Deutsche Leasing 2023 Cyber-Tochter) — Übung alterniert zwischen den drei Pattern. IT-Leitung plus Auslagerungs-Beauftragte*r plus Vorstand. DORA-Säule 5 (Third-Party-Risk) als Compliance-Klammer."
       }
     ],
     "riskCatalogTemplates": [
