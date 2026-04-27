@@ -1619,3 +1619,171 @@ describe('logistics-core · Resilience-Skeleton (C5.5.5)', () => {
     expect(scnIds.has('log_scn_atlas_ausfall')).toBe(true);
   });
 });
+
+describe('energy-core · Resilience-Skeleton (C5.5.6)', () => {
+  const module = energyPack.module as unknown as SectorModuleDefinition;
+
+  it('hat mindestens 10 processTemplates', () => {
+    expect((module.processTemplates ?? []).length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('hat mindestens 9 dependencyTemplates', () => {
+    expect((module.dependencyTemplates ?? []).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('hat mindestens 8 scenarioTemplates', () => {
+    expect((module.scenarioTemplates ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('hat mindestens 5 exerciseTemplates', () => {
+    expect((module.exerciseTemplates ?? []).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('processTemplates haben Verteilung 5 kritisch / 4 hoch / 1 mittel', () => {
+    const processes = module.processTemplates ?? [];
+    const kritisch = processes.filter((p) => p.criticality === 'kritisch').length;
+    const hoch = processes.filter((p) => p.criticality === 'hoch').length;
+    const mittel = processes.filter((p) => p.criticality === 'mittel').length;
+    expect(kritisch).toBe(5);
+    expect(hoch).toBe(4);
+    expect(mittel).toBe(1);
+  });
+
+  it('Bestands-IDs (alle 9) bleiben erhalten', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const scnIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const exIds = new Set((module.exerciseTemplates ?? []).map((e) => e.id));
+    expect(processIds.has('en_proc_grid')).toBe(true);
+    expect(processIds.has('en_proc_fault')).toBe(true);
+    expect(depIds.has('en_dep_scada')).toBe(true);
+    expect(depIds.has('en_dep_comms')).toBe(true);
+    expect(depIds.has('en_dep_generator')).toBe(true);
+    expect(scnIds.has('en_scn_scada')).toBe(true);
+    expect(scnIds.has('en_scn_blackout')).toBe(true);
+    expect(exIds.has('en_ex_scada')).toBe(true);
+    expect(exIds.has('en_ex_blackout')).toBe(true);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende processTemplate-IDs', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedProcessTemplateIds ?? []) {
+        if (!processIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked process "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle scenarioTemplates verlinken nur auf existierende dependencyTemplate-IDs', () => {
+    const depIds = new Set((module.dependencyTemplates ?? []).map((d) => d.id));
+    const orphans: string[] = [];
+    for (const scenario of module.scenarioTemplates ?? []) {
+      for (const linkedId of scenario.linkedDependencyTemplateIds ?? []) {
+        if (!depIds.has(linkedId)) {
+          orphans.push(`scenario "${scenario.id}" linked dependency "${linkedId}"`);
+        }
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('alle exerciseTemplates verlinken auf existierende scenarioTemplate-IDs', () => {
+    const scenarioIds = new Set((module.scenarioTemplates ?? []).map((s) => s.id));
+    const orphans: string[] = [];
+    for (const exercise of module.exerciseTemplates ?? []) {
+      if (exercise.scenarioTemplateId && !scenarioIds.has(exercise.scenarioTemplateId)) {
+        orphans.push(`exercise "${exercise.id}" linked scenario "${exercise.scenarioTemplateId}"`);
+      }
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it('jede scenarioTemplate hat mindestens eine Prozess-Verlinkung', () => {
+    for (const scenario of module.scenarioTemplates ?? []) {
+      expect(scenario.linkedProcessTemplateIds?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it('OT-IT-Trennung-Verifikation: en_proc_scada + en_proc_it als getrennte Prozesse', () => {
+    const processIds = new Set((module.processTemplates ?? []).map((p) => p.id));
+    expect(processIds.has('en_proc_scada')).toBe(true);
+    expect(processIds.has('en_proc_it')).toBe(true);
+    const scada = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_scada');
+    const it = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_it');
+    expect(scada?.criticality).toBe('kritisch');
+    expect(it?.criticality).toBe('hoch');
+  });
+
+  it('Industroyer-Schablone: 2016-Angriff UND 2022-Verteidigung beide Schichten in description', () => {
+    const industroyer = (module.scenarioTemplates ?? []).find((s) => s.id === 'en_scn_industroyer');
+    expect(industroyer).toBeDefined();
+    expect(industroyer!.description).toMatch(/2016/);
+    expect(industroyer!.description).toMatch(/2022/);
+    expect(industroyer!.description).toMatch(/abgewehrt|Verteidigung|ESET|CERT-UA/i);
+  });
+
+  it('Wismar-Schablone: 28.09.2021 + 4 Monate Wiederherstellung + OT-IT-Trennung', () => {
+    const wismar = (module.scenarioTemplates ?? []).find((s) => s.id === 'en_scn_ransomware_stadtwerke');
+    expect(wismar).toBeDefined();
+    expect(wismar!.description).toMatch(/28\.09\.2021|2021/);
+    expect(wismar!.description).toMatch(/4 Monate/);
+    expect(wismar!.description).toMatch(/OT.{0,3}IT-Trennung/);
+  });
+
+  it('Schwarzstart als eigener Prozess + Aufsichtsrat-Pflichtschritt', () => {
+    const blackstart = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_blackstart');
+    expect(blackstart).toBeDefined();
+    expect(blackstart!.criticality).toBe('kritisch');
+    expect(blackstart!.notes).toMatch(/AUFSICHTSRAT|Aufsichtsrat-Vorsitzenden/);
+    expect(blackstart!.notes).toMatch(/2 Stunden/);
+  });
+
+  it('Sparten-Differenzierung: en_proc_erzeugung Notes nennen alle 5 Sparten + Saison-Profil', () => {
+    const erzeugung = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_erzeugung');
+    expect(erzeugung).toBeDefined();
+    expect(erzeugung!.notes).toMatch(/Heizkraftwerk/);
+    expect(erzeugung!.notes).toMatch(/KWK/);
+    expect(erzeugung!.notes).toMatch(/Photovoltaik|PV-Park/);
+    expect(erzeugung!.notes).toMatch(/Wind/);
+    expect(erzeugung!.notes).toMatch(/Fernwärme/);
+    expect(erzeugung!.notes).toMatch(/Saison/i);
+  });
+
+  it('Multi-Sparten-Hinweis in Strom-zentrierten Prozessen (en_proc_grid, en_proc_fault, en_proc_scada)', () => {
+    const grid = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_grid');
+    const fault = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_fault');
+    const scada = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_scada');
+    expect(grid?.notes).toMatch(/Gas-Sparte|Gas-Netzleitwarte/i);
+    expect(fault?.notes).toMatch(/Gas-Sparte|Gas-Entst/i);
+    expect(scada?.notes).toMatch(/Gas-SCADA|Gas-Druckregelung/i);
+  });
+
+  it('RPO-Schärfung: en_proc_grid hat RPO 0.5h (statt 0h Bestand)', () => {
+    const grid = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_grid');
+    expect(grid).toBeDefined();
+    expect(parseFloat(grid!.rpoHours ?? '0')).toBe(0.5);
+  });
+
+  it('Abrechnung als mittel (Mittelweg-Verteilung)', () => {
+    const abrechnung = (module.processTemplates ?? []).find((p) => p.id === 'en_proc_abrechnung');
+    expect(abrechnung).toBeDefined();
+    expect(abrechnung!.criticality).toBe('mittel');
+  });
+
+  it('SCADA-Dependency mit category="ot" (Industry-Pattern)', () => {
+    const scada = (module.dependencyTemplates ?? []).find((d) => d.id === 'en_dep_scada');
+    expect(scada).toBeDefined();
+    expect(scada!.category).toBe('ot');
+  });
+
+  it('ÜNB-Dependency als kritisch SPOF=true', () => {
+    const uenb = (module.dependencyTemplates ?? []).find((d) => d.id === 'en_dep_uenb');
+    expect(uenb).toBeDefined();
+    expect(uenb!.criticality).toBe('kritisch');
+    expect(uenb!.singlePointOfFailure).toBe(true);
+  });
+});

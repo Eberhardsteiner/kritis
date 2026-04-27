@@ -274,99 +274,379 @@
       {
         "id": "en_proc_grid",
         "title": "Netzsteuerung und Lastmanagement",
-        "ownerRole": "Leitwarte",
+        "ownerRole": "Netzleitwarte",
         "criticality": "kritisch",
         "mtpdHours": "2",
         "rtoHours": "1",
-        "rpoHours": "0",
-        "dependencies": "SCADA, Kommunikation, Bereitschaft",
-        "outputs": "Versorgungsstabilität und Schalthandlungen",
-        "notes": "Manuelle Schalthandlungen dokumentieren."
+        "rpoHours": "0.5",
+        "dependencies": "SCADA, Kommunikation Leitwarte, Bereitschafts-Liste, Schalthandlungs-Vorlagen",
+        "outputs": "Versorgungsstabilität, Schalthandlungen, Lastmanagement-Entscheidungen",
+        "notes": "Manuelle Schalthandlungen mit Papier-Schaltbuch dokumentieren. RPO 30 Minuten reflektiert maximalen Datenverlust nach SCADA-Wiederanlauf — physikalisch realistisch ohne synchrone Replikation. Vorlage gilt analog für Gas-Sparte (Gas-Netzleitwarte mit identischer Logik). Tenant adoptiert pro Sparte oder Sparten-übergreifend."
       },
       {
         "id": "en_proc_fault",
         "title": "Entstörung und Wiederzuschaltung",
-        "ownerRole": "Netzbetrieb",
+        "ownerRole": "Bereitschafts-Leitung",
         "criticality": "kritisch",
         "mtpdHours": "4",
         "rtoHours": "2",
-        "rpoHours": "0",
-        "dependencies": "Rufbereitschaft, Material, Kommunikation",
-        "outputs": "Störungsbehebung und Wiederanlauf",
-        "notes": "Priorisierung kritischer Einspeise- und Verbrauchspunkte pflegen."
+        "rpoHours": "1",
+        "dependencies": "Rufbereitschaft, Material-Lager, Kommunikations-Anlage, Mobilfunk-Backup, Schaltbuch-System",
+        "outputs": "Störungs-Behebung, Wiederanlauf-Sequenz, Einsatz-Doku",
+        "notes": "Priorisierung kritischer Einspeise- und Verbrauchspunkte pflegen (Krankenhäuser, ITS, Wasserwerke). Vorlage gilt analog für Gas-Sparte (Gas-Entstörungs-Bereitschaft mit identischer Logik). Bei Großstörung Eskalation an Schwarzstart-Prozess (en_proc_blackstart)."
+      },
+      {
+        "id": "en_proc_scada",
+        "title": "SCADA/Netzleitsystem-Betrieb (OT-Schicht, Schutz- und Steuerungssysteme)",
+        "ownerRole": "OT-Sicherheit / Netzleitwarte",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "SCADA-Hauptsystem, Schutzgeräte (Siemens SIPROTEC, ABB, GE), IEC-104-/IEC-61850-Protokolle, Hersteller-Wartungsvertrag, IT-OT-Segmentierungs-Firewall",
+        "outputs": "Schutz-Funktion, Steuerungs-Logik, Telemetrie-Daten, Schalthandlungs-Verifikation",
+        "notes": "OT-IT-Konvergenz als Risiko-Schicht: SCADA und IT haben Schnittstellen für Reporting und Zählerdaten. Industroyer-Schablone (Sandworm 2016 Kiew, Industroyer2 2022 Ukraine) zeigt OT-IT-Übergriff via IEC-104 auf Hochspannungs-Umspannstationen. Querverweis auf Szenario en_scn_industroyer. Vorlage gilt analog für Gas-SCADA (Gas-Druckregelung, Gas-Ventil-Steuerung)."
+      },
+      {
+        "id": "en_proc_it",
+        "title": "Werks-IT-Betrieb (ERP, Office, Reporting, getrennt von OT)",
+        "ownerRole": "IT-Leitung Stadtwerk",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "ERP-System (SAP IS-U, Wilken, Schleupen), Active Directory, Fileserver, Backup-Infrastruktur, Office-365-Anbindung",
+        "outputs": "Authentifizierung, ERP-Verfügbarkeit, Reporting, Kunden-Daten-Verfügbarkeit, Office-Doku",
+        "notes": "OT-IT-Trennung als Schutzwall: Wismar-2021-Schablone zeigt, dass diese Trennung Versorgungs-Kontinuität bei Cyber-Vorfall ermöglicht — Versorgung lief weiter, weil OT/IT separiert waren. IT-Vorfall blieb im IT-Netz, Strom-/Gas-/Wärme-Lieferung unbeeinträchtigt. Querverweis auf en_proc_scada (OT-Pendant) und en_scn_ransomware_stadtwerke (Demo-Schablone)."
+      },
+      {
+        "id": "en_proc_blackstart",
+        "title": "Schwarzstart und Notbetrieb (Notstrom-Aggregate, Inselbetrieb, ÜNB-Koordination)",
+        "ownerRole": "Technische Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Notstrom-Aggregate, Schwarzstart-fähige Erzeugungs-Anlagen, ÜNB-Koordinations-Kanäle (TenneT/50Hertz/Amprion/TransnetBW), Treibstoff-Vorhaltung, Funk-Kommunikation",
+        "outputs": "Inselbetrieb-Aufrechterhaltung, koordinierter Wiederanlauf mit ÜNB, Schwarzstart-Sequenz",
+        "notes": "Schwarzstart-Beschaffung seit 12.01.2024 marktbasiert nach EnWG §12h und EU-Richtlinie 2019/944. AUFSICHTSRAT-ESKALATION ALS PFLICHTSCHRITT: Bei Großstörung mit Versorgungs-Ausfall über 2 Stunden Aufsichtsrat-Vorsitzenden und Bürgermeister informieren, gemeinsame Bürger-Kommunikation abstimmen. ÜNB-Koordination für Wiederanlauf mit Inselbetrieb-Erhalt. Live-Übung mindestens alle 36 Monate."
+      },
+      {
+        "id": "en_proc_metering",
+        "title": "Zählerdatenmanagement und Smart-Meter-Gateway (MSB-Funktion)",
+        "ownerRole": "Messstellenbetreiber",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "4",
+        "dependencies": "Smart-Meter-Gateway-Administrator (BSI-zertifiziert), MDM-System, EDIFACT-Schnittstellen zu Marktteilnehmern, BSI-TR-03109-Zertifizierung",
+        "outputs": "Zählerdaten-Erfassung, Verbrauchs-Abrechnungs-Daten, Marktkommunikation EDIFACT, Smart-Meter-Steuerung",
+        "notes": "Smart Meter Gateway (SMGW) als BSI-zertifiziertes Sicherheits-Gateway zwischen Zählern und Marktteilnehmern. Cyber-Angriff auf SMGW als eigenes Szenario (en_scn_smgw_cyber): Massendaten-Exfiltration mit Verbrauchsprofilen plus Manipulationsversuch auf Schalt-Funktionen."
+      },
+      {
+        "id": "en_proc_handel",
+        "title": "Energie-Beschaffung und Bilanzkreismanagement (EPEX, Day-Ahead, Intraday)",
+        "ownerRole": "Handel / kaufmännische Geschäftsführung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "8",
+        "dependencies": "EPEX-Spot-Markt-Anbindung, Day-Ahead-Auktions-System, Bilanzkreis-Verantwortung beim ÜNB, Stromhandel-Software (Optimax, KYOS, Trayport)",
+        "outputs": "Spot-Beschaffung, Day-Ahead-Gebote, Intraday-Anpassungen, Bilanzkreis-Steuerung, Ausgleichsenergie-Monitoring",
+        "notes": "Bilanzkreis-Strafzahlungen bei Abweichungen (Ausgleichsenergie-Preise volatil, in Engpass-Zeiten 5-100 €/MWh). BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen. Bei System-Ausfall manuelle Telefon-Beschaffung mit erhöhten Spreads."
+      },
+      {
+        "id": "en_proc_kunden",
+        "title": "Bürger-Service und Kunden-Hotline (Störungs-Annahme, Tarif-Auskunft, Vertragswesen)",
+        "ownerRole": "Vertriebsleitung / Kunden-Service",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "CRM-System, Telefonanlage mit Hotline-Routing, Webportal, Stadt-Webseite-Anbindung, Pressestelle-Anbindung",
+        "outputs": "Bürger-Information, Störungs-Annahme, Tarif-Auskünfte, Vertragsdaten, Beschwerde-Behandlung",
+        "notes": "Bei Großstörung wird die Hotline binnen Minuten überlastet — Webseite und Pressemitteilungen als Skalierungs-Pfad. AUFSICHTSRAT-REAKTIV-HINWEIS: Bei Bürger-Beschwerden über kommunale Themen (Tarif-Erhöhungen, Lieferketten-Engpässe) Eskalation an Geschäftsführung und Aufsichtsrat-Vorsitzenden. Notbetrieb mit Externer Call-Center-Verstärkung."
+      },
+      {
+        "id": "en_proc_abrechnung",
+        "title": "Abrechnung und Forderungsmanagement (Strom-/Gas-/Wärme-Rechnung, Mahnung, Inkasso)",
+        "ownerRole": "kaufmännische Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Abrechnungs-Software (SAP IS-U, Wilken Energy), Bank-Anbindung, Inkasso-Dienstleister, Mahnstufen-Workflow",
+        "outputs": "Kunden-Rechnungen, Mahnungen, Inkasso-Übergaben, Erlös-Reporting, Bilanz-Vorlauf-Daten",
+        "notes": "Mittlere Kritikalität konsistent zum Pattern aus Logistics (Frachtrechnung), KMU-Basis (Lohnabrechnung), Healthcare (DRG). Stadtwerke-Abrechnung hat mehrwöchige Pufferzeiten (Quartals-Logik, Mahnstufen). Cashflow-Eskalation tritt erst nach Wochen Abrechnungs-Verzug ein."
+      },
+      {
+        "id": "en_proc_erzeugung",
+        "title": "Erzeugung und Anlagen-Betrieb (HKW, KWK, PV/Wind, Fernwärme)",
+        "ownerRole": "Erzeugungs-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Heizkraftwerk-Steuerung, KWK-Anlagen, PV-/Wind-Park-Wechselrichter, Fernwärme-Erzeugungs-Anlagen, Brennstoff-Lieferanten",
+        "outputs": "Strom-Erzeugung, Wärme-Erzeugung, Bilanzkreis-Einspeisung, KWK-Bonus-Daten, EE-Einspeise-Vergütung",
+        "notes": "Kritikalität abhängig von Sparten-Mix: Heizkraftwerk fossil (kritisch im Winter wegen Fernwärme-Notlage), KWK-Anlage gekoppelt Strom-Wärme (kritisch im Winter), Photovoltaik-Park (hoch, weil Strom-Substitution aus Netz möglich), Wind-Park (hoch, Strom-Substitution möglich), Fernwärme-Erzeugung (kritisch im Winter, sekundär im Sommer). Tenant adoptiert je nach Erzeugungs-Mix und Saison-Profil. Saison-Differenzierung als Energy-Pack-Spezifikum: Sommer/Winter-BCM-Profile getrennt führen."
       }
     ],
     "dependencyTemplates": [
       {
         "id": "en_dep_scada",
-        "title": "Leitsystem / SCADA",
+        "title": "Leitsystem / SCADA (Siemens Spectrum, ABB Network Manager, GE PowerOn)",
         "category": "ot",
         "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Manuelle Fahrweise und lokale Bedienung",
-        "contractReference": "Leitsystem-Service",
-        "notes": "Fallback-Rechte und Rufbereitschaft prüfen."
+        "fallback": "Manuelle Fahrweise und lokale Bedienung mit Schaltbuch und Funk-Kommunikation. Hersteller-Substitution mehrjähriges Migrations-Projekt mit politischer Beschluss-Pflicht.",
+        "contractReference": "Leitsystem-Hersteller-Wartungsvertrag mit 24/7-SLA",
+        "notes": "Fallback-Rechte und Rufbereitschaft prüfen. Industroyer-2016-Schablone und Industroyer2-2022-Schablone (Sandworm/GRU): direkte Manipulation der SCADA-Schutz-/Steuerungs-Logik via IEC-104-Protokoll. Patch-Disziplin und Code-Integritäts-Prüfung als Mindeststandard."
       },
       {
         "id": "en_dep_comms",
         "title": "Sprach- und Datenkommunikation Leitwarte",
         "category": "kommunikation",
-        "criticality": "hoch",
+        "criticality": "kritisch",
         "singlePointOfFailure": true,
-        "fallback": "Fallback-Netze und Mobilfunk",
-        "contractReference": "Carrier / Funkdienst",
-        "notes": "Ausweichwege dokumentieren."
+        "fallback": "Fallback-Netze und Mobilfunk; redundante Funk-Kommunikation für Bereitschafts-Dienste; Sat-Telefon als letzter Fallback.",
+        "contractReference": "Carrier-Vertrag (Telekom, Vodafone Business) / Funkdienst-Lizenz",
+        "notes": "Ausweichwege dokumentieren. Bei kombiniertem Cyber-Vorfall mit gleichzeitigem Telekom-Outage steht Leitwarte ohne Steuerungs-Kommunikation — sehr seltenes aber katastrophales Szenario."
       },
       {
         "id": "en_dep_generator",
-        "title": "Netzersatz- und Schwarzstartfähigkeit",
+        "title": "Netzersatz- und Schwarzstart-fähige Anlagen",
         "category": "energie",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobile Einspeisung und Lastabwurf; ÜNB-Koordination für externe Schwarzstart-Kapazität; Dieseltank-Vorhaltung für 48-72h Inselbetrieb.",
+        "contractReference": "Wartungsvertrag Netzersatz-Aggregate; ggf. Marktrahmen-Vereinbarung mit ÜNB für Schwarzstart-Beschaffung",
+        "notes": "Schwarzstart-Beschaffung seit 12.01.2024 marktbasiert nach EnWG §12h. Treibstoff- und Test-Regime überwachen — Live-Test mindestens alle 36 Monate Pflicht. Hochstufung von Bestand-'hoch' auf 'kritisch': Großstörung ohne Schwarzstart-Fähigkeit kann mehrtägige Versorgungs-Krise bedeuten."
+      },
+      {
+        "id": "en_dep_uenb",
+        "title": "Übertragungsnetzbetreiber-Anbindung (TenneT, 50Hertz, Amprion, TransnetBW)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Faktisch nicht ersetzbar — der ÜNB ist der einzige Netz-Verbund-Partner pro Regelzone. Eskalations-Hotline mit 24/7-Verfügbarkeit als einziger Pfad.",
+        "contractReference": "Anschluss- und Nutzungs-Vertrag mit zuständigem ÜNB (Regelzone)",
+        "notes": "Bei Schwarzstart und Großstörung ist die ÜNB-Koordination zwingend. Vier deutsche Regelzonen: TenneT (Nord/Bayern), 50Hertz (Ost), Amprion (West), TransnetBW (BW). Pro Stadtwerk eine Regelzone. Eskalations-Hotline der ÜNB rund um die Uhr besetzt."
+      },
+      {
+        "id": "en_dep_smgw",
+        "title": "Smart-Meter-Gateway-Administrator (BSI-zertifiziert, BSI-TR-03109)",
+        "category": "dienstleister",
         "criticality": "hoch",
         "singlePointOfFailure": false,
-        "fallback": "Mobile Einspeisung und Lastabwurf",
-        "contractReference": "Wartung Netzersatz",
-        "notes": "Treibstoff und Testregime überwachen."
+        "fallback": "Backup-GWA mit Rahmenvertrag; bei eigenem GWA-Betrieb redundante Standorte. Manuelle Zähler-Ablese-Aktion in seltenen Notfällen.",
+        "contractReference": "GWA-Dienstleister-Vertrag (z.B. Voltaris, GWAdriga, theben)",
+        "notes": "BSI-Zertifizierung nach BSI-TR-03109 zwingend. Cyber-Angriff auf SMGW als eigenes Szenario (en_scn_smgw_cyber): Massendaten-Exfiltration mit Verbrauchsprofilen plus Manipulationsversuch auf Schalt-Funktionen."
+      },
+      {
+        "id": "en_dep_epex",
+        "title": "EPEX-/Bilanzkreis-Anbindung (Strom-Spot-Markt, Day-Ahead, Intraday)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Manuelle Telefon-Beschaffung mit erhöhten Spreads; Backup-Stromhandel-Software; ÜNB-Bilanzkreis-Information für Ausgleichsenergie-Status.",
+        "contractReference": "EPEX-Mitgliedschaft + Bilanzkreis-Vertrag mit ÜNB",
+        "notes": "Bei mehrtägiger EPEX-Disruption kippt Bilanzkreis-Stabilität — Ausgleichsenergie-Strafzahlungen 5-100 €/MWh. BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen."
+      },
+      {
+        "id": "en_dep_brennstoff",
+        "title": "Brennstoff-/Erdgas-Lieferant (Heizöl, Erdgas, Pellets)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Lieferanten mit Rahmenverträgen; eigene Brennstoff-Vorhaltung 7-14 Tage für HKW-Betrieb; Diesel-Tankvorhaltung für Notstrom.",
+        "contractReference": "Brennstoff-Liefervertrag mit Stamm- und Backup-Lieferant",
+        "notes": "Saison-Differenzierung: im Winter Brennstoff-Versorgungs-Engpässe als Folge von Lieferketten-Disruption (russisches Gas seit 2022, LNG-Preisvolatilität). Vorhaltung als Resilienz-Maßnahme."
+      },
+      {
+        "id": "en_dep_ot_wartung",
+        "title": "OT-Wartungs-Hersteller (Siemens, ABB, GE, Schneider für SCADA und Schutztechnik)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": true,
+        "fallback": "Bei einzelnem Hersteller-Outage Backup-Integrator mit OT-Erfahrung; bei branchenweitem Hersteller-Cyber-Vorfall (z.B. Hersteller-Ransomware) keine sofortige Substitution möglich.",
+        "contractReference": "OT-Hersteller-Wartungsvertrag mit Sicherheits-Anhang",
+        "notes": "Hersteller-Fernwartungs-Zugänge sind häufig Eintritts-Vektor für OT-Cyber-Vorfälle (Industroyer-Schablone-Adjazenz). Multi-Faktor-Authentisierung für Wartungs-Zugänge Mindeststandard."
+      },
+      {
+        "id": "en_dep_bnetza_bsi",
+        "title": "Bundesnetzagentur und BSI-Meldewege (KRITIS-Meldepflicht § 8b BSIG, EnWG § 11)",
+        "category": "behoerde",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalations-Pfade über mehrere Behörden parallel: BSI-CERT-Bund + BNetzA + Landes-CERT + ggf. Polizei (LKA Cyber).",
+        "contractReference": "KRITIS-Registrierung beim BSI; EnWG-§-11-Konformitäts-Zertifizierung",
+        "notes": "Doppelte Compliance-Schicht: § 8b BSIG für KRITIS-Meldung 24h, plus EnWG § 11 für IT-Sicherheits-Katalog. BNetzA-Aktualisierung Mai 2025. Pro Sektor unterschiedliche Meldepflicht-Schwellen — Tenant muss eigene Schwellenwerte kennen."
       }
     ],
     "scenarioTemplates": [
       {
         "id": "en_scn_scada",
-        "title": "Leitsystemausfall",
-        "category": "OT-Ausfall",
-        "description": "Die zentrale Leitwarte kann keine regulären Schalthandlungen ausführen.",
+        "title": "Leitsystem-Ausfall (SCADA-Hardware-/Software-Defekt)",
+        "category": "OT-Ausfall mit Steuerungs-Hebel",
+        "description": "SCADA-Hauptsystem ausgefallen durch Hardware-Defekt, Software-Bug oder Hersteller-Outage. Reguläre Schalthandlungen nicht möglich. Manuelle Fahrweise und lokale Bedienung als Fallback.",
         "likelihood": 3,
         "impact": 5,
-        "ownerRole": "Leitwarte",
+        "ownerRole": "Netzleitwarte / OT-Sicherheit",
         "linkedProcessTemplateIds": [
           "en_proc_grid",
-          "en_proc_fault"
+          "en_proc_fault",
+          "en_proc_scada"
         ],
         "linkedDependencyTemplateIds": [
           "en_dep_scada",
-          "en_dep_comms"
+          "en_dep_comms",
+          "en_dep_ot_wartung"
         ],
-        "playbook": "Lokale Bedienung, Kommunikationsfallback und Eskalation aktivieren.",
+        "playbook": "Lokale Bedienung mit Schaltbuch, Kommunikations-Fallback (Funk, Mobilfunk), Hersteller-Eskalation 24/7-SLA, BNetzA-Information bei mehrtägiger Disruption.",
         "exerciseTypeHint": "technical",
-        "notes": "Bedienrechte und Schaltbücher verifizieren."
+        "notes": "Bedienrechte und Schaltbücher verifizieren. Bei Outage über 4 Stunden Eskalation an technische Geschäftsführung."
       },
       {
         "id": "en_scn_blackout",
-        "title": "Großflächiger Versorgungsausfall",
-        "category": "Blackout",
-        "description": "Mehrere Netzteile sind gleichzeitig betroffen.",
+        "title": "Großflächiger Versorgungs-Ausfall (Blackout)",
+        "category": "Großstörung mit Versorgungs-Stillstand",
+        "description": "Mehrere Netzteile gleichzeitig betroffen — Übertragungsnetz-Störung, Naturereignis, kombinierte Cyber-physische Disruption. Versorgung großflächig unterbrochen, Schwarzstart-Sequenz wird notwendig.",
         "likelihood": 2,
         "impact": 5,
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / Technische Geschäftsführung",
         "linkedProcessTemplateIds": [
           "en_proc_grid",
-          "en_proc_fault"
+          "en_proc_fault",
+          "en_proc_blackstart",
+          "en_proc_kunden"
         ],
         "linkedDependencyTemplateIds": [
-          "en_dep_generator"
+          "en_dep_generator",
+          "en_dep_uenb"
         ],
-        "playbook": "Priorisierte Wiederzuschaltung, externe Koordination und Lagekommunikation steuern.",
+        "playbook": "Priorisierte Wiederzuschaltung mit ÜNB-Koordination, Schwarzstart-Sequenz aktivieren, Lagekommunikation an Bürger via Pressemeldung + Stadt-Webseite + Energieversorger-Webseite gleichzeitig. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN.",
         "exerciseTypeHint": "tabletop",
-        "notes": "Behörden- und Partnerkommunikation einbeziehen."
+        "notes": "Behörden- und Partner-Kommunikation einbeziehen (BNetzA, BSI, ÜNB, Landes-Innenministerium). Bei langer Dauer Notwasser-/Notlebensmittel-Versorgung mit Stadt koordinieren."
+      },
+      {
+        "id": "en_scn_industroyer",
+        "title": "ICS-Malware-Angriff auf Schutz- und Steuerungs-Logik (Industroyer-Schablone)",
+        "category": "OT-Cyber-Angriff mit physischem Schaden-Hebel",
+        "description": "Spezialisierte ICS-Malware kompromittiert SCADA-Schutz- und Steuerungs-Logik via IEC-104-/IEC-61850-Protokolle. Zwei historische Bezugspunkte: (1) Industroyer 2016 Kiew — Sandworm/GRU-Angriff erfolgreich, 200.000 Haushalte 1 Stunde ohne Strom als Test der Angriffs-Fähigkeit. (2) Industroyer2 2022 Ukraine — Sandworm/GRU-Angriff auf Hochspannungs-Umspannstationen erfolgreich abgewehrt durch ESET + CERT-UA — Defender-Lessons-Learned als positive Schablone.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "OT-Sicherheit / Krisenstab / Technische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_scada",
+          "en_proc_grid",
+          "en_proc_it"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_scada",
+          "en_dep_ot_wartung"
+        ],
+        "playbook": "Sofortige IT-OT-Segmentierung-Aktivierung, SCADA-Programme auf Code-Integrität prüfen (Vergleich gegen verifizierte Backup-Programme), forensische Beweis-Sicherung. BSI-CERT-Bund parallel zur Hersteller-Eskalation. Wiederanlauf nur nach forensischer Freigabe und SCADA-Programm-Reset. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN, gemeinsame Pressemeldung mit Stadtkommunikation.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Beide Schichten als didaktischer Anker: 2016-Erfolg-des-Angriffs (200.000 Haushalte 1 Stunde ohne Strom) zeigt die Bedrohung, 2022-Erfolg-der-Verteidigung (rechtzeitige Erkennung via ESET-Defender-Tools, CERT-UA-Reaktions-Kette) zeigt das Erfolgs-Modell. UVM-Tenants brauchen beide Schichten — Bedrohungs-Szenario ALLEIN demoralisiert; Defender-Lessons-Learned motivieren zum Handeln."
+      },
+      {
+        "id": "en_scn_ransomware_stadtwerke",
+        "title": "Ransomware mit Verwaltungs-Stillstand (Wismar-2021-Schablone)",
+        "category": "Cyber-Angriff mit Verwaltungs-Stillstand-Hebel",
+        "description": "Ransomware-Verschlüsselung der Werks-IT-Systeme über mehrere Wochen — Wismar-2021-Schablone (28.09.2021, 4 Monate bis Vollwiederherstellung). Drei zentrale Aspekte: (1) Vorfall-Größenordnung: Monate-lange Wiederherstellungs-Phase mit kontinuierlichem Druck auf alle Prozesse. (2) Schutz-Mechanismus: Bei guter OT/IT-Trennung läuft die Versorgung weiter — bei Wismar war Strom/Gas/Wasser nicht beeinträchtigt. (3) Kommunale Folgen: Bürger-Kommunikation über alternative Kanäle (während Web-Portal weg war), Vier-Monats-Phase mit manuellen Prozessen für Abrechnung und Kunden-Service.",
+        "likelihood": 4,
+        "impact": 4,
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Stadtwerk",
+        "linkedProcessTemplateIds": [
+          "en_proc_it",
+          "en_proc_kunden",
+          "en_proc_abrechnung",
+          "en_proc_metering"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_bnetza_bsi"
+        ],
+        "playbook": "Sofortige Trennung infizierter Systeme. Krisenstab nach Wismar-Pattern. BSI-Meldung nach § 8b BSIG binnen 24h, BNetzA-Information nach EnWG § 11. Manueller Notbetrieb der kaufmännischen Prozesse mit Excel und Papier-Verfahren — auf 3-6 Monate vorbereiten. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN, Pressemeldung gemeinsam mit Stadtkommunikation abstimmen, Bürger-Information via Stadt-Webseite + Energieversorger-Webseite gleichzeitig. Backup-Restore-Sequenz mit forensischer Bereinigung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Wismar 2021 (28.09.2021, 4 Monate Wiederherstellung, OT/IT-Trennung als Schutz) als zentrale Schablone — positive didaktische Linie: nicht 'Stadtwerke sind hilflos', sondern 'Stadtwerke mit guter Trennung sind resilient'. BSI-Lagebericht 2025: Energiesektor +31 % YoY auf 89 gemeldete Vorfälle (stärkste Zunahme aller KRITIS-Sektoren)."
+      },
+      {
+        "id": "en_scn_blackstart_versagen",
+        "title": "Schwarzstart-Versagen nach Großstörung (Notstrom-Aggregate-Ausfall in Wiederanlauf-Phase)",
+        "category": "Folge-Schaden mit Wiederanlauf-Krise",
+        "description": "Nach Großstörung mit Versorgungs-Ausfall versagen die Schwarzstart-Aggregate in der kritischen Wiederanlauf-Phase — Treibstoff-Engpass, Wartungs-Versäumnis, oder mechanischer Defekt. Wiederanlauf verzögert sich um Stunden bis Tage, ÜNB-Koordination wird komplex. Worst-Case bei Eintritt — Score 5 trotz niedriger Wahrscheinlichkeit.",
+        "likelihood": 1,
+        "impact": 5,
+        "ownerRole": "Technische Geschäftsführung / Krisenstab",
+        "linkedProcessTemplateIds": [
+          "en_proc_blackstart",
+          "en_proc_grid"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_generator",
+          "en_dep_uenb",
+          "en_dep_brennstoff"
+        ],
+        "playbook": "Treibstoff-Notnachschub mit Tankstelle/THW koordinieren. ÜNB-Eskalation für externe Schwarzstart-Kapazität. Mobile Aggregate aus Nachbar-Stadtwerken anfordern (Verbund-Solidaritäts-Vereinbarung). AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Live-Übung mindestens alle 36 Monate Pflicht — nur echter Test gegen den Trockenfall validiert das Schwarzstart-Konzept. Treibstoff- und Test-Regime im Notbetriebs-Plan verankert."
+      },
+      {
+        "id": "en_scn_epex_disruption",
+        "title": "EPEX-/Bilanzkreis-Disruption (Stromhandels-System-Ausfall)",
+        "category": "Markt-Disruption mit Bilanzkreis-Hebel",
+        "description": "EPEX-Spot-Markt oder Day-Ahead-Auktion mehrtägig nicht verfügbar — Hersteller-Outage, BSI-Vorfall an EPEX. Bilanzkreis-Steuerung wird schwierig, Ausgleichsenergie-Strafzahlungen drohen, BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Handel / kaufmännische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_handel"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_epex"
+        ],
+        "playbook": "Manuelle Telefon-Beschaffung mit erhöhten Spreads, Bilanzkreis-Information an ÜNB für Ausgleichsenergie-Status, Backup-Stromhandel-Software aktivieren, BNetzA-Information bei mehrtägiger Disruption.",
+        "exerciseTypeHint": "supplier",
+        "notes": "Ausgleichsenergie-Preise volatil 5-100 €/MWh in Engpass-Zeiten — schnelle Eskalation an ÜNB als Schadens-Begrenzung."
+      },
+      {
+        "id": "en_scn_smgw_cyber",
+        "title": "Cyber-Angriff auf Smart-Meter-Gateway",
+        "category": "Cyber-Angriff mit Massendaten-Hebel",
+        "description": "Kompromittierung des Smart-Meter-Gateway-Administrators oder eines GWA-Partners. Massendaten-Exfiltration mit Verbrauchs-Profilen tausender Haushalte (DSGVO-relevante Personen-Bezugs-Daten) plus Manipulationsversuch auf Schalt-Funktionen (Lastabwurf bei Endkunden ohne Berechtigung).",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Stadtwerk / OT-Sicherheit",
+        "linkedProcessTemplateIds": [
+          "en_proc_metering",
+          "en_proc_kunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_smgw"
+        ],
+        "playbook": "Sofortige Trennung des GWA-Zugangs, BSI-CERT-Bund-Eskalation (BSI-TR-03109-Zertifizierungs-Bezug), DSGVO-Bewertung Art. 33/34 binnen 72h, Bürger-Benachrichtigung bei hohem Risiko. Forensik mit Hersteller und LKA Cyber.",
+        "exerciseTypeHint": "technical",
+        "notes": "DSGVO-Bußgeld-Risiko bei Verbrauchsdaten-Verlust hoch (besonders schutzwürdige Bewegungs-/Lebensgewohnheits-Daten ableitbar). BSI-TR-03109-Zertifizierung des GWA als Pflicht-Anker."
+      },
+      {
+        "id": "en_scn_hochwasser_erzeugung",
+        "title": "Hochwasser/Naturereignis am Erzeugungs-Standort (Bayern-Hochwasser-2024-Schablone)",
+        "category": "Naturgefahr mit Erzeugungs-Hebel",
+        "description": "Hochwasser- oder Starkregen-Ereignis am Erzeugungs-Standort flutet Heizkraftwerk-/KWK-Anlage. Erzeugungs-Ausfall bedeutet Fernwärme-Versorgungs-Engpass im Winter (saisonal kritisch), Strom-Substitution aus Netz möglich (sommer-tolerabel).",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Erzeugungs-Leitung / Technische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_erzeugung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_brennstoff",
+          "en_dep_uenb"
+        ],
+        "playbook": "Auslagerungs-Standort aktivieren (mobile Heizzentrale, Notwärme-Versorgung). Strom-Beschaffung über EPEX hochfahren. Bei Fernwärme-Notlage Bürger-Information mit Notmaßnahmen (Kraftwerks-Ausfall im Winter = potenziell lebensbedrohlich für Risiko-Gruppen). Versicherungs-Schaden-Aufnahme parallel zur Schadens-Begrenzung.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Bayern-Hochwasser 2024 als Schablone. Klimawandel-Szenario mit steigender Eintrittswahrscheinlichkeit. Saison-Differenzierung als Energy-Pack-Spezifikum: Sommer/Winter unterschiedliche Kritikalität."
       }
     ],
     "exerciseTemplates": [
@@ -375,18 +655,45 @@
         "title": "SCADA-Failover-Test",
         "exerciseType": "technical",
         "scenarioTemplateId": "en_scn_scada",
-        "ownerRole": "Leitwarte / OT",
-        "cadenceMonths": 6,
-        "notes": "Failover, lokale Bedienung und Monitoring prüfen."
+        "ownerRole": "Netzleitwarte / OT-Sicherheit",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher technischer Test: Failover auf Backup-SCADA, lokale Bedienung mit Schaltbuch, Kommunikations-Fallback (Funk, Mobilfunk), Hersteller-Eskalations-Hotline. Bestand-ID; Cadence von 6 auf 12 Monate angepasst, konsistent zum Pack-Übungs-Pattern."
       },
       {
         "id": "en_ex_blackout",
         "title": "Blackout-Tabletop Energie",
         "exerciseType": "tabletop",
         "scenarioTemplateId": "en_scn_blackout",
-        "ownerRole": "Krisenstab",
+        "ownerRole": "Krisenstab / Technische Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop: priorisierte Wiederzuschaltung, ÜNB-Koordination, Aufsichtsrat-Eskalation binnen 4 Stunden, Bürger-Kommunikation via Stadt-Webseite + Pressemeldung. Bestand-ID; Cadence von 12 auf 24 Monate angepasst, konsistent zum Pack-Übungs-Pattern."
+      },
+      {
+        "id": "en_ex_industroyer",
+        "title": "OT-IT-Übergriff-Tabletop (Industroyer-Schablone)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "en_scn_industroyer",
+        "ownerRole": "Krisenstab / OT-Sicherheit / IT-Leitung Stadtwerk",
         "cadenceMonths": 12,
-        "notes": "Priorisierte Wiederzuschaltung und Kommunikationslage üben."
+        "notes": "Jährlicher Krisenstabs-Tabletop mit Geschäftsführung, OT-Sicherheit, IT-Leitung, Netzleitwarte, Pressestelle. Beide Industroyer-Schichten als Drehbuch: 2016-Angriff (Bedrohungs-Analyse, was wäre passiert) und 2022-Verteidigung (ESET + CERT-UA-Defender-Lessons-Learned). UVM-Tenants brauchen Erfolgs-Modelle, nicht nur Bedrohungs-Geschichten."
+      },
+      {
+        "id": "en_ex_blackstart_live",
+        "title": "Schwarzstart-Live-Übung mit ÜNB-Koordination",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "en_scn_blackstart_versagen",
+        "ownerRole": "Technische Geschäftsführung / Erzeugungs-Leitung",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung Pflicht: echte Last-Abschaltung mit Notstrom-Aggregat-Start, Inselbetrieb-Aufrechterhaltung, ÜNB-Koordination für Wiederanlauf, Treibstoff-Nachschub-Prozess. Erst nach erfolgreichem Live-Test gilt das Schwarzstart-Konzept als belastbar. Verbund-Solidarität mit Nachbar-Stadtwerken üben."
+      },
+      {
+        "id": "en_ex_ransomware_stadtwerke",
+        "title": "Ransomware-Stadtwerke-Tabletop (Wismar-Schablone)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "en_scn_ransomware_stadtwerke",
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Stadtwerk",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Tabletop mit Geschäftsführung, IT-Leitung Stadtwerk, OT-Sicherheit, Aufsichtsrat-Vertretung, Pressestelle, Kunden-Service-Leitung. Wismar-2021-Schablone als Drehbuch-Anhang (28.09.2021, 4 Monate Wiederherstellung, OT/IT-Trennung als Schutz). Drei Aspekte üben: (1) BSI-Meldung 24h, (2) OT/IT-Trennung-Verifikation, (3) Vier-Monats-Notbetrieb-Plan für Abrechnung und Kunden-Service."
       }
     ],
     "riskCatalogTemplates": [
