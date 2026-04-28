@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0510" />
+  <radialGradient id="aura" cx="50%" cy="50%" r="60%">
+    <stop offset="0%" stop-color="#8b1538" stop-opacity="0.45" />
+    <stop offset="100%" stop-color="#8b1538" stop-opacity="0" />
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#aura)" />
+
+  <g transform="translate(600 220) scale(5)">
+    <circle r="34" fill="#1a0a14" stroke="#c43960" stroke-width="1.5" />
+    <path
+      d="M0,-22 L18,-13 L18,5 C18,20 8,27 0,30 C-8,27 -18,20 -18,5 L-18,-13 Z"
+      fill="none"
+      stroke="#c43960"
+      stroke-width="1.6"
+      stroke-linejoin="round"
+    />
+    <text
+      x="0"
+      y="0"
+      text-anchor="middle"
+      dominant-baseline="central"
+      fill="#f5ebef"
+      font-size="20"
+      font-weight="500"
+      font-family="Inter, system-ui, sans-serif"
+    >K</text>
+  </g>
+
+  <text
+    x="600"
+    y="430"
+    text-anchor="middle"
+    fill="#f5ebef"
+    font-size="56"
+    font-weight="500"
+    font-family="Inter, system-ui, sans-serif"
+    letter-spacing="-1"
+  >KRITIS-Kompass</text>
+  <text
+    x="600"
+    y="478"
+    text-anchor="middle"
+    fill="#b08090"
+    font-size="22"
+    font-weight="400"
+    font-family="Inter, system-ui, sans-serif"
+  >Resilienz-Selbstanalyse · 15 Minuten · Direkter PDF-Bericht</text>
+  <text
+    x="600"
+    y="565"
+    text-anchor="middle"
+    fill="#7a5060"
+    font-size="16"
+    font-weight="500"
+    font-family="Inter, system-ui, sans-serif"
+    letter-spacing="3"
+  >UVM-INSTITUT  ·  SCHÄUBLE CONSULTING GMBH</text>
+</svg>
