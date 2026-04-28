@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-13 -16 26 32">
+  <path
+    d="M0,-13 L11,-8 L11,3 C11,12 5,16 0,18 C-5,16 -11,12 -11,3 L-11,-8 Z"
+    fill="#c43960"
+    stroke="none"
+  />
+  <text
+    x="0"
+    y="0"
+    text-anchor="middle"
+    dominant-baseline="central"
+    fill="#f5ebef"
+    font-size="14"
+    font-weight="600"
+    font-family="system-ui, sans-serif"
+  >K</text>
+</svg>

@@ -1,0 +1,146 @@
+{
+  "version": "2026-04",
+  "lastReviewed": "2026-04-28",
+  "stage1_direct": {
+    "title": "Direkte KRITIS-Betroffenheit",
+    "description": "Diese Fragen klären, ob Ihr Unternehmen selbst KRITIS-pflichtig sein könnte.",
+    "indicators": [
+      {
+        "id": "sector",
+        "type": "select",
+        "label": "In welchem Sektor sind Sie tätig?",
+        "required": true,
+        "options": [
+          { "value": "energie", "label": "Energie" },
+          { "value": "transport", "label": "Transport und Verkehr" },
+          { "value": "finanzwesen", "label": "Finanzwesen" },
+          { "value": "sozialversicherung", "label": "Leistungen der Sozialversicherung und Grundsicherung" },
+          { "value": "gesundheit", "label": "Gesundheit" },
+          { "value": "wasser", "label": "Wasser (Trinkwasser und Abwasser)" },
+          { "value": "ernaehrung", "label": "Ernährung" },
+          { "value": "it_telekom", "label": "Informationstechnik und Telekommunikation" },
+          { "value": "weltraum", "label": "Weltraum" },
+          { "value": "abfall", "label": "Siedlungsabfallentsorgung" },
+          { "value": "keiner", "label": "In keinem dieser Sektoren" }
+        ]
+      },
+      {
+        "id": "personsServed",
+        "type": "number",
+        "label": "Wie viele Personen versorgen Sie pro Jahr (geschätzt)?",
+        "guidance": "Regel-Schwelle KRITISDachG: 500.000 Personen. Sektorspezifische Schwellen können niedriger liegen.",
+        "thresholds": [
+          { "value": 500000, "level": "high" },
+          { "value": 100000, "level": "medium" }
+        ]
+      },
+      {
+        "id": "criticalService",
+        "type": "select",
+        "label": "Erbringen Sie eine kritische Dienstleistung?",
+        "dependsOn": "sector",
+        "hideWhen": { "sector": "keiner" },
+        "optionsBySector": {
+          "energie": ["Stromerzeugung > 100 MW", "Stromnetz Hochspannung > 110 kV", "Gasversorgung", "Mineralöl- und Kraftstofflogistik", "Fernwärmeversorgung"],
+          "transport": ["ÖPNV / Schienenpersonenverkehr", "Güterbahn / Logistikknoten", "Flughafen / Luftverkehr", "Seehafen / Binnenhafen", "Straßentunnel / Brücken kritisch"],
+          "finanzwesen": ["Zahlungsverkehrsabwicklung", "Kreditinstitut systemrelevant", "Versicherung systemrelevant", "Wertpapierabwicklung / Clearing"],
+          "sozialversicherung": ["Auszahlung Sozialleistungen", "Renten- und Krankenversicherungs-IT"],
+          "gesundheit": ["Krankenhaus stationäre Versorgung", "Apothekenlogistik", "Labordiagnostik kritisch", "Medizintechnik-Wartung", "Rettungsdienst-Leitstelle"],
+          "wasser": ["Trinkwasserversorgung", "Abwasserentsorgung", "Wasseraufbereitung großflächig"],
+          "ernaehrung": ["Lebensmittelverarbeitung großflächig", "Lebensmittellogistik / Großhandel", "Tierproduktion großflächig"],
+          "it_telekom": ["Rechenzentrum", "Cloud-Dienst kritisch", "Telekommunikationsnetzbetrieb", "DNS / Internet Exchange Point", "Managed Security Services"],
+          "weltraum": ["Satellitenbetrieb", "Bodenstation kritisch"],
+          "abfall": ["Hausmüllentsorgung", "Sonderabfallbehandlung"]
+        }
+      },
+      {
+        "id": "employees",
+        "type": "number",
+        "label": "Wie viele Mitarbeitende haben Sie?",
+        "guidance": "Querkontrolle für NIS2-Schwellen.",
+        "thresholds": [
+          { "value": 250, "level": "high" },
+          { "value": 50, "level": "medium" }
+        ]
+      },
+      {
+        "id": "revenue",
+        "type": "number",
+        "label": "Jahresumsatz in Mio. €?",
+        "guidance": "Querkontrolle für NIS2-Schwellen.",
+        "thresholds": [
+          { "value": 50, "level": "high" },
+          { "value": 10, "level": "medium" }
+        ]
+      }
+    ]
+  },
+  "stage2_supplier": {
+    "title": "Indirekte Betroffenheit als Lieferant",
+    "description": "Wenn Sie selbst nicht KRITIS sind, kann Ihre Position in der Lieferkette dennoch Pflichten auslösen.",
+    "indicators": [
+      {
+        "id": "kritisRevenueShare",
+        "type": "slider",
+        "label": "Anteil Ihres Umsatzes mit KRITIS-Kunden (in %)",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "default": 0,
+        "thresholds": [
+          { "value": 25, "level": "high" },
+          { "value": 10, "level": "medium" }
+        ]
+      },
+      {
+        "id": "contractualResilienceObligations",
+        "type": "boolean",
+        "label": "Haben Sie vertragliche Resilienz- oder Audit-Pflichten gegenüber KRITIS-Kunden?"
+      },
+      {
+        "id": "singleSource",
+        "type": "boolean",
+        "label": "Sind Sie für mindestens einen KRITIS-Kunden Single Source?"
+      },
+      {
+        "id": "supplierCustomerSectors",
+        "type": "multiselect",
+        "label": "In welchen KRITIS-Sektoren liegen Ihre Hauptkunden?",
+        "options": [
+          { "value": "energie", "label": "Energie" },
+          { "value": "transport", "label": "Transport und Verkehr" },
+          { "value": "finanzwesen", "label": "Finanzwesen" },
+          { "value": "gesundheit", "label": "Gesundheit" },
+          { "value": "wasser", "label": "Wasser" },
+          { "value": "ernaehrung", "label": "Ernährung" },
+          { "value": "it_telekom", "label": "IT und Telekommunikation" },
+          { "value": "weltraum", "label": "Weltraum" },
+          { "value": "abfall", "label": "Siedlungsabfallentsorgung" },
+          { "value": "sozialversicherung", "label": "Sozialversicherung" }
+        ]
+      },
+      {
+        "id": "supplierServiceType",
+        "type": "multiselect",
+        "label": "Was erbringen Sie für KRITIS-Kunden?",
+        "options": [
+          { "value": "it_maintenance", "label": "IT-Wartung / Software" },
+          { "value": "logistics", "label": "Logistik / Transport" },
+          { "value": "facility", "label": "Gebäudetechnik / Wartung" },
+          { "value": "consulting", "label": "Beratung / Auditierung" },
+          { "value": "personnel", "label": "Personaldienstleistung" },
+          { "value": "other", "label": "Sonstiges" }
+        ]
+      }
+    ]
+  },
+  "stage3_context": {
+    "title": "Kontext (optional)",
+    "description": "Hilft uns, Ihre Lage besser einzuordnen.",
+    "indicators": [
+      { "id": "nis2Affected", "type": "boolean", "label": "Sind Sie bereits NIS2-betroffen?" },
+      { "id": "doraAffected", "type": "boolean", "label": "Sind Sie DORA-betroffen (Finanzsektor)?" },
+      { "id": "authorityContact", "type": "boolean", "label": "Stehen Sie bereits in Kontakt mit BSI / BBK / Landesamt?" }
+    ]
+  }
+}

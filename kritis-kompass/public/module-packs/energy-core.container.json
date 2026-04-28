@@ -1,0 +1,2269 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-energy-core",
+    "packType": "module",
+    "moduleId": "energy",
+    "name": "Energie-Basismodul",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Energieversorger mit Fokus auf Netzstabilität, OT-Resilienz und §16-KRITISDachG-Meldefähigkeit.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Energie",
+    "industryClass": "Versorgungsnahe Infrastruktur",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "energie",
+      "versorgung",
+      "netz",
+      "ot"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "sector"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "energy",
+    "name": "Energie & Versorgung",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Energieversorger mit Fokus auf Netzstabilität, OT-Resilienz und §16-KRITISDachG-Meldefähigkeit.",
+    "sectorCategory": "Energie",
+    "domainWeightAdjustments": {
+      "physical": 1.25,
+      "operations": 1.2,
+      "cyber": 1.2,
+      "bcm": 1.15
+    },
+    "additionalQuestions": [
+      {
+        "id": "energy_grid_dependency",
+        "domainId": "operations",
+        "title": "Netz- und Anlagenabhängigkeiten sind transparent",
+        "prompt": "Sind Kaskadeneffekte, Vorleistungsabhängigkeiten und Wiederzuschaltlogiken dokumentiert?",
+        "guidance": "Zu betrachten sind vorgelagerte Netze, Fernwirktechnik, Leittechnik und Subunternehmer.",
+        "recommendation": "Dokumentieren Sie Kaskaden- und Wiederzuschaltlogiken für kritische Anlagen und Netzkopplungen.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Netzabhängigkeitsanalyse, Wiederzuschaltlogik, Betriebsanweisungen",
+        "tags": [
+          "Netz",
+          "Kaskade"
+        ]
+      },
+      {
+        "id": "energy_substation_protection",
+        "domainId": "physical",
+        "title": "Kritische Standorte sind gegen Sabotage geschützt",
+        "prompt": "Sind kritische Standorte, Umspannwerke oder Schaltanlagen gegen physische Angriffe und Sabotage ausreichend geschützt?",
+        "guidance": "Wichtig sind Perimeterschutz, Video, Sensorik, Zufahrtsschutz und Alarmbearbeitung.",
+        "recommendation": "Prüfen und stärken Sie physische Schutzmaßnahmen an kritischen Standorten und Zufahrten.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Perimeterschutz, Alarmkonzept, Standortschutzanalyse",
+        "tags": [
+          "Sabotage",
+          "Standortschutz"
+        ]
+      },
+      {
+        "id": "energy_ot_recovery",
+        "domainId": "cyber",
+        "title": "Leit- und Fernwirktechnik kann wiederhergestellt werden",
+        "prompt": "Sind Backup, Wiederanlauf und Ersatzverfahren für Leitsysteme, Fernwirktechnik und OT dokumentiert und getestet?",
+        "guidance": "Auch Lieferantenabhängigkeit, Konfigurationssicherung und Ersatzhardware sind relevant.",
+        "recommendation": "Sichern und testen Sie Wiederanlauf- und Ersatzverfahren für Leit- und Fernwirktechnik einschließlich Konfigurationen.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Wiederanlaufkonzept OT, Konfigurationsbackups, Lieferantenkontakte",
+        "tags": [
+          "Leittechnik",
+          "Fernwirktechnik"
+        ]
+      },
+      {
+        "id": "energy_manual_operations",
+        "domainId": "bcm",
+        "title": "Manuelle Betriebsverfahren sind vorbereitet",
+        "prompt": "Gibt es erprobte manuelle Verfahren für Entstörung, Schalthandlungen oder lokale Intervention?",
+        "guidance": "Wichtig sind Personalverfügbarkeit, Sicherheit und dokumentierte Grenzen des Manualbetriebs.",
+        "recommendation": "Definieren und üben Sie manuelle Betriebsverfahren für Störungen, Schalthandlungen und lokale Interventionen.",
+        "weight": 1.2,
+        "evidenceHint": "Manualbetrieb, Schaltanweisungen, Übungsprotokolle",
+        "tags": [
+          "Manualbetrieb",
+          "Entstörung"
+        ]
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "Energie"
+      ],
+      "hints": [
+        "Energie gehört zum expliziten KRITIS-Sektor. In diesem Sektor sind physische Resilienz und IT-/OT-Sicherheit eng zu koppeln.",
+        "Für Energiebetreiber ist eine gemeinsame Evidenzsicht aus KRITIS-Dachgesetz und BSIG besonders wichtig."
+      ],
+      "additionalRequirements": []
+    },
+    "uiHints": {
+      "accentLabel": "Netzstabilität, OT und physischer Schutz",
+      "focusAreas": [
+        "Wiederzuschaltung",
+        "Standortschutz",
+        "Manualbetrieb"
+      ]
+    },
+    "recommendedActions": [
+      {
+        "id": "energy_template_ot_restore",
+        "title": "OT-Wiederanlauf und Konfigurationssicherung stärken",
+        "description": "Leit- und Fernwirktechnik, Konfigurationsbackups und Ersatzhardware in ein belastbares Restore-Verfahren überführen.",
+        "priority": "kritisch",
+        "ownerRole": "Netzbetrieb / OT",
+        "relatedQuestionIds": [
+          "energy_ot_recovery",
+          "cyber_backup_restore"
+        ],
+        "relatedRequirementIds": [
+          "kritis_it_evidence"
+        ]
+      },
+      {
+        "id": "energy_template_site_security",
+        "title": "Perimeter- und Zufahrtsschutz für kritische Standorte erhöhen",
+        "description": "Umspannwerke, Schaltanlagen und Leitstellen nach Risikoklassen absichern und Alarmbearbeitung klären.",
+        "priority": "hoch",
+        "ownerRole": "Security / Facility",
+        "relatedQuestionIds": [
+          "energy_substation_protection",
+          "phys_site_security"
+        ],
+        "relatedRequirementIds": [
+          "kritis_resilience_measures"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "energy_evidence_restore_tests",
+        "title": "Wiederherstellungstests für Leit- und Fernwirktechnik",
+        "type": "test",
+        "ownerRole": "OT",
+        "reviewCycleHint": "Mindestens jährlich testen",
+        "relatedQuestionIds": [
+          "energy_ot_recovery"
+        ],
+        "relatedRequirementIds": [
+          "kritis_it_evidence"
+        ],
+        "folder": "Risikoanalyse",
+        "tags": [
+          "Energie"
+        ]
+      },
+      {
+        "id": "energy_evidence_manual_ops",
+        "title": "Dokumentation Manualbetrieb und Schaltanweisungen",
+        "type": "plan",
+        "ownerRole": "Netzbetrieb",
+        "reviewCycleHint": "Nach Änderungen der Betriebslogik aktualisieren",
+        "relatedQuestionIds": [
+          "energy_manual_operations"
+        ],
+        "folder": "Resilienzplan",
+        "tags": [
+          "Energie"
+        ]
+      }
+    ],
+    "roleTemplates": [
+      {
+        "id": "energy_role_control_center",
+        "label": "Netzleitstelle / Leitwarte",
+        "responsibility": "Steuert Schaltungen, Priorisierung und Eskalation bei Störungen im Netz oder Werk.",
+        "approvalScope": "Operative Leitwartenentscheidungen und Eskalationen",
+        "focusAreas": [
+          "Leitwarte",
+          "Schaltungen",
+          "Versorgung"
+        ]
+      },
+      {
+        "id": "energy_role_asset",
+        "label": "Anlagen- und Stationsverantwortung",
+        "responsibility": "Sichert Verfügbarkeit kritischer Anlagen, Schutztechnik und Wiederanlauf.",
+        "approvalScope": "Anlagenbetrieb und technische Freigaben",
+        "focusAreas": [
+          "Anlagen",
+          "Schutztechnik",
+          "Wiederanlauf"
+        ]
+      },
+      {
+        "id": "energy_role_ot",
+        "label": "OT / Leittechnik",
+        "responsibility": "Verantwortet OT-Sicherheit, Fernzugriffe, Backup und Wiederherstellung der Leittechnik.",
+        "approvalScope": "Leittechnik, Netzsegmente und technische Nachweise",
+        "focusAreas": [
+          "OT",
+          "Leittechnik",
+          "Fernzugriff"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 82,
+      "targetByDomain": {
+        "governance": 76,
+        "operations": 86,
+        "people": 74,
+        "physical": 84,
+        "cyber": 84,
+        "supply": 78,
+        "finance": 68,
+        "bcm": 84
+      },
+      "notes": [
+        "Energiebezogene Betreiber benötigen hohe Zielwerte in Betrieb, physischer Resilienz, OT-Sicherheit und BCM."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "energy_audit_blackstart",
+        "area": "Betrieb",
+        "title": "Wiederanlauf- und Umschaltverfahren sind dokumentiert und geübt",
+        "guidance": "Prüfen Sie Schaltfolgen, Personalverfügbarkeit, Notstrom und Eskalationspfade.",
+        "severity": "high",
+        "relatedRequirementIds": [
+          "kritis_resilience_plan"
+        ]
+      },
+      {
+        "id": "energy_audit_remote_access",
+        "area": "OT",
+        "title": "Fernzugriffe und Dienstleisterzugänge zur Leittechnik sind kontrolliert",
+        "guidance": "Berücksichtigen Sie Freigaben, Protokollierung, Segmentierung und Notfalltrennung.",
+        "severity": "high",
+        "relatedRequirementIds": [
+          "kritis_it_evidence"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "Risikoanalyse",
+      "Resilienzplan",
+      "Netzbetrieb",
+      "Leitstelle & Schalthandlungen",
+      "Meldewesen",
+      "IT-/OT-Nachweise"
+    ],
+    "processTemplates": [
+      {
+        "id": "en_proc_grid",
+        "title": "Netzsteuerung und Lastmanagement",
+        "ownerRole": "Netzleitwarte",
+        "criticality": "kritisch",
+        "mtpdHours": "2",
+        "rtoHours": "1",
+        "rpoHours": "0.5",
+        "dependencies": "SCADA, Kommunikation Leitwarte, Bereitschafts-Liste, Schalthandlungs-Vorlagen",
+        "outputs": "Versorgungsstabilität, Schalthandlungen, Lastmanagement-Entscheidungen",
+        "notes": "Manuelle Schalthandlungen mit Papier-Schaltbuch dokumentieren. RPO 30 Minuten reflektiert maximalen Datenverlust nach SCADA-Wiederanlauf — physikalisch realistisch ohne synchrone Replikation. Vorlage gilt analog für Gas-Sparte (Gas-Netzleitwarte mit identischer Logik). Tenant adoptiert pro Sparte oder Sparten-übergreifend."
+      },
+      {
+        "id": "en_proc_fault",
+        "title": "Entstörung und Wiederzuschaltung",
+        "ownerRole": "Bereitschafts-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Rufbereitschaft, Material-Lager, Kommunikations-Anlage, Mobilfunk-Backup, Schaltbuch-System",
+        "outputs": "Störungs-Behebung, Wiederanlauf-Sequenz, Einsatz-Doku",
+        "notes": "Priorisierung kritischer Einspeise- und Verbrauchspunkte pflegen (Krankenhäuser, ITS, Wasserwerke). Vorlage gilt analog für Gas-Sparte (Gas-Entstörungs-Bereitschaft mit identischer Logik). Bei Großstörung Eskalation an Schwarzstart-Prozess (en_proc_blackstart)."
+      },
+      {
+        "id": "en_proc_scada",
+        "title": "SCADA/Netzleitsystem-Betrieb (OT-Schicht, Schutz- und Steuerungssysteme)",
+        "ownerRole": "OT-Sicherheit / Netzleitwarte",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "SCADA-Hauptsystem, Schutzgeräte (Siemens SIPROTEC, ABB, GE), IEC-104-/IEC-61850-Protokolle, Hersteller-Wartungsvertrag, IT-OT-Segmentierungs-Firewall",
+        "outputs": "Schutz-Funktion, Steuerungs-Logik, Telemetrie-Daten, Schalthandlungs-Verifikation",
+        "notes": "OT-IT-Konvergenz als Risiko-Schicht: SCADA und IT haben Schnittstellen für Reporting und Zählerdaten. Industroyer-Schablone (Sandworm 2016 Kiew, Industroyer2 2022 Ukraine) zeigt OT-IT-Übergriff via IEC-104 auf Hochspannungs-Umspannstationen. Querverweis auf Szenario en_scn_industroyer. Vorlage gilt analog für Gas-SCADA (Gas-Druckregelung, Gas-Ventil-Steuerung)."
+      },
+      {
+        "id": "en_proc_it",
+        "title": "Werks-IT-Betrieb (ERP, Office, Reporting, getrennt von OT)",
+        "ownerRole": "IT-Leitung Stadtwerk",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "ERP-System (SAP IS-U, Wilken, Schleupen), Active Directory, Fileserver, Backup-Infrastruktur, Office-365-Anbindung",
+        "outputs": "Authentifizierung, ERP-Verfügbarkeit, Reporting, Kunden-Daten-Verfügbarkeit, Office-Doku",
+        "notes": "OT-IT-Trennung als Schutzwall: Wismar-2021-Schablone zeigt, dass diese Trennung Versorgungs-Kontinuität bei Cyber-Vorfall ermöglicht — Versorgung lief weiter, weil OT/IT separiert waren. IT-Vorfall blieb im IT-Netz, Strom-/Gas-/Wärme-Lieferung unbeeinträchtigt. Querverweis auf en_proc_scada (OT-Pendant) und en_scn_ransomware_stadtwerke (Demo-Schablone)."
+      },
+      {
+        "id": "en_proc_blackstart",
+        "title": "Schwarzstart und Notbetrieb (Notstrom-Aggregate, Inselbetrieb, ÜNB-Koordination)",
+        "ownerRole": "Technische Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "8",
+        "rtoHours": "4",
+        "rpoHours": "2",
+        "dependencies": "Notstrom-Aggregate, Schwarzstart-fähige Erzeugungs-Anlagen, ÜNB-Koordinations-Kanäle (TenneT/50Hertz/Amprion/TransnetBW), Treibstoff-Vorhaltung, Funk-Kommunikation",
+        "outputs": "Inselbetrieb-Aufrechterhaltung, koordinierter Wiederanlauf mit ÜNB, Schwarzstart-Sequenz",
+        "notes": "Schwarzstart-Beschaffung seit 12.01.2024 marktbasiert nach EnWG §12h und EU-Richtlinie 2019/944. AUFSICHTSRAT-ESKALATION ALS PFLICHTSCHRITT: Bei Großstörung mit Versorgungs-Ausfall über 2 Stunden Aufsichtsrat-Vorsitzenden und Bürgermeister informieren, gemeinsame Bürger-Kommunikation abstimmen. ÜNB-Koordination für Wiederanlauf mit Inselbetrieb-Erhalt. Live-Übung mindestens alle 36 Monate."
+      },
+      {
+        "id": "en_proc_metering",
+        "title": "Zählerdatenmanagement und Smart-Meter-Gateway (MSB-Funktion)",
+        "ownerRole": "Messstellenbetreiber",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "4",
+        "dependencies": "Smart-Meter-Gateway-Administrator (BSI-zertifiziert), MDM-System, EDIFACT-Schnittstellen zu Marktteilnehmern, BSI-TR-03109-Zertifizierung",
+        "outputs": "Zählerdaten-Erfassung, Verbrauchs-Abrechnungs-Daten, Marktkommunikation EDIFACT, Smart-Meter-Steuerung",
+        "notes": "Smart Meter Gateway (SMGW) als BSI-zertifiziertes Sicherheits-Gateway zwischen Zählern und Marktteilnehmern. Cyber-Angriff auf SMGW als eigenes Szenario (en_scn_smgw_cyber): Massendaten-Exfiltration mit Verbrauchsprofilen plus Manipulationsversuch auf Schalt-Funktionen."
+      },
+      {
+        "id": "en_proc_handel",
+        "title": "Energie-Beschaffung und Bilanzkreismanagement (EPEX, Day-Ahead, Intraday)",
+        "ownerRole": "Handel / kaufmännische Geschäftsführung",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "12",
+        "rpoHours": "8",
+        "dependencies": "EPEX-Spot-Markt-Anbindung, Day-Ahead-Auktions-System, Bilanzkreis-Verantwortung beim ÜNB, Stromhandel-Software (Optimax, KYOS, Trayport)",
+        "outputs": "Spot-Beschaffung, Day-Ahead-Gebote, Intraday-Anpassungen, Bilanzkreis-Steuerung, Ausgleichsenergie-Monitoring",
+        "notes": "Bilanzkreis-Strafzahlungen bei Abweichungen (Ausgleichsenergie-Preise volatil, in Engpass-Zeiten 5-100 €/MWh). BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen. Bei System-Ausfall manuelle Telefon-Beschaffung mit erhöhten Spreads."
+      },
+      {
+        "id": "en_proc_kunden",
+        "title": "Bürger-Service und Kunden-Hotline (Störungs-Annahme, Tarif-Auskunft, Vertragswesen)",
+        "ownerRole": "Vertriebsleitung / Kunden-Service",
+        "criticality": "hoch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "CRM-System, Telefonanlage mit Hotline-Routing, Webportal, Stadt-Webseite-Anbindung, Pressestelle-Anbindung",
+        "outputs": "Bürger-Information, Störungs-Annahme, Tarif-Auskünfte, Vertragsdaten, Beschwerde-Behandlung",
+        "notes": "Bei Großstörung wird die Hotline binnen Minuten überlastet — Webseite und Pressemitteilungen als Skalierungs-Pfad. AUFSICHTSRAT-REAKTIV-HINWEIS: Bei Bürger-Beschwerden über kommunale Themen (Tarif-Erhöhungen, Lieferketten-Engpässe) Eskalation an Geschäftsführung und Aufsichtsrat-Vorsitzenden. Notbetrieb mit Externer Call-Center-Verstärkung."
+      },
+      {
+        "id": "en_proc_abrechnung",
+        "title": "Abrechnung und Forderungsmanagement (Strom-/Gas-/Wärme-Rechnung, Mahnung, Inkasso)",
+        "ownerRole": "kaufmännische Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Abrechnungs-Software (SAP IS-U, Wilken Energy), Bank-Anbindung, Inkasso-Dienstleister, Mahnstufen-Workflow",
+        "outputs": "Kunden-Rechnungen, Mahnungen, Inkasso-Übergaben, Erlös-Reporting, Bilanz-Vorlauf-Daten",
+        "notes": "Mittlere Kritikalität konsistent zum Pattern aus Logistics (Frachtrechnung), KMU-Basis (Lohnabrechnung), Healthcare (DRG). Stadtwerke-Abrechnung hat mehrwöchige Pufferzeiten (Quartals-Logik, Mahnstufen). Cashflow-Eskalation tritt erst nach Wochen Abrechnungs-Verzug ein."
+      },
+      {
+        "id": "en_proc_erzeugung",
+        "title": "Erzeugung und Anlagen-Betrieb (HKW, KWK, PV/Wind, Fernwärme)",
+        "ownerRole": "Erzeugungs-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "4",
+        "rtoHours": "2",
+        "rpoHours": "1",
+        "dependencies": "Heizkraftwerk-Steuerung, KWK-Anlagen, PV-/Wind-Park-Wechselrichter, Fernwärme-Erzeugungs-Anlagen, Brennstoff-Lieferanten",
+        "outputs": "Strom-Erzeugung, Wärme-Erzeugung, Bilanzkreis-Einspeisung, KWK-Bonus-Daten, EE-Einspeise-Vergütung",
+        "notes": "Kritikalität abhängig von Sparten-Mix: Heizkraftwerk fossil (kritisch im Winter wegen Fernwärme-Notlage), KWK-Anlage gekoppelt Strom-Wärme (kritisch im Winter), Photovoltaik-Park (hoch, weil Strom-Substitution aus Netz möglich), Wind-Park (hoch, Strom-Substitution möglich), Fernwärme-Erzeugung (kritisch im Winter, sekundär im Sommer). Tenant adoptiert je nach Erzeugungs-Mix und Saison-Profil. Saison-Differenzierung als Energy-Pack-Spezifikum: Sommer/Winter-BCM-Profile getrennt führen."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "en_dep_scada",
+        "title": "Leitsystem / SCADA (Siemens Spectrum, ABB Network Manager, GE PowerOn)",
+        "category": "ot",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Manuelle Fahrweise und lokale Bedienung mit Schaltbuch und Funk-Kommunikation. Hersteller-Substitution mehrjähriges Migrations-Projekt mit politischer Beschluss-Pflicht.",
+        "contractReference": "Leitsystem-Hersteller-Wartungsvertrag mit 24/7-SLA",
+        "notes": "Fallback-Rechte und Rufbereitschaft prüfen. Industroyer-2016-Schablone und Industroyer2-2022-Schablone (Sandworm/GRU): direkte Manipulation der SCADA-Schutz-/Steuerungs-Logik via IEC-104-Protokoll. Patch-Disziplin und Code-Integritäts-Prüfung als Mindeststandard."
+      },
+      {
+        "id": "en_dep_comms",
+        "title": "Sprach- und Datenkommunikation Leitwarte",
+        "category": "kommunikation",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Fallback-Netze und Mobilfunk; redundante Funk-Kommunikation für Bereitschafts-Dienste; Sat-Telefon als letzter Fallback.",
+        "contractReference": "Carrier-Vertrag (Telekom, Vodafone Business) / Funkdienst-Lizenz",
+        "notes": "Ausweichwege dokumentieren. Bei kombiniertem Cyber-Vorfall mit gleichzeitigem Telekom-Outage steht Leitwarte ohne Steuerungs-Kommunikation — sehr seltenes aber katastrophales Szenario."
+      },
+      {
+        "id": "en_dep_generator",
+        "title": "Netzersatz- und Schwarzstart-fähige Anlagen",
+        "category": "energie",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobile Einspeisung und Lastabwurf; ÜNB-Koordination für externe Schwarzstart-Kapazität; Dieseltank-Vorhaltung für 48-72h Inselbetrieb.",
+        "contractReference": "Wartungsvertrag Netzersatz-Aggregate; ggf. Marktrahmen-Vereinbarung mit ÜNB für Schwarzstart-Beschaffung",
+        "notes": "Schwarzstart-Beschaffung seit 12.01.2024 marktbasiert nach EnWG §12h. Treibstoff- und Test-Regime überwachen — Live-Test mindestens alle 36 Monate Pflicht. Hochstufung von Bestand-'hoch' auf 'kritisch': Großstörung ohne Schwarzstart-Fähigkeit kann mehrtägige Versorgungs-Krise bedeuten."
+      },
+      {
+        "id": "en_dep_uenb",
+        "title": "Übertragungsnetzbetreiber-Anbindung (TenneT, 50Hertz, Amprion, TransnetBW)",
+        "category": "behoerde",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Faktisch nicht ersetzbar — der ÜNB ist der einzige Netz-Verbund-Partner pro Regelzone. Eskalations-Hotline mit 24/7-Verfügbarkeit als einziger Pfad.",
+        "contractReference": "Anschluss- und Nutzungs-Vertrag mit zuständigem ÜNB (Regelzone)",
+        "notes": "Bei Schwarzstart und Großstörung ist die ÜNB-Koordination zwingend. Vier deutsche Regelzonen: TenneT (Nord/Bayern), 50Hertz (Ost), Amprion (West), TransnetBW (BW). Pro Stadtwerk eine Regelzone. Eskalations-Hotline der ÜNB rund um die Uhr besetzt."
+      },
+      {
+        "id": "en_dep_smgw",
+        "title": "Smart-Meter-Gateway-Administrator (BSI-zertifiziert, BSI-TR-03109)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-GWA mit Rahmenvertrag; bei eigenem GWA-Betrieb redundante Standorte. Manuelle Zähler-Ablese-Aktion in seltenen Notfällen.",
+        "contractReference": "GWA-Dienstleister-Vertrag (z.B. Voltaris, GWAdriga, theben)",
+        "notes": "BSI-Zertifizierung nach BSI-TR-03109 zwingend. Cyber-Angriff auf SMGW als eigenes Szenario (en_scn_smgw_cyber): Massendaten-Exfiltration mit Verbrauchsprofilen plus Manipulationsversuch auf Schalt-Funktionen."
+      },
+      {
+        "id": "en_dep_epex",
+        "title": "EPEX-/Bilanzkreis-Anbindung (Strom-Spot-Markt, Day-Ahead, Intraday)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Manuelle Telefon-Beschaffung mit erhöhten Spreads; Backup-Stromhandel-Software; ÜNB-Bilanzkreis-Information für Ausgleichsenergie-Status.",
+        "contractReference": "EPEX-Mitgliedschaft + Bilanzkreis-Vertrag mit ÜNB",
+        "notes": "Bei mehrtägiger EPEX-Disruption kippt Bilanzkreis-Stabilität — Ausgleichsenergie-Strafzahlungen 5-100 €/MWh. BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen."
+      },
+      {
+        "id": "en_dep_brennstoff",
+        "title": "Brennstoff-/Erdgas-Lieferant (Heizöl, Erdgas, Pellets)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Lieferanten mit Rahmenverträgen; eigene Brennstoff-Vorhaltung 7-14 Tage für HKW-Betrieb; Diesel-Tankvorhaltung für Notstrom.",
+        "contractReference": "Brennstoff-Liefervertrag mit Stamm- und Backup-Lieferant",
+        "notes": "Saison-Differenzierung: im Winter Brennstoff-Versorgungs-Engpässe als Folge von Lieferketten-Disruption (russisches Gas seit 2022, LNG-Preisvolatilität). Vorhaltung als Resilienz-Maßnahme."
+      },
+      {
+        "id": "en_dep_ot_wartung",
+        "title": "OT-Wartungs-Hersteller (Siemens, ABB, GE, Schneider für SCADA und Schutztechnik)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": true,
+        "fallback": "Bei einzelnem Hersteller-Outage Backup-Integrator mit OT-Erfahrung; bei branchenweitem Hersteller-Cyber-Vorfall (z.B. Hersteller-Ransomware) keine sofortige Substitution möglich.",
+        "contractReference": "OT-Hersteller-Wartungsvertrag mit Sicherheits-Anhang",
+        "notes": "Hersteller-Fernwartungs-Zugänge sind häufig Eintritts-Vektor für OT-Cyber-Vorfälle (Industroyer-Schablone-Adjazenz). Multi-Faktor-Authentisierung für Wartungs-Zugänge Mindeststandard."
+      },
+      {
+        "id": "en_dep_bnetza_bsi",
+        "title": "Bundesnetzagentur und BSI-Meldewege (KRITIS-Meldepflicht § 8b BSIG, EnWG § 11)",
+        "category": "behoerde",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalations-Pfade über mehrere Behörden parallel: BSI-CERT-Bund + BNetzA + Landes-CERT + ggf. Polizei (LKA Cyber).",
+        "contractReference": "KRITIS-Registrierung beim BSI; EnWG-§-11-Konformitäts-Zertifizierung",
+        "notes": "Doppelte Compliance-Schicht: § 8b BSIG für KRITIS-Meldung 24h, plus EnWG § 11 für IT-Sicherheits-Katalog. BNetzA-Aktualisierung Mai 2025. Pro Sektor unterschiedliche Meldepflicht-Schwellen — Tenant muss eigene Schwellenwerte kennen."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "en_scn_scada",
+        "title": "Leitsystem-Ausfall (SCADA-Hardware-/Software-Defekt)",
+        "category": "OT-Ausfall mit Steuerungs-Hebel",
+        "description": "SCADA-Hauptsystem ausgefallen durch Hardware-Defekt, Software-Bug oder Hersteller-Outage. Reguläre Schalthandlungen nicht möglich. Manuelle Fahrweise und lokale Bedienung als Fallback.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Netzleitwarte / OT-Sicherheit",
+        "linkedProcessTemplateIds": [
+          "en_proc_grid",
+          "en_proc_fault",
+          "en_proc_scada"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_scada",
+          "en_dep_comms",
+          "en_dep_ot_wartung"
+        ],
+        "playbook": "Lokale Bedienung mit Schaltbuch, Kommunikations-Fallback (Funk, Mobilfunk), Hersteller-Eskalation 24/7-SLA, BNetzA-Information bei mehrtägiger Disruption.",
+        "exerciseTypeHint": "technical",
+        "notes": "Bedienrechte und Schaltbücher verifizieren. Bei Outage über 4 Stunden Eskalation an technische Geschäftsführung."
+      },
+      {
+        "id": "en_scn_blackout",
+        "title": "Großflächiger Versorgungs-Ausfall (Blackout)",
+        "category": "Großstörung mit Versorgungs-Stillstand",
+        "description": "Mehrere Netzteile gleichzeitig betroffen — Übertragungsnetz-Störung, Naturereignis, kombinierte Cyber-physische Disruption. Versorgung großflächig unterbrochen, Schwarzstart-Sequenz wird notwendig.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Krisenstab / Technische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_grid",
+          "en_proc_fault",
+          "en_proc_blackstart",
+          "en_proc_kunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_generator",
+          "en_dep_uenb"
+        ],
+        "playbook": "Priorisierte Wiederzuschaltung mit ÜNB-Koordination, Schwarzstart-Sequenz aktivieren, Lagekommunikation an Bürger via Pressemeldung + Stadt-Webseite + Energieversorger-Webseite gleichzeitig. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Behörden- und Partner-Kommunikation einbeziehen (BNetzA, BSI, ÜNB, Landes-Innenministerium). Bei langer Dauer Notwasser-/Notlebensmittel-Versorgung mit Stadt koordinieren."
+      },
+      {
+        "id": "en_scn_industroyer",
+        "title": "ICS-Malware-Angriff auf Schutz- und Steuerungs-Logik (Industroyer-Schablone)",
+        "category": "OT-Cyber-Angriff mit physischem Schaden-Hebel",
+        "description": "Spezialisierte ICS-Malware kompromittiert SCADA-Schutz- und Steuerungs-Logik via IEC-104-/IEC-61850-Protokolle. Zwei historische Bezugspunkte: (1) Industroyer 2016 Kiew — Sandworm/GRU-Angriff erfolgreich, 200.000 Haushalte 1 Stunde ohne Strom als Test der Angriffs-Fähigkeit. (2) Industroyer2 2022 Ukraine — Sandworm/GRU-Angriff auf Hochspannungs-Umspannstationen erfolgreich abgewehrt durch ESET + CERT-UA — Defender-Lessons-Learned als positive Schablone.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "OT-Sicherheit / Krisenstab / Technische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_scada",
+          "en_proc_grid",
+          "en_proc_it"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_scada",
+          "en_dep_ot_wartung"
+        ],
+        "playbook": "Sofortige IT-OT-Segmentierung-Aktivierung, SCADA-Programme auf Code-Integrität prüfen (Vergleich gegen verifizierte Backup-Programme), forensische Beweis-Sicherung. BSI-CERT-Bund parallel zur Hersteller-Eskalation. Wiederanlauf nur nach forensischer Freigabe und SCADA-Programm-Reset. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN, gemeinsame Pressemeldung mit Stadtkommunikation.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Beide Schichten als didaktischer Anker: 2016-Erfolg-des-Angriffs (200.000 Haushalte 1 Stunde ohne Strom) zeigt die Bedrohung, 2022-Erfolg-der-Verteidigung (rechtzeitige Erkennung via ESET-Defender-Tools, CERT-UA-Reaktions-Kette) zeigt das Erfolgs-Modell. UVM-Tenants brauchen beide Schichten — Bedrohungs-Szenario ALLEIN demoralisiert; Defender-Lessons-Learned motivieren zum Handeln."
+      },
+      {
+        "id": "en_scn_ransomware_stadtwerke",
+        "title": "Ransomware mit Verwaltungs-Stillstand (Wismar-2021-Schablone)",
+        "category": "Cyber-Angriff mit Verwaltungs-Stillstand-Hebel",
+        "description": "Ransomware-Verschlüsselung der Werks-IT-Systeme über mehrere Wochen — Wismar-2021-Schablone (28.09.2021, 4 Monate bis Vollwiederherstellung). Drei zentrale Aspekte: (1) Vorfall-Größenordnung: Monate-lange Wiederherstellungs-Phase mit kontinuierlichem Druck auf alle Prozesse. (2) Schutz-Mechanismus: Bei guter OT/IT-Trennung läuft die Versorgung weiter — bei Wismar war Strom/Gas/Wasser nicht beeinträchtigt. (3) Kommunale Folgen: Bürger-Kommunikation über alternative Kanäle (während Web-Portal weg war), Vier-Monats-Phase mit manuellen Prozessen für Abrechnung und Kunden-Service.",
+        "likelihood": 4,
+        "impact": 4,
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Stadtwerk",
+        "linkedProcessTemplateIds": [
+          "en_proc_it",
+          "en_proc_kunden",
+          "en_proc_abrechnung",
+          "en_proc_metering"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_bnetza_bsi"
+        ],
+        "playbook": "Sofortige Trennung infizierter Systeme. Krisenstab nach Wismar-Pattern. BSI-Meldung nach § 8b BSIG binnen 24h, BNetzA-Information nach EnWG § 11. Manueller Notbetrieb der kaufmännischen Prozesse mit Excel und Papier-Verfahren — auf 3-6 Monate vorbereiten. AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN, Pressemeldung gemeinsam mit Stadtkommunikation abstimmen, Bürger-Information via Stadt-Webseite + Energieversorger-Webseite gleichzeitig. Backup-Restore-Sequenz mit forensischer Bereinigung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Wismar 2021 (28.09.2021, 4 Monate Wiederherstellung, OT/IT-Trennung als Schutz) als zentrale Schablone — positive didaktische Linie: nicht 'Stadtwerke sind hilflos', sondern 'Stadtwerke mit guter Trennung sind resilient'. BSI-Lagebericht 2025: Energiesektor +31 % YoY auf 89 gemeldete Vorfälle (stärkste Zunahme aller KRITIS-Sektoren)."
+      },
+      {
+        "id": "en_scn_blackstart_versagen",
+        "title": "Schwarzstart-Versagen nach Großstörung (Notstrom-Aggregate-Ausfall in Wiederanlauf-Phase)",
+        "category": "Folge-Schaden mit Wiederanlauf-Krise",
+        "description": "Nach Großstörung mit Versorgungs-Ausfall versagen die Schwarzstart-Aggregate in der kritischen Wiederanlauf-Phase — Treibstoff-Engpass, Wartungs-Versäumnis, oder mechanischer Defekt. Wiederanlauf verzögert sich um Stunden bis Tage, ÜNB-Koordination wird komplex. Worst-Case bei Eintritt — Score 5 trotz niedriger Wahrscheinlichkeit.",
+        "likelihood": 1,
+        "impact": 5,
+        "ownerRole": "Technische Geschäftsführung / Krisenstab",
+        "linkedProcessTemplateIds": [
+          "en_proc_blackstart",
+          "en_proc_grid"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_generator",
+          "en_dep_uenb",
+          "en_dep_brennstoff"
+        ],
+        "playbook": "Treibstoff-Notnachschub mit Tankstelle/THW koordinieren. ÜNB-Eskalation für externe Schwarzstart-Kapazität. Mobile Aggregate aus Nachbar-Stadtwerken anfordern (Verbund-Solidaritäts-Vereinbarung). AUFSICHTSRAT-VORSITZENDEN UND BÜRGERMEISTER BINNEN 4 STUNDEN INFORMIEREN.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Live-Übung mindestens alle 36 Monate Pflicht — nur echter Test gegen den Trockenfall validiert das Schwarzstart-Konzept. Treibstoff- und Test-Regime im Notbetriebs-Plan verankert."
+      },
+      {
+        "id": "en_scn_epex_disruption",
+        "title": "EPEX-/Bilanzkreis-Disruption (Stromhandels-System-Ausfall)",
+        "category": "Markt-Disruption mit Bilanzkreis-Hebel",
+        "description": "EPEX-Spot-Markt oder Day-Ahead-Auktion mehrtägig nicht verfügbar — Hersteller-Outage, BSI-Vorfall an EPEX. Bilanzkreis-Steuerung wird schwierig, Ausgleichsenergie-Strafzahlungen drohen, BNetzA-Eskalation bei systematischem Bilanzkreis-Versagen.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Handel / kaufmännische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_handel"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_epex"
+        ],
+        "playbook": "Manuelle Telefon-Beschaffung mit erhöhten Spreads, Bilanzkreis-Information an ÜNB für Ausgleichsenergie-Status, Backup-Stromhandel-Software aktivieren, BNetzA-Information bei mehrtägiger Disruption.",
+        "exerciseTypeHint": "supplier",
+        "notes": "Ausgleichsenergie-Preise volatil 5-100 €/MWh in Engpass-Zeiten — schnelle Eskalation an ÜNB als Schadens-Begrenzung."
+      },
+      {
+        "id": "en_scn_smgw_cyber",
+        "title": "Cyber-Angriff auf Smart-Meter-Gateway",
+        "category": "Cyber-Angriff mit Massendaten-Hebel",
+        "description": "Kompromittierung des Smart-Meter-Gateway-Administrators oder eines GWA-Partners. Massendaten-Exfiltration mit Verbrauchs-Profilen tausender Haushalte (DSGVO-relevante Personen-Bezugs-Daten) plus Manipulationsversuch auf Schalt-Funktionen (Lastabwurf bei Endkunden ohne Berechtigung).",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung Stadtwerk / OT-Sicherheit",
+        "linkedProcessTemplateIds": [
+          "en_proc_metering",
+          "en_proc_kunden"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_smgw"
+        ],
+        "playbook": "Sofortige Trennung des GWA-Zugangs, BSI-CERT-Bund-Eskalation (BSI-TR-03109-Zertifizierungs-Bezug), DSGVO-Bewertung Art. 33/34 binnen 72h, Bürger-Benachrichtigung bei hohem Risiko. Forensik mit Hersteller und LKA Cyber.",
+        "exerciseTypeHint": "technical",
+        "notes": "DSGVO-Bußgeld-Risiko bei Verbrauchsdaten-Verlust hoch (besonders schutzwürdige Bewegungs-/Lebensgewohnheits-Daten ableitbar). BSI-TR-03109-Zertifizierung des GWA als Pflicht-Anker."
+      },
+      {
+        "id": "en_scn_hochwasser_erzeugung",
+        "title": "Hochwasser/Naturereignis am Erzeugungs-Standort (Bayern-Hochwasser-2024-Schablone)",
+        "category": "Naturgefahr mit Erzeugungs-Hebel",
+        "description": "Hochwasser- oder Starkregen-Ereignis am Erzeugungs-Standort flutet Heizkraftwerk-/KWK-Anlage. Erzeugungs-Ausfall bedeutet Fernwärme-Versorgungs-Engpass im Winter (saisonal kritisch), Strom-Substitution aus Netz möglich (sommer-tolerabel).",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Erzeugungs-Leitung / Technische Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "en_proc_erzeugung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "en_dep_brennstoff",
+          "en_dep_uenb"
+        ],
+        "playbook": "Auslagerungs-Standort aktivieren (mobile Heizzentrale, Notwärme-Versorgung). Strom-Beschaffung über EPEX hochfahren. Bei Fernwärme-Notlage Bürger-Information mit Notmaßnahmen (Kraftwerks-Ausfall im Winter = potenziell lebensbedrohlich für Risiko-Gruppen). Versicherungs-Schaden-Aufnahme parallel zur Schadens-Begrenzung.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Bayern-Hochwasser 2024 als Schablone. Klimawandel-Szenario mit steigender Eintrittswahrscheinlichkeit. Saison-Differenzierung als Energy-Pack-Spezifikum: Sommer/Winter unterschiedliche Kritikalität."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "en_ex_scada",
+        "title": "SCADA-Failover-Test",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "en_scn_scada",
+        "ownerRole": "Netzleitwarte / OT-Sicherheit",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher technischer Test: Failover auf Backup-SCADA, lokale Bedienung mit Schaltbuch, Kommunikations-Fallback (Funk, Mobilfunk), Hersteller-Eskalations-Hotline. Bestand-ID; Cadence von 6 auf 12 Monate angepasst, konsistent zum Pack-Übungs-Pattern."
+      },
+      {
+        "id": "en_ex_blackout",
+        "title": "Blackout-Tabletop Energie",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "en_scn_blackout",
+        "ownerRole": "Krisenstab / Technische Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop: priorisierte Wiederzuschaltung, ÜNB-Koordination, Aufsichtsrat-Eskalation binnen 4 Stunden, Bürger-Kommunikation via Stadt-Webseite + Pressemeldung. Bestand-ID; Cadence von 12 auf 24 Monate angepasst, konsistent zum Pack-Übungs-Pattern."
+      },
+      {
+        "id": "en_ex_industroyer",
+        "title": "OT-IT-Übergriff-Tabletop (Industroyer-Schablone)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "en_scn_industroyer",
+        "ownerRole": "Krisenstab / OT-Sicherheit / IT-Leitung Stadtwerk",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Krisenstabs-Tabletop mit Geschäftsführung, OT-Sicherheit, IT-Leitung, Netzleitwarte, Pressestelle. Beide Industroyer-Schichten als Drehbuch: 2016-Angriff (Bedrohungs-Analyse, was wäre passiert) und 2022-Verteidigung (ESET + CERT-UA-Defender-Lessons-Learned). UVM-Tenants brauchen Erfolgs-Modelle, nicht nur Bedrohungs-Geschichten."
+      },
+      {
+        "id": "en_ex_blackstart_live",
+        "title": "Schwarzstart-Live-Übung mit ÜNB-Koordination",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "en_scn_blackstart_versagen",
+        "ownerRole": "Technische Geschäftsführung / Erzeugungs-Leitung",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung Pflicht: echte Last-Abschaltung mit Notstrom-Aggregat-Start, Inselbetrieb-Aufrechterhaltung, ÜNB-Koordination für Wiederanlauf, Treibstoff-Nachschub-Prozess. Erst nach erfolgreichem Live-Test gilt das Schwarzstart-Konzept als belastbar. Verbund-Solidarität mit Nachbar-Stadtwerken üben."
+      },
+      {
+        "id": "en_ex_ransomware_stadtwerke",
+        "title": "Ransomware-Stadtwerke-Tabletop (Wismar-Schablone)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "en_scn_ransomware_stadtwerke",
+        "ownerRole": "Krisenstab / Geschäftsführung / IT-Leitung Stadtwerk",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Tabletop mit Geschäftsführung, IT-Leitung Stadtwerk, OT-Sicherheit, Aufsichtsrat-Vertretung, Pressestelle, Kunden-Service-Leitung. Wismar-2021-Schablone als Drehbuch-Anhang (28.09.2021, 4 Monate Wiederherstellung, OT/IT-Trennung als Schutz). Drei Aspekte üben: (1) BSI-Meldung 24h, (2) OT/IT-Trennung-Verifikation, (3) Vier-Monats-Notbetrieb-Plan für Abrechnung und Kunden-Service."
+      }
+    ],
+    "riskCatalogTemplates": [
+      {
+        "id": "risk-energy-scada-compromise",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ot_incident",
+        "titel": "Kompromittierung des SCADA-/Leitsystems durch OT-Angriff",
+        "beschreibung": "Gezielter Eingriff in die Netzleittechnik (SCADA/EMS/DMS) oder vorgelagerte Engineering-Workstations durch staatsnahe Akteure oder Hacktivisten (ENISA-Lagebild 2025: Z-PENTEST-ALLIANCE und staatsnahe Gruppen im Fokus des europäischen Energiesektors). Potenzielle Wirkung: Fehl- oder Nichtauslösung von Schaltbefehlen, Integritätsverletzung des Netzabbilds in der Leitstelle, Überbrückung von Schutzfunktionen. Relevante Rahmen: §11 EnWG IT-Sicherheitskatalog, ISO 27019, BSI IT-SiKat für Betreiber von Energieanlagen. Wiederanlauf-Risiko bei SCADA-Kompromittierung hoch, da vertrauenswürdiger Stand der Konfigurationen und Asset-Telemetrie zuerst wiederhergestellt werden muss.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "OT-Security-Manager / CISO",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-malware-physical-substation",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "malware_physical",
+        "titel": "Malware mit physischer Auswirkung auf Schutz- und Sicherheits-SPS",
+        "beschreibung": "Malware der Klassen Industroyer / CRASHOVERRIDE / Triton-Typ, die spezifische Safety-PLCs und Schutzrelais in Umspannwerken manipuliert. Referenzpunkt: Angriffe auf das ukrainische Stromnetz 2015/2016 (BlackEnergy/Industroyer), fortgesetzte Aktivitäten 2022–2025 (Industroyer2 durch Sandworm). Die Wirkung ist nicht nur Ausfall, sondern Fehlauslösung von Schutzsystemen mit potenzieller Anlagen- oder Menschenschaden. Mitigation erfordert strikte Trennung Safety- und Security-Layer nach IEC 61511 / IEC 62443 sowie Signaturbasis für bekannte OT-Malware-IOC.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "OT-Leitung / Schutztechnik-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-blackout-cascading",
+        "categoryId": "technical",
+        "subCategoryId": "power_outage",
+        "titel": "Großflächiger Blackout durch Kaskadeneffekt",
+        "beschreibung": "Ausgelöst durch überregionale Netzfrequenz-Entgleisung, Lastflussdeckungslücke oder Ausfall einzelner Netzelemente mit Kaskadenwirkung (vgl. Europäische Netzaufspaltungen 2006, 2021). Schwarzstartfähigkeit ist bei ÜNB und Verteilnetzbetreibern unterschiedlich etabliert; Schwarzstart dauert erfahrungsgemäß 8–24 Stunden je nach Netztopologie. Kaskade über Sektorgrenzen (Wasser, Telekommunikation, Gas-Verdichterstationen) ist bei Blackout > 2 Stunden erwartbar. BSI-KRITIS-Meldepflicht nach § 16 KRITIS-Dachgesetz und § 8b BSIG bei Verlust der Netzführung.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 4,
+        "reviewDate": "",
+        "owner": "Leitwarten-Leitung / Technische Leitung Netzbetrieb",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-protection-relay-misoperation",
+        "categoryId": "technical",
+        "subCategoryId": "it_outage",
+        "titel": "Fehlauslösung oder Versagen der Schutz- und Leittechnik",
+        "beschreibung": "Schutzrelais, Differentialschutz oder Distanzschutz lösen bei Netzstörungen falsch (Überfunktion) oder gar nicht (Unterfunktion) aus. Ursachen: Parametrierungsfehler nach Netzumbau, nicht aufeinander abgestimmte Staffelpläne, alterungsbedingte Hardware-Drift, fehlerhafte Firmware-Updates. Folgen: unbeabsichtigte Abschaltung gesunder Netzteile (und damit Versorgungsunterbrechung) oder Nicht-Isolation fehlerbehafteter Abschnitte mit Schadensausweitung bis hin zu Trafobrand. Mitigation über Selektivitäts-Audits, Typprüfung nach IEC 61850 und dokumentierte Change-Management-Prozesse.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Schutztechnik-Leitung / Anlagenverantwortung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-transformer-fire-explosion",
+        "categoryId": "technical",
+        "subCategoryId": "plant_fire",
+        "titel": "Großtransformator-Brand oder Explosion in einem Umspannwerk",
+        "beschreibung": "Transformatoren der 220-kV-/380-kV-Netzebene sind Großkomponenten mit Einzelkosten 3–15 Mio. Euro und Lieferzeiten 12–36 Monate. Brand- oder Explosionsrisiko durch Isolationsfehler, Buchholz-Grenzwertüberschreitung, interne Lichtbogen. Sekundärschäden: Kollateralschäden auf Nachbar-Trafos, dauerhafte Außerbetriebnahme der Schaltanlage, Ölaustritt (Umweltereignis nach BImSchG). Ersatzbeschaffung kritischer Trafos über Schwesterunternehmen oder Pool-Vereinbarungen (z. B. BDEW-Trafopool) empfohlen.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Anlagenverantwortung / Technische Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-leitwarte-comms-outage",
+        "categoryId": "technical",
+        "subCategoryId": "comms_outage",
+        "titel": "Ausfall der Leitwarten-Kommunikation (Sprach-, Daten- und Fernwirkwege)",
+        "beschreibung": "Ausfall der Primär- und Redundanzanbindung zwischen Leitwarte und entfernten Umspannwerken, Kraftwerken, Netzeinspeise-/Verbrauchspunkten. Betrifft Fernwirkprotokolle (IEC 60870-5-104, IEC 61850-GOOSE), Sprachverbindungen (BOS-Funk/TETRA, Festnetz) und Engineering-Fernzugänge. Ursachen: Carrier-Ausfall, Kabelbruch, Fehlkonfiguration in Kommunikations-Infrastruktur, gezielte Angriffe auf Carrier-Equipment. Ohne Leitwartenkommunikation ist zentrale Netzsteuerung nicht mehr möglich, Rückfall auf Inselbetrieb und lokale Bedienung erforderlich.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Leitwarten-Leitung / Telekommunikations-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-extreme-storm",
+        "categoryId": "nature",
+        "subCategoryId": "storm",
+        "titel": "Sturm- oder Eislast mit Freileitungs- und Gittermast-Schäden",
+        "beschreibung": "Orkantiefs mit Windspitzen > 120 km/h, kombinierte Eis-/Sturmlasten im Winter oder Blitzeinschläge in Freileitungs-Trassen. Referenz-Ereignisse: Orkan Kyrill 2007, Schneekatastrophe Münsterland 2005. Typische Folgen: umstürzende Masten, gerissene Leiterseile, Beschädigung von Umspannwerk-Dachkonstruktionen. Wiederaufbauzeit einzelner Mastabschnitte 24–72 Stunden, bei Masterneuerung Wochen bis Monate. Bedeutsam für Betreiber mit hohem Freileitungsanteil (Übertragungsnetz, ländliche Mittelspannung).",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Technische Leitung Netzbetrieb / Entstörungsdienst",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-heat-wave-derating",
+        "categoryId": "nature",
+        "subCategoryId": "heat_wave",
+        "titel": "Hitzewelle mit Betriebsmittel-Derating und Kühlungsengpässen",
+        "beschreibung": "Anhaltende Hitzeperioden (Tage mit > 32 °C Maximaltemperatur) führen zu Derating von Freileitungen (Erhöhung des zulässigen Durchhangs, Reduktion der Stromtragfähigkeit) und erhöhter Last auf Kraftwerks-Kühlwasser (Flusstemperatur-Grenzwerte). Gleichzeitig steigt die Netzlast durch Klimatisierung (Lastspitze im Nachmittag-/Abendbereich). Kombinierte Wirkung: Engpass zwischen reduziertem Angebot und erhöhter Nachfrage. Bei lang anhaltender Hitze auch Grenzwertüberschreitung der Kühlwasserentnahme nach WHG und Derating von Kraftwerksblöcken.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Leitwarten-Leitung / Lastverteilung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-grid-sabotage",
+        "categoryId": "human_intentional",
+        "subCategoryId": "sabotage",
+        "titel": "Gezielte Sabotage an Leitungs- und Umspannwerks-Infrastruktur",
+        "beschreibung": "Brandanschläge auf Kabelanlagen, Beschädigungen von Gittermasten, Brandanschläge auf Schaltanlagen oder Glasfaser-/Steuer-Kabel. Referenzvorfälle Deutschland 2024–2026: Brandanschlag an Berliner Hochspannungskabeln (Januar 2026, fünf 110-kV- und zehn 10-kV-Kabel irreparabel zerstört, längster Berliner Stromausfall seit Kriegsende); Angriffe auf Tesla-Standort Grünheide 2024; Serie auf Strommasten bundesweit 2024–2025. Täterkreise: linksextreme Gruppen (Bekennerschreiben unter dem Label 'Vulkangruppe'). Ermittelt durch Bundesanwaltschaft wegen verfassungsfeindlicher Sabotage. Impact: lokaler bis regionaler Blackout, hohe öffentliche Aufmerksamkeit, mittelfristiger Wiederaufbau.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Security / Facility / Standortschutz",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-drone-substation-reconnaissance",
+        "categoryId": "human_intentional",
+        "subCategoryId": "drone_incident",
+        "titel": "Drohnen-Ausspähung oder gezielte Nutzlast-Abwürfe über Umspannwerken",
+        "beschreibung": "Unbefugte UAV-Überflüge mit Ausspähungs-Absicht als Vorbereitung physischer oder cyber-physischer Angriffe; zunehmend auch mit Nutzlast-Abwurf (Brandsätze, Sprengstoff, gezielte Trafo-Schädigung) — in den USA 2022/2023 dokumentiert, in Europa 2024/2025 mehrfach beobachtet. Erkennungsschwäche: Standard-Perimeter-Überwachung detektiert Kleinst-Drohnen nicht zuverlässig, und gegen aktive Nutzlast-Angriffe sind die Abwehr-Optionen innerhalb kurzer Flugzeiten begrenzt. Mitigation: Anti-Drohnen-Sensorik (Radar, HF-Detektion, Akustik) an Standorten der Schutzklasse 1, Kooperation mit Luftraum-Aufsicht, vorab geregelte Eingriffskompetenz der Landespolizei nach Luftverkehrsverordnung, bauliche Härtung exponierter Trafo-Ölwannen.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Security / Standortschutz",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-leitwarte-misoperation",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "human_error",
+        "titel": "Fehlbedienung in der Netzleitstelle",
+        "beschreibung": "Fehlerhafte Schalthandlung durch Leitstellenpersonal unter Stress, Zeitdruck oder bei nicht routinierten Sonderschaltungen. Typische Muster: falscher Schalter ausgewählt, Schaltfolge nicht entsprechend Schaltbuch, versehentliche Aktivierung von Netzabwehrprogrammen. Kollateralrisiken bei schnellen Wiederholungsschaltungen ohne Nachlauf. Mitigation über Vier-Augen-Prinzip bei Sonderschaltungen, Schaltbuch-Pflicht, Dual-Approval bei netzkritischen Manövern, jährliche Simulator-Übungen für Leitstellenpersonal.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Leitwarten-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-skill-shortage-hv",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "skill_shortage",
+        "titel": "Fachkräftemangel in Hochspannungstechnik und OT-Security",
+        "beschreibung": "Struktureller Dauer-Mangel an qualifiziertem Personal in den Bereichen Hochspannungstechnik (Schutztechnik, Schaltanlagen-Inbetriebnahme), Netzleitstellen-Betrieb und OT-Security. Laut BDEW-Personalreport 2024 sind > 25 % der Hochspannungs-Fachkräfte im Altersband > 55 Jahre; Nachwuchs-Lücke durch wenige duale Studiengänge, jahrelange Besetzungszeiten bei Spezial-Funktionen. Zusätzliche Last durch Energiewende (Umbau Mittelspannungsnetze, Smart-Grid-Rollout, Elektromobilitäts-Infrastruktur). Folgen: verzögerte Störungsbeseitigung, längere Inbetriebnahme neuer Anlagen, erhöhte Abhängigkeit von externen Dienstleistern, Überlastung des Stammpersonals mit Fehlerrate-Risiko. Bewertet als laufend eingetretener Dauer-Zustand (E=5), nicht als Eintrittsereignis.",
+        "eintrittswahrscheinlichkeit": 5,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Personalentwicklung / Technische Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-primary-fuel-disruption",
+        "categoryId": "interdependency",
+        "subCategoryId": "cross_sector_cascade",
+        "titel": "Primärenergie-Versorgungsunterbrechung (Erdgas, Kohle, Heizöl)",
+        "beschreibung": "Unterbrechung der Primärenergieträger-Zufuhr für Gas- und Kohlekraftwerke sowie KWK-Anlagen. Referenzpunkt: Erdgas-Krise 2022 mit Russland-Lieferstopp, Einrichtung Gas-Notfallplan Stufe 2 (Alarmstufe). Abhängigkeit verschärft durch LNG-Infrastruktur-Auslastung, begrenzte Gasspeicher-Kapazität. Kohleverstromung-Reaktivierung 2022–2024 hat parallel Transportkapazitäten (Rhein-Schifffahrt bei Niedrigwasser) als neuen Engpass entwickelt. Folge: Reduktion Erzeugungsleistung, Zwangs-Lastabwurf bei ungünstiger Wetter-Konstellation.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Einkauf / Kraftwerks-Betriebsleitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-it-service-dependency",
+        "categoryId": "interdependency",
+        "subCategoryId": "external_dependency",
+        "titel": "Ausfall externer IT-/Leittechnik-Dienstleister",
+        "beschreibung": "Kritische IT-/Leittechnik-Dienstleistungen von wenigen spezialisierten Anbietern: Leitsystem-Hersteller (Siemens Spectrum, GE/ABB), Carrier für Fernwirkkommunikation, OT-Security-Dienstleister, Cloud-Hosting für Metering-Plattformen. Nicht-Cyber-Risiken: Dienstleister-Insolvenz, Übernahme mit Produkt-Discontinuation, SLA-Downgrade. Besonderheit: Leitsystem-Migration ist mehrjähriges Großprojekt (3–5 Jahre mit Parallel-Betrieb), in dieser Phase eingeschränkte Wartungs- und Supportfähigkeit. BDEW-Whitepaper IT/OT-Sicherheit empfiehlt Vertrags-Exit-Klauseln und Konfigurationsausstieg in offenen Standards (IEC 61850).",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "CISO / IT-Vertragsmanagement",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-energy-redispatch-grid-congestion",
+        "categoryId": "technical",
+        "subCategoryId": "it_outage",
+        "titel": "Netzengpass-Management und Redispatch-Überforderung",
+        "beschreibung": "Betriebsleitender Engpass, nicht klassischer Ausfall: Regelzonen-übergreifende Süd-Nord-Leitungsengpässe führen zu hohen Redispatch-Volumina (Abregelung Nord-Wind, Hochfahren Süd-Konventionell). Rolle der ÜNB (50Hertz, Amprion, TenneT, TransnetBW) nach § 13 EnWG-Systemverantwortung: Engpass-Behebung auch durch marktliche (§ 13 Abs. 1) und netzbezogene Maßnahmen (§ 13 Abs. 2), in der letzten Eskalationsstufe Anpassungsmaßnahmen gegen den Willen der Betreiber (§ 13a EnWG). Redispatch-Kosten 2023 laut BNetzA-Monitoringbericht ca. 4,2 Mrd. Euro, stark schwankend mit Wetterbedingungen und Netzausbaustand. Risiko: Bei extremen Wetter-Szenarien (Dunkelflaute kombiniert mit Süd-Nord-Engpass) Gefahr für Netzstabilität bis zu kontrolliertem Lastabwurf nach § 13 Abs. 2 Satz 2 EnWG. Subkategorie technical/it_outage gewählt, weil die Taxonomie kein eigenes grid_congestion-Feld enthält; Abgrenzung zu power_outage (lokaler Ausfall): Redispatch ist überregionale Betriebsführungs-Herausforderung, keine physische Unterbrechung der Energieleitung.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Regelzonen-Koordination / Systemführung ÜNB",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience-template-energy-kritisdachg-1.0",
+      "templateNote": "Demo-Entwurf als Starter für einen Resilienzplan nach § 13 KRITIS-Dachgesetz für Energieversorger. Vor Go-Live anzupassen: Operator-Name, Standortzahlen, BNetzA-Registriernummer, Regelzonen-Zuordnung, Kontaktdaten (CISO-/OT-Bereitschaft, Vorstand). Cross-Referenzen (topRisks[].riskId, measuresByGoal[*][].linkedActionItemId) bleiben im Pack leer — der Operator verknüpft nach Übernahme manuell (Entscheidung B.1 aus C5.1). Review-Zyklus auf 4 Jahre (§ 12 Abs. 3 KRITISDachG) voreingestellt; bei Netzumbau oder neuer BNetzA-Verfügung anlassbezogen früher. Parallele Zertifizierungen nach § 11 EnWG IT-Sicherheitskatalog (ISO 27001 + ISO 27019) sind in der evidence-Sektion als gleichwertige Nachweise anerkannt.",
+      "content": {
+        "scope": {
+          "operatorName": "Stadtwerke Donau-Ries Energie AG",
+          "sector": "Energie",
+          "criticalService": "Elektrizitätsverteilung, Gas-Verteilnetz, Netzleitstelle, Schwarzstart-Bereitschaft",
+          "locations": "4 Umspannwerke (110/20 kV), 2 Schaltzentralen, Leitwarte am Standort Donauwörth; 12 Gas-Übergabestationen",
+          "employees": "Ca. 500 Vollzeitäquivalente, davon ca. 80 in Netzleitstelle und OT-Betrieb",
+          "personsServed": "Versorgungsgebiet ca. 250.000 Haushalte sowie Gewerbe- und Industriekunden der Region",
+          "scopeNote": "Betreiber einer kritischen Anlage nach BSI-KritisV Anhang 1 (Strom) und Anhang 2 (Gas). Anwendungsbereich KRITIS-Dachgesetz (physische Resilienz) und BSIG/NIS2-Umsetzung (Cyber-Resilienz) parallel. Bei Stromnetzen zusätzlich § 11 EnWG IT-Sicherheitskatalog der BNetzA; bei Gas-Netzen analoge Vorgaben über § 11 Abs. 1a EnWG. Regelzonen-Zuordnung (50Hertz/Amprion/TenneT/TransnetBW) ist vor Go-Live zu ergänzen."
+        },
+        "riskBasis": {
+          "methodology": "All-Gefahren-Ansatz nach § 12 KRITIS-Dachgesetz, ergänzt um BNetzA-IT-Sicherheitskatalog-Perspektive (ISO 27019-Kontrollziele). 5×5-Matrix mit differenzierter Residualbewertung. Sechs Gefährdungskategorien nach Engine-Taxonomie; spezifische Schwerpunkt-Kategorien im Energie-Sektor: cyber_physical (OT/SCADA) und technical (Netzelemente, Schutztechnik).",
+          "riskAnalysisReference": "Interne Risikoanalyse-Dokumentation (Stand zu ersetzen beim Pack-Import). Freigabe durch den Krisenstab, Zustimmung durch Vorstand Netzbetrieb. Nächste Revision nach § 12 Abs. 3 KRITIS-Dachgesetz spätestens alle 4 Jahre; anlassbezogen früher bei Netzumbau (signifikante Leitungs- oder Anlagen-Erweiterungen), bei neuer BNetzA-Verfügung, bei Wechsel eines kritischen IT-/Leittechnik-Dienstleisters.",
+          "topRisks": [
+            {
+              "title": "Kompromittierung des SCADA-/Leitsystems durch OT-Angriff",
+              "category": "Cyber-physische Kaskaden",
+              "initialScore": 15,
+              "residualScore": 15,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Großflächiger Blackout durch Kaskadeneffekt",
+              "category": "Technische Gefahren",
+              "initialScore": 10,
+              "residualScore": 20,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Gezielte Sabotage an Leitungs- und Umspannwerks-Infrastruktur",
+              "category": "Menschlich intentional",
+              "initialScore": 12,
+              "residualScore": 12,
+              "criticality": "mittel-hoch"
+            },
+            {
+              "title": "Fachkräftemangel in Hochspannungstechnik und OT-Security",
+              "category": "Menschlich nicht-intentional",
+              "initialScore": 15,
+              "residualScore": 9,
+              "criticality": "mittel-hoch"
+            },
+            {
+              "title": "Primärenergie-Versorgungsunterbrechung (Erdgas, Kohle, Heizöl)",
+              "category": "Interdependenzen",
+              "initialScore": 12,
+              "residualScore": 12,
+              "criticality": "mittel-hoch"
+            },
+            {
+              "title": "Netzengpass-Management und Redispatch-Überforderung",
+              "category": "Technische Gefahren",
+              "initialScore": 12,
+              "residualScore": 9,
+              "criticality": "mittel-hoch"
+            }
+          ],
+          "riskBasisNote": "Die Top-Risiko-Auswahl spiegelt den sektor-typischen Schwerpunkt: zwei technical- und ein cyber_physical-Risiko sind unter den Top-6. Auffälligkeit: Blackout-Kaskade hat residualScore 20 > initialScore 10 — das ist keine Inkohärenz, sondern die physikalische Besonderheit von Schwarzstart-Dauer (8–24 h selbst bei etablierten Schwarzstart-Prozessen). Die 5×5-Matrix-Konvention (Score = Eintrittswahrscheinlichkeit × Auswirkung) zeigt für Blackout: initial E=2×A=5=10, residual Res=4×A=5=20; der Operator erkennt hier eine strukturelle Untergrenze, die nur durch Netz-Ausbau (mehr Redundanz, mehr Schwarzstart-Kraftwerke) und nicht durch betriebsorganisatorische Maßnahmen zu senken ist. Sabotage-Risiken (human_intentional) sind durch physische Härtung adressierbar; Fachkräftemangel (human_unintentional) ist struktureller Dauerzustand mit E=5, aber beherrschbarer Auswirkung (A=3)."
+        },
+        "measuresByGoal": {
+          "prevent": [
+            {
+              "id": "m-energy-prevent-ot-awareness",
+              "title": "OT-spezifisches Security-Awareness-Programm",
+              "description": "Verpflichtendes jährliches Sicherheitstraining für alle Leittechnik-Administratoren, Engineering-Workstation-Nutzer und Netzleitstellen-Personal. Spezialisierte Phishing-Simulationen, die OT-typische Angriffsvektoren adressieren (gefälschte Hersteller-Support-Anrufe, simulierte BNetzA-Mails, präparierte Leitsystem-Hersteller-Pakete). Bezug: BSI-Lagebild 2024/2025 identifiziert Phishing an OT-Administratoren als häufigste Eintrittstür in europäische Energieversorger.",
+              "goal": "prevent",
+              "owner": "CISO / OT-Security-Manager",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-prevent-patch-ot-it",
+              "title": "Patch-Management IT/OT mit Hersteller-Freigabe",
+              "description": "Monatlicher Patch-Zyklus Standard-IT, vierteljährlicher Zyklus OT/Leittechnik mit Hersteller-Testfreigabe und vorherigem Impact-Assessment. Notfall-Patch-Prozess für OT-Zero-Days mit Hersteller-Koordination und Re-Parametrierung der Schutzfunktionen nach IEC 61850. Dokumentation je Asset-Klasse in zentraler Patch-Datenbank. Berücksichtigung der BNetzA-IT-Sicherheitskatalog-Anforderungen (ISO 27019 A.12.6).",
+              "goal": "prevent",
+              "owner": "OT-Leitung / IT-Betrieb",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-prevent-supplier-due-diligence",
+              "title": "Sorgfaltspflicht bei kritischen IT-/Leittechnik-Lieferanten",
+              "description": "Jährliche Überprüfung kritischer Lieferanten (Leitsystem-Hersteller, Carrier für Fernwirkkommunikation, OT-Security-Dienstleister, Cloud-Hosting für Smart-Meter-Plattformen) hinsichtlich Informationssicherheits-Standards (ISO 27001), Business-Continuity-Nachweisen und Substitutionsfähigkeit. Vertragliche Verankerung von Meldepflichten bei Störungen beim Lieferanten innerhalb 24 h. Exit-Klauseln mit Konfigurationsausstieg in offenen Standards (IEC 61850) zur Reduktion von Lieferanten-Lock-in (BDEW-Whitepaper-Empfehlung).",
+              "goal": "prevent",
+              "owner": "Einkauf / CISO",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-prevent-physical-hardening",
+              "title": "Physische Härtung kritischer Standorte",
+              "description": "Perimeterschutz, Video-Überwachung, HF-/Radar-basierte Anti-Drohnen-Sensorik und Zufahrtsschutz für Umspannwerke der Schutzklasse 1. Jährliche Begehung und Bewertung nach BDEW-Sicherheitsleitfaden; erhöhte Wachsamkeit nach Sabotage-Welle 2024–2026. Kooperation mit Landespolizei und ggf. Bundeswehr-Territorialkommando bei exponierten Standorten. Bauliche Härtung exponierter Trafo-Ölwannen gegen Nutzlast-Abwürfe.",
+              "goal": "prevent",
+              "owner": "Security / Facility / Standortschutz",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "protect": [
+            {
+              "id": "m-energy-protect-network-segmentation",
+              "title": "Netzwerksegmentierung IT / OT / Safety",
+              "description": "Strikte Drei-Ebenen-Segmentierung: Standard-IT (Verwaltung, Vertrieb), OT-Prozessnetz (SCADA, EMS, Engineering), Safety-Layer (Schutzrelais, Sicherheits-SPS) nach IEC 62443. Keine gemeinsam genutzten Fileshares zwischen IT und OT (Kern-Lessons-Learned aus Industroyer-Klasse-Angriffen). Übergänge ausschließlich über Application-Layer-Proxies mit Protocol-Whitelisting. Zero-Trust-Zugriff für OT-Administratoren mit Hardware-MFA und Time-Based-Access.",
+              "goal": "protect",
+              "owner": "CISO / OT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-protect-blackstart-diesel",
+              "title": "Schwarzstart-Fähigkeit und Dieselbevorratung 72 h",
+              "description": "Vertraglich gesicherte Schwarzstart-Kraftwerke in der Regelzone (Pumpspeicher, Wasserkraft, Notfall-Diesel-BHKW). Dieselaggregate für alle kritischen Standorte (Leitwarte, zentrale Umspannwerke, Kommunikationsknoten) mit Tankfüllung 72 h bei Standardlast. Monatlicher Testlauf mit dokumentierten Protokollen. Diesel-Lieferverträge mit garantierter 24-h-Nachlieferung auch im flächigen Notfall; Reservekontingente über regionale Versorger-Kooperation (BDEW-Notfalldiesel-Pool).",
+              "goal": "protect",
+              "owner": "Technische Leitung / Schwarzstart-Koordination",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-protect-ot-backup",
+              "title": "OT-Backup-Konzept (3-2-1 mit Offline-Komponente)",
+              "description": "Tägliches Backup aller EMS-Konfigurationen, Netzabbilder, Schutzparameter, Leittechnik-Firmwares auf LTO-Band, wöchentlich ausgelagerte Kopie. Immutable-Backup für 14 Tage als Ransomware-Schutz. Jährlicher Vollrestore-Test mit Messung der Wiederanlaufzeit gegen definierte RTO/RPO der Leittechnik (typisch RTO 4–8 h für EMS-Lesemodus, 24 h für Schreib-Funktionalität). Prozedur für Rebuild auf sauberer Hardware bei bestätigter Kompromittierung (parallel zum Hauptsystem).",
+              "goal": "protect",
+              "owner": "OT-Leitung / IT-Betrieb",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "respond": [
+            {
+              "id": "m-energy-respond-crisis-team-ot",
+              "title": "Krisenstab mit OT-Fokus und definierten Meldewegen",
+              "description": "Krisenstab mit klaren Rollen (Leitung, CISO, Leitwarte, OT-Leitung, Schutztechnik, Externe Kommunikation, Rechtsabteilung) und Out-of-Band-Kommunikation (Mobilfunk-Gruppe für Ausfall interner Telefonanlage). Meldewege vordokumentiert für § 16 KRITIS-Dachgesetz (24 h), § 8b BSIG bzw. § 8d BSIG-NIS2 (24 h/72 h/1 Monat), § 11 EnWG IT-Sicherheitskatalog (an BNetzA), § 17 KRITIS-Dachgesetz (Nachbar-ÜNB und andere betroffene KRITIS-Sektoren). Meldungsvorlagen in vier Varianten (physisch, Cyber, kombiniert, Kreuzsektor) im Krisenhandbuch bereitgelegt.",
+              "goal": "respond",
+              "owner": "Krisenstabs-Leitung / CISO",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-respond-manual-operation",
+              "title": "Manueller Fallback-Plan für Leittechnik-Ausfall",
+              "description": "Dokumentierter Betriebsplan für lokale Bedienung in allen kritischen Umspannwerken: Stationsmeister-Bereitschaft, Schaltbücher mit Dual-Approval-Verfahren über Out-of-Band-Kommunikation, Priorisierung kritischer Schalthandlungen. Jährliche Übung pro Umspannwerk mit echter Abschaltung der Fernwirkstrecken für 4 h. Alternative Autorisierungs-Kaskade bei Ausfall der Leitwarte (zweite Leitstelle, letzter Eskalations-Pfad: Vorstands-Freigabe).",
+              "goal": "respond",
+              "owner": "Leitwarten-Leitung / Anlagenverantwortung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-respond-exercises",
+              "title": "Halbjährliche Krisenstab-Übungen mit Tabletop-Szenarien",
+              "description": "Zweimal jährlich Durchführung der Tabletop-Szenarien (Leitstelle-Cyberangriff, Blackout-Kaskadenausfall) mit vollständiger Krisenstab-Besetzung. Wechselnde Moderation durch externe Berater*innen. Alle 2 Jahre sektorübergreifende Übung mit Nachbar-ÜNB, Wasserversorger, Telekommunikationsanbietern und Gesundheits-KRITIS zur Validierung der § 17-Unterrichtungsketten. Dokumentation der Entscheidungen und Lessons-Learned mit Maßnahmenplan im Quality-Management-System.",
+              "goal": "respond",
+              "owner": "Krisenstabs-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-respond-supply-alternatives",
+              "title": "Zweitquellen für Primärenergie und kritische Materialien",
+              "description": "Vertraglich gesicherte Zweitquellen für Gas-Bezug (diversifizierte Lieferanten-Basis nach Gas-Krise 2022–2023, LNG-Alternativen), Heizöl für Reserve-Kraftwerke, kritische Ersatzteile (Leistungsschalter, Stromwandler) über BDEW-Trafopool oder Schwesterunternehmen. Jährliches Stress-Testing der Alternativ-Beschaffungsketten. Dokumentation der Bezugsketten und SLA-Konditionen im Incident-Response-Plan.",
+              "goal": "respond",
+              "owner": "Einkauf / Kraftwerks-Betriebsleitung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "recover": [
+            {
+              "id": "m-energy-recover-restore-testing",
+              "title": "Jährliche OT-Vollrestore-Tests",
+              "description": "Einmal jährlich komplette Wiederherstellung der EMS-/SCADA-Produktionsumgebung aus Offline-Backup in isolierter Restore-Umgebung. Messung der tatsächlichen Wiederanlaufzeit für EMS-Lesemodus, Schreib-Funktionalität und Schutzrelais-Parametrierung. Abweichungen vom geplanten RTO/RPO im Vorstandsbericht dokumentiert, Maßnahmenplan ausgelöst. Bei Rebuild-auf-sauberer-Hardware-Szenario auch Wiederherstellung der Konfigurations-Diff zwischen letztem sauberen Stand und Live-Zustand.",
+              "goal": "recover",
+              "owner": "OT-Leitung / Externe IR-Firma",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-recover-lessons-learned",
+              "title": "Lessons-Learned-Prozess mit Maßnahmentracking",
+              "description": "Nach jedem Vorfall (Ereignis, Near-Miss, Übung) strukturierte Retro binnen 14 Tagen. Teilnehmer aus allen Krisenstabs-Rollen plus OT-Fachbereich. Lessons-Learned-Katalog mit Fristen, Verantwortlichen, Quartals-Status-Tracking im Quality-Management-System. Kritische Erkenntnisse fließen in den Resilienzplan-Revisions-Zyklus. Austausch mit BSI (UP-KRITIS-Kanal) und BDEW-AK IT-Security, sofern vertrauliche Informationen nicht betroffen sind.",
+              "goal": "recover",
+              "owner": "Krisenstabs-Leitung / QM-Beauftragte*r",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-energy-recover-rto-rpo-dashboard",
+              "title": "Dokumentierte RTO/RPO pro kritischem System mit Dashboard",
+              "description": "Jedes als kritisch klassifizierte System hat definierte RTO (Recovery Time Objective) und RPO (Recovery Point Objective) aus der BIA: EMS-Lesemodus max. 4 h RTO / 15 min RPO, Fernwirkstrecken max. 2 h RTO / 5 min RPO, Schutztechnik-Parametrierung max. 24 h RTO. Monatliches Resilienz-Dashboard an Geschäftsführung mit aktuellen Soll-Ist-Werten und Audit-Feststellungen. Abweichungen > 25 % lösen automatischen Eskalations-Workflow aus.",
+              "goal": "recover",
+              "owner": "OT-Leitung / Controlling",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ]
+        },
+        "governance": {
+          "managementBoardContact": "Vorstand Netzbetrieb / Technik (vor Go-Live zu setzen: Name, Amtszeit)",
+          "programOwner": "CISO / OT-Security-Lead in Personalunion mit KRITIS-Beauftragter-Rolle nach § 11 KRITIS-Dachgesetz und § 11 EnWG; Stellvertretung durch Leitung Netzleitstelle",
+          "escalationPath": "Stufe 1: CISO-/OT-Bereitschaft und Leitwarten-Dispatcher (24/7, direkt erreichbar innerhalb 10 min). Stufe 2: Krisenstabs-Leitung (Vorstand Netzbetrieb oder benannte Vertretung), Krisenstab-Einberufung innerhalb 30 min; bei OT-Incidents zusätzlich externer OT-IR-Dienstleister mit 2-h-Response-SLA. Stufe 3: Vorstand + ggf. Beirat + externe Krisenkommunikation; Aktivierung UP-KRITIS-Kanal, BSI/BNetzA-Eskalation, BBK-Unterrichtung.",
+          "boardReviewCadence": "Quartalsweise Vorstandsbericht zu KRITIS-Readiness-Status (Kennzahlen: offene Top-Risiken, Übungsergebnisse, RTO/RPO-Einhaltung, Audit-Feststellungen, BNetzA-Korrespondenz). Jährliche Management-Review mit BNetzA-Fachaufsicht und Zertifizierungsstelle (ISO 27001 / ISO 27019). Halbjährliches Audit-Gespräch mit interner Revision.",
+          "governanceNote": "§ 11 KRITIS-Dachgesetz und § 11 EnWG-IT-Sicherheitskatalog verlangen die geschäftsführende Ebene als verantwortliche Stelle für Resilienz-Organisation und Informationssicherheit. Delegation operativer Verantwortung an CISO/OT-Security-Lead zulässig, aber Gesamtverantwortung bleibt beim Vorstand (nicht delegierbare Verantwortung, § 11 Abs. 1a EnWG). Dokumentation der Delegationsvereinbarung im Organisationshandbuch empfohlen; regelmäßige persönliche Berichterstattung CISO → Vorstand ist Pflicht."
+        },
+        "reporting": {
+          "incidentContact": "CISO-/OT-Security-24/7-Bereitschaft (vor Go-Live: Mobilnummer, Stellvertreter-Nummer). Erreichbarkeit garantiert durch rotierende Bereitschaftsgruppe aus CISO + OT-Leitung + Leitwarten-Dispatcher. Out-of-Band-Kommunikation via vordefinierte Mobilfunk-Gruppe für Ausfall der Telefonanlage.",
+          "incidentBackupContact": "Krisenstabs-Leitung (Vorstand Netzbetrieb), Stellvertretung durch Kaufmännische Direktion. Bei gleichzeitigem Ausfall der primären Kontakte: Notfall-Kontakt im Krisenhandbuch (Stufe-3-Eskalation mit Vorstands-Vertretung).",
+          "bsiPortalNote": "BSI-Meldeportal registriert (Zugang für CISO, OT-Security-Lead, Compliance-Beauftragte*r). Meldevorlagen vorbereitet für: § 16 KRITIS-Dachgesetz (physische Sicherheitsvorfälle, 24 h), § 8b BSIG bzw. § 8d BSIG-NIS2 (Cyber-Vorfälle, gestaffelt 24 h/72 h/1 Monat), § 11 EnWG IT-Sicherheitskatalog (an BNetzA — eigenständige Meldepflicht neben BSI). Parallele UP-KRITIS-Anbindung für vertrauliches IOC-Sharing mit Peer-Energieversorgern. Vorlagen jährlich auf Aktualität geprüft, Musterdaten in Staging-Umgebung getestet.",
+          "firstReportingTimeline": "Meldefrist-Kette bei Vollereignis: T+0 Erstmeldung § 16 KRITIS-Dachgesetz ans BSI (Kurzfassung, binnen 2–4 h angestrebt, spätestens 24 h). T+0 bis T+24 h parallel § 11 EnWG-Meldung an BNetzA mit technischem Briefing. T+24 h Bestätigungsmeldung ans BSI. T+72 h § 8b/§ 8d-Folgemeldung bei Cyber-Vorfall. T+1 Monat Abschlussbericht. Bei Betroffenheit anderer KRITIS-Sektoren parallel § 17-Unterrichtungspflicht (Nachbar-ÜNB, andere Energieversorger, angrenzende KRITIS-Sektoren wie Wasser/Telekommunikation/Gesundheit bei kaskadierender Wirkung).",
+          "reportingNote": "§ 17 KRITIS-Dachgesetz-Unterrichtungspflicht ist im Energiesektor besonders präsent: bei kaskadierenden Vorfällen über Regelzonen- oder Sektor-Grenzen hinweg ist die Unterrichtung anderer KRITIS-Betreiber (Wasser, Telekommunikation, Gesundheit, Transport) essenziell für Cross-Sector-Resilienz. Bei § 20-Bußgeldrisiko (bis zu 1 Mio. Euro bei Meldeversäumnis) rechtliche Begleitung der Meldungen empfohlen. Alle Meldungen zentral im Quality-Management-System archiviert, Zugriff beschränkt auf Compliance, CISO, Vorstand, interne Revision."
+        },
+        "evidence": {
+          "evidenceReferences": [],
+          "reviewCycleYears": 4,
+          "equivalentProofsNote": "Nachweise nach § 20 KRITIS-Dachgesetz im Rahmen der Aufsichtsbehörden-Prüfung: Risikoanalyse-Bericht, genehmigter Resilienzplan, Tabletop-Übungsprotokolle, BSI-/BBK-Meldungen, § 11 EnWG IT-Sicherheitskatalog-Audit-Berichte, Audit-Berichte interne Revision. Gleichwertige Nachweise aus anderen Normen-Rahmenwerken werden anerkannt: ISO 27001 (Informationssicherheit) in Kombination mit ISO 27019 (sektor-spezifische Ergänzung Energie), BNetzA-IT-Sicherheitskatalog-Zertifizierung nach § 11 Abs. 1a/1b EnWG, NIS2-Konformitätsbescheinigungen, ISO 22301 (Business Continuity Management). Gleichwertigkeits-Argumentation ist schriftlich zu hinterlegen und mit BNetzA / BSI abgestimmt.",
+          "evidenceNote": "Dokumentationsablage zentral im Quality-Management-System, Zugriffsbeschränkung auf CISO, Vorstand, Compliance-Beauftragte*r, interne Revision. Aufbewahrung mindestens 5 Jahre (bei laufendem Ermittlungsverfahren oder bei BNetzA-Sonderprüfung nach § 11 Abs. 1f EnWG längere Aufbewahrung nach anwaltlichem Hinweis). Versionierung mit unveränderlicher Signaturkette. Review-Zyklus von 4 Jahren ist die gesetzliche Mindestfrequenz nach § 12 Abs. 3 KRITIS-Dachgesetz; bei Netzumbau (signifikante Erweiterung), neuer BNetzA-Verfügung, Übernahme eines neuen Netzabschnitts oder Wechsel eines kritischen IT-/Leittechnik-Dienstleisters anlassbezogen früher."
+        }
+      }
+    },
+    "tabletopScenarios": [
+      {
+        "id": "tabletop-energy-leitstelle-cyberattack",
+        "version": "1.0.0",
+        "title": "Cyberangriff auf die Netzleitstelle (SCADA/EMS)",
+        "summary": "Staatsnaher Angreifer kompromittiert über eine Engineering-Workstation das EMS (Energy Management System) der Leitstelle. Ziel: Manipulation von Netzabbild und Schaltbefehlen, Überbrückung von Schutzfunktionen. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf OT-Isolation, Fallback auf lokale Bedienung in Umspannwerken, KRITIS-Meldewege (§ 8b BSIG / § 8d NIS2 / § 16 KRITISDachG / § 11 EnWG IT-SiKat) und die ÜNB-Koordination. Referenz-Kontext: ENISA Threat Landscape 2025, Industroyer-/CRASHOVERRIDE-Angriffsklasse, Sandworm-Aktivitäten 2022–2025.",
+        "sectors": [
+          "Energie"
+        ],
+        "applicableRegimes": [
+          "KRITISDachG",
+          "BSIG",
+          "EnWG"
+        ],
+        "durationMinutes": 180,
+        "roles": [
+          {
+            "id": "role-en-krisenstab",
+            "title": "Krisenstabs-Leitung",
+            "briefing": "Gesamtkoordination. Strategische Freigaben (Netz-Entkopplung, Fallback-Aktivierung, Lösegeldentscheidung, externe Kommunikation). Typisch Geschäftsführung Netzbetrieb oder Vorstand Technik."
+          },
+          {
+            "id": "role-en-ciso",
+            "title": "CISO / OT-Security-Lead",
+            "briefing": "Cyber-Incident-Response-Lead mit OT-Fokus. Koordiniert Forensik, IOC-Analyse, BSI- und BNetzA-Meldungen nach § 8b BSIG / § 11 EnWG IT-SiKat. Hauptansprechpartner für externe OT-IR-Dienstleister."
+          },
+          {
+            "id": "role-en-leitwarte",
+            "title": "Leitwarten-Leitung",
+            "briefing": "Operative Netzführung. Beurteilt die Integrität des EMS-Netzabbilds, entscheidet über Fallback auf manuelle Fahrweise oder lokale Bedienung. Koordiniert mit Anlagenverantwortung vor Ort."
+          },
+          {
+            "id": "role-en-ot-leitung",
+            "title": "OT-Leitung / Leittechnik",
+            "briefing": "Technische Verantwortung für Leittechnik, Fernwirkstrecken, Engineering-Workstations. Führt Netzsegmentierung und Isolation durch, stellt die technische Faktenbasis für Krisenstab und CISO bereit."
+          },
+          {
+            "id": "role-en-schutztechnik",
+            "title": "Schutztechnik-Leitung",
+            "briefing": "Verantwortlich für die Integrität der Schutzrelais und Staffelpläne. Prüft, ob Safety-PLCs mit der Industroyer-Klasse kompromittiert wurden (separates IEC 62443-Layer)."
+          },
+          {
+            "id": "role-en-externe-komm",
+            "title": "Externe Kommunikation (BSI, BNetzA, Nachbar-ÜNB)",
+            "briefing": "Koordiniert die parallel laufenden Meldewege: BSI-Meldeportal nach § 8b/§ 8d BSIG und § 16 KRITISDachG, BNetzA-Fachaufsicht nach § 11 EnWG, Nachbar-ÜNB-Unterrichtung nach § 17 KRITISDachG. Out-of-Band-Kommunikation via vordefinierte Mobilfunk-Gruppe."
+          },
+          {
+            "id": "role-en-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu Meldepflichten, Haftungsfragen (§ 11 Abs. 1a EnWG, Sektorenverantwortung), strafrechtlichen Implikationen (Cyber-Zahlung = § 89c StGB bei bestimmten Gruppen). Schnittstelle zur Polizei (LKA Cybercrime)."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "en-inj-scada-anomaly",
+                "title": "Asset-Telemetrie-Drift im EMS",
+                "description": "Leitstelle meldet: Mehrere Zustandsanzeigen im EMS zeigen unplausible Werte (Schaltzustand + Messwert widersprechen sich). Ein Monitoring-Alarm deutet auf nicht freigegebene Engineering-Zugriffe in den letzten 4 h hin.",
+                "roleId": "role-en-leitwarte"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-initial-assessment",
+                "question": "Wie reagieren Leitwarte und CISO auf die erste Anomalie?",
+                "roleId": "role-en-ciso",
+                "guidance": "Bei OT-Systemen unterscheidet sich die Response-Logik von reinen IT-Incidents: Vor-Ort-Bestätigung durch Stationsmeister ist technisch zwingend (physische Realität vs. manipulierte SCADA-Anzeige). Frühe Eskalation schützt Netzstabilität, verzögert aber Forensik.",
+                "options": [
+                  {
+                    "id": "en-opt-cross-check",
+                    "label": "Vor-Ort-Validierung anfordern (Stationsmeister) + parallel IOC-Scan",
+                    "consequence": "Physischer Ground-Truth in 15–30 min verfügbar, IR-Team startet parallel Analyse. Bewährter OT-Response-Pfad.",
+                    "evaluationHints": [
+                      "Cross-Validation vor Ort"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-ems-only",
+                    "label": "Nur EMS-interne Diagnostik, keine Vor-Ort-Prüfung",
+                    "consequence": "Schnellere Diagnose-Hoffnung, aber bei manipuliertem EMS-Abbild ist die Diagnose nicht vertrauenswürdig. Klassischer OT-Response-Fehler.",
+                    "evaluationHints": [
+                      "Fehlende physische Verifikation"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-operations-netzstabilitaet",
+                  "en-crit-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "en-inj-station-confirms",
+                "title": "Station bestätigt Diskrepanz",
+                "description": "Stationsmeister in einem Umspannwerk der Region meldet: Ein Schalter, der im EMS als geschlossen angezeigt wird, steht vor Ort mechanisch offen. Zweites Umspannwerk zeigt vergleichbare Anomalie. Bestätigung: Netzabbild im EMS ist nicht mehr zuverlässig.",
+                "roleId": "role-en-ot-leitung"
+              },
+              {
+                "id": "en-inj-engineering-workstation",
+                "title": "Engineering-Workstation auffällig",
+                "description": "OT-Forensik identifiziert: Eine der beiden Engineering-Workstations mit Schreibrechten auf die SCADA-Datenbank hat verdächtige PowerShell-Aktivität und einen unbekannten Remote-Access-Trojaner. Initiale Bewertung: Industroyer-Klasse möglich, IOC-Treffer auf Sandworm-Unterstrukturen.",
+                "roleId": "role-en-ciso"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-isolation-strategy",
+                "question": "Wie wird die Ausbreitung im OT-Netz gestoppt?",
+                "roleId": "role-en-ot-leitung",
+                "guidance": "Trade-off: Sofortige komplette Isolation = Verlust der Leittechnik-Fähigkeit, Rückfall auf lokale Bedienung. Segmentierte Isolation = Live-Telemetrie erhalten, aber Risiko weiterer Manipulation. Bei OT-Incidents ist Vor-Ort-Bedienfähigkeit Grundvoraussetzung für Isolation.",
+                "options": [
+                  {
+                    "id": "en-opt-segment-isolate",
+                    "label": "Engineering-Workstations sofort trennen, EMS-Lesemodus beibehalten, Schreib-Operationen gesperrt",
+                    "consequence": "Keine neuen manipulativen Schaltbefehle mehr möglich. Ausführung laufender Operationen unter verstärkter Vor-Ort-Aufsicht. Live-Telemetrie erhalten für Forensik.",
+                    "evaluationHints": [
+                      "Segmentierte OT-Isolation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-full-ems-off",
+                    "label": "EMS komplett abschalten, alle Umspannwerke auf manuelle Fahrweise",
+                    "consequence": "Angriffsfläche sofort weg, aber Netzbeobachtbarkeit verloren. Fehlerrate bei manueller Fahrweise steigt. Nur tragbar bei etablierten manuellen Betriebsverfahren.",
+                    "evaluationHints": [
+                      "Aggressive Isolation mit Beobachtbarkeits-Verlust"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-operations-netzstabilitaet",
+                  "en-crit-operations-fallback"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "en-inj-krisenstab-active",
+                "title": "Krisenstab konstituiert",
+                "description": "Krisenstabs-Leitung hat Geschäftsführung, CISO, OT-Leitung, Leitwarte, Schutztechnik, Externe Kommunikation, Rechtsabteilung aktiviert. Out-of-Band-Kommunikation (Mobilfunk-Gruppe) bestätigt, da Unsicherheit über Integrität interner Telefonanlage besteht.",
+                "roleId": "role-en-krisenstab"
+              },
+              {
+                "id": "en-inj-uenb-coordination",
+                "title": "Nachbar-ÜNB meldet sich",
+                "description": "Benachbarter Übertragungsnetzbetreiber (Regelzonen-Nachbar) fragt an, ob bei uns ein Cyber-Vorfall vorliegt — sie sehen Anomalien an unserer Regelzonengrenze. Forderung: Transparenz zur Aufrechterhaltung der Systembalance nach § 13 EnWG.",
+                "roleId": "role-en-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-uenb-disclosure",
+                "question": "Wie viel wird dem Nachbar-ÜNB sofort offengelegt?",
+                "roleId": "role-en-krisenstab",
+                "guidance": "§ 17 KRITISDachG-Unterrichtungspflicht greift bei Regelzonen-übergreifender Auswirkung. Vollständige Offenlegung unterstützt Systembalance, aber Details zu IOCs/TTPs könnten bei Fehl-Forwarding zum Angreifer zurückfließen (sehr unwahrscheinlich, aber denkbar). Zurückhaltende Meldung = Systemrisiko durch Koordinations-Unsicherheit.",
+                "options": [
+                  {
+                    "id": "en-opt-full-uenb",
+                    "label": "Vollständige Offenlegung an Nachbar-ÜNB: bestätigter Cyber-Vorfall, Art, bisherige Maßnahmen",
+                    "consequence": "Systembalance-Koordination möglich, Vertrauen zwischen ÜNB erhalten. § 17-Pflicht eingehalten.",
+                    "evaluationHints": [
+                      "Transparente ÜNB-Koordination"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-minimal-uenb",
+                    "label": "Minimal-Information: 'Störung, prüfen noch'",
+                    "consequence": "Nachbar-ÜNB reagiert unsicher, potenziell mit eigenen Schutzmaßnahmen. Koordinations-Lücke. § 17-Pflicht formal nicht erfüllt.",
+                    "evaluationHints": [
+                      "Unzureichende ÜNB-Unterrichtung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-communication-uenb",
+                  "en-crit-reporting-section-17"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "en-inj-local-operation",
+                "title": "Lokale Bedienung aktiviert",
+                "description": "In 6 kritischen Umspannwerken ist Stationsmeister vor Ort. Manuelle Schalthandlungen erfolgen nur nach Schaltbuch + Telefonfreigabe durch Leitwarte (Out-of-Band). Bedien-Durchsatz deutlich reduziert, aber physikalische Wirklichkeit kontrolliert.",
+                "roleId": "role-en-leitwarte"
+              },
+              {
+                "id": "en-inj-load-imbalance",
+                "title": "Lastflussveränderung",
+                "description": "Regelzonen-Bilanz verschiebt sich durch Redispatch-Verzögerung. Sekundärregelung wird stärker belastet. Gefahr: Wenn das so über > 1 h läuft, Grenzwerte für Frequenzhaltung.",
+                "roleId": "role-en-leitwarte"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-schutztechnik-check",
+                "question": "Werden die Schutzrelais einzeln auf Integrität geprüft?",
+                "roleId": "role-en-schutztechnik",
+                "guidance": "Industroyer-Klasse greift Safety-Layer an. Wenn Schutzrelais kompromittiert sind, kann bei Fehlerfall der Schutzmechanismus versagen oder falsch auslösen — mögliche Folgeschäden an Trafos oder Kaskadenauslösung. IEC 62443-getrennte Safety-Layer sollten nicht betroffen sein, aber Nachweis nötig.",
+                "options": [
+                  {
+                    "id": "en-opt-full-relay-audit",
+                    "label": "Sofortige Audit-Runde aller Safety-PLCs mit Hash-Vergleich gegen Herstellersignatur",
+                    "consequence": "3–6 h Aufwand pro Umspannwerk. Am Ende gesicherter Safety-Layer-Zustand. Konform zu IEC 61511-Sicherheitsvorgaben.",
+                    "evaluationHints": [
+                      "Umfassende Safety-Layer-Verifikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-selective-audit",
+                    "label": "Stichprobenartige Prüfung nur der Schutzrelais mit Fernwirk-Zugriff",
+                    "consequence": "Schneller, aber Lücken bleiben. Bei Industroyer-Klasse reicht selektive Prüfung nicht aus — die Malware zielt gezielt auf bestimmte Relais-Typen.",
+                    "evaluationHints": [
+                      "Unzureichende Safety-Prüfung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-operations-netzstabilitaet"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "en-inj-bsi-notification",
+                "title": "BSI-Meldeportal-Kontakt",
+                "description": "CISO hat Erstmeldung nach § 8b BSIG (Cyber-Vorfall) und § 16 KRITISDachG (physische Systemverantwortung) eingereicht. BSI-CERT bietet Koordination über den UP-KRITIS-Kanal an. Rückfrage: Können IOCs an andere Energieversorger weitergegeben werden?",
+                "roleId": "role-en-ciso"
+              },
+              {
+                "id": "en-inj-bnetza-meldung",
+                "title": "BNetzA-Fachaufsicht eingeschaltet",
+                "description": "Meldung nach § 11 EnWG IT-Sicherheitskatalog an die BNetzA. Die BNetzA prüft, ob der Vorfall die Schwelle für eine Eskalation nach EnWG § 11 Abs. 1f (Sonderprüfung) erfüllt.",
+                "roleId": "role-en-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-ioc-sharing",
+                "question": "Werden IOCs über UP-KRITIS an andere Energieversorger geteilt?",
+                "roleId": "role-en-ciso",
+                "guidance": "IOC-Sharing schützt Sektor-Peers vor demselben Angriff. Enthüllt aber Detail-Info, die Medien aufgreifen könnten. UP-KRITIS ist vertraulicher Kanal, aber Leak-Risiko nicht null.",
+                "options": [
+                  {
+                    "id": "en-opt-share-iocs",
+                    "label": "Vollständiges IOC-Sharing (Hashes, C2-Indikatoren, TTPs) über UP-KRITIS",
+                    "consequence": "Sektor-Schutz verbessert. Signalwirkung an BSI und Aufsicht gut. Leak-Risiko kalkulierbar.",
+                    "evaluationHints": [
+                      "Pro-aktives Sektor-IOC-Sharing"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-share-later",
+                    "label": "IOC-Sharing erst nach Abschluss der internen Forensik (voraussichtlich 72 h)",
+                    "consequence": "Eigene Faktenbasis robust. Aber in 72 h können Sektor-Peers bereits erfolgreich angegriffen werden. Opportunity Cost.",
+                    "evaluationHints": [
+                      "Verzögertes Sharing"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-communication-uenb",
+                  "en-crit-reporting-bsi-frist"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 105,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "en-inj-bnetza-briefing",
+                "title": "BNetzA fordert technisches Briefing",
+                "description": "Die Bundesnetzagentur als Fachaufsicht nach § 11 EnWG IT-Sicherheitskatalog fordert ein strukturiertes Briefing. Die BNetzA koordiniert zunehmend die Konsolidierung zuständiger Energie-Aufsichtsbehörden und erwartet technische Tiefe — nicht nur formale Pflichtmeldung.",
+                "roleId": "role-en-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-bnetza-briefing",
+                "question": "In welchem Umfang erfolgt das BNetzA-Briefing?",
+                "roleId": "role-en-externe-komm",
+                "guidance": "Die BNetzA ist bei Energie-Cyber-Vorfällen operativ eng eingebunden. Volles proaktives Briefing schafft Vertrauen und bindet die BNetzA als Unterstützer bei Fachfragen. Formal-Minimum erfüllt die Rechtspflicht, überlässt aber der BNetzA nur rudimentäre Faktenbasis — das kann zu Nachfragen und formalen Eskalationen führen.",
+                "options": [
+                  {
+                    "id": "en-opt-full-bnetza",
+                    "label": "Volles proaktives Briefing: Technik-Details (SCADA-Impact, betroffene Regelzonen), laufende Impact-Analyse, Wiederherstellungs-Roadmap mit Zeitplan",
+                    "consequence": "BNetzA hat belastbare Faktenbasis, kann UP-KRITIS-Kanäle effizient bespielen. Ressourcen-Aufwand ca. 3–4 h Abstimmungsarbeit zusätzlich.",
+                    "evaluationHints": [
+                      "Volles proaktives BNetzA-Briefing"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "en-opt-minimal-bnetza",
+                    "label": "Formal-Minimum: gesetzliche Meldepflicht erfüllt, weitere Informationen auf Nachfrage",
+                    "consequence": "Pflicht formal erfüllt, aber BNetzA kann bei Nachfragen oder Eskalation nur auf lückenhafter Faktenbasis agieren. Erhöhtes Risiko späterer Sonderprüfung nach § 11 Abs. 1f EnWG.",
+                    "evaluationHints": [
+                      "Formal-Minimum mit Nachfragen-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-reporting-bsi-frist",
+                  "en-crit-communication-uenb"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "en-inj-forensik-confirmed",
+                "title": "Forensik bestätigt Angriff",
+                "description": "Externer IR-Dienstleister hat die Industroyer-Klassifikation bestätigt. Eindringweg: Phishing-Mail an OT-Administrator vor 21 Tagen, gefolgt von Credential-Ausnutzung und seitlicher Bewegung über gemeinsam genutzten Fileshare zwischen IT und OT (keine saubere IT/OT-Segmentierung). Angreifer ordnet sich einer bekannten staatsnahen APT zu.",
+                "roleId": "role-en-ciso"
+              },
+              {
+                "id": "en-inj-config-backup",
+                "title": "Netzplan-Backup vorhanden",
+                "description": "IT-Leitung bestätigt: Offline-Backup der EMS-Konfiguration und Topologie vom Vortag (Differenz 18 Stunden). Wiederherstellung in saubere EMS-Instanz technisch möglich, erfordert 4–6 h Downtime mit lokaler Bedienung.",
+                "roleId": "role-en-ot-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-ems-rebuild",
+                "question": "EMS aus Backup wiederherstellen oder Parallel-Neuaufbau mit weiterer Forensik?",
+                "roleId": "role-en-krisenstab",
+                "guidance": "Backup-Restore bringt schnelle Rückkehr zur Netzbeobachtbarkeit, aber möglicherweise infizierte Komponenten in geringer Tiefe. Parallel-Neuaufbau gibt höhere Sicherheit, dauert aber 3–5 Tage mit anhaltender lokaler Bedienung.",
+                "options": [
+                  {
+                    "id": "en-opt-parallel-rebuild",
+                    "label": "Parallel-Neuaufbau auf neuer Hardware mit neuer Netzwerksegmentierung",
+                    "consequence": "3–5 Tage lokale Bedienung, Lastmanagement sehr aufwändig, aber am Ende sauber. Nachhaltigste Lösung.",
+                    "evaluationHints": [
+                      "Saubere Neuaufbau-Strategie"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-backup-restore",
+                    "label": "Backup-Restore auf bestehender Hardware, anschließend Monitoring-verstärkt",
+                    "consequence": "4–6 h Downtime, dann Normalbetrieb. Restrisiko für tiefer sitzende Persistenz.",
+                    "evaluationHints": [
+                      "Schnelle Wiederherstellung mit Restrisiko"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-operations-fallback"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "en-inj-ransom-demand",
+                "title": "Ransomforderung mit Safety-Drohung",
+                "description": "Über verschlüsselten Kanal erreicht eine Forderung die Geschäftsführung: 15 Mio. Euro in Krypto — andernfalls würden mehrere Großtransformatoren über manipulierte Schutzrelais beim nächsten Fehlerfall fehlgeleitet und zerstört werden. Die Drohung enthält belastbare technische Details (Schutzparameter, Staffelpläne, Substation-IDs), die nur Insider oder erfolgreicher Angreifer kennen kann — was die Safety-Drohung operativ ernst nimmt. Zugleich folgt damit ein klarer Attributions-Hinweis auf einen staatsnahen Angreifer mit Sandworm-Ausrichtung.",
+                "roleId": "role-en-ciso"
+              },
+              {
+                "id": "en-inj-lka-no-pay",
+                "title": "BKA/LKA empfiehlt eindringlich, nicht zu zahlen",
+                "description": "Zentrale Ansprechstelle Cybercrime: Zahlung finanziert weitere Angriffe auf europäische KRITIS-Infrastruktur. Bei staatsnahen Gruppen drohen strafrechtliche Risiken nach § 89c StGB (Terrorismusfinanzierung) für die Geschäftsführung persönlich. Empfehlung: Kein Zahlungsdialog, Forensik intensivieren, Safety-Layer-Audit forcieren, parallel defensive Trafo-Schutz-Reparametrierung vor Ort durchführen.",
+                "roleId": "role-en-rechtsabteilung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-ransom-en",
+                "question": "Wird die Forderung beantwortet?",
+                "roleId": "role-en-krisenstab",
+                "guidance": "Der Fall bringt zwei fundamentale Dimensionen in Konflikt: (1) OPERATIV DRINGEND — die Safety-Drohung auf Schutzrelais ist keine leere Drohung, sondern reale Gefahr für Trafo-Zerstörung oder Personenschaden; das Patientensicherheits-Äquivalent im Energie-Kontext sind die Folgen großflächiger Stromausfälle (Krankenhäuser im Notstrom, Wasserversorgung, Kühlketten). (2) RECHTLICH UNZULÄSSIG — bei staatsnahen Angreifern (Sandworm-Attribution) droht § 89c StGB als persönliches strafrechtliches Risiko für die Geschäftsführung, zusätzlich zur Finanzierung weiterer KRITIS-Angriffe. Die Abwägung ist ethisch schwer, rechtlich aber klar: Zahlung ist nicht zulässig. Die Mitigation der Safety-Drohung erfolgt technisch über Safety-Layer-Audit und defensive Reparametrierung, nicht über Zahlung.",
+                "options": [
+                  {
+                    "id": "en-opt-no-pay-en",
+                    "label": "Keine Zahlung, Safety-Layer-Audit forcieren, BSI/LKA-koordinierte Forensik",
+                    "consequence": "Konformität mit BSI-/LKA-Empfehlung. Trafo-Risiko wird durch Audit-Tiefe und Safety-Relais-Neu-Parametrierung adressiert. Kostenintensiv, aber regelkonform.",
+                    "evaluationHints": [
+                      "Keine Zahlung, regelkonform"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "en-opt-pay-en",
+                    "label": "Zahlung nach Rechtsprüfung (bei nachgewiesener Safety-Bedrohung)",
+                    "consequence": "Keine Garantie, dass Angreifer die Manipulation zurücknimmt. Finanzierung weiterer Angriffe auf KRITIS. Strafrechtliche Risiken.",
+                    "evaluationHints": [
+                      "Diskutierbar mit erheblichen Folgeproblemen"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 160,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "en-inj-press-political",
+                "title": "Politisch sensible Medienlage",
+                "description": "Handelsblatt, WirtschaftsWoche und Spiegel fragen nach. Parallel eine Anfrage aus dem Landtag: Sicherheit der Energieversorgung. Die Presseabteilung drängt auf schnelle Kommunikationslinie.",
+                "roleId": "role-en-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-press-en",
+                "question": "Wann und wie wird extern kommuniziert?",
+                "roleId": "role-en-externe-komm",
+                "guidance": "Energieversorger-Cyber = politisch hochsensibel. Schweigen erzeugt Spekulation. Zu frühe Details liefern Angreifern Informationen.",
+                "options": [
+                  {
+                    "id": "en-opt-early-comm-en",
+                    "label": "Pressemitteilung sofort: bestätigter IT-Sicherheitsvorfall, Versorgung sichergestellt, BSI eingebunden",
+                    "consequence": "Narrativ unter Kontrolle, politische Nachfragen adressiert. Gefahr: frühe Faktenlage muss ggf. korrigiert werden.",
+                    "evaluationHints": [
+                      "Frühe kontrollierte Kommunikation — Good Practice"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "en-opt-late-comm-en",
+                    "label": "Pressemitteilung erst nach BSI-/BNetzA-Abstimmung (ca. 24 h)",
+                    "consequence": "Faktenbasis robust, Abstimmung mit Aufsichtsbehörden eng. Zwischenzeit von Spekulationen überlagert.",
+                    "evaluationHints": [
+                      "Späte, behördlich abgestimmte Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-communication-presse"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 175,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "en-inj-rebuild-prio",
+                "title": "Wiederanlauf-Priorisierung",
+                "description": "OT-Leitung schlägt vor: Priorität 1 EMS-Lesemodus auf sauberer Hardware (für Netzbeobachtbarkeit), Priorität 2 Engineering-Workstations mit striktem Audit, Priorität 3 Schreib-Operationen mit Dual-Approval-Wiederherstellung. Zeitplan: 24 h / 72 h / 7 Tage.",
+                "roleId": "role-en-ot-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-dec-rebuild-order",
+                "question": "Wird die vorgeschlagene Priorisierung übernommen?",
+                "roleId": "role-en-krisenstab",
+                "guidance": "Netzbeobachtbarkeit zuerst entspricht Best-Practice. Alternative: Zuerst Schreib-Operationen für Fern-Schalthandlungen wieder herstellen (reduziert Personal-Belastung lokaler Bedienung), aber erhöht Residual-Risiko.",
+                "options": [
+                  {
+                    "id": "en-opt-follow-plan",
+                    "label": "Vorgeschlagene Priorisierung (Lesen → Engineering → Schreiben) freigeben",
+                    "consequence": "Netzbeobachtbarkeit schnell zurück, Personal-Belastung lokaler Bedienung bleibt. Systematischer Wiederanlauf.",
+                    "evaluationHints": [
+                      "Sicherheits-priorisierte Wiederanlauf-Ordnung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-opt-write-first",
+                    "label": "Schreib-Operationen früher freigeben, um lokale Bedienung zu entlasten",
+                    "consequence": "Personal-Druck sinkt schneller. Restrisiko für übersehene Kompromittierung in Schreib-Pfaden.",
+                    "evaluationHints": [
+                      "Verfügbarkeits-priorisierte Ordnung mit Restrisiko"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-crit-operations-fallback"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 180,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "en-inj-retro-en",
+                "title": "Retro-Kickoff",
+                "description": "Szenario-Ende. Krisenstab schließt die Übung: Was lief gut, was muss verbessert werden? Besonders: IT/OT-Segmentierung (Fileshare), MFA auf OT-Admin-Konten, UP-KRITIS-IOC-Sharing-Vereinbarungen, Safety-Layer-Audit-Intervall.",
+                "roleId": "role-en-krisenstab"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "en-crit-reporting-bsi-frist",
+            "description": "BSI-Meldung innerhalb 24 h nach § 8b BSIG / § 16 KRITISDachG, BNetzA-Meldung nach § 11 EnWG",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "en-crit-reporting-section-17",
+            "description": "§ 17 KRITISDachG-Unterrichtung an Nachbar-ÜNB und andere betroffene Energieversorger",
+            "weight": 1.5,
+            "category": "reporting"
+          },
+          {
+            "id": "en-crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur, OT-spezifische Rollenklarheit, Out-of-Band-Kommunikation",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "en-crit-operations-netzstabilitaet",
+            "description": "Netzstabilität während OT-Isolation gewahrt (Frequenz, Lastfluss, Regelzonen-Bilanz)",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "en-crit-operations-fallback",
+            "description": "Fallback auf lokale Bedienung und manuelle Fahrweise funktional",
+            "weight": 1.5,
+            "category": "operations"
+          },
+          {
+            "id": "en-crit-communication-uenb",
+            "description": "Koordination mit Nachbar-ÜNB und UP-KRITIS-Peer-Kommunikation",
+            "weight": 1.5,
+            "category": "communication"
+          },
+          {
+            "id": "en-crit-communication-presse",
+            "description": "Externe Kommunikation (Presse, Politik, Kund*innen) unter politischer Sensibilität",
+            "weight": 1,
+            "category": "communication"
+          }
+        ]
+      },
+      {
+        "id": "tabletop-energy-blackout-cascade",
+        "version": "1.0.0",
+        "title": "Großflächiger Blackout mit Kaskadenausfall",
+        "summary": "Unerwartete Abschaltung einer Nord-Süd-Fernleitung löst in Verbindung mit einer Dunkelflaute eine Kaskadenschaltung aus. Mehrere Teilnetze fallen gleichzeitig aus, Regelzonen-Synchronisation nicht mehr gewährleistet. Das Szenario simuliert 150 Minuten Response mit Fokus auf Schwarzstart-Koordination, Priorisierung kritischer Verbraucher (KRITIS-Kreuzabhängigkeit), § 13 EnWG-Systemverantwortung und § 16 KRITISDachG-Meldung an BBK. Referenz-Kontext: Europäische Netzaufspaltungen 2006 und 2021, Schwarzstart-Leitfäden der ENTSO-E.",
+        "sectors": [
+          "Energie"
+        ],
+        "applicableRegimes": [
+          "KRITISDachG",
+          "EnWG"
+        ],
+        "durationMinutes": 150,
+        "roles": [
+          {
+            "id": "role-en-bo-krisenstab",
+            "title": "Krisenstabs-Leitung",
+            "briefing": "Gesamtkoordination. Strategische Entscheidungen zur Regelzonen-Rekonstruktion, Wiederzuschaltungs-Priorisierung, externer Eskalation (BBK, andere ÜNB, Landes-Krisenstäbe)."
+          },
+          {
+            "id": "role-en-bo-leitwarte",
+            "title": "Leitwarten-Leitung",
+            "briefing": "Operative Netzführung. Koordiniert Schwarzstart-Kraftwerke, Lastabwurf-Stufen, Rückkehr zur Synchronisation mit Nachbar-Regelzonen. Entscheidet Schaltfolgen gemeinsam mit Systemführung."
+          },
+          {
+            "id": "role-en-bo-blackstart",
+            "title": "Schwarzstart-Koordination",
+            "briefing": "Technische Führung des Schwarzstart-Prozesses. Aktiviert vordefinierte Schwarzstart-Kraftwerke (pumpspeicherbar, Wasserkraft, kleine Diesel-BHKW), koordiniert Inselnetz-Aufbau, Integration ins UCTE-Verbundnetz."
+          },
+          {
+            "id": "role-en-bo-lastverteilung",
+            "title": "Lastverteilung / Priorisierung kritischer Verbraucher",
+            "briefing": "Priorisierung der Wiederzuschaltung: KRITIS-Einrichtungen (Krankenhäuser, Wasserwerke, Telekommunikations-Knoten, andere Energieversorger) zuerst, dann Haushalte und Gewerbe nach Lastmanagement-Stufen."
+          },
+          {
+            "id": "role-en-bo-externe-komm",
+            "title": "Externe Kommunikation (BBK, ÜNB, Landes-Krisenstab)",
+            "briefing": "Schnittstelle zu BBK (§ 16 KRITISDachG-Meldung), Landes-Krisenstäben (Katastrophenschutz), Nachbar-ÜNB (Synchronisations-Koordination), Medien. Out-of-Band-Kommunikation, da Telefonanlagen teilweise abhängig von Strom."
+          },
+          {
+            "id": "role-en-bo-anlagen",
+            "title": "Anlagen- und Stationsverantwortung",
+            "briefing": "Technische Verantwortung für kritische Anlagen (Schaltanlagen, Großtransformatoren, Umspannwerke). Steuert Vor-Ort-Ressourcen für Schalthandlungen, Einsatz mobiler Einspeisungen (Netzersatz-Aggregate)."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "en-bo-inj-frequency-drop",
+                "title": "Frequenzabweichung detektiert",
+                "description": "Systemfrequenz sinkt innerhalb 12 Sekunden von 50,00 Hz auf 49,85 Hz. Automatische Lastabwurfstufe 49,8 Hz steht bevor. Parallel lösen mehrere Schutzrelais an Nord-Süd-Leitungen aus.",
+                "roleId": "role-en-bo-leitwarte"
+              },
+              {
+                "id": "en-bo-inj-dunkelflaute",
+                "title": "Dunkelflaute-Bedingung",
+                "description": "Wetterbild: Seit 48 h Dunkelflaute (< 5 % Wind-/Solar-Einspeisung). Residuallast wurde aus Gas-/Kohlekraftwerken und Nord-Süd-Leitungen gedeckt. Mit Leitungs-Ausfall bricht dieses Netz-Equilibrium zusammen.",
+                "roleId": "role-en-bo-lastverteilung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-initial-alert",
+                "question": "Wie wird die Lage initial priorisiert?",
+                "roleId": "role-en-bo-krisenstab",
+                "guidance": "Schwarzstart-Aktivierung ist eine Großentscheidung mit Kosten und Impact. Zu früh = unnötige Eingriffe; zu spät = Kaskade nicht mehr zu stoppen. Ab 49,8 Hz greift automatischer Lastabwurf.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-early-activation",
+                    "label": "Schwarzstart-Koordination sofort aktivieren, Nachbar-ÜNB informieren",
+                    "consequence": "Vorbereitung der Schwarzstart-Kraftwerke beginnt, Zeit gewonnen. Falls Lage sich stabilisiert, waren die Vorbereitungen Trocken-Übung.",
+                    "evaluationHints": [
+                      "Proaktive Schwarzstart-Vorbereitung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-wait-stabilize",
+                    "label": "Erst Stabilisierung abwarten, nur Sekundärregelung maximieren",
+                    "consequence": "Bei Kaskadenfortsetzung Zeitverlust von 10–20 min für die Schwarzstart-Aktivierung. Risiko, dass einzelne Regelzonen zu spät eingreifen können.",
+                    "evaluationHints": [
+                      "Reaktive Strategie mit Zeitverlustrisiko"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-blackstart"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "en-bo-inj-grid-split",
+                "title": "Bestätigte Netzaufspaltung",
+                "description": "Systemfrequenz bei 49,6 Hz, automatischer Lastabwurf Stufe 1 hat ausgelöst. Mehrere Teilnetze sind nicht mehr synchron. Bestätigung: Netzaufspaltung in drei Cluster.",
+                "roleId": "role-en-bo-leitwarte"
+              },
+              {
+                "id": "en-bo-inj-adjacent-tso",
+                "title": "Nachbar-ÜNB meldet Systembalance-Problem",
+                "description": "Regelzonen-Nachbar berichtet: Bilanzkreise können nicht mehr korrekt geführt werden. Export- und Import-Schaltungen sind inkonsistent. Synchronisations-Punkte müssen neu verhandelt werden.",
+                "roleId": "role-en-bo-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-load-shed-strategy",
+                "question": "Welche Lastabwurf-Strategie wird aktiviert?",
+                "roleId": "role-en-bo-lastverteilung",
+                "guidance": "Manueller Zusatz-Lastabwurf über den automatischen hinaus kann Kaskadenausdehnung stoppen. Trifft aber große Verbraucher — KRITIS-Betreiber können bei Schutzwürdigkeits-Klassifizierung ausgenommen werden.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-prio-load-shed",
+                    "label": "Manueller Lastabwurf mit KRITIS-Priorisierung: Haushalte/Gewerbe zuerst, KRITIS-Verbraucher geschützt",
+                    "consequence": "Kaskade gestoppt. KRITIS-Versorgung weitgehend erhalten. Politische Kommunikation mit Landes-Krisenstäben nötig.",
+                    "evaluationHints": [
+                      "KRITIS-priorisierter Lastabwurf"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-uniform-shed",
+                    "label": "Uniformer Lastabwurf ohne KRITIS-Priorisierung",
+                    "consequence": "Einfacher umzusetzen, aber KRITIS-Versorgung teilweise betroffen (u. a. Krankenhäuser, Telekommunikation). Eskalations-Risiko durch KRITIS-Sekundärwirkungen.",
+                    "evaluationHints": [
+                      "Fehlende KRITIS-Priorisierung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-priorisierung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "en-bo-inj-krisenstab-full",
+                "title": "Krisenstab voll besetzt",
+                "description": "Krisenstab mit Schwarzstart-Koordination, Leitwarte, Lastverteilung, Externe Kommunikation, Anlagen- und Stationsverantwortung aktiv. Mobilfunk-Out-of-Band-Gruppe bestätigt. Lagebild wird stündlich aktualisiert.",
+                "roleId": "role-en-bo-krisenstab"
+              },
+              {
+                "id": "en-bo-inj-pumpspeicher",
+                "title": "Schwarzstart-Kraftwerk Pumpspeicher verfügbar",
+                "description": "Pumpspeicherkraftwerk Goldisthal meldet: Schwarzstart-Bereitschaft, Anfahrtszeit 8 min. Anschluss an Teilnetz-Insel möglich, Aufbau Inselnetz mit 180 MW Lastaufnahme.",
+                "roleId": "role-en-bo-blackstart"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-pumpspeicher",
+                "question": "Wird Goldisthal aktiviert?",
+                "roleId": "role-en-bo-blackstart",
+                "guidance": "Schwarzstart über Pumpspeicher ist der bewährte Pfad. Alternativ: Warten auf weitere Kraftwerke mit Schwarzstart-Fähigkeit (Zeitverlust).",
+                "options": [
+                  {
+                    "id": "en-bo-opt-start-goldisthal",
+                    "label": "Goldisthal sofort aktivieren, Inselnetz aufbauen",
+                    "consequence": "180 MW verfügbar nach 8 min. Erstes Inselnetz synchronisationsfähig. Bewährter Standard-Pfad.",
+                    "evaluationHints": [
+                      "Standard-Schwarzstart-Aktivierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-wait-more",
+                    "label": "Aktivierung erst nach Koordination mit Nachbar-ÜNB (ca. 15 min Verzögerung)",
+                    "consequence": "Bessere Synchronisation, aber Zeitverlust kann Kaskade verlängern.",
+                    "evaluationHints": [
+                      "Zu vorsichtige Aktivierung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-blackstart"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 45,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "en-bo-inj-hospitals-alert",
+                "title": "Krankenhäuser melden Notstrombetrieb",
+                "description": "Mehrere Krankenhäuser in der Region melden Umschaltung auf Notstrom. Dieselbevorratung für 48–72 h, aber besorgt wegen Nachlieferung bei flächiger Krise.",
+                "roleId": "role-en-bo-lastverteilung"
+              },
+              {
+                "id": "en-bo-inj-water-treatment",
+                "title": "Wasserwerke in Gefahr",
+                "description": "Wasserversorger meldet: Einzelne Pump- und Aufbereitungsanlagen ohne Notstrom. Bei > 4 h Ausfall Trinkwasserversorgung in zwei Stadtteilen gefährdet.",
+                "roleId": "role-en-bo-lastverteilung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-kritis-prio",
+                "question": "Welche KRITIS-Sektoren werden bei Wiederzuschaltung zuerst bedient?",
+                "roleId": "role-en-bo-krisenstab",
+                "guidance": "Abstimmung mit Landes-Krisenstäben ist Pflicht. Reihenfolge-Varianten: Krankenhaus > Wasser > Telekommunikation, oder Wasser > Krankenhaus > Telekommunikation, oder paralleler Aufbau mehrerer KRITIS-Inseln.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-parallel-kritis",
+                    "label": "Parallele KRITIS-Inseln aufbauen (Krankenhaus, Wasser, Telekommunikation zeitgleich)",
+                    "consequence": "Ressourcen-intensiv (mehrere Schaltfolgen gleichzeitig), aber alle KRITIS-Sektoren schnell versorgt.",
+                    "evaluationHints": [
+                      "Paralleler KRITIS-Wiederaufbau"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-sequential-kritis",
+                    "label": "Sequenzielle Reihenfolge nach interner Priorisierungsliste",
+                    "consequence": "Klare Reihenfolge, überschaubare Schalthandlungen. Die später bedienten Sektoren haben längere Ausfallzeit.",
+                    "evaluationHints": [
+                      "Sequenzielle KRITIS-Priorisierung"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-priorisierung",
+                  "en-bo-crit-communication-extern"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 75,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "en-bo-inj-comms-partial",
+                "title": "Kommunikationsausfall teilweise",
+                "description": "BOS-Funk und Festnetz in den betroffenen Regionen teilweise ausgefallen. Mobilfunk funktioniert nur in Bereichen mit Batteriestütze > 4 h. Kommunikation mit Stationen erschwert.",
+                "roleId": "role-en-bo-externe-komm"
+              },
+              {
+                "id": "en-bo-inj-cross-sector",
+                "title": "Kreuz-Sektor-Kaskaden sichtbar",
+                "description": "Wasser-Versorger bestätigt: drei Pumpstationen ohne Notstrom, Versorgung in Teilgebieten eingestellt. Mobilfunk-Provider meldet Ausfall mehrerer Basisstationen. Straßenverkehr stockt (Ampelausfall).",
+                "roleId": "role-en-bo-lastverteilung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-mobile-gen",
+                "question": "Werden mobile Notstromaggregate priorisiert eingesetzt?",
+                "roleId": "role-en-bo-anlagen",
+                "guidance": "Mobile Einspeisungen sind begrenzt (Bestand eigener Betrieb + Partnerunternehmen). Einsatz an Wasserwerken schneller Wirkungs-Impact. Einsatz an Umspannwerken bessere Netz-Systemwirkung.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-mobile-kritis",
+                    "label": "Mobile Einspeisungen prioritär an KRITIS-Wasserwerke",
+                    "consequence": "Sofortige Stabilisierung Wasserversorgung. Netz-Systemaufbau etwas verzögert.",
+                    "evaluationHints": [
+                      "Konkrete KRITIS-Hilfe"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-mobile-substation",
+                    "label": "Mobile Einspeisungen an Umspannwerke für Netzaufbau",
+                    "consequence": "Systemwirkung stärker, aber KRITIS-Wasser noch länger kritisch.",
+                    "evaluationHints": [
+                      "Netz-Systemwirkung priorisiert"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-priorisierung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 105,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "en-bo-inj-reconnect-progress",
+                "title": "Wiederzuschaltung im Gang",
+                "description": "Erste Inselnetze sind stabil: Pumpspeicher-gespeiste Insel (120 MW), mit mehreren KRITIS-Verbrauchern synchronisiert. Zweite Insel in Vorbereitung (Gas-Kraftwerk Anfahrt).",
+                "roleId": "role-en-bo-leitwarte"
+              },
+              {
+                "id": "en-bo-inj-uenb-synch",
+                "title": "Nachbar-ÜNB-Synchronisations-Gespräch",
+                "description": "Nachbar-ÜNB fragt: Ab wann ist Synchronisations-Resynchronisation möglich? Gemeinsame Schaltfolge nötig, Phasenlage muss abgestimmt werden.",
+                "roleId": "role-en-bo-externe-komm"
+              },
+              {
+                "id": "en-bo-inj-cross-sector-impact",
+                "title": "Kaskade berührt weitere KRITIS-Sektoren",
+                "description": "Rechtsabteilung fasst zusammen: Der Blackout wirkt kaskadierend auf Wasser (Pumpenausfall in drei Stadtteilen), Telekommunikation (Basisstations-Batterien entladen), Gesundheit (Notstrom in mehreren Kliniken), Transport (Ampel- und Signaltechnik). § 17 KRITIS-Dachgesetz verpflichtet zur aktiven Unterrichtung anderer betroffener KRITIS-Betreiber — klassischer Anwendungsfall für Kreuzsektor-Kaskade.",
+                "roleId": "role-en-bo-externe-komm"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-synchronize",
+                "question": "Wann wird Resynchronisation mit Nachbar-ÜNB versucht?",
+                "roleId": "role-en-bo-blackstart",
+                "guidance": "Resynchronisation braucht Phasengleichheit und stabile Frequenz. Zu früher Versuch = erneuter Kaskadenausfall. Standard: 30 min Stabilisierung vor Synchronisation.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-standard-synch",
+                    "label": "Standard-Protokoll: 30 min Inselnetz-Stabilisierung, dann Resynchronisation",
+                    "consequence": "Bewährter Pfad, Risiko erneuter Kaskade niedrig.",
+                    "evaluationHints": [
+                      "Standard-Synchronisations-Protokoll"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-quick-synch",
+                    "label": "Schnelle Resynchronisation nach 10 min zur Abkürzung der Blackout-Dauer",
+                    "consequence": "Potenziell Zeitersparnis. Bei instabiler Insel erneuter Kaskadenausfall möglich.",
+                    "evaluationHints": [
+                      "Risikoreiche Beschleunigung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-blackstart",
+                  "en-bo-crit-communication-uenb"
+                ]
+              },
+              {
+                "id": "en-bo-dec-section-17-cross-sector",
+                "question": "Wie breit erfolgt die § 17 KRITIS-Dachgesetz-Unterrichtung anderer KRITIS-Sektoren?",
+                "roleId": "role-en-bo-externe-komm",
+                "guidance": "Kaskadierende Blackouts über Sektorgrenzen sind der prototypische Anwendungsfall von § 17 KRITISDachG. Volle Kreuzsektor-Unterrichtung maximiert Cross-Sector-Resilienz, erzeugt aber Koordinations-Overhead und kann in akuter Lage Ressourcen binden. Minimale Unterrichtung reduziert den Overhead, birgt aber Residualrisiken — nicht direkt adjazente Sektoren könnten Folgewirkungen unterschätzen.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-full-cross-sector",
+                    "label": "Volle Kreuzsektor-Unterrichtung aller betroffenen KRITIS-Sektoren (Wasser, Telekommunikation, Gesundheit, Transport) sowie der koordinierenden BBK-/Landes-Krisenstäbe",
+                    "consequence": "Maximale Cross-Sector-Transparenz. Koordinations-Ressourcen (1–2 Personen über 2 h) gebunden. § 17-Pflicht robust eingehalten.",
+                    "evaluationHints": [
+                      "Volle Kreuzsektor-Unterrichtung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "en-bo-opt-minimal-cross-sector",
+                    "label": "Minimale Unterrichtung nur direkt adjazenter Sektoren (Wasser, Telekommunikation)",
+                    "consequence": "Ressourcen-schonend, § 17-Mindestanforderung erfüllt. Gesundheits- und Transport-Sektoren erhalten Information erst mit Verzögerung oder über Umwege.",
+                    "evaluationHints": [
+                      "Minimale Kreuzsektor-Unterrichtung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-communication-extern",
+                  "en-bo-crit-reporting-bbk"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "en-bo-inj-bbk-meldung",
+                "title": "BBK-Lagebild-Anforderung",
+                "description": "BBK über BSI-Meldeportal: § 16 KRITISDachG-Meldung innerhalb 24 h ist fällig. Bitte um strukturiertes Lagebild mit Schadensausmaß, laufenden Maßnahmen, voraussichtlicher Wiederherstellungs-Dauer.",
+                "roleId": "role-en-bo-externe-komm"
+              },
+              {
+                "id": "en-bo-inj-press-political",
+                "title": "Politischer Druck",
+                "description": "Ministerpräsident/Ministerin hat sich eingeschaltet. Forderung nach Lagezentrum-Einrichtung, Medien-Informationen, Abstimmung mit anderen KRITIS-Sektoren über § 17 KRITISDachG-Unterrichtung.",
+                "roleId": "role-en-bo-krisenstab"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-bbk-meldung",
+                "question": "Wie wird die § 16-Meldung unter akutem Ressourcen-Druck erstellt?",
+                "roleId": "role-en-bo-externe-komm",
+                "guidance": "Fristgerechte Kurzmeldung mit späterer Detailergänzung (Folgemeldung) ist Standard-Pfad. Fristverstoß riskiert Bußgeld nach § 20 KRITISDachG bis zu 1 Mio. Euro.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-quick-meldung",
+                    "label": "Kurzmeldung binnen 2 h, Folgemeldung binnen 72 h",
+                    "consequence": "Fristgerecht, BBK hat Lagebild. Ressourcen-schonend.",
+                    "evaluationHints": [
+                      "Fristgerechte Erstmeldung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-delayed-meldung",
+                    "label": "Vollständige Meldung erst nach Ereignisende (geschätzt > 24 h)",
+                    "consequence": "Fristverstoß, Bußgeldrisiko nach § 20 KRITISDachG.",
+                    "evaluationHints": [
+                      "Fristverstoß"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-reporting-bbk"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 135,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "en-bo-inj-grid-reconnected",
+                "title": "Verbundnetz-Resynchronisation erfolgreich",
+                "description": "Beide Inselnetze mit Nachbar-Regelzonen synchronisiert. Frequenz stabil bei 50,00 Hz. Schrittweise Wiederzuschaltung Haushalte und Gewerbe nach priorisierter Reihenfolge.",
+                "roleId": "role-en-bo-leitwarte"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "en-bo-dec-restoration-speed",
+                "question": "Wie schnell wird die vollständige Versorgung wiederhergestellt?",
+                "roleId": "role-en-bo-lastverteilung",
+                "guidance": "Zu schnelle Wiederzuschaltung kann erneute Last-Spitzen erzeugen. Standard: gestufte Wiederzuschaltung über 2–4 h, danach Normalbetrieb.",
+                "options": [
+                  {
+                    "id": "en-bo-opt-staged-restore",
+                    "label": "Gestufte Wiederzuschaltung über 2–4 h nach Lastmanagement-Stufen",
+                    "consequence": "Risiko erneuter Kaskade niedrig. Normalbetrieb stabil.",
+                    "evaluationHints": [
+                      "Standard-Wiederherstellung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "en-bo-opt-quick-restore",
+                    "label": "Schnelle Wiederzuschaltung binnen 30 min",
+                    "consequence": "Zeitersparnis. Risiko erneuter Last-Spitzen und Kaskadenausfall.",
+                    "evaluationHints": [
+                      "Risikoreiche Beschleunigung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "en-bo-crit-operations-blackstart"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 150,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "en-bo-inj-retro-en-bo",
+                "title": "Lagebild-Abschluss",
+                "description": "Versorgung zu 90 % wiederhergestellt. Restliche Verbraucher in 1–2 h. Gesamtdauer Blackout 2,5 h in den schwerstbetroffenen Gebieten. BBK-Kurzmeldung eingereicht. Retro und Lessons-Learned in der nächsten Krisenstabs-Sitzung, insbesondere zu Wasser-Notstrom-Lücken und mobilem Einspeisungs-Bestand.",
+                "roleId": "role-en-bo-krisenstab"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "en-bo-crit-operations-blackstart",
+            "description": "Schwarzstart-Durchführung, Inselnetz-Aufbau, Resynchronisation mit Nachbar-Regelzonen",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "en-bo-crit-operations-priorisierung",
+            "description": "Priorisierung kritischer Verbraucher (KRITIS-Kreuzabhängigkeit) bei Lastabwurf und Wiederzuschaltung",
+            "weight": 2,
+            "category": "operations"
+          },
+          {
+            "id": "en-bo-crit-governance-krisenstab",
+            "description": "Krisenstab-Struktur unter parallelen physikalischen und politischen Anforderungen",
+            "weight": 1.5,
+            "category": "governance"
+          },
+          {
+            "id": "en-bo-crit-communication-uenb",
+            "description": "Koordination mit Nachbar-ÜNB für Synchronisations-Rekonstruktion",
+            "weight": 1.5,
+            "category": "communication"
+          },
+          {
+            "id": "en-bo-crit-communication-extern",
+            "description": "Externe Kommunikation (BBK, Landes-Krisenstab, Medien, andere KRITIS-Sektoren)",
+            "weight": 1,
+            "category": "communication"
+          },
+          {
+            "id": "en-bo-crit-reporting-bbk",
+            "description": "§ 16 KRITISDachG-Meldung an BBK fristgerecht trotz akuter Lage",
+            "weight": 1,
+            "category": "reporting"
+          }
+        ]
+      }
+    ]
+  }
+}

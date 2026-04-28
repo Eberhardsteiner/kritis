@@ -1,0 +1,2309 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-administration-core",
+    "packType": "module",
+    "moduleId": "administration",
+    "name": "Verwaltungs-Basismodul",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Stadtverwaltungen, Landratsämter, Bezirksregierungen und Landesbehörden mit Fokus auf Bürger-Service-Verfügbarkeit, Aktenintegrität und politische Verantwortlichkeit.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "Staat und Verwaltung",
+    "industryClass": "Öffentliche Verwaltung",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "verwaltung",
+      "kommune",
+      "stadt",
+      "landratsamt",
+      "bezirk",
+      "landesbehoerde",
+      "ozg",
+      "akdb",
+      "kivbf",
+      "itnrw"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "sector"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "administration",
+    "name": "Öffentliche Verwaltung",
+    "version": "1.0.0",
+    "description": "Branchenmodul für Stadtverwaltungen, Landratsämter, Bezirksregierungen und Landesbehörden mit Fokus auf Bürger-Service-Verfügbarkeit, Aktenintegrität und politische Verantwortlichkeit.",
+    "sectorCategory": "Staat und Verwaltung",
+    "domainWeightAdjustments": {
+      "cyber": 1.3,
+      "governance": 1.25,
+      "supply": 1.2,
+      "operations": 1.15
+    },
+    "additionalQuestions": [
+      {
+        "id": "adm_buerger_daten_kategorisierung",
+        "domainId": "governance",
+        "title": "Bürger-Daten-Kategorisierung mit DSGVO- und Verwaltungsverfahrensgesetz-Bezug ist gepflegt",
+        "prompt": "Existiert eine aktuelle Kategorisierung der Bürger-Daten-Verarbeitungs-Verfahren (Personenstand, Steuer, Sozialhilfe, Jugendamt, Standesamt, Ausländerwesen) mit DSGVO-Risikoklasse und Verwaltungsverfahrensgesetz-Anzeige-Pflichten?",
+        "guidance": "Verwaltungsspezifik: Bürger-Daten gehören zu den sensitivsten Datenkategorien (Personenstand, Sozialhilfe, Jugendamt-Akten — letztere oft nach SGB VIII besonders streng). Anzeige-Pflichten nach DSGVO Art. 33/34 und Verwaltungsverfahrensgesetz parallel. Bei Vorfällen schnelle Reichweiten-Bewertung möglich (welches Verfahren betroffen, wieviele Bürger).",
+        "recommendation": "Datenverarbeitungs-Verzeichnis nach DSGVO Art. 30 mit Bürger-Daten-Risikoklasse (Standard / sensitiv / hochsensitiv), Verwaltungsverfahrensgesetz-Anzeige-Pflichten kategorisiert, jährlicher Review im DSB-Komitee.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Verfahrensverzeichnis DSGVO Art. 30, DSB-Review-Protokoll",
+        "tags": [
+          "DSGVO",
+          "VwVfG",
+          "Bürger-Daten"
+        ]
+      },
+      {
+        "id": "adm_itdz_drittanbieter_eskalation",
+        "domainId": "supply",
+        "title": "Kommunaler IT-Verbund-Dienstleister-Eskalations-Pfade sind dokumentiert und geübt",
+        "prompt": "Sind die Eskalations-Pfade zum kommunalen IT-Verbund-Dienstleister (z. B. AKDB Bayern, KIVBF, IT.NRW, ekom21 Hessen, Dataport, regio iT) mit 24/7-Hotline und Substitutions-Plan dokumentiert?",
+        "guidance": "Verwaltungsspezifik: Föderale dezentrale IT-Strukturen führen zu starker Abhängigkeit von einem regionalen IT-Verbund-Dienstleister. Südwestfalen-IT-Vorfall Oktober 2023: 72 Kommunen mit 1,7 Mio. Einwohnern wochenlang im Notbetrieb. Eskalations-Pfade müssen 24/7 belastbar sein, Substitution faktisch nicht möglich — Resilienz-Plan muss damit umgehen.",
+        "recommendation": "ITDZ-Vertrag mit 24/7-Hotline, vor-vereinbarte Eskalations-Stufen, halbjährlicher Eskalations-Drill, Verbund-Solidaritäts-Vereinbarung mit benachbarten Kommunen für Notbetrieb.",
+        "weight": 1.25,
+        "critical": true,
+        "evidenceHint": "ITDZ-Vertrag, Eskalations-Drill-Protokoll, Verbund-Solidaritäts-Vereinbarung",
+        "tags": [
+          "ITDZ",
+          "AKDB",
+          "KIVBF",
+          "IT.NRW"
+        ]
+      },
+      {
+        "id": "adm_buergermeister_landrat_krisenstab",
+        "domainId": "governance",
+        "title": "Bürgermeister/Landrat ist im Krisenstab mit politischer Letztverantwortung verankert",
+        "prompt": "Ist die Krisenstabs-Leitung des Bürgermeisters bzw. Landrats mit nicht delegierbarer politischer Letztverantwortung (Notstandserklärung, Lösegeld-Entscheidung, Bürger-Kommunikation) dokumentiert und geübt?",
+        "guidance": "Verwaltungsspezifik: Anders als in Wirtschafts-Sektoren ist die Krisenstabs-Leitung politisch — Bürgermeister/Landrat sind direkt gewählt und verantworten gegenüber dem Stadt-/Kreisrat. Notstandserklärung nach Landeskatastrophenschutzgesetz ist politisches Instrument. Anhalt-Bitterfeld-Schablone Juli 2021: Cyber-Katastrophenfall durch Landrat erklärt, 207 Tage Wirkung.",
+        "recommendation": "Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung, jährliche Tabletop-Übung mit politischer Spitze, Stellvertretungs-Regelung für Urlaubs-/Krankheitszeiten.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Krisenstabs-Geschäftsordnung, Tabletop-Protokoll, Stellvertretungs-Plan",
+        "tags": [
+          "Krisenstab",
+          "Bürgermeister",
+          "Landrat",
+          "Notstandserklärung"
+        ]
+      },
+      {
+        "id": "adm_offline_backup_diszpiplin",
+        "domainId": "cyber",
+        "title": "Offline-Backup-Disziplin nach Anhalt-Bitterfeld-Lehre ist etabliert",
+        "prompt": "Sind alle kritischen Verwaltungs-Fachverfahren mit Offline-Backups (3-2-1-Regel mit Air-Gap-Tape oder Immutable-Storage) gesichert, getestet und vor Ransomware-Verschlüsselung geschützt?",
+        "guidance": "Verwaltungsspezifik: Anhalt-Bitterfeld-Lehre Juli 2021: Backup war auf demselben Netz wie Produktiv-Systeme — Ransomware verschlüsselte beide. Ohne Offline-Backup dauerte der Wiederaufbau 207 Tage. BSI-Empfehlung: 3-2-1-Regel (3 Kopien, 2 Medien, 1 offline) mit Tape-Backup oder Immutable-Storage. Quartalsweise Wiederherstellungs-Test ist Pflicht.",
+        "recommendation": "Offline-Backup auf Tape oder Immutable-Storage, Air-Gap-Trennung, quartalsweiser Wiederherstellungs-Test mit definiertem Recovery-Time-Objective.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Backup-Konzept, Wiederherstellungs-Test-Protokoll, Air-Gap-Architektur-Diagramm",
+        "tags": [
+          "Backup",
+          "Anhalt-Bitterfeld",
+          "Ransomware"
+        ]
+      },
+      {
+        "id": "adm_admin_rechte_minimierung",
+        "domainId": "cyber",
+        "title": "Administrator-Rechte sind nach Least-Privilege minimiert (nach Anhalt-Bitterfeld-Lehre)",
+        "prompt": "Sind administrative Rechte auf Workstations und Fachverfahren strikt nach Least-Privilege vergeben, mit getrennten Admin-Konten und MFA-Pflicht für privilegierte Zugänge?",
+        "guidance": "Verwaltungsspezifik: Anhalt-Bitterfeld-Lehre: Alle Mitarbeiter*innen hatten Admin-Rechte (für „schnelle Bedienbarkeit\") — das gab Angreifern lateral movement im gesamten Netz. Least-Privilege mit Privileged-Access-Management (PAM) und MFA für Admin-Konten ist Pflicht-Lehre.",
+        "recommendation": "Trennung Standard- und Admin-Konten, PAM-Tool für Just-in-Time-Privilegien, FIDO2/WebAuthn-MFA für alle Admin-Zugänge, vierteljährlicher Privilegien-Review.",
+        "weight": 1.25,
+        "critical": false,
+        "evidenceHint": "PAM-Konzept, Privilegien-Review-Protokoll, MFA-Coverage-Report",
+        "tags": [
+          "Least-Privilege",
+          "PAM",
+          "MFA"
+        ]
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "Staat und Verwaltung"
+      ],
+      "hints": [
+        "KRITIS-Schwellenwerte für Sektor Staat und Verwaltung sind in Vorbereitung (KRITISDachG noch im Gesetzgebungs-Prozess).",
+        "NIS2-Umsetzungsgesetz (in Kraft 6.12.2025) erfasst die Bundesverwaltung direkt; kommunale Ebene weitgehend ausgenommen, Länder verantworten eigene Cybersicherheits-Gesetzgebung (Bayern LSI-Gesetz, NRW etc.).",
+        "BSI-Empfehlungen für kommunale Verwaltung als de-facto-Standard (BSI Grundschutz, BSI-CS-Vorfallsmeldung), ergänzt durch Cybersicherheitsagenturen der Länder.",
+        "Cross-Sector-Bezug: Verwaltung ist Bürger-Daten-Verwalter und über ITDZ-Drittanbieter-Abhängigkeit auf den IT/Telekom-Sektor angewiesen."
+      ],
+      "additionalRequirements": []
+    },
+    "uiHints": {
+      "accentLabel": "Bürger-Service-Verfügbarkeit, Aktenintegrität, politische Verantwortlichkeit",
+      "focusAreas": [
+        "Anhalt-Bitterfeld-Baseline (Backup, Admin-Rechte, Krisenstab)",
+        "ITDZ-Verbund-Resilienz (AKDB/KIVBF/IT.NRW)",
+        "Notstandserklärung-Disziplin (Bürgermeister/Landrat)",
+        "Bürger-Kommunikation Multi-Kanal",
+        "DSGVO-/VwVfG-Bürger-Daten-Schutz"
+      ]
+    },
+    "recommendedActions": [
+      {
+        "id": "adm_action_anhalt_bitterfeld_baseline",
+        "title": "Anhalt-Bitterfeld-Baseline-Audit (Backup, Admin-Rechte, Krisenstab)",
+        "description": "Drei-Punkte-Audit nach Anhalt-Bitterfeld-Lehre: (1) Offline-Backup nach 3-2-1-Regel mit Wiederherstellungs-Test, (2) Admin-Rechte-Minimierung mit PAM und MFA, (3) Krisenstab-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung. Bei jeder Lücke Sofort-Maßnahme und Board-Reporting.",
+        "priority": "kritisch",
+        "ownerRole": "IT-Leitung / IT-Sicherheitsbeauftragte*r",
+        "relatedQuestionIds": [
+          "adm_offline_backup_diszpiplin",
+          "adm_admin_rechte_minimierung",
+          "adm_buergermeister_landrat_krisenstab"
+        ]
+      },
+      {
+        "id": "adm_action_itdz_eskalations_drill",
+        "title": "ITDZ-Eskalations-Drill mit kommunalem IT-Verbund-Dienstleister",
+        "description": "Halbjährlicher Eskalations-Drill mit dem kommunalen IT-Verbund-Dienstleister (AKDB / KIVBF / IT.NRW / ekom21 / Dataport / regio iT). Tabletop „Verbund-Outage am Wahltag oder Steuer-Stichtag\", Verbund-Solidaritäts-Aktivierung mit benachbarten Kommunen, Land-CIO-Eskalation.",
+        "priority": "hoch",
+        "ownerRole": "IT-Leitung / Hauptamt",
+        "relatedQuestionIds": [
+          "adm_itdz_drittanbieter_eskalation"
+        ]
+      },
+      {
+        "id": "adm_action_buerger_komm_drehbuch",
+        "title": "Bürger-Kommunikations-Drehbuch mit Multi-Kanal-Strategie",
+        "description": "Vor-textierte Krisen-Botschaften für die fünf Tabletop-Hauptszenarien (Ransomware-Stillstand, ITDZ-Ausfall, Bürger-Daten-Exfiltration, Fachverfahren-Ausfall, Hochwasser-RZ). Multi-Kanal: Rathaus-Aushang, Webseite, Social-Media, lokale Presse, Bürger-Hotline, Amtsblatt. Politische Spitze (Bürgermeister/Landrat) als Sprecher persönlich.",
+        "priority": "hoch",
+        "ownerRole": "Pressesprecher / Bürgermeister-/Landrats-Büro",
+        "relatedQuestionIds": [
+          "adm_buergermeister_landrat_krisenstab"
+        ]
+      },
+      {
+        "id": "adm_action_dsgvo_buerger_daten_kategorisierung",
+        "title": "DSGVO-/VwVfG-Bürger-Daten-Kategorisierung pflegen",
+        "description": "Verfahrensverzeichnis nach DSGVO Art. 30 mit Bürger-Daten-Risikoklasse (Standard / sensitiv / hochsensitiv), Verwaltungsverfahrensgesetz-Anzeige-Pflichten, Jugendamt-Akten nach SGB VIII besonders gekennzeichnet, jährlicher DSB-Review.",
+        "priority": "hoch",
+        "ownerRole": "Datenschutzbeauftragte*r / Hauptamt",
+        "relatedQuestionIds": [
+          "adm_buerger_daten_kategorisierung"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "adm_evidence_backup_konzept",
+        "title": "Offline-Backup-Konzept und Wiederherstellungs-Test-Protokolle",
+        "type": "policy",
+        "ownerRole": "IT-Leitung / IT-Sicherheitsbeauftragte*r",
+        "reviewCycleHint": "Quartalsweise Wiederherstellungs-Test, jährliche Konzept-Review",
+        "relatedQuestionIds": [
+          "adm_offline_backup_diszpiplin"
+        ],
+        "folder": "IT-Sicherheit",
+        "tags": [
+          "Backup",
+          "Anhalt-Bitterfeld"
+        ]
+      },
+      {
+        "id": "adm_evidence_krisenstabs_geo",
+        "title": "Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung",
+        "type": "policy",
+        "ownerRole": "Hauptamt / Bürgermeister-Büro",
+        "reviewCycleHint": "Jährlich, nach jeder Tabletop-Übung anlassbezogen",
+        "relatedQuestionIds": [
+          "adm_buergermeister_landrat_krisenstab"
+        ],
+        "folder": "Krisenmanagement",
+        "tags": [
+          "Krisenstab",
+          "Notstandserklärung"
+        ]
+      },
+      {
+        "id": "adm_evidence_itdz_vertrag",
+        "title": "ITDZ-Vertrag mit Eskalations-Pfaden und Verbund-Solidaritäts-Vereinbarung",
+        "type": "contract",
+        "ownerRole": "IT-Leitung / Hauptamt",
+        "reviewCycleHint": "Jährlich, anlassbezogen nach ITDZ-Vorfällen",
+        "relatedQuestionIds": [
+          "adm_itdz_drittanbieter_eskalation"
+        ],
+        "folder": "IT-Verträge",
+        "tags": [
+          "ITDZ",
+          "Verbund"
+        ]
+      },
+      {
+        "id": "adm_evidence_dsgvo_verfahrensverzeichnis",
+        "title": "DSGVO Art. 30 Verfahrensverzeichnis mit Bürger-Daten-Risikoklasse",
+        "type": "register",
+        "ownerRole": "Datenschutzbeauftragte*r",
+        "reviewCycleHint": "Jährlich, anlassbezogen bei neuen Verfahren",
+        "relatedQuestionIds": [
+          "adm_buerger_daten_kategorisierung"
+        ],
+        "folder": "Datenschutz",
+        "tags": [
+          "DSGVO",
+          "VwVfG"
+        ]
+      }
+    ],
+    "roleTemplates": [
+      {
+        "id": "adm_role_buergermeister_landrat",
+        "label": "Bürgermeister*in / Landrat / -rätin",
+        "responsibility": "Politische Letztverantwortung für Krisenstab, Notstandserklärung, Lösegeld-Entscheidung, Bürger-Kommunikation. Anhalt-Bitterfeld-Schablone: Landrat erklärte Cyber-Katastrophenfall, 207 Tage politische Verantwortung. Schnittstelle zu Stadt-/Kreisrat, Land-Innenministerium, ggf. Ministerpräsident bei systemischen Implikationen.",
+        "approvalScope": "Notstandserklärung, Lösegeld-Entscheidung, Bürger-Disclosure-Freigaben, Krisenstab-Aktivierung",
+        "focusAreas": [
+          "Krisenstab",
+          "Notstandserklärung",
+          "Bürger-Kommunikation"
+        ]
+      },
+      {
+        "id": "adm_role_it_leitung",
+        "label": "IT-Leitung",
+        "responsibility": "Operative IT-Verantwortung, ITDZ-Schnittstelle (AKDB/KIVBF/IT.NRW/ekom21/Dataport/regio iT), Backup-Disziplin, Wiederherstellungs-Plan, Fachverfahren-Verfügbarkeit. Personalunion mit IT-Sicherheitsbeauftragte*r in kleineren Tenants, sonst getrennt.",
+        "approvalScope": "Operative IT-Entscheidungen, ITDZ-Eskalationen, Backup-Konzept",
+        "focusAreas": [
+          "ITDZ",
+          "Backup",
+          "Fachverfahren"
+        ]
+      },
+      {
+        "id": "adm_role_dsb",
+        "label": "Datenschutzbeauftragte*r",
+        "responsibility": "DSGVO Art. 33/34-Bewertung bei Bürger-Daten-Vorfällen (72 h-Frist, unverzüglich bei hohem Risiko), Verfahrensverzeichnis-Pflege nach Art. 30, Verwaltungsverfahrensgesetz-Anzeige-Pflichten, Schnittstelle zur Landes-Datenschutzbehörde (LfD/LDI). Bei kommunalen Tenants meist externe DSB-Bestellung (gemeinsam mit Nachbar-Kommunen).",
+        "approvalScope": "DSGVO-Meldepflicht-Entscheidungen, Bürger-Benachrichtigungs-Pflicht nach Art. 34",
+        "focusAreas": [
+          "DSGVO",
+          "VwVfG",
+          "Bürger-Daten"
+        ]
+      },
+      {
+        "id": "adm_role_pressesprecher",
+        "label": "Pressesprecher / Bürger-Kommunikation",
+        "responsibility": "Bürger-Kommunikation mit Multi-Kanal-Strategie (Rathaus-Aushang, Webseite, Social-Media, lokale Presse, Bürger-Hotline, Amtsblatt), Schnittstelle zu Bürgermeister/Landrat als persönlicher Sprecher, Verbands-Schnittstelle (Städtetag, Landkreistag, Gemeindebund). Demokratie-Anspruch der Bürger-Information ist Verwaltungs-Spezifikum.",
+        "approvalScope": "Krisen-Kommunikations-Strategie, Pressemitteilungen (mit Bürgermeister/Landrat)",
+        "focusAreas": [
+          "Bürger-Kommunikation",
+          "Demokratie-Anspruch",
+          "Multi-Kanal"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 80,
+      "targetByDomain": {
+        "governance": 84,
+        "operations": 80,
+        "people": 76,
+        "physical": 74,
+        "cyber": 84,
+        "supply": 82,
+        "finance": 70,
+        "bcm": 82
+      },
+      "notes": [
+        "Verwaltungs-Tenants benötigen hohe Werte in Cyber (84 % Ziel — Ransomware-Hauptangriffsziel) und Governance (84 % — politische Verantwortlichkeit + DSGVO).",
+        "Supply (82 %) reflektiert die hohe ITDZ-Verbund-Abhängigkeit (AKDB/KIVBF/IT.NRW/ekom21/Dataport/regio iT) — kommunale Resilienz hängt am Drittanbieter-Eskalations-Pfad.",
+        "Finance-Domäne mit niedrigerem Ziel (70 %) wegen kommunaler Finanz-Knappheit als strukturelle Resilienz-Limitierung — Resilienz-Investitionen müssen oft mit dem Stadt-/Kreisrat verhandelt werden."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "adm_audit_anhalt_bitterfeld_baseline",
+        "area": "IT-Sicherheit",
+        "title": "Anhalt-Bitterfeld-Baseline (Offline-Backup, Admin-Rechte, Krisenstab) erfüllt",
+        "guidance": "Prüfen: Offline-Backup auf Tape/Immutable-Storage mit quartalsweisem Test, Admin-Rechte-Minimierung mit PAM und MFA, Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung. Bei Lücken Sofort-Maßnahmen-Plan.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "adm_offline_backup_diszpiplin",
+          "adm_admin_rechte_minimierung",
+          "adm_buergermeister_landrat_krisenstab"
+        ]
+      },
+      {
+        "id": "adm_audit_itdz_eskalation",
+        "area": "IT-Verbund",
+        "title": "ITDZ-Eskalations-Pfad dokumentiert und geübt",
+        "guidance": "Prüfen: 24/7-Hotline-Vertrag, vor-vereinbarte Eskalations-Stufen, halbjährlicher Drill, Verbund-Solidaritäts-Vereinbarung mit benachbarten Kommunen, Land-CIO-Schnittstelle.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "adm_itdz_drittanbieter_eskalation"
+        ]
+      },
+      {
+        "id": "adm_audit_dsgvo_verfahrensverzeichnis",
+        "area": "Datenschutz",
+        "title": "DSGVO Art. 30 Verfahrensverzeichnis mit Bürger-Daten-Risikoklasse",
+        "guidance": "Prüfen: Verfahrensverzeichnis vollständig, Bürger-Daten-Risikoklasse zugewiesen, Verwaltungsverfahrensgesetz-Anzeige-Pflichten dokumentiert, Jugendamt-Akten nach SGB VIII besonders gekennzeichnet, jährlicher DSB-Review.",
+        "severity": "medium",
+        "relatedQuestionIds": [
+          "adm_buerger_daten_kategorisierung"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "Risikoanalyse",
+      "IT-Sicherheit",
+      "Krisenmanagement",
+      "IT-Verträge",
+      "Datenschutz",
+      "Bürger-Kommunikation",
+      "Politische-Verantwortlichkeit",
+      "Verbund-Solidarität"
+    ],
+    "processTemplates": [
+      {
+        "id": "adm_proc_buergeramt",
+        "title": "Bürger-Service-Frontoffice (Bürgerbüro, Pass, Personalausweis, Meldung, Beglaubigung)",
+        "ownerRole": "Hauptamt / Bürgeramt-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Fachverfahren MESO/MOIN/AKDB-Lösungen, Personenstandsregister, Druck-Infrastruktur, OZG-Portal",
+        "outputs": "Bürger-Identitäts-Dokumente, Meldungs-Bestätigungen, Beglaubigungen",
+        "notes": "Notbetrieb mit Papier-Verfahren möglich (Anhalt-Bitterfeld-Schablone), aber stark begrenzte Throughput. Bei Wahlen oder Feriensaison sehr empfindlich."
+      },
+      {
+        "id": "adm_proc_standesamt",
+        "title": "Personenstands-Verwaltung (Geburts-, Heirats-, Sterbe-Beurkundung)",
+        "ownerRole": "Standesamt-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Personenstandsregister-Fachverfahren AutiSta, Druck-Infrastruktur, Beglaubigungs-Stempel",
+        "outputs": "Geburts-, Heirats-, Sterbeurkunden — rechtlich verbindlich, oft zeitkritisch",
+        "notes": "Sterbe-Beurkundung ist gesetzlich binnen 3 Werktagen Pflicht (PStG § 28) und für Bestattung notwendig — Notbetrieb mit Papier-Beurkundung Pflicht."
+      },
+      {
+        "id": "adm_proc_steueramt",
+        "title": "Steuer- und Abgabenwesen (Grundsteuer, Gewerbesteuer, Bescheid-Erstellung)",
+        "ownerRole": "Stadtkasse / Steueramt-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HKR-Fachverfahren (Doppik), Druckdienstleister Massenbescheid, OZG-Portal-Anbindung",
+        "outputs": "Steuer-/Abgaben-Bescheide, Säumniszuschläge, Vollstreckungs-Vorlagen",
+        "notes": "Quartalsstichtage (Grundsteuer-Hauptveranlagung, Gewerbesteuer-Vorauszahlung) sind Hochlast-Fenster. Notbetrieb mit Papier-Bescheid-Druck nur stark begrenzt skalierbar (Massenbescheid-Versand). Kämmerei muss Cashflow-Risiko kennen."
+      },
+      {
+        "id": "adm_proc_sozialamt",
+        "title": "Sozialhilfe und Jugendamt (Leistungsanträge, Auszahlungen)",
+        "ownerRole": "Sozialamt-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Fachverfahren OPEN/PROSOZ/AKDB, Auszahlungs-System, Bürger-Daten-Register, HKR-Zahlungsverkehr",
+        "outputs": "Sozialleistungs-Auszahlungen, Bewilligungs-Bescheide, Jugendhilfe-Verfügungen",
+        "notes": "Anhalt-Bitterfeld-Lehre: Sozialleistungen konnten für mindestens eine Woche nicht ausgezahlt werden — direkter Bürger-Existenz-Bezug. Notbetrieb mit Papier-Anträgen + manuelle Bundesbank-Überweisung als Worst-Case."
+      },
+      {
+        "id": "adm_proc_bauamt",
+        "title": "Bauamt-Verfahren (Bauanträge, Genehmigungen, Bauleitplanung)",
+        "ownerRole": "Bauamt-Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "Bau-Fachverfahren ProBauG/eVerwaltung, GIS-System, OZG-Portal-Anbindung, Architekt-PDF-Anhänge",
+        "outputs": "Bau-Genehmigungen, Ablehnungs-Bescheide, Bauleitplanung-Beschlüsse",
+        "notes": "Fristen-Logik (Genehmigungsfiktion nach 3 Monaten gem. § 36 BauGB) macht IT-Ausfall haftungsrelevant. Investoren-Frust eskaliert politisch."
+      },
+      {
+        "id": "adm_proc_ordnungsamt",
+        "title": "Ordnungsamt-Vollzug (Gewerbeüberwachung, Verkehrsüberwachung)",
+        "ownerRole": "Ordnungsamt-Leitung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Gewerbe-Fachverfahren, Verwarngeld-System, Kommunaler Vollzugsdienst, Polizei-Schnittstelle",
+        "outputs": "Verwarngeld-Bescheide, Gewerbe-Untersagungen, Vollzugs-Verfügungen",
+        "notes": "Verkehrsüberwachung mit Knöllchen-Stillstand erträglich, aber Verwarngeld-Einnahmen-Ausfall trifft Kämmerei. Gewerbe-Vollzug bei Gefahrenabwehr (Lebensmittel, Veterinär) zeitkritisch."
+      },
+      {
+        "id": "adm_proc_ratsinformation",
+        "title": "Ratsinformations- und Sitzungsdienst (Vorlagen, Beschlüsse, öffentliche Bekanntmachungen)",
+        "ownerRole": "Hauptamt / Ratsbüro",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "72",
+        "rpoHours": "48",
+        "dependencies": "Ratsinformations-System (Session/SD.NET/ALLRIS), Webserver Bekanntmachungen, E-Mail-Verteiler Ratsmitglieder",
+        "outputs": "Ratsvorlagen, Beschlussprotokolle, öffentliche Bekanntmachungen, Wahl-Bekanntmachungen",
+        "notes": "Vor Wahltagen und großen Ratssitzungen extrem empfindlich. Öffentliche Bekanntmachungen sind oft Wirksamkeits-Voraussetzung (Bauleitplan, Satzungen)."
+      },
+      {
+        "id": "adm_proc_personalamt",
+        "title": "Personalverwaltung und Lohnabrechnung",
+        "ownerRole": "Personalamt-Leitung",
+        "criticality": "hoch",
+        "mtpdHours": "336",
+        "rtoHours": "168",
+        "rpoHours": "24",
+        "dependencies": "Lohn-Fachverfahren KIDICAP/LOGA/dvv-Personal, HKR-Zahlungsverkehr, Zeiterfassungs-System",
+        "outputs": "Lohnzahlungen Mitarbeiter, Beihilfe-Abrechnungen, Sozialversicherungs-Meldungen",
+        "notes": "Monatlicher Lohnlauf zum 15./25./Monatsletzter ist hartes Stichtags-Risiko. Bei Ausfall muss manuelle Vorab-Auszahlung über Bundesbank/Stadtkasse möglich sein (DTAUS/SEPA-XML manuell)."
+      },
+      {
+        "id": "adm_proc_finanzbuchhaltung",
+        "title": "Finanzbuchhaltung und Zahlungsverkehr (HKR-System, SEPA-Lauf)",
+        "ownerRole": "Kämmerei / Finanzverwaltung",
+        "criticality": "kritisch",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HKR-Fachverfahren (Doppik), Banking-Schnittstelle (FinTS/EBICS), Bundesbank-Anbindung",
+        "outputs": "SEPA-Sammler, Bescheid-Buchungen, Jahresabschluss, Liquiditätsplanung",
+        "notes": "Tägliche SEPA-Sammler-Versendung an Hausbank ist zeitkritisch — Zinsausfall + Mahnverfahren bei Lieferanten als Folgekosten. Kämmerer-persönliche Haftung in einigen Bundesländern."
+      },
+      {
+        "id": "adm_proc_itbetrieb",
+        "title": "IT-Betrieb und Verwaltungsnetz (Active Directory, E-Akte, Fileserver)",
+        "ownerRole": "IT-Amt / IT-Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Active-Directory-Wartungsvertrag, ITDZ-Verbund-Hosting, Netzwerk-Hardware, Backup-Infrastruktur",
+        "outputs": "Authentifizierung, E-Akte-Verfügbarkeit, Fileserver-Freigaben, alle Fachverfahren-Voraussetzung",
+        "notes": "Single Point of Failure für faktisch alle anderen Verwaltungs-Prozesse. Backup-Restore-Fähigkeit binnen 8h ist die Nicht-Verhandlungs-Grenze (Anhalt-Bitterfeld: 207 Tage Notbetrieb, weil Backup-Konzept versagt hat)."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "adm_dep_itdz_kommunal",
+        "title": "Kommunaler IT-Verbund-Dienstleister (AKDB / KIVBF / IT.NRW / ekom21 / Dataport / regio iT)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Im regionalen Markt faktisch nicht ersetzbar — Substitution erfordert mehrjährige Migration. Verbund-Solidaritäts-Vereinbarung mit benachbarten Kommunen für Notbetrieb ist Pflicht.",
+        "contractReference": "ITDZ-Rahmenvertrag (regional bestimmt)",
+        "notes": "Südwestfalen-IT-Schablone Oktober 2023: 72 Kommunen mit 1,7 Mio. Einwohnern wochenlang im Notbetrieb. Eskalations-Pfade müssen vor-vertraglich auf 24/7-SLA gebunden sein."
+      },
+      {
+        "id": "adm_dep_hkr",
+        "title": "HKR-Fachverfahren / Doppik-System (Infoma newsystem / SAP-KOSO / KIRP / kommunale ERP)",
+        "category": "software",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Lokale, manuelle Verbuchung mit Excel und Bundesbank-Schnittstelle als Notbetrieb möglich, aber massiv verlangsamt. Wechsel des HKR-Herstellers ist faktisch unmöglich (mehrjähriges Migrations-Projekt mit politischer Beschluss-Pflicht).",
+        "contractReference": "HKR-Hersteller-Wartungsvertrag",
+        "notes": "Bei Doppik-Pflicht (alle Bundesländer außer Bayern, Schleswig-Holstein) ist das HKR-System die zentrale Daten-Quelle für Jahresabschluss. Cloud-Anbindung der modernen Versionen ist Sicherheits-Hotspot."
+      },
+      {
+        "id": "adm_dep_fachverfahren_msb",
+        "title": "Fachverfahren-Hersteller (MESO/MOIN, OPEN/PROSOZ, AutiSta, ProBauG, AKDB-Lösungen)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Pro Fachverfahren oft nur 1-2 Hersteller im DACH-Markt — Substitution erfordert mehrjährige Migration. Update-Pflichten und Patch-Disziplin als kompensierende Maßnahme.",
+        "contractReference": "Hersteller-Wartungs-Verträge (pro Verfahren)",
+        "notes": "Verwaltungs-Fachverfahren oft 10-20 Jahre alt, mit eingeschränkter API-Modernisierungs-Fähigkeit. Hersteller-Outage trifft alle Tenants gleichzeitig."
+      },
+      {
+        "id": "adm_dep_ozg_portal",
+        "title": "OZG-Portal-Anbindung (Bund-ID, BayernID, Servicekonto Land)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Online-Antragstellung wird auf Papier-/Vor-Ort-Verfahren zurückgeschwenkt — funktioniert, aber stark verlangsamt. Bürger-Erwartung an Online-Verfahren steigt mit OZG-Reife schnell.",
+        "contractReference": "Anbindungs-Vereinbarung mit Land/FITKO",
+        "notes": "OZG-Reife unterschiedlich pro Bundesland. Authentifizierungs-Backbone (Servicekonto Bund / Bund-ID) ist Cross-Sector-Abhängigkeit. NIS2-Bezug: § 8d Meldepflicht greift bei Datenschutz-Vorfall in OZG-Pfad."
+      },
+      {
+        "id": "adm_dep_strom_rathaus",
+        "title": "Stromversorgung Rathaus / Verwaltungsstandort",
+        "category": "energie",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "USV für 30-60 Minuten geordneter Shutdown der IT, Diesel-Notstrom-Aggregat (mit getanktem Tank!) für 24-72h Verwaltungs-Notbetrieb. Notstrom-Live-Übung Pflicht — Bestand oft jahrelang ungetestet.",
+        "contractReference": "Strom-Vertrag mit Stadtwerken / Wartungsvertrag Notstrom-Aggregat",
+        "notes": "Nordrhein-Westfalen 2024: mehrere Rathäuser bei Stromausfall ohne Notbetrieb, weil Diesel-Aggregat-Tanks leer waren. Treibstoff-Vorhaltung muss in Wartungs-Routinen verankert sein."
+      },
+      {
+        "id": "adm_dep_tk_anbieter",
+        "title": "Internet- und Telekommunikations-Anbieter (Festnetz, Mobilfunk, Internet primär)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Festnetz-Telefonie für Bürger-Hotline ist erstaunlich kritisch — bei Ausfall Bürger-Welle ans Rathaus. Backup über Mobilfunk-Hotline und alternative Provider.",
+        "contractReference": "Telekom-/Vodafone-/1&1-Verträge",
+        "notes": "Cross-Sector-Bezug zum IT/Telekom-Pack — bei TK-Sektor-Vorfall (BGP-Hijacking, Submarine-Cable-Schaden) sind Verwaltungs-Tenants über die TK-Abhängigkeit betroffen."
+      },
+      {
+        "id": "adm_dep_buerger_telefonie",
+        "title": "Bürger-Telefonie (Hotline, Vermittlung, Behörden-115)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobilfunk-Hotline mit 0800-Nummer als Backup; Behörden-115-Verbund kann bei lokalem Ausfall Anrufe nicht übernehmen, weil regionale Routing-Logik fehlt.",
+        "contractReference": "TK-Anbieter-Vertrag, Behörden-115-Verbund-Vereinbarung",
+        "notes": "Bei IT-Vorfällen ist die Telefonie der erste Bürger-Eskalations-Kanal. Wenn auch Telefonie ausfällt (z.B. SIP-Trunk auf gleicher Infrastruktur), eskaliert Druck auf Pressestelle und Bürgermeister-Büro extrem schnell."
+      },
+      {
+        "id": "adm_dep_druckdienstleister",
+        "title": "Druckdienstleister Massenbescheid-Versand (Steuern, Sozialleistungen)",
+        "category": "lieferant",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Eigener Hauspost-Druck für kleine Auflagen; bei Massenbescheid-Saison (Grundsteuer-Hauptveranlagung) Substitution durch Backup-Druckdienstleister möglich, aber Vorlauf-Zeit von 1-2 Wochen.",
+        "contractReference": "Rahmenvertrag mit Druckdienstleister (Lettershop)",
+        "notes": "Druckdienstleister sind oft selbst NIS2-relevant (kritische Lieferketten-Abhängigkeit). Bei Datenschutz-Vorfall beim Dienstleister haftet die Verwaltung mit (Auftragsverarbeitungs-Vertrag DSGVO Art. 28)."
+      },
+      {
+        "id": "adm_dep_landes_cio",
+        "title": "Cybersicherheitsagentur Land / Land-CIO (LSI Bayern, IT.NRW, ekom21 Hessen)",
+        "category": "behoerde",
+        "criticality": "mittel",
+        "singlePointOfFailure": false,
+        "fallback": "Eskalations-Pfad bei systemischen IT-Vorfällen. Cybersicherheitsagenturen Bayern (LSI), Hessen, Niedersachsen, NRW als sektorale CERT-Strukturen für kommunale Anbindung.",
+        "contractReference": "Verwaltungs-Abkommen mit Landesbehörden",
+        "notes": "Bei Bayern: LSI als Landesamt für Sicherheit in der Informationstechnik. Bei NRW: IT.NRW. Bei Hessen: ekom21. Pro Bundesland eigene Strukturen — Eskalations-Liste mit Telefonnummern in Krisen-Handbuch verankern."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "adm_scn_ransomware_stillstand",
+        "title": "Ransomware mit vollständigem Verwaltungs-Stillstand",
+        "category": "Cyber-physische Bedrohung mit Bürger-Service-Hebel",
+        "description": "Ransomware-Verschlüsselung aller Fachverfahren, Bürgeramt/Sozialamt/Standesamt nicht arbeitsfähig, Sozialleistungen ausgesetzt, Bürger-Wartelistung ohne Aussicht. Anhalt-Bitterfeld-Schablone Juli 2021.",
+        "likelihood": 4,
+        "impact": 5,
+        "ownerRole": "Bürgermeister*in / Landrat / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_itbetrieb",
+          "adm_proc_buergeramt",
+          "adm_proc_sozialamt",
+          "adm_proc_standesamt",
+          "adm_proc_finanzbuchhaltung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_itdz_kommunal",
+          "adm_dep_fachverfahren_msb",
+          "adm_dep_hkr"
+        ],
+        "playbook": "Sofortige Trennung infizierter Systeme. Krisenstab nach Anhalt-Bitterfeld-Pattern. BSI-Meldung nach NIS2 §8d innerhalb 24h. Bürger-Information über alternative Kanäle (Pressestelle, Behörden-115, Aushang). Notbetrieb mit Papier-Antrags-Annahme. Notstandserklärung durch Bürgermeister/Landrat als politische Eskalations-Stufe.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Anhalt-Bitterfeld 2021 (207 Tage Notbetrieb), Witten 2022, Rhein-Pfalz-Kreis 2024 als Schablonen."
+      },
+      {
+        "id": "adm_scn_itdz_outage",
+        "title": "Kommunaler IT-Verbund-Dienstleister-Outage mit Verbund-Kaskade",
+        "category": "Interdependenz auf regionaler Ebene",
+        "description": "Zentraler IT-Verbund-Dienstleister hat einen Outage, mehrere angeschlossene Kommunen gleichzeitig betroffen, Wahltag oder Steuer-Stichtag droht. Operative Resilienz, kein Cyber-Vorfall.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "IT-Leitung / Bürgermeister*in",
+        "linkedProcessTemplateIds": [
+          "adm_proc_buergeramt",
+          "adm_proc_sozialamt",
+          "adm_proc_steueramt",
+          "adm_proc_finanzbuchhaltung",
+          "adm_proc_itbetrieb"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_itdz_kommunal"
+        ],
+        "playbook": "ITDZ-Eskalations-Hotline, Notbetrieb mit Papier-Verfahren, Bürger-Information mit Multi-Kanal, Verbund-Solidarität mit benachbarten Kommunen, Land-CIO-Eskalation.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Südwestfalen-IT-Schablone Oktober 2023 (72 Kommunen, 1,7 Mio. Einwohner)."
+      },
+      {
+        "id": "adm_scn_hochwasser_rathaus",
+        "title": "Hochwasser am Rathaus-Standort (Bayern-Donau, NRW-Erft, Sachsen-Mulde)",
+        "category": "Naturgefahr mit Standort-Unterbrechung",
+        "description": "Hochwasser- oder Starkregen-Ereignis flutet das Rathaus-Untergeschoss inkl. Server-Raum und Aktenarchiv. Verwaltungsstandort für 1-2 Wochen nicht nutzbar; physische Akten teilweise vernichtet.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Hauptamt / Bürgermeister*in / Bauamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_buergeramt",
+          "adm_proc_ratsinformation",
+          "adm_proc_ordnungsamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_strom_rathaus",
+          "adm_dep_druckdienstleister"
+        ],
+        "playbook": "Auslagerungs-Standort aktivieren (z.B. Schule, VHS, Bürgerhaus). Mobile IT-Anbindung über LTE. Akten-Rettung (Trocknung) durch Restaurations-Dienstleister. Krisenkommunikation zur Bürgerschaft mit alternativen Anlaufstellen.",
+        "exerciseTypeHint": "simulation",
+        "notes": "Erft-Hochwasser Juli 2021 (Stolberg, Bad Münstereifel, Erftstadt), Donau-Hochwasser Bayern 2024 als Schablonen. Klimawandel-Szenario mit steigender Eintrittswahrscheinlichkeit."
+      },
+      {
+        "id": "adm_scn_stromausfall",
+        "title": "Stromausfall mit Notstrom-Versagen",
+        "category": "Infrastruktur-Ausfall mit IT-Kaskade",
+        "description": "Längerer Stromausfall (24-72h) am Verwaltungsstandort, Diesel-Notstrom-Aggregat fällt nach 8h aus (Tank leer / Wartung versäumt). IT-Komplettausfall, Bürger-Service nicht arbeitsfähig.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "IT-Leitung / Bauamt / Hauptamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_itbetrieb",
+          "adm_proc_buergeramt",
+          "adm_proc_finanzbuchhaltung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_strom_rathaus",
+          "adm_dep_itdz_kommunal"
+        ],
+        "playbook": "Geordneter Shutdown der IT (USV-Phase). Treibstoff-Nachschub für Notstrom-Aggregat (Vertrag mit Tankstelle / THW). Auslagerung kritischer Bürger-Service-Funktionen an benachbarte Kommunen. Strom-Wiederkehr-Sequenz mit IT-Cold-Start.",
+        "exerciseTypeHint": "simulation",
+        "notes": "NRW 2024: mehrere Rathäuser bei Stromausfall ohne Notbetrieb wegen leerer Diesel-Tanks. Reine Live-Übung als einzig vertrauenswürdiger Test."
+      },
+      {
+        "id": "adm_scn_buerger_daten_exfiltration",
+        "title": "Bürger-Daten-Exfiltration mit DSGVO-Art.-34-Pflicht",
+        "category": "Cyber-physische Bedrohung mit DSGVO-Pflicht",
+        "description": "Daten-Exfiltration aus dem Sozialamt-/Jugendamt-/Standesamt-Fachverfahren, mehrere zehntausend Bürger-Datensätze betroffen, DSGVO Art. 34 unverzügliche Benachrichtigung notwendig.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Datenschutzbeauftragte*r / Bürgermeister*in / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_sozialamt",
+          "adm_proc_standesamt",
+          "adm_proc_personalamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_fachverfahren_msb",
+          "adm_dep_ozg_portal"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34, BfDI/Landes-Datenschutzbehörde-Meldung 72 h, Bürger-Benachrichtigung individuell, Schnittstelle zur Polizei (LKA Cyber).",
+        "exerciseTypeHint": "technical",
+        "notes": "Heinrich-Heine-Universität-Schablone, Frankfurt-Universität 2024."
+      },
+      {
+        "id": "adm_scn_wahltag_cyber",
+        "title": "Wahltag-Cyber-Vorfall (Wahlleiter-System, Wahlbenachrichtigungen)",
+        "category": "Cyber-Bedrohung an demokratie-relevantem Stichtag",
+        "description": "Cyber-Vorfall am Wahlsonntag oder in der Auszählungs-Phase: Manipulation oder Outage des Wahlleiter-Fachverfahrens, der Wahlbenachrichtigungs-Druckstrasse oder der öffentlichen Bekanntmachung der Ergebnisse.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Wahlleiter*in / Bürgermeister*in / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_ratsinformation",
+          "adm_proc_itbetrieb",
+          "adm_proc_buergeramt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_itdz_kommunal",
+          "adm_dep_ozg_portal"
+        ],
+        "playbook": "Sofortige Eskalation an Landeswahlleiter und Bundeswahlleiter, Verfassungsschutz-Liaison, Pressestelle Multi-Kanal. Auszählung manuell mit Doppel-Bestätigung. Wahl-Wiederholung als juristische Worst-Case-Option.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Vor jeder Wahl Krisenstabs-Probe Pflicht. BSI hat eigene Wahl-Hardening-Checkliste. Reputations-Schaden für Demokratie-Vertrauen ist hoch."
+      },
+      {
+        "id": "adm_scn_hkr_ausfall",
+        "title": "HKR-System-Ausfall (Lohnzahlungs-Verzug, SEPA-Sammler-Stop)",
+        "category": "IT-Ausfall mit Liquiditäts-Hebel",
+        "description": "HKR-Doppik-System fällt mehrere Tage aus, monatlicher Lohnlauf droht zu kippen, SEPA-Lauf an Lieferanten gestoppt, Mahnverfahren von Lieferanten gegen die Verwaltung absehbar.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Kämmerei / IT-Leitung / Personalamt",
+        "linkedProcessTemplateIds": [
+          "adm_proc_finanzbuchhaltung",
+          "adm_proc_personalamt",
+          "adm_proc_sozialamt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_hkr",
+          "adm_dep_itdz_kommunal"
+        ],
+        "playbook": "Manuelle SEPA-XML-Erzeugung mit Excel + Bundesbank-Schnittstelle als Notbetrieb. Lieferanten-Kommunikation bei Zahlungs-Verzug (Bürgermeister-Brief). Lohnlauf-Vorab-Auszahlung über Bundesbank/Stadtkasse, falls nötig.",
+        "exerciseTypeHint": "technical",
+        "notes": "In einigen Bundesländern (z.B. NRW) persönliche Haftung des Kämmerers bei Liquiditäts-Engpass. Cashflow-Risiko für Lieferanten-Beziehungen langfristig schädlich."
+      },
+      {
+        "id": "adm_scn_insider_datendiebstahl",
+        "title": "Insider-Datendiebstahl (Personenstand, Sozialdaten, Personalakten)",
+        "category": "Personeller Risiko-Vektor mit DSGVO-Pflicht",
+        "description": "Mitarbeiter mit erweiterten Rechten exfiltriert vor seinem/ihrem Ausscheiden Bürger-Datensätze (Personenstand, Sozialdaten, Personalakten) — entweder vorsätzlich oder im Auftrag Dritter.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r / Personalamt / IT-Leitung",
+        "linkedProcessTemplateIds": [
+          "adm_proc_sozialamt",
+          "adm_proc_standesamt",
+          "adm_proc_personalamt",
+          "adm_proc_steueramt"
+        ],
+        "linkedDependencyTemplateIds": [
+          "adm_dep_fachverfahren_msb"
+        ],
+        "playbook": "Schnelle Account-Sperrung beim Verlassen-Prozess (Personalamt-IT-Workflow). Logging-Auswertung für Exfiltrations-Nachweis. DSGVO-Meldung 72h falls Bürger-Daten betroffen. Disziplinar-/Strafverfahren mit Polizei.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Häufigster nicht-medialer Insider-Fall. Joiner-Mover-Leaver-Prozesse in der Verwaltung oft schwach (Beamtentum, Kündigungsschutz). Berechtigungs-Reviews quartalsweise als Mindeststandard."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "adm_ex_ransomware_stillstand",
+        "title": "Ransomware-Tabletop Verwaltung",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "adm_scn_ransomware_stillstand",
+        "ownerRole": "Krisenstab / Bürgermeister*in",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Krisenstabs-Übung mit Bürgermeister/Landrat persönlich, IT-Leitung, DSB, Pressesprecher, Land-CIO-Liaison, Hauptamt, Pressestelle. Anhalt-Bitterfeld-Lessons-Learned-Drehbuch als Pflicht-Anhang."
+      },
+      {
+        "id": "adm_ex_itdz_outage",
+        "title": "ITDZ-Ausfall-Walkthrough",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "adm_scn_itdz_outage",
+        "ownerRole": "Krisenstab / IT-Leitung",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Walkthrough-Übung mit ITDZ-Liaison-Person, benachbarten Kommunen für Verbund-Solidaritäts-Test, Land-CIO-Eskalation. Übungs-Format als Walkthrough (kein Vollstandby) — Fokus auf Eskalations-Pfade und Notbetriebs-Prozeduren."
+      },
+      {
+        "id": "adm_ex_dsgvo_meldung",
+        "title": "DSGVO-Meldung-Funktionstest (Datenpanne 72h)",
+        "exerciseType": "technical",
+        "scenarioTemplateId": "adm_scn_buerger_daten_exfiltration",
+        "ownerRole": "Datenschutzbeauftragte*r / IT-Leitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Funktions-Test: simulierte Datenpanne, mit Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72h-Frist). Inkl. Test der Bürger-Benachrichtigungs-Logistik (Art. 34) und Kommunikations-Vorlagen."
+      },
+      {
+        "id": "adm_ex_notstrom_live",
+        "title": "Notstrom-Live-Übung Rathaus",
+        "exerciseType": "simulation",
+        "scenarioTemplateId": "adm_scn_stromausfall",
+        "ownerRole": "IT-Leitung / Bauamt",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Vollübung: echte Last-Abschaltung, Notstrom-Aggregat startet, IT-Cold-Start-Sequenz, Treibstoff-Nachschub-Prozess. Wichtigste Übung gegen den NRW-2024-Trockenfall. Erst nach erfolgreichem Live-Test gilt das Notstrom-Konzept als belastbar."
+      },
+      {
+        "id": "adm_ex_wahltag_krisenstab",
+        "title": "Wahltag-Krisenstab-Probe",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "adm_scn_wahltag_cyber",
+        "ownerRole": "Wahlleiter*in / Krisenstab",
+        "cadenceMonths": 36,
+        "notes": "Drei-Jahres-Tabletop (Spec sah 48 Monate vor jeder Bundeswahl vor; Schema-Limit der Plattform liegt bei 36 Monaten — daher zusätzlich vor jeder Bundes-/Landtagswahl ad-hoc proben). Krisenstab + Wahlleitung + Pressestelle + Verfassungsschutz-Liaison. BSI-Wahl-Hardening-Checkliste als Drehbuch-Basis."
+      }
+    ],
+    "riskCatalogTemplates": [
+      {
+        "id": "risk-adm-ransomware-verwaltungs-stillstand",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ransomware_full_outage",
+        "titel": "Ransomware mit Verwaltungs-Stillstand (Anhalt-Bitterfeld-Schablone)",
+        "beschreibung": "Ransomware verschlüsselt alle kritischen Fachverfahren, Bürgeramt/Sozialamt/Standesamt sind nicht arbeitsfähig, Sozialleistungen werden ausgesetzt, Bürger-Wartelisten wachsen unbegrenzt. Anhalt-Bitterfeld-Schablone Juli 2021: erste deutsche Kommune mit Cyber-Katastrophenfall, 207 Tage Notstandserklärung, ca. 2,5 Mio. € Wiederaufbau-Kosten. Vektoren: Phishing-E-Mail mit Office-Makro, Exploit veralteter Web-Anwendungen, kompromittierte Drittanbieter-Wartungs-Zugänge. Tenant-Profil-Hinweis: kleine Gemeinden besonders verwundbar (knappe IT-Kapazitäten), Großstädte besser ausgestattet aber höhere Bürger-Reichweite. Schadensbild: vollständiger Bürger-Service-Stillstand, politische Krise (lokale Presse, Bürgermeister-/Landrats-Verantwortung), DSGVO-Folge-Wirkung. Mitigation: Offline-Backup nach 3-2-1-Regel mit quartalsweisem Test, Admin-Rechte-Minimierung mit PAM und MFA, halbjährliche Tabletop-Übung.",
+        "eintrittswahrscheinlichkeit": 5,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Bürgermeister*in / Landrat / IT-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-buerger-daten-exfiltration",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "buerger_data_exfiltration",
+        "titel": "Bürger-Daten-Exfiltration mit DSGVO-Art.-34-Pflicht",
+        "beschreibung": "Daten-Exfiltration aus dem Sozialamt-/Jugendamt-/Standesamt-/Ausländerwesen-Fachverfahren — Personen-Stamm-Daten, finanzielle Lebenslagen, familiäre Strukturen, Aufenthalts-Status. Schablonen: Heinrich-Heine-Universität, Frankfurt-Universität 2024, kommunale ITDZ-Vorfälle 2023-2025. Vektor: APT-Gruppe oder organisierte Kriminalität, Doppel-Erpressung (Verschlüsselung + Daten-Leak-Drohung). Tenant-Profil-Hinweis: Großstädte mit Ausländerwesen-Schwerpunkt politisch besonders sensibel; Landkreise mit Jugendamt-Akten nach SGB VIII besonders DSGVO-relevant. Schadensbild: DSGVO Art. 34 unverzügliche Benachrichtigung mehrerer zehntausend Bürger, Reputations-Schaden für Bürgermeister/Landrat, ggf. politische Konsequenz im Stadt-/Kreisrat. Mitigation: Datenklassifizierung, MFA-Vollabdeckung, EDR auf allen Verwaltungs-Workstations, DSGVO-Pflicht-Übung halbjährlich.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Datenschutzbeauftragte*r / IT-Leitung / Bürgermeister*in",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-ddos-buergerportal",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ddos_buergerportal",
+        "titel": "DDoS-Angriff auf Bürger-Portal (OZG-/e-Government-Plattform)",
+        "beschreibung": "Volumetrische DDoS-Angriffe gegen das Bürger-Portal (OZG-konformes e-Government-Portal, kommunale Webseite, Online-Antrags-Plattform) — besonders kritisch bei Wahl-Stichtag, Steuer-Stichtag, OZG-Pflicht-Frist. OZG-Status 2026: nur 823 von 7.509 Verwaltungsleistungen flächendeckend digital, ab 2028 Pflicht. Tenant-Profil-Hinweis: Großstädte mit ausgebauten Online-Diensten primär betroffen; Landgemeinden mit minimalen Online-Diensten weniger empfindlich, dafür weniger Mitigation-Kapazität. Schadensbild: Bürger-Service-Verfügbarkeit nicht gegeben, lokale Pressewelle, OZG-Pflicht-Verstoß. Mitigation: vertraglich gebundener DDoS-Mitigation-Provider (Akamai/Cloudflare/Link11), Failover auf statische Status-Seite, BSI-CS-Vorfallsmeldung.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Pressesprecher",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-spear-phishing-amts-leitung",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "spear_phishing_leadership",
+        "titel": "Spear-Phishing gegen Amts-/Bürgermeister-/Landrats-Leitung",
+        "beschreibung": "Gezielte Spear-Phishing-Kampagne gegen Bürgermeister, Landrat, Amtsleitungen — Vektor: gefälschte Ministerial-E-Mails, Land-CIO-Imitation, Bundesbehörden-Imitation. Bei erfolgreichem Initial-Access: Lateral movement zu Fachverfahren, Daten-Exfiltration, Ransomware-Vorbereitung. Tenant-Profil-Hinweis: politisch exponierte Tenants (Großstadt, Bezirksregierung) primär betroffen; Verwaltungs-Spitzen oft mit eigenem Mail-Client und unregelmäßiger Sicherheits-Schulung. Schadensbild: Initial-Access mit hoher Reichweite (Admin-Rechte oft auf Leitungs-Workstations), DSGVO-Implikation, politisch-mediale Schadens-Hebel. Mitigation: FIDO2-MFA für Leitungs-Konten, jährliche Phishing-Simulation, separate Admin-Konten, EDR.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-fachverfahren-ausfall",
+        "categoryId": "technical",
+        "subCategoryId": "fachverfahren_outage",
+        "titel": "Fachverfahren-Ausfall (MESO/MOIN, OPEN/PROSOZ, AutiSta, SAP-KOSO, AKDB-Lösungen)",
+        "beschreibung": "Ausfall eines kritischen Fachverfahrens — Update-Fehler, Datenbank-Korruption, Storage-Cluster-Ausfall beim Hersteller, Lizenz-Stilllegung. Verwaltungs-Fachverfahren oft 10-20 Jahre alt mit eingeschränkter Update-Tiefe. Tenant-Profil-Hinweis: AKDB-/KIVBF-Hosted-Verfahren mit gemeinsamer Hersteller-Infrastruktur — Outage trifft alle Tenants gleichzeitig. Schadensbild: pro Verfahren spezifischer Bürger-Service-Ausfall (Bürgeramt → keine Pässe, Sozialamt → keine Auszahlung, Standesamt → keine Beurkundung). Mitigation: Hersteller-Wartungs-Vertrag mit definiertem RTO, Notbetrieb mit Papier-Verfahren, Update-Disziplin mit Test-Umgebung.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Fachbereichs-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-rechenzentrum-storage",
+        "categoryId": "technical",
+        "subCategoryId": "datacenter_storage_failure",
+        "titel": "Rechenzentrums-Storage-Cluster-Ausfall",
+        "beschreibung": "Storage-Cluster-Ausfall im eigenen oder beim ITDZ-Verbund-RZ — Hardware-Defekt, RAID-Mehrfach-Ausfall, Firmware-Bug. Tenant-Profil-Hinweis: Tenants mit eigener Rack-Infrastruktur strukturell anfälliger als ITDZ-Hosted-Tenants (Verbund-Disziplin höher). Schadensbild: alle gehosteten Fachverfahren betroffen, Wiederaufbau aus Backup über Stunden bis Tage. Mitigation: Multi-RZ-Failover, Storage-Snapshots, regelmäßiger DR-Test, Backup-Disziplin nach 3-2-1.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / RZ-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-altsystem-eos",
+        "categoryId": "technical",
+        "subCategoryId": "legacy_end_of_support",
+        "titel": "Altsystem-End-of-Support mit Verwundbarkeits-Folgen",
+        "beschreibung": "Verwaltungs-Altsysteme (Windows-Server-Versionen ohne Hersteller-Support, alte Datenbank-Versionen, veraltete Fachverfahren-Versionen) erreichen End-of-Support — keine Sicherheits-Updates mehr, neu entdeckte Verwundbarkeiten bleiben offen. Tenant-Profil-Hinweis: kommunale Tenants mit knapper Finanz-Lage besonders empfindlich (Migration kostet, oft auf nächstes Haushalts-Jahr verschoben). Schadensbild: erhöhte Angriffsfläche, Compliance-Verstoß bei BSI-Grundschutz/NIS2, Versicherungs-Risiko. Mitigation: Lifecycle-Management mit definierten Migrations-Fenstern, Compensating-Controls (Netzsegmentierung, EDR), Mehrjahres-Investitions-Plan mit dem Stadt-/Kreisrat.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-insider-akten-zugriff",
+        "categoryId": "human_intentional",
+        "subCategoryId": "insider_akten_zugriff",
+        "titel": "Insider-Zugriff auf sensitive Bürger-Akten (Standesamt/Sozialamt/Jugendamt)",
+        "beschreibung": "Verwaltungs-Mitarbeiter*in mit Zugriffs-Berechtigung nutzt diese unbefugt — Recherche zu Nachbarn, Verwandten, Prominenten, Politikern. Schablonen: einzelne Vorfälle in DACH-Verwaltungen 2018-2024 mit Disziplinar- und Strafrechts-Folgen. Tenant-Profil-Hinweis: Großstädte mit politischer Prominenz primär betroffen; Landgemeinden mit kleinem Personenstand weniger anfällig, dafür Sozial-Verflechtungen stark. Schadensbild: DSGVO-Verstoß, politischer Skandal bei Prominenz-Bezug, Disziplinarmaßnahmen, ggf. § 203 StGB-Bruch von Privatgeheimnissen. Mitigation: Logging aller Akten-Zugriffe, regelmäßiger Audit, Vier-Augen-Prinzip bei Prominenz-Anfragen, Sensibilisierungs-Schulung jährlich.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Datenschutzbeauftragte*r / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-organisierte-akten-betrug",
+        "categoryId": "human_intentional",
+        "subCategoryId": "organized_crime_papers",
+        "titel": "Organisierte Kriminalität: Bürger-Daten-/Pass-Betrug-Schema",
+        "beschreibung": "Organisierte Kriminalität versucht über bestochene oder erpresste Verwaltungs-Mitarbeiter*innen, gefälschte Pässe, Aufenthaltsgestattungen oder Sozialleistungs-Bescheide zu erwirken. Vorfälle in DACH 2018-2024 mit BKA-Ermittlungen. Tenant-Profil-Hinweis: Großstädte mit Ausländerwesen-Schwerpunkt primär betroffen; Bezirke mit hoher Asyl-Last besonders. Schadensbild: gefälschte Identitäts-Dokumente im Umlauf, Sozialleistungs-Betrug, Reputations-Schaden für die Verwaltung, BKA-/LKA-Ermittlung. Mitigation: Vier-Augen-Prinzip bei Pass-/Aufenthalts-Erstellung, Hintergrund-Checks bei Einstellung, Whistleblower-Hotline, Job-Rotation.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Hauptamt / Personalabteilung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-politische-sabotage",
+        "categoryId": "human_intentional",
+        "subCategoryId": "political_sabotage",
+        "titel": "Politisch-motivierte Sabotage gegen Verwaltung",
+        "beschreibung": "Politisch-motivierte Sabotage gegen Verwaltung — Brandstiftung am Rathaus, Sachbeschädigung, Hacker-Aktivismus mit politischer Botschaft (Hacktivism). Schablone: einzelne Vorfälle 2020-2024 in DACH gegen Rathäuser und Parteibüros. Tenant-Profil-Hinweis: politisch exponierte Tenants (Großstadt mit umstrittenen Politikern, Bezirke mit hoher Migration) primär betroffen. Schadensbild: physische Schäden, Bürger-Verunsicherung, lokale Pressewelle, Polizei-Eskalation. Mitigation: physische Sicherheit (Rathaus-Bewachung, Kameras), Cyber-Resilienz für Hacktivism (DDoS-Mitigation), Krisen-Kommunikations-Drehbuch.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Hauptamt / Pressesprecher / Polizei-Kontakt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-fehlversand-personenakten",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "data_fehlversand",
+        "titel": "Fehlversand sensitiver Bürger-Daten (E-Mail, Brief, Fax)",
+        "beschreibung": "Verwaltungs-Mitarbeiter*innen versenden sensitive Daten an falsche Empfänger — Tippfehler in E-Mail-Adresse, falscher Anhang, Brief mit falschem Bürger-Adress-Aufkleber, Fax an falsche Nummer. DSGVO Art. 33-Meldepflicht binnen 72 h, ggf. Art. 34 unverzüglich. Tenant-Profil-Hinweis: alle Verwaltungs-Tenants gleichermaßen betroffen, Häufigkeit pro Mitarbeiter*in über Jahre konstant. Schadensbild: DSGVO-Bußgeld, Bürger-Vertrauensschaden, lokale Pressewelle bei Sammel-Vorfällen. Mitigation: E-Mail-Verschlüsselung Default, Sensibilisierungs-Schulung halbjährlich, automatischer Fehlversand-Check (ähnliche E-Mail-Adressen warnen), Vier-Augen-Prinzip bei Massen-Versand.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Datenschutzbeauftragte*r / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-verlust-mobiler-geraete",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "lost_mobile_device",
+        "titel": "Verlust mobiler Geräte mit Bürger-Daten (Außendienst, Homeoffice)",
+        "beschreibung": "Verlust oder Diebstahl von Verwaltungs-Notebooks/Tablets/Smartphones mit Bürger-Daten — z. B. Außendienst (Sozialamt-Hausbesuch, Bauamt-Vorort, Ordnungsamt-Streifen), Homeoffice-Geräte. DSGVO Art. 33/34-Pflicht falls Daten zugänglich. Tenant-Profil-Hinweis: Tenants mit ausgeprägtem Außendienst (Sozialämter, Jugendämter) primär betroffen; Tenants mit Schreibtisch-Konzentration weniger. Schadensbild: DSGVO-Meldepflicht, Bürger-Benachrichtigung bei hohem Risiko, Reputations-Schaden. Mitigation: Festplatten-Verschlüsselung Pflicht, MDM mit Remote-Wipe, MFA für Konten, regelmäßiger Geräte-Inventar-Check.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Datenschutzbeauftragte*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-itdz-verbund-ausfall",
+        "categoryId": "interdependency",
+        "subCategoryId": "itdz_verbund_outage",
+        "titel": "Kommunaler IT-Verbund-Dienstleister-Ausfall (Südwestfalen-IT-Schablone)",
+        "beschreibung": "Zentraler kommunaler IT-Verbund-Dienstleister (AKDB / KIVBF / IT.NRW / ekom21 / Dataport / regio iT) hat einen Outage — Hardware-Vorfall, Cyber-Vorfall beim Dienstleister, Migrations-Fehler. Schablone: Südwestfalen-IT-Cyber-Vorfall Oktober 2023 mit 72 betroffenen Kommunen, ~20.000 Arbeitsplätzen, ~1,7 Mio. Einwohnern. Tenant-Profil-Hinweis: alle ITDZ-angeschlossenen Tenants gleichzeitig betroffen — Verbund-Solidarität ist organisatorische Antwort, nicht technische. Schadensbild: alle gehosteten Fachverfahren betroffen, Bürger-Service-Stillstand, lokale Presse mit Sammel-Wirkung („alle Kommunen im Kreis betroffen\"). Mitigation: Notbetrieb mit Papier-Verfahren vor-vertraglich vorbereitet, Verbund-Solidaritäts-Vereinbarung mit benachbarten Kommunen, ITDZ-Eskalations-Drill.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Bürgermeister*in",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-tk-anbieter-ausfall",
+        "categoryId": "interdependency",
+        "subCategoryId": "tk_provider_outage",
+        "titel": "Telekommunikations-Anbieter-Ausfall (Festnetz / Mobilfunk / Internet)",
+        "beschreibung": "Telekommunikations-Anbieter-Ausfall — Festnetz-Telefonie für Bürger-Hotline ist erstaunlich kritisch (alte Bürger ohne Smartphone-Affinität rufen das Rathaus an), Mobilfunk-Backbone-Ausfall trifft Außendienst, Internet-Ausfall lähmt Online-Verkehr und Bürger-Portal. Cross-Sector-Bezug zum IT/Telekom-Pack. Tenant-Profil-Hinweis: Landgemeinden mit nur einem Provider strukturell anfälliger; Großstädte oft mit Multi-Provider-Anbindung. Schadensbild: Bürger-Hotline-Ausfall, Außendienst-Kommunikation gestört, Online-Dienste ausgefallen. Mitigation: Backup-Anbindung über zweiten Provider, Mobilfunk-Notfall-Hotline, lokale Internet-Anbindung für kritische Anwendungen.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Leitung / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-stromversorgung-rathaus",
+        "categoryId": "interdependency",
+        "subCategoryId": "power_outage_rathaus",
+        "titel": "Stromversorgungs-Ausfall am Rathaus / Kreisverwaltung",
+        "beschreibung": "Stromausfall am Rathaus oder Kreisverwaltung über Stunden bis Tage — abhängig vom Energie-Sektor (Cross-Sector-Bezug zum Energie-Pack). Vorfälle 2024-2025 in DACH durch Sturm, Überschwemmung, Substations-Ausfall. Tenant-Profil-Hinweis: ländliche Tenants strukturell anfälliger (längere Ausfallzeiten); Großstädte mit Multi-Anbindung weniger. Schadensbild: keine IT-Verfügbarkeit, Bürgeramt-Stillstand, Notfallpläne aktivieren. Mitigation: USV für kritische Workstations, Notstrom-Aggregat für RZ, Verlagerung auf benachbarte Kommune im Notfall, Energie-Versorger-Eskalations-Vertrag.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Hauptamt / IT-Leitung / RZ-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-adm-hochwasser-rathaus-rz",
+        "categoryId": "nature",
+        "subCategoryId": "flood_rathaus_rz",
+        "titel": "Hochwasser am Rathaus / Verwaltungs-RZ",
+        "beschreibung": "Hochwasser-Ereignis an Rathaus oder Verwaltungs-Rechenzentrum — Schablonen: Ahrtal Juli 2021 (mehrere Verwaltungen wochenlang ausgefallen), Süddeutschland Mai/Juni 2024 (100-150 mm Niederschlag im Allgäu/Augsburg). Bürger-Daten-Akten in physischer Form (Dachbodengeschoss-Archive) zusätzlich gefährdet. Tenant-Profil-Hinweis: Tenants in Hochwasser-Risiko-Gebieten (Donau, Rhein, Elbe, Oder, Mittelgebirge) primär betroffen. Schadensbild: physische Schäden, IT-Stillstand, Akten-Verlust, Bürger-Service-Ausfall. Mitigation: Hochwasser-Schutz (Mauer, Pumpen), RZ in höherer Etage oder externer Standort, Akten-Digitalisierung mit Offsite-Backup, Pandemie-Continuity-Plan.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Hauptamt / Bürgermeister*in / RZ-Leitung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "tabletopScenarios": [
+      {
+        "id": "tabletop-adm-ransomware-verwaltungs-stillstand",
+        "version": "1.0.0",
+        "title": "Ransomware mit Verwaltungs-Stillstand und politischer Eskalation",
+        "summary": "Ransomware-Verschlüsselung aller kritischen Fachverfahren (Bürgeramt, Sozialamt, Standesamt, Jugendamt, Ausländerwesen) eines mittelgroßen Landratsamts (~ 130.000 Einwohner, ~800 MA, sechs Niederlassungen). Anhalt-Bitterfeld-Schablone Juli 2021: erste deutsche Kommune mit Cyber-Katastrophenfall, 207 Tage Notstandserklärung, ca. 2,5 Mio. € Wiederaufbau-Kosten. Bürgeramt nicht arbeitsfähig (keine Pässe, keine Personalausweise), Sozialamt kann Bürgergeld/Wohngeld nicht auszahlen, Standesamt kann keine Sterbe-Urkunden ausstellen (PStG § 28 3-Werktag-Frist), Jugendamt-Akten verschlüsselt mit SGB-VIII-Sensitivität. Lokale Pressewelle binnen Stunden. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf Notstandserklärungs-Bewertung durch den Landrat (politische Letztverantwortung), BSI-CERT-Bund-Aktivierung nach NIS2 § 8d BSIG-Doppelmeldung, DSGVO-Art.-33/34-Bewertung mit Bürger-Benachrichtigung, Land-CIO-/Innenministerium-Eskalations-Pfad und der zentralen Demokratie-Anspruch-Disziplin der Bürger-Kommunikation. Realitätsbezug: Anhalt-Bitterfeld 2021, Witten 2022, Rhein-Pfalz-Kreis 2024, Heinrich-Heine-Universität, Frankfurt-Universität 2024. Das Szenario komprimiert auf 180 Minuten.",
+        "sectors": [
+          "Staat und Verwaltung"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "NIS2",
+          "DSGVO",
+          "VwVfG",
+          "Landeskatastrophenschutzgesetz"
+        ],
+        "durationMinutes": 180,
+        "roles": [
+          {
+            "id": "role-landrat",
+            "title": "Krisenstabs-Leitung (Landrat / Bürgermeister*in)",
+            "briefing": "Politische Letztverantwortung für Krisenstab. Notstandserklärung nach Landeskatastrophenschutzgesetz ist persönliche Entscheidung des Landrats — Anhalt-Bitterfeld-Schablone Juli 2021: Landrat erklärte Cyber-Katastrophenfall, 207 Tage politische Verantwortung. Lösegeld-Entscheidung mit politischer Tragweite. Bürger-Kommunikations-Sprecher persönlich. Schnittstelle zu Kreisrat, Land-Innenministerium, ggf. Ministerpräsident bei systemischen Implikationen. Politische Verantwortlichkeit ist nicht delegierbar."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung",
+            "briefing": "Operative IT-Verantwortung. Hat den Vorfall erkannt, koordiniert ITDZ-Eskalation (AKDB für bayerische Tenants, KIVBF für BW, IT.NRW, ekom21 für Hessen, Dataport für Norden, regio iT). Erste Eskalations-Stufe nach IT-Sicherheitsbeauftragte*r, entscheidender Fakten-Lieferer für Krisenstab. Trägt Verantwortung für Backup-Wiederherstellung (Anhalt-Bitterfeld-Lehre: Offline-Backup-Disziplin) und Lateral-Movement-Stopp."
+          },
+          {
+            "id": "role-it-sicherheit",
+            "title": "IT-Sicherheitsbeauftragte*r / CISO",
+            "briefing": "Cyber-Incident-Response-Lead. Forensik-Koordination, externe IR-Firma (vor-vertraglich gebunden mit 4-h-SLA), BSI-CERT-Bund-Schnittstelle nach NIS2 § 8d BSIG, ggf. Cybersicherheitsagentur des Landes (Bayern LSI, NRW, Hessen, Niedersachsen). Bewertet Reichweite (welche Verfahren betroffen, welche Bürger-Daten exfiltriert), Ransomware-Familie (LockBit/BlackCat/Hive-Successor), Lösegeld-Forderung."
+          },
+          {
+            "id": "role-dsb",
+            "title": "Datenschutzbeauftragte*r",
+            "briefing": "DSGVO Art. 33 (72 h Erstmeldung an LfD/LDI) und Art. 34 (unverzüglich an Bürger bei hohem Risiko). Sondersensitivität: Jugendamt-Akten nach SGB VIII, Sozialamt-Akten mit finanziellen Lebenslagen, Standesamt-Akten mit Personenstands-Daten. Verwaltungsverfahrensgesetz-Anzeige-Pflichten parallel. Bei kommunalen Tenants meist externe DSB-Bestellung — Schnittstelle zur Anwaltskanzlei mit IT-Recht-Schwerpunkt."
+          },
+          {
+            "id": "role-pressesprecher",
+            "title": "Pressesprecher / Bürger-Kommunikation",
+            "briefing": "Bürger-Kommunikation mit Demokratie-Anspruch — anders als in Wirtschafts-Sektoren ist die Bürger-Information keine PR-Frage, sondern ein demokratisches Recht. Multi-Kanal: Rathaus-/Landratsamt-Aushang, Webseite, Social-Media, lokale Presse, Bürger-Hotline, Amtsblatt, ggf. Lautsprecher-Durchsage. Schnittstelle zu Landrat als persönlichem Sprecher. Verbands-Schnittstelle (Städtetag, Landkreistag, Gemeindebund) für gemeinsame Sprachregelung mit Nachbar-Kommunen."
+          },
+          {
+            "id": "role-ministerial-liaison",
+            "title": "Land-CIO / Innenministerium-Liaison",
+            "briefing": "Schnittstelle zum Land-CIO und zum Land-Innenministerium. Bei Bayern: LSI (Landesamt für Sicherheit in der Informationstechnik) als operative Stelle, Innenministerium als politische Eskalation. Bei NRW: IT.NRW + Innenministerium. Bei Hessen: ekom21 + Innenministerium. Eskalations-Pfad bei systemischen Implikationen, Verbund-Solidaritäts-Vermittlung mit benachbarten Kommunen, Ressourcen-Anforderung an das Land."
+          },
+          {
+            "id": "role-rechtsabteilung",
+            "title": "Rechtsabteilung / Compliance",
+            "briefing": "Berät zu BSIG/NIS2-Meldepflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht nach § 8d BSIG-Umsetzung), DSGVO Art. 33/34, Verwaltungsverfahrensgesetz-Anzeige-Pflichten, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung, OFAC-SDN-Compliance bei sanktionierten Ransomware-Gruppen wie LockBit-Cluster), Notstandserklärung-Rechtsgrundlage nach Landeskatastrophenschutzgesetz. Bei kommunalen Tenants oft externe Anwaltskanzlei."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-ransomware-erkennung",
+                "title": "Ransomware-Erkennung am Montagmorgen",
+                "description": "IT-Leitung meldet: Beim Hochfahren der Workstations am Montagmorgen sehen mehrere Mitarbeiter*innen einen Ransomware-Lock-Screen — „Your network has been encrypted by LockBit 3.0. Pay 800.000 EUR in BTC within 72h or your data will be published\". Erste Stichproben in Fachverfahren-Servern: Datei-Endungen geändert auf .lockbit3, Dateien nicht öffnenbar. Forensik-Telemetrie zeigt: Initial-Access vor 11 Tagen über Phishing-E-Mail mit Office-Makro an Hauptamt-Mitarbeiter*in, lateral movement zu Domain-Controller, Admin-Rechte erlangt, Backup-Server gleichermaßen verschlüsselt (Anhalt-Bitterfeld-Schablone). Fachverfahren MESO, OPEN, AutiSta, AKDB-Lösungen alle nicht erreichbar.",
+                "roleId": "role-it-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-eskalation",
+                "question": "Wie wird die Erst-Eskalation gestaltet?",
+                "roleId": "role-it-leitung",
+                "guidance": "Trade-off zwischen Sofort-Aktivierung der Krisenstabs-Kette (Landrat persönlich, ITDZ-Hotline, BSI-CERT-Bund, externe IR-Firma) und stiller Forensik-Phase (zuerst Reichweiten-Bewertung, dann Eskalation). Anhalt-Bitterfeld-Lehre: stille Phase verlängerte den Wiederaufbau — sofortige multi-direktionale Eskalation ist Pflicht.",
+                "options": [
+                  {
+                    "id": "opt-sofortige-mult-eskalation",
+                    "label": "Sofortige Multi-Eskalation: Landrat persönlich, ITDZ-Vorstands-Hotline, BSI-CERT-Bund, externe IR-Firma (4-h-SLA), Land-CIO parallel — alle innerhalb 30 min",
+                    "consequence": "Maximale Mobilisierung, Anhalt-Bitterfeld-Lehre angewandt. Empfohlen.",
+                    "evaluationHints": [
+                      "Multi-direktionale Sofort-Eskalation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-it-erst-bewerten",
+                    "label": "IT-Leitung bewertet erst Reichweite (30-60 min), dann Krisenstabs-Aktivierung",
+                    "consequence": "Verlorene Zeit, in der lateral movement weiterläuft. Schwächer.",
+                    "evaluationHints": [
+                      "Verzögerte Eskalation"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-still-und-zahlen-pruefen",
+                    "label": "Stille Phase: Erst Lösegeld-Forderung intern bewerten, dann Eskalation",
+                    "consequence": "Anhalt-Bitterfeld-Anti-Schablone. § 89c StGB-Risiko bei sanktionierter Ransomware-Gruppe. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Stille Phase — schädlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-governance-krisenstab",
+                  "crit-adm-reporting-bsig"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-fachverfahren-stillstand",
+                "title": "Fachverfahren-Stillstand bestätigt",
+                "description": "IT-Leitung meldet Reichweite: Bürgeramt-Fachverfahren MESO/MOIN nicht erreichbar (keine Pässe, keine Personalausweise, keine Meldungs-Bestätigungen), Sozialamt OPEN/PROSOZ nicht erreichbar (Bürgergeld-Auszahlung heute nicht möglich), Standesamt AutiSta nicht erreichbar (Sterbe-Beurkundung im PStG-§-28-Drei-Werktage-Fenster gefährdet), Jugendamt-Akten verschlüsselt (SGB-VIII-sensitive Akten potenziell exfiltriert), Ausländerwesen-Fachverfahren nicht erreichbar. Pressesprecher meldet: erste Bürger-Anrufe an Rathaus-Hotline, lokale Presse hat schon angerufen.",
+                "roleId": "role-it-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-buerger-info",
+                "question": "Wie wird die erste Bürger-Information gestaltet?",
+                "roleId": "role-pressesprecher",
+                "guidance": "Trade-off zwischen sofortiger transparenter Bürger-Information (Demokratie-Anspruch, Anhalt-Bitterfeld-Lehre: schweigen verstärkt Misstrauen) und vorsichtiger erst-Phase-Sprache („technische Probleme, Untersuchung läuft\"). Bei Standesamt-Sterbe-Frist (PStG § 28 binnen 3 Werktagen) ist transparente Information rechtlich notwendig.",
+                "options": [
+                  {
+                    "id": "opt-buerger-transparent",
+                    "label": "Sofort transparente Bürger-Information: Rathaus-Aushang + Webseite + Social-Media + lokale Presse + Bürger-Hotline „Wir hatten einen Cyber-Angriff, alle Fachverfahren sind betroffen, wir arbeiten an Wiederaufbau, dringende Anliegen (Sterbe-Beurkundung, Bürgergeld) bitte direkt mit uns kontakten\"",
+                    "consequence": "Demokratie-Anspruch erfüllt, Anhalt-Bitterfeld-Lehre angewandt, Bürger-Vertrauen gewahrt. Empfohlene Variante. Gleichwertig zu opt-buerger-koordiniert.",
+                    "evaluationHints": [
+                      "Sofortige transparente Bürger-Information"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-buerger-koordiniert",
+                    "label": "Erst 30-min-Koordination mit Land-CIO und Städtetag/Landkreistag, dann gemeinsame Sprachregelung",
+                    "consequence": "Verbund-Disziplin maximal, gemeinsame Sprache mit Nachbar-Kommunen. Empfohlene Variante in Verbund-Kontext. Gleichwertig zu opt-buerger-transparent.",
+                    "evaluationHints": [
+                      "Koordinierte Verbands-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-buerger-vorsichtig",
+                    "label": "Vorsichtige Erst-Sprache: „Technische Probleme, Untersuchung läuft, wir bitten um Geduld\"",
+                    "consequence": "Anhalt-Bitterfeld-Anti-Schablone. Bürger-Vakuum füllt sich mit Spekulation, Vertrauensverlust. Schwächer.",
+                    "evaluationHints": [
+                      "Vorsichtige Sprache mit Vakuum-Risiko"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-communication-buerger",
+                  "crit-adm-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-konstituiert",
+                "title": "Krisenstab konstituiert + ITDZ-Vorstand-Eskalation",
+                "description": "Landrat hat Krisenstab einberufen (Landrat, IT-Leitung, IT-Sicherheitsbeauftragte*r, DSB, Pressesprecher, Land-CIO-Liaison, Rechtsabteilung). ITDZ-Vorstand wurde über die 24/7-Hotline erreicht — Vorstand bestätigt: „Wir sehen ähnliche Vorfälle bei zwei weiteren angeschlossenen Kommunen — möglicherweise koordinierter Angriff\". BSI-CERT-Bund hat Bestätigung der § 8d BSIG-Erstmeldung quittiert. Externe IR-Firma (vor-vertraglich gebunden) ist auf dem Weg, Ankunft in 90 min.",
+                "roleId": "role-landrat"
+              },
+              {
+                "id": "inj-loesegeld-mail",
+                "title": "Lösegeld-Forderung mit Bürger-Daten-Drohung",
+                "description": "IT-Sicherheitsbeauftragte*r meldet: LockBit 3.0-Erpresser-Portal zeigt einen Counter („72h until publication\") + Liste mit Stichproben aus Sozialamt-Akten („as proof of access\") — Klar-Namen, Bürger-Daten, Sozialleistungs-Beträge. Lösegeld-Forderung 800.000 EUR in BTC. Bei Nicht-Zahlung: Veröffentlichung aller Bürger-Akten im Dark-Net. LockBit-Cluster ist OFAC-SDN-gelistet.",
+                "roleId": "role-it-sicherheit"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-notstandserklarung",
+                "question": "Erklärt der Landrat den Cyber-Katastrophenfall (Notstandserklärung nach Landeskatastrophenschutzgesetz)?",
+                "roleId": "role-landrat",
+                "guidance": "Politische Letztverantwortung. Anhalt-Bitterfeld-Schablone Juli 2021: Landrat erklärte den Cyber-Katastrophenfall — 207 Tage Wirkung, beschleunigte Ressourcen-Mobilisierung (Bundeswehr-Cybersicherheitsteam, BSI-Vor-Ort-Unterstützung), aber auch erhebliche politische Bindung. Trade-off: Sofort-Erklärung (maximale Mobilisierung, politisches Signal) versus Wait-and-see (politische Vorsicht, aber Ressourcen-Verzug).",
+                "options": [
+                  {
+                    "id": "opt-notstand-sofort",
+                    "label": "Sofort Cyber-Katastrophenfall erklären — maximale Ressourcen-Mobilisierung, klares politisches Signal",
+                    "consequence": "Anhalt-Bitterfeld-Schablone angewandt. Bundeswehr-Cybersicherheits-Team und BSI-Vor-Ort-Unterstützung in 6-12 h verfügbar. Politische Bindung hoch, aber operativ richtig. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofort-Notstandserklärung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-notstand-warten",
+                    "label": "Wait-and-see: erst Reichweite voll bewertet, dann nach 4-6 h entscheiden",
+                    "consequence": "Politisch vorsichtiger, aber Ressourcen-Verzug. Bei eskalierender Lage später nachvollziehen schwierig. Akzeptabel bei kleineren Vorfällen.",
+                    "evaluationHints": [
+                      "Verzögerte Notstandserklärung"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-notstand-ablehnen",
+                    "label": "Notstandserklärung ablehnen — „technischer Vorfall, kein Katastrophenfall\"",
+                    "consequence": "Anhalt-Bitterfeld-Anti-Schablone. Ressourcen-Mangel, politisch im Nachhinein schwer zu verteidigen. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Notstands-Verweigerung"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-governance-notstandserklarung",
+                  "crit-adm-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-itdz-verbund-info",
+                "title": "ITDZ-Verbund: Drei Kommunen koordiniert betroffen",
+                "description": "Land-CIO-Liaison meldet: Innerhalb des ITDZ-Verbunds sind drei Kommunen koordiniert betroffen (unser Tenant + zwei Nachbar-Kreise) — Threat-Actor scheint regional gezielt zu agieren, nicht zufällig. Land-Innenministerium hat eine Pressekonferenz für 16:00 Uhr angesetzt — der Innenminister will eine gemeinsame Sprachregelung. Nachbar-Kommunen melden ähnliche Lösegeld-Forderungen, eine davon hat bereits Bundeswehr-Cybersicherheitsteam angefordert.",
+                "roleId": "role-ministerial-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-loesegeld",
+                "question": "Wie reagiert die Verwaltung auf die Lösegeld-Forderung?",
+                "roleId": "role-rechtsabteilung",
+                "guidance": "Rechtlich klare Lage in Deutschland: Lösegeld-Zahlung an OFAC-SDN-gelistete Cyberkriminelle (LockBit-Cluster ist gelistet) ist nach § 89c StGB (Terrorismusfinanzierung) strafbar — und politisch undenkbar für eine demokratisch gewählte Verwaltung. BSI- und Bundesregierungs-Position eindeutig: nicht zahlen, BKA-Anzeige, Wiederaufbau aus Backup. Trade-off nur scheinbar.",
+                "options": [
+                  {
+                    "id": "opt-nicht-zahlen-bka",
+                    "label": "Nicht zahlen, BKA-/LKA-Cyber-Anzeige, BSI-CERT-Bund informieren, externe Forensik aktivieren, Wiederaufbau aus Offline-Backup",
+                    "consequence": "Rechtlich saubere und einzig empfohlene Variante. BSI-/Bundesregierungs-Linie. Politisch verteidigbar gegenüber Kreisrat und Bürger. Empfohlen.",
+                    "evaluationHints": [
+                      "Lösegeld-Verweigerung mit BKA-Anzeige"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zeit-spielen",
+                    "label": "Mit Erpressern Zeit-Spiel führen (Verhandlung andeuten, ohne zu zahlen) — parallel BKA und BSI",
+                    "consequence": "Vom BKA in einigen Fällen toleriert für Forensik-Gewinn. Politisch heikel — bei Bekanntwerden im Kreisrat schwer zu verteidigen.",
+                    "evaluationHints": [
+                      "Verzögerungs-Taktik mit Behörden-Koordination"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-zahlen",
+                    "label": "800.000 EUR zahlen, um Bürger-Daten-Veröffentlichung zu vermeiden",
+                    "consequence": "§ 89c StGB-Verstoß bei OFAC-SDN-gelistetem LockBit, Landrat persönlich strafbar, politische Existenzfrage. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Lösegeld-Zahlung — strafrechtlich + politisch problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-governance-krisenstab",
+                  "crit-adm-reporting-bsig"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bsig-frist",
+                "title": "BSIG § 8d 24-h-Erstmeldungs-Frist + DSGVO-72h-Frist",
+                "description": "Rechtsabteilung meldet: BSIG-§-8d-NIS2-Erstmeldung an BSI-Meldeportal binnen 24 h ab Klassifikation als „Sicherheitsvorfall\" — Frist tickt seit Minute 30, verbleibend 22,5 h. DSGVO Art. 33-Frist 72 h gegenüber LfD/LDI tickt parallel. DSGVO Art. 34 (Bürger-Benachrichtigung) ist „unverzüglich\" bei hohem Risiko — Bürger-Daten-Veröffentlichungs-Drohung qualifiziert als hohes Risiko, also Pflicht. Verwaltungsverfahrensgesetz-Anzeige-Pflichten parallel beim Land.",
+                "roleId": "role-rechtsabteilung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-dsgvo-art34-buerger",
+                "question": "Wie wird die DSGVO-Art.-34-Bürger-Benachrichtigung gestaltet?",
+                "roleId": "role-dsb",
+                "guidance": "DSGVO Art. 34 verlangt unverzügliche, individuelle Bürger-Benachrichtigung bei hohem Risiko. Trade-off zwischen umfassender individueller Benachrichtigung (postalisch + E-Mail wo verfügbar, ressourcen-aufwändig aber rechtlich sauber) und Sammel-Benachrichtigung über Webseite/Presse (effizient aber rechtlich angreifbar). Bei zehntausenden Betroffenen ist hybride Lösung pragmatisch.",
+                "options": [
+                  {
+                    "id": "opt-art34-hybrid",
+                    "label": "Hybride Benachrichtigung: Webseite + lokale Presse + Amtsblatt + Hotline, plus individuelle Briefe an Hochrisiko-Gruppen (Jugendamt-Klienten, Sozialamt-Empfänger), DSB-Koordination mit LfD/LDI",
+                    "consequence": "Pragmatisch, rechtlich vertretbar bei zehntausenden Betroffenen, LfD/LDI-Akzeptanz gegeben. Empfohlen.",
+                    "evaluationHints": [
+                      "Hybride Bürger-Benachrichtigung mit Hochrisiko-Fokus"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-art34-individuell",
+                    "label": "Vollständig individuelle postalische Benachrichtigung an alle ~50.000 Betroffenen",
+                    "consequence": "Rechtlich am saubersten, aber Wochen-Aufwand und ~75.000 EUR Druck-/Versand-Kosten. Bei knapper kommunaler Finanzlage problematisch.",
+                    "evaluationHints": [
+                      "Vollständige individuelle Benachrichtigung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-art34-sammel",
+                    "label": "Nur Sammel-Benachrichtigung über Webseite und lokale Presse",
+                    "consequence": "Effizient, aber LfD/LDI-Beanstandung wahrscheinlich, rechtlich angreifbar. Schwächer.",
+                    "evaluationHints": [
+                      "Nur Sammel-Benachrichtigung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-reporting-dsgvo",
+                  "crit-adm-communication-buerger"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bundeswehr-cyber",
+                "title": "Bundeswehr-Cybersicherheitsteam + BSI-Vor-Ort eingetroffen",
+                "description": "Aufgrund der Notstandserklärung sind das Bundeswehr-Cybersicherheitsteam (CIR) und das BSI-Vor-Ort-Team eingetroffen. Lagebeurteilung: Wiederaufbau aus Offline-Backup-Tape ist möglich (Anhalt-Bitterfeld-Lehre wurde gelernt — Tape-Backup im Tresor existiert), Wiederherstellungs-Zeit geschätzt 5-7 Tage für Kern-Fachverfahren, 2-3 Wochen für vollständige Wiederherstellung. Bürgeramt-Notbetrieb mit Papier-Verfahren wird ab morgen aufgesetzt. Externe IR-Firma quantifiziert Bürger-Daten-Exfiltration: ~50.000 Datensätze potenziell exfiltriert (Stichproben bestätigen, aber Vollständigkeit nicht prüfbar).",
+                "roleId": "role-it-sicherheit"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-papier-notbetrieb",
+                "question": "Wie wird der Papier-Notbetrieb für die kritischen Fachverfahren organisiert?",
+                "roleId": "role-it-leitung",
+                "guidance": "Anhalt-Bitterfeld-Lehre: Notbetrieb mit Papier-Verfahren ist organisatorisch komplex — manuelle Buchungen, Datums-Stempel, später nachträgliche IT-Übertragung mit Doppel-Buchungs-Risiko. Standesamt-Sterbe-Beurkundung (PStG § 28 3-Werktage-Frist) ist rechtlich besonders kritisch und muss höchste Priorität bekommen. Sozialamt-Bürgergeld-Auszahlung ist Bürger-Existenz-relevant und muss spätestens am 3. Tag funktionieren.",
+                "options": [
+                  {
+                    "id": "opt-papier-priorisiert",
+                    "label": "Priorisierter Papier-Notbetrieb: Standesamt (Tag 1, Sterbe-Frist), Sozialamt (Tag 2-3, Bürgergeld-Auszahlung), Bürgeramt (Tag 3-5, Pässe), Jugendamt (Tag 5+, Akten-Bezug)",
+                    "consequence": "Rechtlich + bürger-bedürfnis-orientiert, Anhalt-Bitterfeld-Lehre angewandt. Empfohlen.",
+                    "evaluationHints": [
+                      "Priorisierter Papier-Notbetrieb"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-papier-uniform",
+                    "label": "Uniformer Papier-Notbetrieb: Alle Fachverfahren ab Tag 2 gleichermaßen",
+                    "consequence": "Faire Behandlung, aber Standesamt-Sterbe-Frist verpasst. Akzeptabel bei kürzeren Vorfällen, schwächer bei längerem Stillstand.",
+                    "evaluationHints": [
+                      "Uniformer Papier-Notbetrieb"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-warten-auf-it",
+                    "label": "Auf IT-Wiederaufbau warten, kein Papier-Notbetrieb",
+                    "consequence": "Anhalt-Bitterfeld-Anti-Schablone. PStG-§-28-Verstoß, Bürger-Existenzbedrohung. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Kein Papier-Notbetrieb"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-operations-buerger-service",
+                  "crit-adm-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-stabilisierung",
+                "title": "Stabilisierung: Papier-Notbetrieb + Land-Pressekonferenz vorbereitet",
+                "description": "Papier-Notbetrieb für Standesamt läuft seit 1 h, erste Sterbe-Beurkundung manuell ausgestellt. Bürgeramt-Hotline ist in Vorbereitung mit Mobilfunk-Anbindung (Festnetz noch nicht restauriert). Landrat hat persönliche Pressemitteilung herausgegeben („Wir hatten einen Cyber-Angriff, wir haben den Katastrophenfall erklärt, Bundeswehr und BSI sind vor Ort, wir arbeiten am Wiederaufbau, wir bedauern die Unannehmlichkeit für unsere Bürger*innen\"). Land-Innenminister-Pressekonferenz um 16:00 — Innenminister will gemeinsame Position der drei betroffenen Kommunen.",
+                "roleId": "role-pressesprecher"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-land-pressekonferenz",
+                "question": "Wie positioniert sich der Landrat bei der Land-Innenminister-Pressekonferenz?",
+                "roleId": "role-landrat",
+                "guidance": "Trade-off zwischen offen-selbstkritischer Position (Lessons-Learned, Anhalt-Bitterfeld-Lehre, langfristige Resilienz-Investitionen — politisch glaubwürdig) und schützender Position (Wir-haben-alles-richtig-gemacht — kurzfristig sicherer, aber langfristig glaubwürdigkeits-schwächend).",
+                "options": [
+                  {
+                    "id": "opt-land-offen",
+                    "label": "Offene Position: „Wir hatten den Vorfall, wir haben aus Anhalt-Bitterfeld gelernt (Offline-Backup vorhanden), wir investieren weiter in Resilienz im ITDZ-Verbund, wir bitten den Landtag um zusätzliche IT-Sicherheits-Mittel\"",
+                    "consequence": "Glaubwürdig, signalisiert Lern-Disziplin, stärkt langfristiges Bürger-Vertrauen, ermöglicht Mehr-Mittel-Argument im Stadt-/Kreisrat. Empfohlen.",
+                    "evaluationHints": [
+                      "Offene Lessons-Learned-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-land-sachlich",
+                    "label": "Sachliche Position: „Wir haben den Vorfall fach-gerecht abgearbeitet, Bundeswehr und BSI unterstützen uns, Wiederaufbau läuft\"",
+                    "consequence": "Akzeptabel, aber Lernerziehungs-Effekt geht verloren. Mittlerer Wert.",
+                    "evaluationHints": [
+                      "Sachliche Position"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-land-defensiv",
+                    "label": "Defensive Position: „Wir konnten nichts dafür, Cyber-Kriminelle sind immer einen Schritt voraus\"",
+                    "consequence": "Politisch schwach, glaubwürdigkeits-schädigend, im Kreisrat schwer zu verteidigen. Schwächste Option.",
+                    "evaluationHints": [
+                      "Defensive Position"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-communication-buerger",
+                  "crit-adm-governance-notstandserklarung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 160,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-verbund-solidaritat",
+                "title": "Verbund-Solidarität: Nachbar-Kommunen helfen",
+                "description": "Nachbar-Kommunen (nicht betroffen) bieten Hilfe an: Personelle Unterstützung im Bürgeramt-Papier-Notbetrieb, IT-Backup-Server-Bereitstellung, Standesamt-Beamten-Aushilfe für Sterbe-Beurkundung über Verbands-Standesamt-Vereinbarung. Bürgermeister-Konferenz auf Kreis-Ebene koordiniert die Verbund-Solidarität. Ein offizieller Vertrag der „Verbund-Solidarität bei IT-Notlagen\" wird vorbereitet — Vorlage für andere Kreise.",
+                "roleId": "role-ministerial-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-verbund-solidaritat",
+                "question": "Wie wird die Verbund-Solidarität institutionalisiert?",
+                "roleId": "role-landrat",
+                "guidance": "Verwaltungs-spezifische Frage: Verbund-Solidarität ist organisatorisch und politisch — keine technische. Verträge zwischen Kommunen sind kommunalrechtlich möglich (öffentlich-rechtliche Vereinbarung nach Gemeindeordnung), aber selten geübt. Anhalt-Bitterfeld-Lehre: ad-hoc-Hilfe funktionierte, aber nicht institutionalisiert.",
+                "options": [
+                  {
+                    "id": "opt-verbund-vertrag",
+                    "label": "Offizieller Verbund-Solidaritäts-Vertrag (öffentlich-rechtliche Vereinbarung) mit benachbarten Kommunen, Vorlage für Land mit Bitte um Verallgemeinerung",
+                    "consequence": "Institutionalisierte Resilienz, politisch wirksam, langfristig nachhaltige Lösung. Empfohlen.",
+                    "evaluationHints": [
+                      "Verbund-Solidaritäts-Vertrag"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-verbund-adhoc",
+                    "label": "Ad-hoc-Hilfe akzeptieren, aber kein offizieller Vertrag — informelle Vereinbarung",
+                    "consequence": "Pragmatisch im Akut-Fall, aber für nächsten Vorfall nicht reproduzierbar. Akzeptabel.",
+                    "evaluationHints": [
+                      "Informelle Verbund-Solidarität"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-cross-sector-verbund",
+                  "crit-adm-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 175,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein. Erste Erkenntnisse: Offline-Backup auf Tape im Tresor war Goldwert (Anhalt-Bitterfeld-Lehre angewandt), aber Wiederherstellung dauert 5-7 Tage — RTO-Verkürzung notwendig. Notstandserklärung am Tag 1 war richtig — Bundeswehr-/BSI-Unterstützung beschleunigte Wiederaufbau. Papier-Notbetrieb-Drehbuch fehlte detailliert für jedes Fachverfahren — Verbesserung. Bürger-Kommunikation Multi-Kanal funktionierte, aber Mobilfunk-Backup für Hotline sollte vor-vereinbart sein. Verbund-Solidaritäts-Vertrag wird in Kreis-Vorlage gehoben.",
+                "roleId": "role-it-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-folgemeldung",
+                "question": "Wie wird die NIS2-Folgemeldung (72 h) und der Abschlussbericht (1 Monat) koordiniert?",
+                "roleId": "role-rechtsabteilung",
+                "guidance": "BSIG § 8d-Folgemeldungs-Pflicht: 72 h-Folgemeldung mit vollständiger Vorfalls-Beschreibung und Zwischen-Status, 1-Monats-Abschlussbericht mit forensischer Tiefe und Lessons-Learned. Trade-off: koordiniert mit benachbarten betroffenen Kommunen (gemeinsame Position) versus eigenständig (spezifischer aber Doppelaufwand).",
+                "options": [
+                  {
+                    "id": "opt-folgemeldung-koordiniert",
+                    "label": "Koordinierte Folgemeldung mit benachbarten Kommunen + Land-CIO + BSI — gemeinsame Faktenbasis, adressaten-spezifische Überleitungen, Lessons-Learned als regionale Lehre",
+                    "consequence": "Effizient, regionalpolitisch wirksam, BSI-konform. Empfohlen.",
+                    "evaluationHints": [
+                      "Koordinierte regionale Folgemeldung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-folgemeldung-eigen",
+                    "label": "Eigenständige Folgemeldung ohne Koordination",
+                    "consequence": "Spezifischer, aber kein regionaler Lerneffekt. Akzeptabel.",
+                    "evaluationHints": [
+                      "Eigenständige Folgemeldung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-reporting-bsig",
+                  "crit-adm-cross-sector-verbund"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 180,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 7 evaluationCriteria-Achsen. Notstandserklärung am Tag 1 war richtig, Lösegeld nicht gezahlt (rechtlich + politisch korrekt), Papier-Notbetrieb priorisiert nach Bürger-Bedürfnis, DSGVO-Art.-34-Bürger-Benachrichtigung hybrid, Verbund-Solidarität institutionalisiert. Lessons-Learned: Offline-Backup-Wiederherstellungs-Drill verkürzen, Papier-Notbetrieb-Drehbuch detailliert pflegen, Mobilfunk-Backup für Bürger-Hotline vor-vereinbaren, Verbund-Solidaritäts-Vertrag als Kreis-Vorlage.",
+                "roleId": "role-landrat"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-adm-reporting-bsig",
+            "description": "BSIG § 8d / NIS2 Erstmeldung (24 h) + Folgemeldung (72 h) + Abschlussbericht (1 Monat)",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-adm-reporting-dsgvo",
+            "description": "DSGVO Art. 33 (72 h LfD/LDI) + Art. 34 unverzügliche Bürger-Benachrichtigung bei hohem Risiko",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-adm-governance-notstandserklarung",
+            "description": "Notstandserklärung-Disziplin durch Landrat/Bürgermeister, politische Letztverantwortung",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-adm-governance-krisenstab",
+            "description": "Krisenstabs-Konstituierung, Multi-Eskalation (ITDZ, BSI, externe IR, Land-CIO)",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-adm-operations-buerger-service",
+            "description": "Bürger-Service-Erhalt durch priorisierten Papier-Notbetrieb (Standesamt, Sozialamt, Bürgeramt)",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-adm-communication-buerger",
+            "description": "Bürger-Kommunikations-Disziplin: Demokratie-Anspruch, Multi-Kanal, Lessons-Learned-Offenheit",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-adm-cross-sector-verbund",
+            "description": "Verbund-Solidarität mit benachbarten Kommunen, Land-CIO-Eskalation, ITDZ-Koordination",
+            "weight": 2,
+            "category": "cross_sector"
+          }
+        ]
+      },
+      {
+        "id": "tabletop-adm-itdz-verbund-outage",
+        "version": "1.0.0",
+        "title": "Kommunaler IT-Verbund-Dienstleister-Ausfall mit Verbund-Kaskade",
+        "summary": "Der zentrale kommunale IT-Verbund-Dienstleister (AKDB Bayern als Schablone, alternativ KIVBF/IT.NRW/ekom21/Dataport/regio iT) hat einen schweren Hardware-Vorfall im Karlsruhe-/München-/Düsseldorfer-/Hamburger-Rechenzentrum. Mehrere zehn bis hundert angeschlossene Kommunen gleichzeitig betroffen — Schablone Südwestfalen-IT-Cyber-Vorfall Oktober 2023 mit 72 betroffenen Kommunen, ~20.000 Arbeitsplätzen, ~1,7 Mio. Einwohnern. Operative Resilienz, kein Cyber-Vorfall — der Vorfall ist Hardware-bedingt (Storage-Cluster-Ausfall mit RAID-Mehrfachfehler). Verschärfung: heute ist der letzte Tag der Steuer-Stichtag-Frist (Grundsteuer-Bescheid-Einspruch) und in zwei Wochen ist Bundestags-Wahl-Vorbereitung mit Wähler-Verzeichnis-Pflege. Das Szenario simuliert die ersten 2,5 Stunden mit Fokus auf ITDZ-Eskalation, Notbetrieb mit Papier-Verfahren, Bürger-Information mit Multi-Kanal, Verbund-Solidarität mit benachbarten Kommunen, Land-CIO-Eskalation.",
+        "sectors": [
+          "Staat und Verwaltung"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "NIS2",
+          "VwVfG",
+          "OZG"
+        ],
+        "durationMinutes": 150,
+        "roles": [
+          {
+            "id": "role-buergermeister",
+            "title": "Krisenstabs-Leitung (Bürgermeister*in)",
+            "briefing": "Politische Letztverantwortung. Bei ITDZ-Verbund-Vorfall ist die politische Eskalation weniger akut als bei Cyber-Vorfall (kein Lösegeld, keine Daten-Exfiltration), aber Bürger-Service-Stillstand ist Bürgermeister-Verantwortung. Schnittstelle zu Stadtrat, Land-Innenministerium, ggf. Verbands-Spitze (Städtetag, Gemeindebund)."
+          },
+          {
+            "id": "role-it-leitung",
+            "title": "IT-Leitung",
+            "briefing": "Operative IT-Verantwortung. ITDZ-Eskalation über die 24/7-Vorstands-Hotline, Bewertung des Vorfall-Status, Wiederanlauf-Erwartung, Notbetrieb mit Papier-Verfahren auf Tenant-Seite vorbereiten. Bei kleineren Kommunen oft Personalunion mit Hauptamt-Leitung."
+          },
+          {
+            "id": "role-fachbereichsleitung",
+            "title": "Fachbereichs-Leitung Bürgeramt + Sozialamt",
+            "briefing": "Bürger-Service-Verantwortung. Trifft operative Entscheidungen zu Papier-Notbetrieb, Bürger-Hotline-Personal-Aufstockung, Schalter-Schließung versus Schalter-mit-Verzögerung. Steuer-Stichtag-Druck heute akut."
+          },
+          {
+            "id": "role-pressesprecher",
+            "title": "Pressesprecher / Bürger-Kommunikation",
+            "briefing": "Multi-Kanal-Bürger-Information. Bei ITDZ-Vorfall ist die Sprachregelung anders als bei Cyber-Vorfall: Vorfall ist beim externen Dienstleister, Tenant kann nicht direkt beheben. Trade-off zwischen Transparenz („AKDB hat einen Vorfall\") und vorsichtiger Sprache („technische Probleme im Verbund\"). Verbands-Schnittstelle (Städtetag, Landkreistag) für gemeinsame Sprache."
+          },
+          {
+            "id": "role-itdz-liaison",
+            "title": "ITDZ-Liaison",
+            "briefing": "Schnittstelle zum kommunalen IT-Verbund-Dienstleister. Hat die 24/7-Vorstands-Hotline aktiviert, kennt den ITDZ-Vertrags-Eskalations-Pfad. Bei größeren ITDZ-Verbünden (AKDB, KIVBF) oft Account-Manager als persönlicher Kontakt. Bekommt minutenweise ITDZ-Status-Updates."
+          },
+          {
+            "id": "role-land-cio",
+            "title": "Land-CIO / Innenministerium-Liaison",
+            "briefing": "Schnittstelle zum Land-CIO und zur Cybersicherheits-/Verwaltungsmodernisierungs-Agentur des Landes. Eskalations-Pfad bei systemischen Implikationen (mehrere Kommunen betroffen, Wahl-/Steuer-Stichtag-Druck). Verbund-Solidaritäts-Vermittlung mit benachbarten Kommunen."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-itdz-status-meldung",
+                "title": "ITDZ-Status-Portal: „Untersuchung läuft\"",
+                "description": "IT-Leitung meldet: Um 09:30 Uhr — kurz nach Öffnung des Bürgeramts — sind alle Fachverfahren-Verbindungen zum AKDB-RZ Karlsruhe ausgefallen. ITDZ-Status-Portal meldet „Untersuchung läuft, voraussichtliche Dauer unklar\". Bürgeramt-Schalter-Mitarbeiter*innen melden Customer-Welle, Steuer-Stichtag-Bürger sind vor Ort und wollen ihre Grundsteuer-Bescheid-Einsprüche abgeben. Erste Bürger-Anrufe an die Hotline.",
+                "roleId": "role-it-leitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-itdz-eskalation",
+                "question": "Wie wird die ITDZ-Eskalation gestaltet?",
+                "roleId": "role-it-leitung",
+                "guidance": "Trade-off zwischen Standard-Status-Portal-Beobachten (langsam, aber dokumentiert) und Aktivierung der ITDZ-Vorstands-Hotline (schnell, aber nur bei klarem „major\"-Charakter zulässig). Bei Steuer-Stichtag-Druck ist schnelle Eskalation gerechtfertigt.",
+                "options": [
+                  {
+                    "id": "opt-itdz-vorstands-hotline",
+                    "label": "Sofort ITDZ-Vorstands-Hotline aktivieren (24/7-SLA, vor-vertraglich gebunden), parallel Status-Portal beobachten und Land-CIO informieren",
+                    "consequence": "Schneller Status-Update, Vor-vertraglicher Eskalations-Pfad genutzt. Empfohlen.",
+                    "evaluationHints": [
+                      "Vorab-Eskalations-Vertrag konsequent genutzt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-itdz-status-warten",
+                    "label": "Status-Portal beobachten, erst bei Stillstand > 30 min Vorstands-Hotline aktivieren",
+                    "consequence": "Verzögerung von 30 min, in dieser Zeit Bürger-Welle weiter wachsend. Akzeptabel bei kleineren Vorfällen.",
+                    "evaluationHints": [
+                      "Verzögerte Eskalation"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-operations-buerger-service",
+                  "crit-adm-cross-sector-verbund"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-buerger-welle",
+                "title": "Bürger-Welle wächst — Steuer-Stichtag-Druck",
+                "description": "Fachbereichsleitung meldet: Bürgeramt-Schalter haben 35 Wartende, Sozialamt-Schalter 12, Steuer-Amt-Schalter 28 (Grundsteuer-Stichtag-Druck). Bürger-Hotline-Anrufe verfünffacht in 15 min. ITDZ-Status-Portal meldet: „Storage-Cluster-Vorfall im Karlsruhe-RZ, Failover auf Sekundär-RZ in München läuft, Wiederanlauf-Zeit 4-6 h\". Land-CIO bestätigt: 47 Kommunen im Land sind betroffen.",
+                "roleId": "role-fachbereichsleitung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bueramt-strategie",
+                "question": "Wie wird das Bürgeramt operativ gehalten?",
+                "roleId": "role-fachbereichsleitung",
+                "guidance": "Trade-off zwischen Schalter-Schließung (klare Botschaft, aber Bürger ärgerlich), Schalter-mit-Wartelisten („Sie kriegen einen Termin wenn IT wieder läuft\", verzögerte Last), Papier-Notbetrieb (Steuer-Stichtag-Einsprüche per Papier annehmen, später nachträglich verarbeiten).",
+                "options": [
+                  {
+                    "id": "opt-papier-stichtag",
+                    "label": "Papier-Notbetrieb für Steuer-Stichtag-Einsprüche aktivieren (Stempel + Aktenzeichen + Eingangs-Datum manuell erfassen, später nachträglich IT-übertragen), Bürgeramt-Schalter mit Verzögerung („wir schreiben Sie an, sobald IT wieder läuft\")",
+                    "consequence": "Steuer-Stichtag-Frist gewahrt (rechtlich kritisch — Einspruchs-Frist VwVfG), Bürger-Service eingeschränkt aber kontrolliert. Empfohlen.",
+                    "evaluationHints": [
+                      "Papier-Notbetrieb für Steuer-Stichtag"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-schalter-schliessen",
+                    "label": "Bürgeramt-Schalter komplett schließen, Bürger nach Hause schicken („IT-Vorfall, kommen Sie morgen wieder\")",
+                    "consequence": "Steuer-Stichtag-Verlust für Bürger (rechtlich problematisch, später Einsprüche von Bürgern), politisch heikel. Schwächste Option.",
+                    "evaluationHints": [
+                      "Schalter-Schließung mit Stichtag-Verlust"
+                    ],
+                    "scoreContribution": 0
+                  },
+                  {
+                    "id": "opt-warten",
+                    "label": "Bürger im Wartebereich warten lassen bis IT wieder läuft (4-6 h)",
+                    "consequence": "Bürger-Frust, Schalter-Stau, kein gutes Bürgermeister-Bild. Schwächer.",
+                    "evaluationHints": [
+                      "Bürger warten lassen"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-operations-buerger-service",
+                  "crit-adm-communication-buerger"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-bm",
+                "title": "Krisenstab konstituiert + Bürgermeister-Pressemitteilung in Vorbereitung",
+                "description": "Bürgermeister hat Krisenstab konstituiert (Bürgermeister, IT-Leitung, Fachbereichs-Leitung, Pressesprecher, ITDZ-Liaison, Land-CIO-Liaison). Pressesprecher hat Pressemitteilungs-Entwurf vorbereitet — Bürgermeister muss entscheiden, ob „AKDB-Vorfall\" explizit benannt wird oder neutralere Sprache („technische Probleme im IT-Verbund\"). Steuer-Stichtag-Papier-Notbetrieb läuft an, ITDZ-Liaison meldet weiter unverändert „4-6 h Wiederanlauf\".",
+                "roleId": "role-buergermeister"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-presse-itdz-naming",
+                "question": "Wird AKDB/ITDZ in der Pressemitteilung explizit benannt?",
+                "roleId": "role-pressesprecher",
+                "guidance": "Trade-off zwischen voller Transparenz (AKDB explizit benennen, ehrliche Sprache, Bürger versteht den Kontext „dezentrale IT-Strukturen mit Verbund-Anbieter\") und neutraler Sprache („technische Probleme im IT-Verbund\"). Bei AKDB-Verbund-Vorfall hat AKDB selbst Pressemitteilung in Vorbereitung — Sprachregelung sollte koordiniert sein.",
+                "options": [
+                  {
+                    "id": "opt-presse-akdb-explizit",
+                    "label": "Volle Transparenz: „Unser IT-Verbund-Dienstleister AKDB hat einen Hardware-Vorfall im Karlsruhe-Rechenzentrum, voraussichtlich 4-6 h Wiederanlauf, Steuer-Stichtag-Einsprüche werden per Papier angenommen\" — koordiniert mit AKDB-Pressestelle und Land-CIO",
+                    "consequence": "Demokratie-Anspruch erfüllt, Bürger versteht den Kontext, Vertrauen gewahrt. Empfohlen. Gleichwertig zu opt-presse-koordiniert.",
+                    "evaluationHints": [
+                      "Volle Transparenz mit ITDZ-Naming"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-presse-koordiniert",
+                    "label": "Erst 30-min-Koordination mit AKDB-Pressestelle und Land-CIO + Städtetag, dann gemeinsame Sprachregelung",
+                    "consequence": "Verbund-Disziplin maximal. Empfohlen in Verbund-Kontext. Gleichwertig zu opt-presse-akdb-explizit.",
+                    "evaluationHints": [
+                      "Koordinierte Verbund-Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-presse-neutral",
+                    "label": "Neutrale Sprache: „Technische Probleme im IT-Verbund, voraussichtlich 4-6 h\"",
+                    "consequence": "Bürger-Vakuum füllt sich mit Spekulation, Vertrauensverlust. Schwächer.",
+                    "evaluationHints": [
+                      "Neutrale Sprache mit Vakuum-Risiko"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-communication-buerger",
+                  "crit-adm-cross-sector-verbund"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-akdb-update-eskalation",
+                "title": "AKDB-Update: Wiederanlauf-Zeit auf 8-12 h verlängert",
+                "description": "ITDZ-Liaison meldet: AKDB-Vorstand updates die Wiederanlauf-Zeit auf 8-12 h — Failover auf Sekundär-RZ ist komplexer als geplant. Land-Innenminister hat eine gemeinsame Pressekonferenz aller 47 betroffenen Kommunen für 14:00 Uhr angekündigt. Verbands-Spitze (Bayerischer Gemeindetag, Bayerischer Landkreistag) bietet Verbund-Solidarität an: nicht-betroffene Kommunen können temporäre Bürgeramt-Aushilfe entsenden.",
+                "roleId": "role-itdz-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-verbund-hilfe-anfordern",
+                "question": "Fordert die Kommune Verbund-Hilfe von benachbarten Kommunen an?",
+                "roleId": "role-buergermeister",
+                "guidance": "Verwaltungs-spezifische Frage: Verbund-Solidarität ist organisatorisch und politisch — Bürgermeister-Beziehungen über Kreis-Bürgermeister-Konferenzen tragen. Trade-off zwischen Hilfe-Annehmen (kurzfristig hilfreich, aber spätere Gegenleistung erwartet) und Eigen-Stand („wir schaffen das selbst\", politisch unabhängiger).",
+                "options": [
+                  {
+                    "id": "opt-verbund-hilfe-annehmen",
+                    "label": "Verbund-Hilfe von zwei Nachbar-Kommunen annehmen (jeweils 2 Bürgeramt-Mitarbeiter*innen für 1 Tag), später Gegenleistung im nächsten Vorfall",
+                    "consequence": "Pragmatisch, Bürger-Service operativ stabiler. Verbund-Beziehungs-Investition. Empfohlen.",
+                    "evaluationHints": [
+                      "Verbund-Solidarität annehmen"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-verbund-hilfe-ablehnen",
+                    "label": "Verbund-Hilfe ablehnen — „wir schaffen das selbst mit Papier-Notbetrieb\"",
+                    "consequence": "Politisch unabhängig, aber operativ schwächer. Bei längerem Vorfall problematisch. Akzeptabel.",
+                    "evaluationHints": [
+                      "Eigen-Stand"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-cross-sector-verbund",
+                  "crit-adm-operations-buerger-service"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bsig-pruefung",
+                "title": "BSIG § 8d-Meldepflicht-Prüfung",
+                "description": "Rechtsabteilung meldet: NIS2-/BSIG-§-8d-Meldepflicht-Prüfung läuft. Tenant ist „wichtige Einrichtung\" nach NIS2 (~50.000 Einwohner > 50 MA). Bei ITDZ-Verbund-Vorfall ist primär AKDB als „kritische Einrichtung\" meldepflichtig — Tenant ist sekundär als „betroffene wichtige Einrichtung\" meldepflichtig, falls der Vorfall die eigene Verfügbarkeit erheblich einschränkt. Mit > 4 h Bürger-Service-Stillstand ist die Schwelle erreicht. Frist: 24 h ab Klassifikation.",
+                "roleId": "role-itdz-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bsig-eigenmeldung",
+                "question": "Macht die Kommune eine eigene NIS2-/BSIG-Meldung oder reicht AKDB-Meldung?",
+                "roleId": "role-itdz-liaison",
+                "guidance": "BSIG § 8d-Meldepflicht ist primär bei AKDB (als kritische Einrichtung), aber Tenant als wichtige Einrichtung hat eine eigene Meldepflicht falls die Verfügbarkeit erheblich eingeschränkt ist. Trade-off: eigene Meldung (formal-konform, aber Doppel-Aufwand) versus warten auf AKDB-Sammelmeldung (effizient, aber rechtlich weniger sauber).",
+                "options": [
+                  {
+                    "id": "opt-eigenmeldung",
+                    "label": "Eigene NIS2-/BSIG-§-8d-Meldung an BSI mit explizitem Bezug auf AKDB-Hauptvorfall, koordiniert mit AKDB-Meldung",
+                    "consequence": "Rechtlich saubere Variante, BSI-Doppel-Sicht. Empfohlen.",
+                    "evaluationHints": [
+                      "Eigene Meldung mit AKDB-Bezug"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-akdb-sammel",
+                    "label": "Auf AKDB-Sammelmeldung warten (alle 47 Kommunen werden im AKDB-Bericht enthalten sein)",
+                    "consequence": "Effizient, aber rechtlich weniger sauber — bei BSI-Audit-Frage „warum keine eigene Meldung?\" Erklärungsbedarf. Akzeptabel.",
+                    "evaluationHints": [
+                      "AKDB-Sammelmeldung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-reporting-bsig",
+                  "crit-adm-cross-sector-verbund"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-akdb-wiederanlauf",
+                "title": "AKDB-Wiederanlauf um 17:30 Uhr — Steuer-Stichtag-Frist gewahrt",
+                "description": "ITDZ-Liaison meldet: AKDB-Wiederanlauf um 17:30 Uhr — 8 h-Vorfall. Fachverfahren wieder verfügbar, Steuer-Stichtag-Papier-Einsprüche werden manuell IT-übertragen. Bürgeramt-Schalter wieder im Normalbetrieb. Bürger-Hotline-Anrufe sinken. Land-Innenminister-Pressekonferenz um 14:00 verlief sachlich, gemeinsame Position der 47 betroffenen Kommunen vermittelt. Bürgermeister hat persönlich an der Pressekonferenz teilgenommen.",
+                "roleId": "role-itdz-liaison"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-papier-it-uebertragung",
+                "question": "Wie wird die Papier-Stichtag-Einsprüche-IT-Übertragung organisiert?",
+                "roleId": "role-fachbereichsleitung",
+                "guidance": "VwVfG-konforme Übertragung der Papier-Einsprüche in das Fachverfahren mit Erhalt der Fristen-Wirkung (Eingangs-Datum = Stempel-Datum, nicht IT-Eingabe-Datum). Trade-off: heute-Abend-Sofort-Übertragung (zeit-aufwändig, aber gleich erledigt) versus morgen-systematisch (effizienter, aber späterer Reaktions-Zeitpunkt für Bürger).",
+                "options": [
+                  {
+                    "id": "opt-papier-uebertragung-systematisch",
+                    "label": "Morgen systematisch übertragen mit Vier-Augen-Prinzip, Bürger erhalten Eingangs-Bestätigung mit Stempel-Datum (rechtlich Frist-konform)",
+                    "consequence": "Sauber, fehlerarm, rechtlich konform. Empfohlen.",
+                    "evaluationHints": [
+                      "Systematische Übertragung mit Frist-Erhalt"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-papier-uebertragung-sofort",
+                    "label": "Heute-Abend-Sofort-Übertragung mit Überstunden",
+                    "consequence": "Schnell erledigt, aber Fehler-Risiko und Personal-Belastung. Akzeptabel bei kleinem Volumen.",
+                    "evaluationHints": [
+                      "Sofort-Übertragung"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-operations-buerger-service",
+                  "crit-adm-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-akdb-pressekonferenz",
+                "title": "AKDB-Pressekonferenz und Land-Innenminister-Position",
+                "description": "AKDB-Vorstand hat Pressekonferenz gegeben: Hardware-Vorfall im Storage-Cluster, Failover funktionierte, Wiederanlauf in 8 h. AKDB kündigt Investitionen in zusätzliche RZ-Redundanz und Ressourcen-Stärkung an. Land-Innenminister hat öffentlich gefordert: „Verbund-Solidarität zwischen Kommunen muss institutionalisiert werden, das Land wird eine entsprechende Vorlage prüfen\". Stadtrat-/Kreisrat-Anfragen zur Vorfalls-Aufarbeitung sind angekündigt für nächste Sitzung.",
+                "roleId": "role-pressesprecher"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-stadtrat-position",
+                "question": "Wie positioniert sich der Bürgermeister im Stadtrat?",
+                "roleId": "role-buergermeister",
+                "guidance": "Trade-off zwischen offener Lessons-Learned-Position („Wir hatten den Vorfall, wir haben gut reagiert mit Papier-Notbetrieb, wir investieren weiter in Resilienz\") und schützender Position („AKDB hat Vorfall, wir konnten nicht direkt reagieren\"). Erste Variante stärkt politische Glaubwürdigkeit langfristig.",
+                "options": [
+                  {
+                    "id": "opt-stadtrat-offen",
+                    "label": "Offene Lessons-Learned-Position: „Vorfall hat funktionierende Aspekte (Papier-Notbetrieb) und Verbesserungsbereiche (ITDZ-Eskalations-Drill häufiger), Investitions-Antrag für Resilienz folgt\"",
+                    "consequence": "Glaubwürdig, langfristige Investitions-Argumentation gestützt. Empfohlen.",
+                    "evaluationHints": [
+                      "Offene Stadtrat-Position"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-stadtrat-schuetzend",
+                    "label": "Schützende Position: „AKDB hat den Vorfall, wir haben gut reagiert\"",
+                    "consequence": "Kurzfristig sicherer, aber Investitions-Argumentation schwächer. Akzeptabel.",
+                    "evaluationHints": [
+                      "Schützende Stadtrat-Position"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-adm-governance-krisenstab",
+                  "crit-adm-communication-buerger"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 150,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 6 evaluationCriteria-Achsen. Steuer-Stichtag-Papier-Notbetrieb hat gegriffen, Frist-Einsprüche gewahrt, AKDB-Eskalation über Vorstands-Hotline funktionierte, Bürger-Kommunikation mit ITDZ-Naming transparent, Verbund-Solidarität mit Nachbar-Kommunen genutzt, NIS2-/BSIG-Eigenmeldung sauber. Lessons-Learned: ITDZ-Eskalations-Drill halbjährlich, Papier-Notbetrieb-Drehbuch detailliert pro Fachverfahren, Verbund-Solidaritäts-Vertrag mit Nachbar-Kommunen institutionalisieren, Investitions-Antrag im Stadtrat für RZ-Redundanz und IT-Resilienz.",
+                "roleId": "role-buergermeister"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-adm-reporting-bsig",
+            "description": "NIS2-/BSIG-§-8d-Eigenmeldung mit AKDB-Bezug, 24-h-Frist gewahrt",
+            "weight": 2,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-adm-operations-buerger-service",
+            "description": "Bürger-Service-Erhalt durch Papier-Notbetrieb, Steuer-Stichtag-Frist-Wahrung nach VwVfG",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-adm-governance-krisenstab",
+            "description": "Krisenstabs-Konstituierung, ITDZ-Vorstands-Hotline-Aktivierung, Land-CIO-Liaison",
+            "weight": 2,
+            "category": "governance"
+          },
+          {
+            "id": "crit-adm-communication-buerger",
+            "description": "Bürger-Kommunikations-Disziplin: Multi-Kanal, ITDZ-Naming-Transparenz, Stadtrat-Lessons-Learned",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-adm-cross-sector-verbund",
+            "description": "Verbund-Solidarität mit Nachbar-Kommunen, ITDZ-Koordination, Land-CIO-Eskalation",
+            "weight": 3,
+            "category": "cross_sector"
+          },
+          {
+            "id": "crit-adm-governance-resilience-investment",
+            "description": "Resilienz-Investitions-Argumentation im Stadt-/Kreisrat, Lessons-Learned-Verankerung",
+            "weight": 2,
+            "category": "governance"
+          }
+        ]
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience-template-administration-nis2-anhalt-bitterfeld-1.0",
+      "templateNote": "Demo-Entwurf als Starter für einen Resilienzplan im Sektor Staat und Verwaltung, ausgerichtet auf die regulatorische Stapelung: NIS2-Umsetzungsgesetz (in Kraft 6.12.2025) für Bundesverwaltung direkt erfasst und für Tenants > 50 MA / 10 Mio. Euro im Geltungsbereich, kommunale Ebene weitgehend ausgenommen aber via Länder-Cybersicherheits-Gesetzgebung erfasst (Bayern LSI-Gesetz, NRW etc.), KRITISDachG-Schwellen für Sektor Staat und Verwaltung in Vorbereitung, BSI-Grundschutz als de-facto-Standard, DSGVO Art. 30/33/34 für Bürger-Daten-Verarbeitung, Verwaltungsverfahrensgesetz-Anzeige-Pflichten, Personenstandsgesetz § 28 (Sterbe-Beurkundung 3-Werktage-Frist), SGB VIII (Jugendamt-Akten-Sondersensitivität), § 203 StGB (Bruch von Privatgeheimnissen) für Verwaltungsmitarbeiter*innen mit Akten-Zugriff. Sektor-spezifische Performance-Dimension ist Bürger-Service-Verfügbarkeit und Aktenintegrität — die zwei harten Verwaltungs-Achsen, parallel zu Healthcare „Patientensicherheit\", Energy „Netzstabilität\", Industry „Produktionsfähigkeit\", Logistics „Dispositionsfähigkeit\", Water „Versorgungssicherheit + Trinkwasser-Qualität\", IT/Telekom „Verfügbarkeit + Datenintegrität\", Finanz „Customer-Trust + transaktionelle Verfügbarkeit\". Demo-Argument: Verwaltung ist die Bürger-Schnittstellen-Branche mit politischer Verantwortlichkeit — anders als in Wirtschafts-Sektoren ist die Krise hier ein politisches Ereignis, nicht nur ein operatives. Anhalt-Bitterfeld-Schablone Juli 2021: erste deutsche Kommune mit Cyber-Katastrophenfall, 207 Tage Notstandserklärung, ca. 2,5 Mio. € Wiederaufbau-Kosten. Die durchgängige Frage des Plans lautet: Bleibt der Bürger-Service erreichbar mit unverletzten Akten und unverletzten Bürger-Daten, auch bei Ransomware-Stillstand, ITDZ-Verbund-Outage, Bürger-Daten-Exfiltration mit DSGVO-Art.-34-Pflicht oder politisch-motivierter Sabotage — und kann der Bürgermeister/Landrat seine politische Verantwortlichkeit gegenüber Bürger und Stadt-/Kreisrat überzeugend vertreten? Vor Go-Live anzupassen: Operator-Name, Sub-Profil-Zuordnung (Stadtverwaltung / Landratsamt / Bezirksregierung / Landesbehörde — Großstadt / Mittelstadt / Landgemeinde), Einwohner-Zahl, ITDZ-Verbund-Anbieter (AKDB / KIVBF / IT.NRW / ekom21 / Dataport / regio iT je nach Bundesland), Kontaktdaten, Programm-Owner, Stadt-/Kreisrat-Review-Kadenz. Cross-Referenzen (topRisks[].riskId, measuresByGoal[*][].linkedActionItemId) bleiben im Pack leer — der Operator verknüpft nach Übernahme manuell. Review-Zyklus 2 Jahre voreingestellt — bei eskalierenden Vorfällen (Anhalt-Bitterfeld-Niveau) anlassbezogen früher.",
+      "content": {
+        "scope": {
+          "operatorName": "Landratsamt Donau-Ries",
+          "sector": "Staat und Verwaltung",
+          "criticalService": "Bürgeramt (Pass, Personalausweis, Meldung, Beglaubigung), Sozialamt (Bürgergeld, Wohngeld, Sozialhilfe), Standesamt (Geburts-, Heirats-, Sterbe-Beurkundung), Jugendamt (Hilfen zur Erziehung, Vormundschaft), Ausländerwesen (Aufenthaltsgestattung, Pass-Verlängerung), Gesundheitsamt (Infektions-Schutz, Trinkwasser-Überwachung), Veterinäramt, Kfz-Zulassung, Bauamt, Steueramt (Grundsteuer), zwei Schulen-Abteilungen, ITDZ-Anbindung an AKDB Bayern.",
+          "locations": "Hauptverwaltung Donauwörth (Landratsamt mit ~600 MA), Niederlassungen Nördlingen, Wemding, Rain, Oettingen (jeweils Außenstelle), Rechenzentrum vor Ort (kleinere Tenants nutzen ITDZ-Hosting bei AKDB Karlsruhe-/München-RZ), 18 Schulen, 22 Kindergärten/Krippen.",
+          "employees": "Ca. 600 Vollzeitäquivalente, davon 12 in IT-Leitung / IT-Sicherheit, 8 in Datenschutz / Compliance, 110 in Bürgeramt / Sozialamt / Standesamt / Jugendamt (Bürger-Schnittstellen-Personal), 65 in Bauamt / Veterinäramt / Gesundheitsamt, 80 in Schul-Verwaltung, 50 in Steueramt / Kämmerei, 80 in zentralen Diensten (Personal, Hauptamt, Pressestelle), Rest in Spezial-Bereichen.",
+          "personsServed": "Ca. 130.000 Einwohner im Landkreis Donau-Ries, ca. 25.000 Bürger-Vorgänge pro Jahr im Bürgeramt, ca. 8.000 Sozialamt-Klienten, ca. 5.500 Personenstands-Akten pro Jahr (Geburten, Heiraten, Sterbefälle), ca. 1.200 Jugendamt-Akten in laufender Bearbeitung.",
+          "scopeNote": "Mittelgroßes Landratsamt mit doppelter regulatorischer Schicht: NIS2-Umsetzungsgesetz (in Kraft 6.12.2025) für Tenants als „wichtige Einrichtung\" über Bayerische Cybersicherheits-Gesetzgebung erfasst, parallel BSI-Grundschutz als de-facto-Standard, DSGVO Art. 30/33/34, Verwaltungsverfahrensgesetz-Anzeige-Pflichten beim Land. ITDZ-Bezug: AKDB Bayern als „kritischer Verbund-Dienstleister\" — Vertrags- und Eskalations-Pfade im IT-Vertrags-Register dokumentiert. Sub-Tenant-Profil-Hinweis: Diese Vorlage ist für ein bayerisches Landratsamt zugeschnitten — Stadtverwaltungen passen Größenordnung an, Bezirksregierungen erweitern um zusätzliche Aufsichts-Funktionen, Landesbehörden um Ministerial-Anbindung. Operator ist fiktiv, kein realer Bezug zum tatsächlichen Landratsamt Donau-Ries."
+        },
+        "riskBasis": {
+          "methodology": "BSI-Standard 200-2 Risikoanalyse + BSI-Grundschutz-Profile für Verwaltung als zusammengeführtes Verfahren. Bewertungs-Skala 1–5 für Eintrittswahrscheinlichkeit und Auswirkung; Score = EW × AW. Top-Risiken werden halbjährlich im Krisenstabs-Komitee überprüft (Landrat + IT-Leitung + IT-Sicherheit + DSB + Hauptamt). Anhalt-Bitterfeld-Lessons-Learned-Drehbuch fließt direkt in die Risikobewertung ein.",
+          "riskAnalysisReference": "Internes Risiko-Register (Verweis vor Go-Live zu setzen). Cross-Referenzen zur Risiko-Katalog-Vorlage des Pack (riskCatalogTemplates) bleiben im Pack leer — der Operator verknüpft nach Adoption manuell.",
+          "topRisks": [
+            {
+              "title": "Ransomware mit Verwaltungs-Stillstand (Anhalt-Bitterfeld-Schablone)",
+              "category": "Cyber-physische Bedrohung mit Bürger-Service-Hebel",
+              "initialScore": 25,
+              "residualScore": 9,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Bürger-Daten-Exfiltration mit DSGVO-Art.-34-Pflicht",
+              "category": "Cyber-physische Bedrohung mit DSGVO-Pflicht",
+              "initialScore": 20,
+              "residualScore": 8,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Kommunaler IT-Verbund-Dienstleister-Ausfall (Südwestfalen-IT-Schablone)",
+              "category": "Interdependenz auf regionaler Ebene",
+              "initialScore": 20,
+              "residualScore": 8,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Fachverfahren-Ausfall (MESO/MOIN, OPEN/PROSOZ, AutiSta)",
+              "category": "Technische Verfügbarkeit",
+              "initialScore": 16,
+              "residualScore": 8,
+              "criticality": "hoch"
+            },
+            {
+              "title": "DDoS-Angriff auf Bürger-Portal (OZG-/e-Government-Plattform)",
+              "category": "Cyber-physische Bedrohung mit OZG-Pflicht-Hebel",
+              "initialScore": 12,
+              "residualScore": 6,
+              "criticality": "mittel"
+            },
+            {
+              "title": "Insider-Zugriff auf sensitive Bürger-Akten",
+              "category": "Human Intentional mit DSGVO-/§-203-StGB-Hebel",
+              "initialScore": 12,
+              "residualScore": 6,
+              "criticality": "mittel"
+            }
+          ],
+          "riskBasisNote": "Top-6-Risiken decken die fünf verwaltungsspezifischen Hebel ab: (1) Bürger-Service-Stillstand mit politischer Eskalation (Anhalt-Bitterfeld-Schablone), (2) DSGVO-Pflicht mit Bürger-Daten-Sondersensitivität (Jugendamt SGB VIII, Standesamt PStG), (3) ITDZ-Verbund-Konzentration (AKDB / KIVBF / IT.NRW als systemrelevante regionale Konzentration), (4) Fachverfahren-Mono-Hersteller-Abhängigkeit, (5) OZG-/e-Government-Verfügbarkeits-Pflicht. Sechstes Risiko (Insider-Zugriff) ist häufiger als erwartet und gehört zu den Verwaltungs-typischen Aufsichts-Pflichten."
+        },
+        "measuresByGoal": {
+          "prevent": [
+            {
+              "id": "m-adm-prevent-offline-backup",
+              "title": "Offline-Backup nach Anhalt-Bitterfeld-Lehre (3-2-1-Regel mit Air-Gap-Tape)",
+              "description": "Strukturelle Antwort auf Ransomware-Risiko (Top-1) und Bürger-Daten-Exfiltration (Top-2). 3-Kopien-2-Medien-1-offline-Backup mit Tape-Backup im Tresor (Air-Gap), quartalsweiser Wiederherstellungs-Test mit definiertem RTO (4 h für Standesamt, 24 h für Bürgeramt, 48 h für Sozialamt), Immutable-Storage als Ergänzung. Anhalt-Bitterfeld-Lehre integriert: Backup auf Tape + im Tresor, nicht auf demselben Netz wie Produktivsysteme.",
+              "goal": "prevent",
+              "owner": "IT-Leitung / IT-Sicherheitsbeauftragte*r",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-prevent-admin-rechte-pam",
+              "title": "Admin-Rechte-Minimierung mit PAM und FIDO2-MFA",
+              "description": "Strukturelle Antwort auf Ransomware-Lateral-Movement-Risiko (Anhalt-Bitterfeld-Lehre: Mitarbeiter*innen mit Standard-Admin-Rechten gaben Angreifern Reichweite). Trennung Standard- und Admin-Konten, PAM-Tool für Just-in-Time-Privilegien, FIDO2/WebAuthn-MFA für alle Admin-Zugänge inkl. Bürgermeister/Landrat-Konto, vierteljährlicher Privilegien-Review. Bei kommunalen Tenants oft mit AKDB/KIVBF-Standard-Tools umsetzbar.",
+              "goal": "prevent",
+              "owner": "IT-Leitung / IT-Sicherheitsbeauftragte*r",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-prevent-itdz-eskalations-vertrag",
+              "title": "ITDZ-Eskalations-Vertrag mit kommunalem IT-Verbund-Dienstleister",
+              "description": "Strukturelle Antwort auf ITDZ-Verbund-Outage-Risiko (Top-3). Vertraglich gebundener 24/7-Vorstands-Hotline-Pfad mit definiertem Eskalations-SLA (30 min Antwort), halbjährlicher Eskalations-Drill mit ITDZ-Account-Manager, Verbund-Solidaritäts-Klausel im Vertrag (ITDZ vermittelt Hilfe von nicht-betroffenen Kommunen bei Verbund-Vorfall), Substitutions-Plan für Worst-Case-Szenario.",
+              "goal": "prevent",
+              "owner": "IT-Leitung / Hauptamt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-prevent-phishing-schulung",
+              "title": "Anti-Phishing-Schulung halbjährlich + jährliche Phishing-Simulation",
+              "description": "Strukturelle Antwort auf Spear-Phishing-Risiko (Top-7) und initiale Ransomware-Vektoren (Top-1). Halbjährliche verpflichtende Schulung für alle Verwaltungs-Mitarbeiter*innen (inkl. Landrat/Bürgermeister, der oft als Spear-Phishing-Ziel agiert), jährliche Phishing-Simulation mit Klicker-Statistik und Nachschulung der Klicker, Gamification-Ansatz (rote/grüne Sterne pro Mitarbeiter*in). Ministerial-E-Mail-Erkennung speziell geübt.",
+              "goal": "prevent",
+              "owner": "IT-Sicherheitsbeauftragte*r / Personalabteilung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "protect": [
+            {
+              "id": "m-adm-protect-buerger-komm-multi-kanal",
+              "title": "Multi-Kanal-Bürger-Kommunikations-Drehbuch",
+              "description": "Strukturelle Antwort auf Bürger-Trust-Erosion (zentrale Performance-Dimension). Vor-textierte Krisen-Botschaften für die fünf Tabletop-Hauptszenarien (Ransomware-Stillstand, ITDZ-Outage, Bürger-Daten-Exfiltration, Fachverfahren-Ausfall, Hochwasser-RZ) — Multi-Kanal: Rathaus-/Landratsamt-Aushang, Webseite, Social-Media, lokale Presse, Bürger-Hotline, Amtsblatt, Lautsprecher-Durchsage. Bürgermeister/Landrat als persönlicher Sprecher mit Foto-Vorbereitung. Verbands-Abstimmung mit Städtetag/Landkreistag/Gemeindebund.",
+              "goal": "protect",
+              "owner": "Pressesprecher / Bürgermeister-/Landrats-Büro",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-protect-papier-notbetrieb-drehbuch",
+              "title": "Papier-Notbetrieb-Drehbuch pro Fachverfahren",
+              "description": "Strukturelle Antwort auf Bürger-Service-Stillstand. Pro kritischem Fachverfahren ein Papier-Notbetrieb-Drehbuch mit Formular-Vorlagen, Stempel-Verfahren, Rückübertragungs-Plan in IT, Personal-Zuteilung. Anhalt-Bitterfeld-Lehre: Standesamt-Sterbe-Beurkundung höchste Priorität (PStG § 28 3-Werktage-Frist), Sozialamt-Bürgergeld-Auszahlung am Tag 2-3, Bürgeramt-Pässe Tag 3-5. Halbjährliche Übung.",
+              "goal": "protect",
+              "owner": "Fachbereichs-Leitungen / Hauptamt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-protect-edr-verwaltungs-workstations",
+              "title": "EDR (Endpoint Detection and Response) auf allen Verwaltungs-Workstations",
+              "description": "Strukturelle Antwort auf Ransomware-/Phishing-/Lateral-Movement-Risiken. EDR-Tool (z. B. CrowdStrike, SentinelOne, Microsoft Defender for Endpoint) auf allen Workstations und Servern, zentrales SIEM mit 24/7-Monitoring durch externes SOC oder ITDZ-SOC, automatische Isolation bei Verdacht. Bei kommunalen Tenants oft über ITDZ-Sammel-Vertrag günstiger.",
+              "goal": "protect",
+              "owner": "IT-Sicherheitsbeauftragte*r / IT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "respond": [
+            {
+              "id": "m-adm-respond-krisenstab-geschaftsordnung",
+              "title": "Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung",
+              "description": "Strukturelle Antwort auf politische Verantwortlichkeits-Frage. Schriftliche Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung (nicht delegierbar), Notstandserklärungs-Bewertungs-Matrix, Stellvertretungs-Regelung für Urlaub/Krankheit, jährliche Tabletop-Übung mit politischer Spitze persönlich. Anhalt-Bitterfeld-Lessons-Learned-Drehbuch als Pflicht-Anhang.",
+              "goal": "respond",
+              "owner": "Hauptamt / Bürgermeister-/Landrats-Büro",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-respond-nis2-bsig-workflow",
+              "title": "NIS2-/BSIG-§-8d-Reporting-Workflow mit BSI-Meldeportal",
+              "description": "Strukturelle Antwort auf NIS2-/BSIG-§-8d-Pflichten (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht). Workflow-Tool integriert mit BSI-Meldeportal, vor-strukturierte Templates für Erstmeldung mit allen Pflichtfeldern, automatische Frist-Erinnerung. Parallele Pfade für DSGVO Art. 33/34 (LfD/LDI), Verwaltungsverfahrensgesetz-Anzeige-Pflichten beim Land.",
+              "goal": "respond",
+              "owner": "Rechtsabteilung / Compliance / DSB",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-respond-externe-ir-firma",
+              "title": "Externe Incident-Response-Firma vor-vertraglich gebunden",
+              "description": "Strukturelle Antwort auf Reaktions-Geschwindigkeits-Anforderung. Vertraglich gebundene Incident-Response-Firma mit 4-h-SLA für Verwaltungs-spezialisierte Forensik (Forensik in komplexen Fachverfahren-Umgebungen erfordert Spezial-Wissen). Bei kommunalen Tenants oft über ITDZ-Sammel-Vertrag oder über das Bayern-LSI/IT.NRW-Verbund-Angebot.",
+              "goal": "respond",
+              "owner": "IT-Sicherheitsbeauftragte*r / Hauptamt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-respond-verbund-solidaritaets-vertrag",
+              "title": "Verbund-Solidaritäts-Vertrag mit Nachbar-Kommunen",
+              "description": "Strukturelle Antwort auf Bürger-Service-Stillstand-Risiken. Öffentlich-rechtliche Vereinbarung nach Gemeindeordnung mit benachbarten Kommunen — gegenseitige Hilfe bei IT-Notlagen (Bürgeramt-Aushilfe, Standesamt-Beamten-Vertretung, IT-Backup-Server-Bereitstellung). Anhalt-Bitterfeld-Lehre: ad-hoc-Hilfe funktioniert, Institutionalisierung erlaubt schnellere Aktivierung. Vorlage für Land mit Bitte um Verallgemeinerung.",
+              "goal": "respond",
+              "owner": "Bürgermeister*in / Landrat / Hauptamt",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "recover": [
+            {
+              "id": "m-adm-recover-wiederherstellungs-drill",
+              "title": "Backup-Wiederherstellungs-Drill quartalsweise mit RTO-Verkürzung",
+              "description": "Strukturelle Antwort auf RTO-Verkürzungs-Anforderung. Quartalsweiser Wiederherstellungs-Drill aus Tape-Backup mit Stoppuhr-Messung, Ziel-RTO 4 h für Standesamt, 24 h für Bürgeramt, 48 h für Sozialamt, 72 h für Vollständigkeit. Bei verfehlten RTO-Werten Investitions-Antrag im Stadt-/Kreisrat. Anhalt-Bitterfeld-Lehre: 207 Tage Wiederaufbau lässt sich mit gezielten Drill-Übungen auf Tage verkürzen.",
+              "goal": "recover",
+              "owner": "IT-Leitung / IT-Sicherheitsbeauftragte*r",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-recover-buerger-trust-wiederaufbau",
+              "title": "Bürger-Trust-Wiederaufbau-Programm nach Vorfällen",
+              "description": "Strukturelle Antwort auf demokratisch-politische Folgewirkung. Strukturiertes Programm: Bürgermeister-/Landrat-Statement (Foto, persönlich, Lessons-Learned), Stadt-/Kreisrats-Sitzung mit Vorfalls-Aufarbeitung, Bürger-Versammlung mit Frage-Antwort-Format, Pressekonferenz mit Verbands-Spitze, 6-Monats-Follow-up-Bürger-Survey, ggf. Bürgermeister-/Landrats-Brief an besonders betroffene Bürger (Sozialamt-Klienten mit Auszahlungs-Verzug).",
+              "goal": "recover",
+              "owner": "Bürgermeister*in / Landrat / Pressesprecher",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-adm-recover-resilienz-investition",
+              "title": "Resilienz-Investitions-Antrag im Stadt-/Kreisrat",
+              "description": "Strukturelle Antwort auf kommunale Finanz-Knappheit als strukturelle Resilienz-Limitierung. Strukturierter Investitions-Antrag im Stadt-/Kreisrat nach jedem Vorfall (auch nach Tabletop-Übungen mit identifizierten Lücken) mit klarer Lessons-Learned-Argumentation, Mehr-Jahres-Plan (Backup-Modernisierung, EDR-Roll-out, ITDZ-Eskalations-Drill, Verbund-Solidaritäts-Vertrag), Investitions-Volumen-Vorschlag mit Begründung. Bürgermeister/Landrat als Fürsprecher.",
+              "goal": "recover",
+              "owner": "Bürgermeister*in / Landrat / Hauptamt / IT-Leitung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ]
+        },
+        "governance": {
+          "managementBoardContact": "Bürgermeister*in / Landrat des Tenants (vor Go-Live zu setzen: Name, Wahl-Datum, Stellvertreter*in). Bei Genossenschafts-/Verbund-Strukturen Doppel-Verantwortung Bürgermeister*in + Stadt-/Kreisrat — Stadt-/Kreisrats-Vorsitz mit eigenem Cyber-Sicherheits-Briefing. Politische Letztverantwortung ist nicht delegierbar (Anhalt-Bitterfeld-Schablone Juli 2021: Landrat erklärte den Cyber-Katastrophenfall).",
+          "programOwner": "IT-Leitung in Personalunion mit IT-Sicherheitsbeauftragte*r in kleineren Tenants, in größeren Tenants getrennt mit eigener Berichtslinie. Datenschutzbeauftragte*r ist als zweite operative Säule mit eigener Berichtslinie zur Verwaltungsspitze und zum Stadt-/Kreisrat verankert (parallel zur IT-Leitung, weil die Verwaltungs-Resilienz-Achillesferse Bürger-Daten-Schutz und Akten-Integrität ist, nicht nur IT-Verfügbarkeit — analog zur Finanz-Pack-Doppel-Säule CISO + Compliance).",
+          "escalationPath": "Stufe 1: IT-Leitung (24/7-Bereitschaft, ITDZ-Vorstands-Hotline-Aktivierung innerhalb 5 min). Stufe 2: IT-Sicherheitsbeauftragte*r und DSB (24/7-Bereitschaft, einsatzbereit innerhalb 30 min). Stufe 3: Krisenstabs-Leitung (Bürgermeister*in / Landrat), Einberufung des Krisenstabs innerhalb 60 min. Stufe 4: Bürgermeister/Landrat persönlich + Stadt-/Kreisrats-Vorsitz + ggf. Verbands-Spitze (Städtetag/Landkreistag/Gemeindebund) + externe IR-Firma (4-h-Response-SLA für Verwaltungs-spezialisierte Forensik). Bei Cyber-Katastrophenfall-Verdacht: zusätzlich Land-CIO und Innenministerium binnen 30 min, ggf. BSI-CERT-Bund und Bundeswehr-Cybersicherheits-Team über Land-Innenministerium.",
+          "boardReviewCadence": "Halbjährlicher Krisenstabs-Komitee-Review (Bürgermeister/Landrat + IT-Leitung + IT-Sicherheit + DSB + Hauptamt) mit Top-Risiken, ITDZ-Status und Anhalt-Bitterfeld-Baseline-Pflege. Jährlicher Stadt-/Kreisrats-Bericht zur Cyber-Sicherheit (transparente Darstellung von Risiken, Investitionen, Vorfällen). Anlassbezogene Reviews nach realen Vorfällen oder Tabletops innerhalb 30 Tagen.",
+          "governanceNote": "Verwaltungs-Spezifika: Stadt-/Kreisrat als demokratische Aufsicht — anders als in Wirtschafts-Sektoren ist die Cyber-Sicherheits-Berichterstattung politisch öffentlich. Kommunale Finanz-Knappheit als strukturelle Resilienz-Limitierung — Investitions-Anträge müssen oft im Haushalts-Plan verhandelt werden. Verbands-Schnittstellen (Städtetag, Landkreistag, Gemeindebund) für gemeinsame Sprachregelung und Vorlagen-Austausch."
+        },
+        "reporting": {
+          "incidentContact": "BSI-Meldeportal für NIS2-/BSIG-§-8d (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht). Parallel LfD/LDI-Meldeportal für DSGVO Art. 33 (72 h). Verwaltungsverfahrensgesetz-Anzeige-Pflichten beim Land-Innenministerium. Bei Cyber-Katastrophenfall-Verdacht: ergänzende Meldung an Bundeswehr-Cybersicherheits-Team über Land-Innenministerium.",
+          "incidentBackupContact": "Land-CIO / Cybersicherheitsagentur des Landes (Bayern LSI, NRW, Hessen, Niedersachsen). ITDZ-Vorstand bei Verbund-Vorfällen. BSI-CERT-Bund-Schnittstelle. Verbands-Spitze (Städtetag, Landkreistag, Gemeindebund) für gemeinsame Sprachregelung. Stadtrat-/Kreisrats-Vorsitz für politische Eskalation.",
+          "bsiPortalNote": "BSI nimmt NIS2-/BSIG-§-8d-Meldungen entgegen (24-h-Frist für „Sicherheitsvorfall\"). Bei kommunaler Ebene oft Rolle als „betroffene wichtige Einrichtung\" — Tenant ist meldepflichtig falls Verfügbarkeit erheblich eingeschränkt. ITDZ-Verbund-Anbieter (AKDB, KIVBF, IT.NRW) sind als „kritische Einrichtung\" parallel meldepflichtig. Doppel-Meldung bei Schnittmenge ist üblich. DSGVO-Meldungen gehen an LfD/LDI (Bayern: BayLfD; NRW: LDI NRW; Hessen: HBDI; etc.).",
+          "firstReportingTimeline": "NIS2-/BSIG-§-8d: Erstmeldung 24 h ab Klassifikation als „Sicherheitsvorfall\", Folgemeldung 72 h, Abschlussbericht 1 Monat. DSGVO Art. 33: 72 h gegenüber LfD/LDI. DSGVO Art. 34: unverzüglich an Bürger bei hohem Risiko. Verwaltungsverfahrensgesetz-Anzeige-Pflichten beim Land in der Regel binnen 1-2 Wochen. Stadt-/Kreisrats-Information: in der Regel in der nächsten Sitzung (ggf. außerordentliche Sitzung bei Cyber-Katastrophenfall).",
+          "reportingNote": "Vor-strukturierte Reporting-Templates für NIS2/BSIG, DSGVO, VwVfG sind im Krisenstabs-Drehbuch abgelegt. Halbjährlicher Test der Meldewege durch Rechtsabteilung. BSI- und LfD/LDI-Meldeportal-Logins liegen bei zwei benannten Personen mit Vier-Augen-Prinzip. Anhalt-Bitterfeld-Lehre: Meldewege sollten nicht erst im Krisenfall geübt werden."
+        },
+        "evidence": {
+          "evidenceReferences": [
+            "BSI-Grundschutz-Profil für Verwaltung (Tenant-spezifisch angepasst)",
+            "NIS2-/BSIG-§-8d-Compliance-Dokumentation (für Tenants als „wichtige Einrichtung\")",
+            "Krisenstabs-Geschäftsordnung mit Bürgermeister-/Landrat-Letztverantwortung",
+            "ITDZ-Vertrag mit Eskalations-Pfaden und Verbund-Solidaritäts-Klausel",
+            "Backup-Konzept mit Tape-Backup im Tresor und Wiederherstellungs-Drill-Protokollen",
+            "PAM-Konzept mit Privilegien-Review-Protokollen",
+            "Tabletop-Übungs-Protokolle (Ransomware-Stillstand, ITDZ-Outage)",
+            "Multi-Kanal-Bürger-Kommunikations-Drehbuch",
+            "Papier-Notbetrieb-Drehbuch pro Fachverfahren",
+            "Verbund-Solidaritäts-Vertrag mit Nachbar-Kommunen (öffentlich-rechtliche Vereinbarung)",
+            "DSGVO Art. 30 Verfahrensverzeichnis mit Bürger-Daten-Risikoklasse"
+          ],
+          "reviewCycleYears": 2,
+          "equivalentProofsNote": "Review-Zyklus 2 Jahre voreingestellt — bei eskalierenden Vorfällen (Anhalt-Bitterfeld-Niveau) anlassbezogen früher. Bei kommunalen Tenants oft Verbund-Review (Verband-/Land-koordiniert) als Ergänzung möglich. ITDZ-Vertrag-Review jährlich. Backup-Wiederherstellungs-Drill quartalsweise.",
+          "evidenceNote": "Ergänzend zu den hier gelisteten Evidenz-Referenzen sind alle relevanten BSI-/LfD-/Land-CIO-/Verbands-Korrespondenzen, externe Forensik-Berichte und ITDZ-Vertrags-Updates im Hauptamt-Aktenraum dokumentiert. Bei kommunalen Tenants oft auch im Stadt-/Kreisrats-Akten-System hinterlegt (Demokratie-Anspruch der Transparenz)."
+        }
+      }
+    }
+  }
+}

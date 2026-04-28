@@ -1,0 +1,2387 @@
+{
+  "containerVersion": 1,
+  "manifest": {
+    "packId": "sector-kmu-basis-core",
+    "packType": "module",
+    "moduleId": "kmu-basis",
+    "name": "KMU-Basis-Modul",
+    "version": "1.0.0",
+    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Geschäftskontinuität und NIS2-Mindest-Compliance.",
+    "engine": "krisenfest-sector-engine",
+    "engineVersion": "1.0.0",
+    "sectorCategory": "KMU-Basis (NIS2-Querschnitt)",
+    "industryClass": "Mittelstand-Querschnitt",
+    "maintainer": "KRITIS-Readiness",
+    "tags": [
+      "kmu",
+      "mittelstand",
+      "nis2",
+      "msp",
+      "mssp",
+      "familienunternehmen",
+      "querschnitt",
+      "einsteiger"
+    ],
+    "capabilities": [
+      "assessment",
+      "actions",
+      "evidence",
+      "governance",
+      "kritis",
+      "bia",
+      "documents",
+      "reporting"
+    ],
+    "compatibility": {
+      "minAppVersion": "1.8.0",
+      "minEngineVersion": "1.0.0"
+    },
+    "releaseChannel": "sector"
+  },
+  "module": {
+    "schemaVersion": 1,
+    "id": "kmu-basis",
+    "name": "KMU-Basis (Mittelstand-Querschnitt)",
+    "version": "1.0.0",
+    "description": "Querschnitts-Modul für mittelständische Unternehmen ohne KRITIS-Sektor-Zuordnung mit NIS2-Pflicht — Geschäftskontinuität und NIS2-Mindest-Compliance.",
+    "sectorCategory": "KMU-Basis (NIS2-Querschnitt)",
+    "domainWeightAdjustments": {
+      "supply": 1.3,
+      "cyber": 1.2,
+      "governance": 1.15,
+      "bcm": 1.15
+    },
+    "additionalQuestions": [
+      {
+        "id": "kmu_nis2_registrierung",
+        "domainId": "governance",
+        "title": "NIS2-BSI-Registrierung ist abgeschlossen oder Schwellen-Prüfung dokumentiert",
+        "prompt": "Hat das Unternehmen die NIS2-Erfassungs-Schwelle (50 MA / 10 Mio. € Umsatz oder Bilanz in einem der 18 NIS2-Sektoren) geprüft und im Treffer-Fall die BSI-Registrierung bis 6. März 2026 vorgenommen?",
+        "guidance": "NIS2-Spezifik: Das NIS2-Umsetzungsgesetz ist seit 6. Dezember 2025 in Kraft, die BSI-Registrierungs-Frist war der 6. März 2026 (abgelaufen). Bei verspäteter Registrierung drohen Bußgelder bis 10 Mio. € und persönliche Haftung der Geschäftsführung. Im Mittelstand wird die Schwellen-Prüfung oft unterschätzt — eine dokumentierte Negativ-Prüfung ist genauso wertvoll wie die Registrierung.",
+        "recommendation": "NIS2-Schwellen-Prüfung dokumentiert (MA-Zahl, Umsatz, Bilanz, Sektor-Zuordnung), bei Treffer BSI-Registrierungs-Bestätigung archiviert, jährliche Re-Prüfung bei Wachstum.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "NIS2-Schwellen-Prüfungs-Dokument, BSI-Registrierungs-Bestätigung",
+        "tags": [
+          "NIS2",
+          "BSI",
+          "Registrierung"
+        ]
+      },
+      {
+        "id": "kmu_msp_vertrag_haertung",
+        "domainId": "supply",
+        "title": "MSP-/MSSP-Vertrag mit Sicherheits-SLA und Eskalations-Klauseln",
+        "prompt": "Enthält der Vertrag mit dem externen IT-Dienstleister (MSP/MSSP) klare SLA-Werte (RTO, RPO, Verfügbarkeit), Sicherheits-Anforderungen (MFA, Patch-Disziplin, Audit-Recht) und 24/7-Eskalations-Pfade?",
+        "guidance": "KMU-Spezifik: Mittelständler betreiben ihre IT meist nicht selbst, sondern über externe MSP/MSSP. Wenn der MSP kippt, kippt das Geschäft. Kaseya-VSA-Schablone Juli 2021: REvil-Ransomware kam über MSP-Plattform an die Kunden, ~1.000 Kunden direkt verschlüsselt. Vertrag muss SLA, Sicherheits-Anforderungen und Eskalations-Pfade verbindlich regeln.",
+        "recommendation": "MSP/MSSP-Vertrag mit RTO/RPO-SLA, MFA-Pflicht, Patch-Disziplin, Audit-Recht, 24/7-Hotline, Datenschutz-Auftragsverarbeitung nach DSGVO Art. 28, jährliche Vertragspflege.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "MSP/MSSP-Vertrag, Auftragsverarbeitung, SLA-Report",
+        "tags": [
+          "MSP",
+          "MSSP",
+          "NIS2-Lieferkette"
+        ]
+      },
+      {
+        "id": "kmu_backup_restore_test",
+        "domainId": "cyber",
+        "title": "Backup mit getestetem Restore (3-2-1-Regel)",
+        "prompt": "Werden alle kritischen Geschäftsdaten nach 3-2-1-Regel gesichert (3 Kopien, 2 Medien, 1 offline) und mindestens halbjährlich vollständig wiederhergestellt zum Test?",
+        "guidance": "KMU-Spezifik: BSI-Lagebericht 2025 — 80 % der 950 dokumentierten Ransomware-Angriffe trafen KMU. Mittelstands-typischer Befund: Backups existieren, sind aber nie restored worden. Im Ernstfall scheitert die Wiederherstellung an unvollständigen Backups, korrupten Tapes oder vergessenen Passwörtern. Halbjährlicher Restore-Test ist Pflicht-Lehre.",
+        "recommendation": "Backup-Konzept nach 3-2-1-Regel mit Tape-/Immutable-Storage offline, halbjährlicher Restore-Test mit Stoppuhr, RTO-Ziel pro Geschäftsfunktion dokumentiert.",
+        "weight": 1.3,
+        "critical": true,
+        "evidenceHint": "Backup-Konzept, Restore-Test-Protokoll",
+        "tags": [
+          "Backup",
+          "3-2-1-Regel",
+          "Restore-Test"
+        ]
+      },
+      {
+        "id": "kmu_schluesselperson_vertretung",
+        "domainId": "people",
+        "title": "Schlüsselperson-Vertretung mit Passwort-Manager und Notfall-Zugängen",
+        "prompt": "Existiert für jede Schlüsselperson (IT-Verantwortliche*r, Buchhaltung, Geschäftsführung) eine dokumentierte Vertretung mit Passwort-Manager-Zugang und Notfall-Schlüssel im Tresor?",
+        "guidance": "KMU-Spezifik: Im Mittelstand hängen oft kritische Geschäftsfunktionen an einer einzigen Person — die einzige Buchhalterin, der einzige IT-Verantwortliche, der Geschäftsführer mit Bank-Vollmacht. Fachkräftemangel und Generationenwechsel verschärfen das Risiko. Schlüsselperson-Ausfall durch Krankheit, Kündigung oder Streit kann das Geschäft binnen Tagen lähmen.",
+        "recommendation": "Passwort-Manager mit Notfall-Zugang für mindestens zwei Personen, dokumentierte Vertretungsregelung pro Schlüsselperson, Notfall-Schlüssel im Tresor mit Vier-Augen-Prinzip, jährlicher Vertretungs-Drill.",
+        "weight": 1.25,
+        "critical": true,
+        "evidenceHint": "Passwort-Manager-Konzept, Vertretungsregelung, Drill-Protokoll",
+        "tags": [
+          "Schlüsselperson",
+          "Passwort-Manager",
+          "Vertretung"
+        ]
+      },
+      {
+        "id": "kmu_geschaeftsfuehrung_schulung",
+        "domainId": "governance",
+        "title": "Geschäftsführungs-Schulung NIS2-konform jährlich nachweisbar",
+        "prompt": "Hat die Geschäftsführung eine NIS2-konforme Cyber-Sicherheits-Schulung (jährlich) absolviert mit Nachweis-Dokumentation für BSI-Audits?",
+        "guidance": "NIS2-Spezifik: § 38 BSIG verlangt explizit nachweisbare Geschäftsführer-Schulungen zu Cyber-Sicherheit und Risikomanagement. Bei Pflichtverletzung droht persönliche Haftung. KMU-Realität: Geschäftsführung sieht sich oft als „technisch nicht zuständig\" — diese Sicht ist nach NIS2 nicht mehr tragbar.",
+        "recommendation": "Jährliche NIS2-Schulung der Geschäftsführung (1-2 h), Schulungs-Nachweis dokumentiert, Refresh bei wesentlichen NIS2-Updates oder nach Vorfällen.",
+        "weight": 1.2,
+        "critical": false,
+        "evidenceHint": "Schulungs-Nachweis-Zertifikat, jährlicher Schulungs-Plan",
+        "tags": [
+          "NIS2",
+          "Geschäftsführung",
+          "Schulung"
+        ]
+      }
+    ],
+    "kritisExtension": {
+      "eligibleSectors": [
+        "KMU-Basis (NIS2-Querschnitt)"
+      ],
+      "hints": [
+        "KMU-Basis ist kein KRITIS-Sektor, sondern ein Querschnitts-Pack für NIS2-pflichtige Mittelständler ohne klare Sektor-Zuordnung. Schwellen 50 MA / 10 Mio. € Umsatz oder Bilanz in einem der 18 NIS2-Sektoren.",
+        "Bei Erreichen einer KRITIS-Schwelle (z. B. durch Wachstum oder Zukauf) sollte auf einen Sektor-spezifischen Pack (Industry, Logistics, Healthcare etc.) gewechselt werden — KMU-Basis bleibt der Einsteiger-Pack für Mindest-Compliance.",
+        "NIS2-Umsetzungsgesetz seit 6.12.2025 in Kraft, BSI-Registrierungs-Frist war 6.3.2026. Bußgelder bis 10 Mio. €, persönliche Haftung der Geschäftsführung nach § 38 BSIG.",
+        "Cross-Sector-Bezug: KMU-Basis-Tenants sind über MSP/MSSP, Cloud-Provider, Bank und Großkunden mit den Sektor-Packs verknüpft — bei Vorfällen in den Sektor-Packs (Finanz-Pack: Bank-Konto-Sperre, IT/Telekom-Pack: Cloud-Region-Outage) sind sie in der Kaskade."
+      ],
+      "additionalRequirements": []
+    },
+    "uiHints": {
+      "accentLabel": "Geschäftskontinuität, NIS2-Mindest-Compliance, MSP-Realität",
+      "focusAreas": [
+        "NIS2-Baseline (Schwellen-Prüfung, Registrierung, GF-Schulung)",
+        "MSP/MSSP-Vertrags-Härtung mit Sicherheits-SLA",
+        "Backup mit getestetem Restore (3-2-1-Regel)",
+        "Schlüsselperson-Vertretung (Passwort-Manager + Notfall-Zugang)",
+        "Vier-Augen-Prinzip bei Zahlungen (CEO-Fraud-Schutz)"
+      ]
+    },
+    "recommendedActions": [
+      {
+        "id": "kmu_action_nis2_baseline",
+        "title": "NIS2-Baseline (Schwellen-Prüfung, Registrierung, GF-Schulung)",
+        "description": "Drei-Punkte-Baseline für NIS2-Mindest-Compliance: (1) Schwellen-Prüfung mit Sektor-Zuordnung dokumentiert, (2) BSI-Registrierung bei Treffer abgeschlossen, (3) Geschäftsführungs-Schulung jährlich mit Nachweis. Bei verspäteter Registrierung Bußgeld-Risiko bis 10 Mio. €.",
+        "priority": "kritisch",
+        "ownerRole": "Geschäftsführung / Datenschutzbeauftragte*r",
+        "relatedQuestionIds": [
+          "kmu_nis2_registrierung",
+          "kmu_geschaeftsfuehrung_schulung"
+        ]
+      },
+      {
+        "id": "kmu_action_msp_vertrag_review",
+        "title": "MSP-/MSSP-Vertrags-Review mit Sicherheits-Anhang",
+        "description": "Bestehenden IT-Dienstleister-Vertrag um NIS2-konforme Sicherheits-Anforderungen erweitern: SLA-Werte, MFA-Pflicht, Patch-Disziplin, Audit-Recht, 24/7-Hotline, DSGVO-Art.-28-Auftragsverarbeitung. Bei Verweigerung Substitutions-Plan vorbereiten.",
+        "priority": "hoch",
+        "ownerRole": "Geschäftsführung / IT-Dienstleister-Verantwortliche*r",
+        "relatedQuestionIds": [
+          "kmu_msp_vertrag_haertung"
+        ]
+      },
+      {
+        "id": "kmu_action_backup_restore_drill",
+        "title": "Backup-Restore-Drill halbjährlich mit Stoppuhr",
+        "description": "Halbjährlicher Wiederherstellungs-Test der Backups mit Stoppuhr-Messung. Ziel-RTO pro Geschäftsfunktion (z. B. Buchhaltung 24 h, Webshop 4 h, Kunden-Daten 8 h). Bei verfehlten RTO-Werten Investitions-Antrag in der nächsten GF-Sitzung.",
+        "priority": "hoch",
+        "ownerRole": "IT-Dienstleister-Verantwortliche*r / Geschäftsführung",
+        "relatedQuestionIds": [
+          "kmu_backup_restore_test"
+        ]
+      },
+      {
+        "id": "kmu_action_schluesselperson_passwort_manager",
+        "title": "Passwort-Manager mit Notfall-Zugang einführen",
+        "description": "Zentraler Passwort-Manager (z. B. 1Password Business, Bitwarden Teams, Keeper) mit Notfall-Zugang („Emergency Access\") für mindestens zwei Personen. Notfall-Schlüssel im Tresor mit Vier-Augen-Prinzip. Jährliche Vertretungs-Übung.",
+        "priority": "hoch",
+        "ownerRole": "IT-Dienstleister-Verantwortliche*r / Geschäftsführung",
+        "relatedQuestionIds": [
+          "kmu_schluesselperson_vertretung"
+        ]
+      }
+    ],
+    "evidenceTemplates": [
+      {
+        "id": "kmu_evidence_nis2_registrierung",
+        "title": "NIS2-Schwellen-Prüfung und BSI-Registrierungs-Bestätigung",
+        "type": "register",
+        "ownerRole": "Geschäftsführung / Datenschutzbeauftragte*r",
+        "reviewCycleHint": "Jährlich, anlassbezogen bei Wachstum oder Sektor-Wechsel",
+        "relatedQuestionIds": [
+          "kmu_nis2_registrierung"
+        ],
+        "folder": "NIS2-Compliance",
+        "tags": [
+          "NIS2",
+          "BSI"
+        ]
+      },
+      {
+        "id": "kmu_evidence_msp_vertrag",
+        "title": "MSP-/MSSP-Vertrag mit Sicherheits-Anhang",
+        "type": "contract",
+        "ownerRole": "Geschäftsführung",
+        "reviewCycleHint": "Jährlich, anlassbezogen nach Vorfällen oder NIS2-Updates",
+        "relatedQuestionIds": [
+          "kmu_msp_vertrag_haertung"
+        ],
+        "folder": "IT-Verträge",
+        "tags": [
+          "MSP",
+          "MSSP",
+          "Lieferkette"
+        ]
+      },
+      {
+        "id": "kmu_evidence_backup_konzept",
+        "title": "Backup-Konzept und Restore-Test-Protokolle",
+        "type": "policy",
+        "ownerRole": "IT-Dienstleister-Verantwortliche*r",
+        "reviewCycleHint": "Halbjährlich Restore-Test, jährliche Konzept-Review",
+        "relatedQuestionIds": [
+          "kmu_backup_restore_test"
+        ],
+        "folder": "IT-Sicherheit",
+        "tags": [
+          "Backup",
+          "Restore-Test"
+        ]
+      },
+      {
+        "id": "kmu_evidence_schluesselperson_vertretung",
+        "title": "Schlüsselperson-Vertretungs-Konzept und Passwort-Manager-Notfall-Zugang",
+        "type": "policy",
+        "ownerRole": "Geschäftsführung / IT-Dienstleister-Verantwortliche*r",
+        "reviewCycleHint": "Jährlich, anlassbezogen bei Personal-Wechsel",
+        "relatedQuestionIds": [
+          "kmu_schluesselperson_vertretung"
+        ],
+        "folder": "Geschäftskontinuität",
+        "tags": [
+          "Schlüsselperson",
+          "Vertretung",
+          "Passwort-Manager"
+        ]
+      }
+    ],
+    "roleTemplates": [
+      {
+        "id": "kmu_role_geschaeftsfuehrung",
+        "label": "Geschäftsführung / Inhaber*in",
+        "responsibility": "Gesamt-Verantwortung für Geschäftskontinuität, NIS2-Compliance, MSP-Vertrags-Pflege, Bank-/Liquiditäts-Klärung. Persönliche Haftung nach NIS2 § 38 BSIG bei Pflichtverletzung. KMU-spezifisch: Geschäftsführung ist oft auch Krisenstabs-Leitung, Pressesprecher und Bank-Schnittstelle in Personalunion.",
+        "approvalScope": "Strategische Entscheidungen (Notbetrieb, MSP-Eskalation, Lösegeld, Pressemitteilung, Bank-Information)",
+        "focusAreas": [
+          "NIS2",
+          "MSP-Vertrag",
+          "Geschäftskontinuität"
+        ]
+      },
+      {
+        "id": "kmu_role_it_dienstleister_verantwortliche",
+        "label": "IT-Dienstleister-Verantwortliche*r (intern)",
+        "responsibility": "Schnittstelle zum externen MSP/MSSP. Hat keine eigene IT-Operations-Kapazität, koordiniert externen Dienstleister. KMU-spezifisch: oft Personalunion mit Hauptamt, Buchhaltung oder einem technisch versierten Mitarbeiter ohne formale IT-Ausbildung. Trägt Verantwortung für MSP-Eskalation, Backup-Disziplin, Patch-Status-Tracking.",
+        "approvalScope": "Operative IT-Entscheidungen, MSP-Eskalationen, Backup-Konzept-Pflege",
+        "focusAreas": [
+          "MSP-Schnittstelle",
+          "Backup",
+          "Patch-Disziplin"
+        ]
+      },
+      {
+        "id": "kmu_role_buchhaltung",
+        "label": "Buchhaltung / kaufmännische Leitung",
+        "responsibility": "Liquiditäts-Verantwortung, Bank-Schnittstelle, Versicherungs-Aktivierung (D&O, Cyber-Police), Kunden-/Lieferanten-Zahlungs-Status. KMU-spezifisch: oft Schlüsselperson mit Allein-Wissen über Bank-Zugänge, Lastschriften, Kontoinhaber-Vollmachten — Vertretung ist deshalb besonders kritisch.",
+        "approvalScope": "Liquiditäts-/Versicherungs-Entscheidungen, Bank-Information",
+        "focusAreas": [
+          "Liquidität",
+          "Versicherung",
+          "Bank-Schnittstelle"
+        ]
+      },
+      {
+        "id": "kmu_role_externer_msp",
+        "label": "Externer MSP/MSSP (Vertrags-Partner)",
+        "responsibility": "Operative IT-Sicherheit, Backup-Durchführung, Patch-Management, 24/7-Eskalations-Hotline. Externer Vertrags-Partner — kein interner Mitarbeiter. KMU-spezifisch: bei MSP-Vorfällen (Kaseya-Schablone) ist der MSP gleichzeitig Lieferant und Mitbetroffener — Vertrags-Eskalation muss schnell, aber vertraglich gesichert sein.",
+        "approvalScope": "Operative IT-Maßnahmen im Tenant-Auftrag",
+        "focusAreas": [
+          "IT-Operations",
+          "Backup",
+          "Eskalations-Hotline"
+        ]
+      }
+    ],
+    "maturityProfile": {
+      "targetOverall": 70,
+      "targetByDomain": {
+        "governance": 74,
+        "operations": 70,
+        "people": 70,
+        "physical": 64,
+        "cyber": 76,
+        "supply": 78,
+        "finance": 68,
+        "bcm": 72
+      },
+      "notes": [
+        "KMU-Basis-Tenants haben pragmatische Mindest-Ziele (NIS2-Mindest-Compliance), nicht Vollausbau. Cyber (76 %) und Supply (78 %) sind die Mittelstands-Schwerpunkte: Ransomware-Schutz und MSP-Vertrags-Disziplin.",
+        "Governance (74 %) reflektiert NIS2-Geschäftsführungs-Pflichten, persönliche Haftung. KMU-typischer Befund: Selbst-Überschätzung („wir sind gut aufgestellt\") trifft auf empirische Lücken — Realitäts-Check via halbjährlichem Restore-Test.",
+        "Niedrigere Werte in Physical (64 %) und Finance (68 %) sind realistisch — KMU haben oft kein dediziertes Physical-Security-Programm und begrenzte Finance-Resilienz-Reserven."
+      ]
+    },
+    "auditChecklist": [
+      {
+        "id": "kmu_audit_nis2_baseline",
+        "area": "NIS2-Compliance",
+        "title": "NIS2-Baseline (Schwellen-Prüfung, Registrierung, GF-Schulung) erfüllt",
+        "guidance": "Prüfen: NIS2-Schwellen-Prüfung dokumentiert, BSI-Registrierungs-Bestätigung archiviert, jährliche Geschäftsführungs-Schulung mit Nachweis. Bei Lücken Sofort-Maßnahmen-Plan.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "kmu_nis2_registrierung",
+          "kmu_geschaeftsfuehrung_schulung"
+        ]
+      },
+      {
+        "id": "kmu_audit_msp_vertrag",
+        "area": "MSP/MSSP-Lieferkette",
+        "title": "MSP-/MSSP-Vertrag mit Sicherheits-SLA",
+        "guidance": "Prüfen: Vertrag mit RTO/RPO-SLA, MFA-Pflicht, Patch-Disziplin, Audit-Recht, 24/7-Hotline, DSGVO Art. 28-Auftragsverarbeitung. Substitutions-Plan bei MSP-Ausfall vorhanden.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "kmu_msp_vertrag_haertung"
+        ]
+      },
+      {
+        "id": "kmu_audit_backup_restore",
+        "area": "IT-Sicherheit",
+        "title": "Backup mit halbjährlichem Restore-Test",
+        "guidance": "Prüfen: 3-2-1-Backup-Regel, Restore-Test-Protokoll der letzten 6 Monate, RTO-Ziele dokumentiert und geprüft. „Backup existiert\" reicht nicht — getesteter Restore ist Pflicht.",
+        "severity": "high",
+        "relatedQuestionIds": [
+          "kmu_backup_restore_test"
+        ]
+      }
+    ],
+    "documentFolders": [
+      "NIS2-Compliance",
+      "IT-Sicherheit",
+      "IT-Verträge",
+      "Geschäftskontinuität",
+      "Krisenmanagement",
+      "Versicherung",
+      "Lieferanten-/Kunden-Verträge",
+      "Personal-/Schlüsselperson-Vertretung"
+    ],
+    "processTemplates": [
+      {
+        "id": "kmu_proc_buchhaltung",
+        "title": "Buchhaltung (Rechnungen, Mahnwesen, Bank-Verkehr)",
+        "ownerRole": "Buchhaltung / kaufmännische Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "72",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Buchhaltungs-Software (DATEV / Lexware / SAP Business One), Bank-Online-Banking, E-Mail-Server, Steuerberater-Anbindung",
+        "outputs": "Rechnungen, Bank-Transfers, Mahnungen, Eingangs-Rechnungs-Buchungen, Forderungs-Management",
+        "notes": "KMU-spezifisch: Buchhaltung ist oft Schlüsselperson-Risiko (eine Person, vollständiger Zugriff). Lohnzahlungen am Monatsende sind Existenz-kritisch — Notbetrieb mit manueller Überweisung als Fallback. Vertretungs-Regelung mit Steuerberater-Kanzlei vor-vereinbart halten."
+      },
+      {
+        "id": "kmu_proc_kunden_service",
+        "title": "Kunden-Service (Auftrags-Annahme, Bestellungen, Reklamationen)",
+        "ownerRole": "Vertriebsleitung / Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "CRM-System, E-Mail-Server, Webshop (falls vorhanden), Telefonanlage",
+        "outputs": "Bestätigte Aufträge, Bestellungen, Reklamations-Fälle, Liefertermin-Zusagen",
+        "notes": "Bei Webshop-Tenants ist die Verfügbarkeit besonders zeitkritisch (Kaufabbruch nach 3-Sekunden-Wartezeit). Notbetrieb mit Telefon-Auftragsannahme als Fallback. Mittelweg-Kritikalität (gegen Spec-'hoch' bewusst Bestand-'kritisch' gehalten, weil Webshop-Tenants und B2B-Kunden mit harten Lieferterminen das Maximum verlangen)."
+      },
+      {
+        "id": "kmu_proc_lohnabrechnung",
+        "title": "Lohnabrechnung (monatlich)",
+        "ownerRole": "Personalleitung / Buchhaltung",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "Lohn-Abrechnungs-Software (DATEV LODAS / Lexware Lohn / SAP HCM), Bank-Online-Banking, Krankenkassen-Schnittstelle, Steuerberater-Anbindung",
+        "outputs": "Lohn-Auszahlungen, Lohn-Steuer-Anmeldung, SV-Beiträge, ELStAM-Meldungen",
+        "notes": "Lohnzahlungen am Monatsende sind existenz-kritisch für Mitarbeiter*innen, aber Pufferzeiten (1-2 Wochen) sind durch Krankenkassen-Fristen gedeckt — daher 'hoch' statt 'kritisch'. Bei Ausfall manuelle Überweisung über Bank-Notfall-Verfahren möglich; Steuerberater übernimmt Fallback-Berechnung."
+      },
+      {
+        "id": "kmu_proc_geschaeftsfuehrung",
+        "title": "Geschäftsführungs-Entscheidungen (Verträge, Investitionen, Bank-Vollmachten)",
+        "ownerRole": "Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "E-Mail-Server, Bank-Online-Banking-Vollmachten, CRM/ERP für Vertrags-Vorlagen, Anwalts-/Steuerberater-Anbindung",
+        "outputs": "Vertrags-Freigaben, Investitionsentscheidungen, Bank-Anweisungen, Vollmachts-Erteilung, strategische Kommunikation",
+        "notes": "Im KMU-Mittelstand ist die Geschäftsführung oft Single-Point-of-Failure für Entscheidungs-Kompetenz. Vertretungs-Regelung mit Prokurist*in oder zweitem Geschäftsführer vor-vereinbart halten. Bank-Vollmachten in mindestens zwei Personen aufgeteilt (Vier-Augen-Prinzip Pflicht). Bei plötzlichem Ausfall (Krankheit, Tod) sofortige Notfall-Vertretung mit Anwalts-Beauftragung."
+      },
+      {
+        "id": "kmu_proc_vertrieb",
+        "title": "Vertriebs-Pipeline (Angebotserstellung, Auftragseingang, CRM)",
+        "ownerRole": "Vertriebsleitung",
+        "criticality": "hoch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "8",
+        "dependencies": "CRM-System (Salesforce, HubSpot, Microsoft Dynamics, branchenspezifisch), E-Mail-Server, ERP-Anbindung für Lieferzeit-Auskünfte, Kalkulations-Tools",
+        "outputs": "Angebote, Auftragsbestätigungen, Pipeline-Status, Kunden-Stammdaten, Forecasts",
+        "notes": "Bei mehrtägigem CRM-Ausfall droht Vergessen offener Vertriebs-Vorgänge — Excel-Notbetrieb mit Backup-Kontaktlisten als Fallback. Vertriebs-Pipeline ist Frühwarn-Indikator für Liquiditäts-Steuerung."
+      },
+      {
+        "id": "kmu_proc_it",
+        "title": "IT-Infrastruktur-Betrieb (E-Mail, Fileserver, Internet, Drucker)",
+        "ownerRole": "IT-Verantwortlicher / MSP",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "E-Mail-Server (Cloud oder on-prem), Fileserver, Internet-Anbindung, Active Directory, Drucker, MSP-Wartungsvertrag",
+        "outputs": "Authentifizierung, E-Mail-Verfügbarkeit, Fileserver-Freigaben, Drucker-Verfügbarkeit, Backup-Status",
+        "notes": "Service-Schicht für faktisch alle anderen KMU-Prozesse. KMU haben oft kein internes IT-Team — Verantwortung beim MSP (siehe kmu_dep_msp_mssp). Demo-Pointe: Bei MSP-Verstrickung (siehe kmu_scn_ransomware_msp) sitzt der Verantwortliche extern und ist gleichzeitig Mitbetroffener. MSP-Vertrag mit klaren Eskalations-Pfaden und 24/7-SLA."
+      },
+      {
+        "id": "kmu_proc_personal",
+        "title": "Personal-Management (Einstellungen, Austritte, Verträge, Krankmeldungen)",
+        "ownerRole": "Personalleitung / Geschäftsführung",
+        "criticality": "mittel",
+        "mtpdHours": "120",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "HR-Software (Personio, sage HR, branchenspezifisch), Verträge-Vorlagen, Krankenkassen-Schnittstelle, ELStAM-Anbindung",
+        "outputs": "Arbeitsverträge, Austritts-Dokumente, Krankmeldungen, Probezeit-Bewertungen, Zeugnisse",
+        "notes": "Mittlere Kritikalität — Personal-Management hat meist 1-2 Wochen Pufferung, kritische Themen (Lohnabrechnung, Probezeit-Stichtag) sind separate Prozesse. Bei kleinen Mittelständlern oft Geschäftsführung als Mit-Verantwortliche."
+      },
+      {
+        "id": "kmu_proc_liquiditaet",
+        "title": "Liquiditäts-Steuerung (Cashflow-Planung, Bank-Linien)",
+        "ownerRole": "Geschäftsführung / kaufmännische Leitung",
+        "criticality": "kritisch",
+        "mtpdHours": "48",
+        "rtoHours": "24",
+        "rpoHours": "24",
+        "dependencies": "Bank-Online-Banking, ERP/Buchhaltung für Forderungs-/Verbindlichkeits-Status, Excel-Cashflow-Plan, Bank-Berater-Anbindung",
+        "outputs": "Cashflow-Plan, Mahnstufen-Steuerung, Bank-Linien-Bewirtschaftung, Liquiditäts-Reports an Gesellschafter",
+        "notes": "Liquiditäts-Hebel ist im KMU-Mittelstand der ökonomische Eskalations-Faktor — bei Cyber-Vorfall mit 200-500 T€ Schaden droht binnen Wochen Insolvenz, falls Bank-Linie nicht angepasst wird. Hausbank-Vertrauen als Reserve-Reserve."
+      },
+      {
+        "id": "kmu_proc_steuern",
+        "title": "Steuer- und Behörden-Korrespondenz (ELSTER, Sozialversicherung)",
+        "ownerRole": "Buchhaltung / Steuerberater",
+        "criticality": "hoch",
+        "mtpdHours": "168",
+        "rtoHours": "48",
+        "rpoHours": "24",
+        "dependencies": "ELSTER-Anbindung, DATEV-Schnittstellen, Krankenkassen-Schnittstelle, Sozialversicherungs-Träger, Finanzamt-Online-Portal",
+        "outputs": "Umsatzsteuer-Voranmeldung, Lohnsteuer-Anmeldung, SV-Meldungen, Jahresabschluss-Vorbereitung",
+        "notes": "Behörden-Fristen mit fixen Stichtagen (10. des Monats für USt-Voranmeldung, monatliche SV-Meldung). Pufferzeiten bei Verspätung 1-2 Wochen mit Säumniszuschlag. Steuerberater übernimmt Fallback bei Ausfall der internen Buchhaltung."
+      },
+      {
+        "id": "kmu_proc_kerngeschaeft",
+        "title": "Kerngeschäfts-Leistungserbringung (branchenneutral)",
+        "ownerRole": "Operative Leitung / Geschäftsführung",
+        "criticality": "kritisch",
+        "mtpdHours": "24",
+        "rtoHours": "8",
+        "rpoHours": "4",
+        "dependencies": "Branchen-Software, IT-Infrastruktur, Schlüssel-Lieferanten, qualifiziertes Personal, Großkunden-Schnittstellen",
+        "outputs": "Branchen-spezifische Leistung — z.B. Auftragsfertigung, Mandanten-Beratungsleistung, Software-Entwicklungs-Sprint, Reparatur-/Wartungs-Auftrag, Engineering-Auslieferung",
+        "notes": "Querschnitts-Vorlage für KMU-Mittelstand. Tenant adoptiert diesen Prozess und konkretisiert je nach Geschäftsmodell — z.B. 'Auftragsfertigung Maschinenbau' (für Produktions-Tenants), 'Mandanten-Beratungsleistung' (für Beratungs-Tenants), 'Software-Entwicklung Projekte' (für IT-Häuser), 'Engineering-Lieferung' (für Ingenieur-Büros). MTPD/RTO/RPO als KMU-Standard gesetzt; Tenant kann je nach kritischer Frist verschärfen oder lockern."
+      }
+    ],
+    "dependencyTemplates": [
+      {
+        "id": "kmu_dep_msp_mssp",
+        "title": "Externer MSP / MSSP (Managed Service Provider / Managed Security Service Provider)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": true,
+        "fallback": "Substitution erfordert mehrjährige Migration (Datenmigration, Vertrags-Übergänge). Im Akut-Fall: Notfall-Verträge mit zweitem MSP für 30-90 Tage als Brückenlösung.",
+        "contractReference": "MSP/MSSP-Rahmenvertrag mit Sicherheits-Anhang",
+        "notes": "Kaseya-VSA-Schablone Juli 2021: REvil-Ransomware kam über MSP-Plattform — der MSP wird gleichzeitig Lieferant und Mitbetroffener, Eskalations-Pfade müssen schnell, aber vertraglich gesichert sein."
+      },
+      {
+        "id": "kmu_dep_cloud_provider",
+        "title": "Cloud-Provider (Microsoft 365, Google Workspace, AWS, Azure, regionale Cloud)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Multi-Cloud-Substitution möglich (Microsoft 365 ↔ Google Workspace), aber Daten-Migration aufwändig (mehrere Wochen). Offline-Kopien kritischer Daten als Backup. Multi-Region-Konfiguration für Hochverfügbarkeit (30-100 % Aufpreis, in KMU selten).",
+        "contractReference": "Cloud-Provider-Verträge (Microsoft 365 EA, AWS Standard, Google Workspace Enterprise)",
+        "notes": "Schärfung gegenüber Bestand-'hoch' auf 'kritisch' (C5.5.4): KMU-Microsoft-365-Outage trifft E-Mail, Office-Dokumente, Teams-Kollaboration gleichzeitig — bei Single-Region existenz-bedrohlich. Azure-/AWS-Region-Outages sind selten aber wirkungsvoll, Geschäft kann Stunden bis Tage stillstehen. SPOF=false weil Multi-Cloud-Substitution etabliert; bei Single-Cloud-Tenants tenant-spezifisch auf SPOF=true erhöhen."
+      },
+      {
+        "id": "kmu_dep_bank",
+        "title": "Hausbank (Geschäftskonto, Online-Banking, Kreditlinie)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Zweit-Bank-Konto mit Notfall-Liquidität ist Mittelstands-Standard. Bei Konto-Sperre (Geldwäsche-Verdacht, Pfändung) sofortiger Wechsel auf Zweit-Konto.",
+        "contractReference": "Hausbank-Geschäftskonto-Vertrag, Kreditlinien-Vertrag",
+        "notes": "Cross-Sector-Bezug zum Finanz-Pack. Bei Konto-Sperre sind Lohnzahlungen, Lieferanten-Zahlungen und Steuer-Vorauszahlungen unmittelbar betroffen — schnelle Klärung mit Bank-Berater entscheidend."
+      },
+      {
+        "id": "kmu_dep_grosskunde",
+        "title": "Großkunde mit Konzern-Cyber-Anforderungen",
+        "category": "kunde",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei Verlust eines Großkunden mit > 30 % Umsatzanteil ist Geschäftskontinuität-Risiko hoch. Diversifikations-Strategie als langfristige Antwort.",
+        "contractReference": "Großkunden-Rahmenvertrag mit Cyber-Klauseln",
+        "notes": "Konzerne fordern oft NIS2-/ISO-27001-/TISAX-Konformität von ihren Mittelstands-Lieferanten — Anforderungs-Updates können binnen Monaten Investitions-Bedarf von 50-200 T€ einmalig plus 20-50 T€ jährliche Folgekosten auslösen. NIS2-Mittelstands-Schwelle: Tenant unterhalb der formalen NIS2-Schwelle wird durch Großkunden-Auflagen faktisch in den NIS2-Kreis gezogen."
+      },
+      {
+        "id": "kmu_dep_steuerberater",
+        "title": "Steuerberater-Kanzlei (DATEV-Anbindung, Lohnabrechnung, Jahresabschluss)",
+        "category": "dienstleister",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Steuerberater-Wechsel ist möglich (1-2 Monate Vorlauf für Mandats-Übergang), aber bei Stichtagen (Jahresabschluss-Fristen) eskalations-aufwändig. Backup-Steuerberater-Kontakt vorab mit Geheimhaltungsvereinbarung erfasst.",
+        "contractReference": "Steuerberater-Mandats-Vertrag",
+        "notes": "Bei Cyber-Vorfall im KMU übernimmt der Steuerberater oft Fallback-Funktionen für Buchhaltung und Lohn (siehe kmu_proc_buchhaltung, kmu_proc_lohnabrechnung). DATEV-Anbindung als Standard-Schnittstelle. Jahresabschluss-Fristen (für GmbH typisch 31. Mai des Folgejahres) sind harte Stichtage."
+      },
+      {
+        "id": "kmu_dep_internet",
+        "title": "Internet-Anbindung (typischerweise einfacher Anschluss, ohne Redundanz)",
+        "category": "dienstleister",
+        "criticality": "kritisch",
+        "singlePointOfFailure": false,
+        "fallback": "Mobilfunk-LTE-Backup-Router für Notbetrieb, eingeschränkte Bandbreite. Ein zweiter Festnetz-Anschluss als Redundanz ist im KMU-Mittelstand selten (Kosten-Argument), aber bei Cloud-Abhängigkeit ratsam.",
+        "contractReference": "Internet-Provider-Vertrag (Telekom, Vodafone, 1&1, Carrier mit Geschäftskunden-SLA)",
+        "notes": "Bei Cloud-Provider-Abhängigkeit (kmu_dep_cloud_provider) ist die Internet-Anbindung Single Point of Failure — Outage des Internet-Anschlusses unterbricht alle Cloud-Dienste gleichzeitig. Mobilfunk-Backup mit LTE-Router als Mindeststandard."
+      },
+      {
+        "id": "kmu_dep_branchensoftware",
+        "title": "Branchen-Software (CRM, ERP, branchenspezifische Lösung)",
+        "category": "software",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Bei Branchen-Software-Ausfall Excel-Notbetrieb mit Backup-Stammdaten möglich, aber stark verlangsamt. Hersteller-Substitution mehrjähriges Migrations-Projekt mit klinischer Daten-Übergabe.",
+        "contractReference": "Branchen-Software-Hersteller-Wartungsvertrag",
+        "notes": "Branchen-Software in KMUs ist oft 10-15 Jahre alt, mit eingeschränkter API-Modernisierungs-Fähigkeit. Cloud-Migration als Härtungs-Maßnahme + Modernisierungs-Schritt empfehlenswert. Beispiele: Salesforce / HubSpot (CRM), SAP Business One / Sage / proAlpha (ERP), branchenspezifisch (z.B. Tour-Planung für Logistiker, Mandantenverwaltung für Berater)."
+      },
+      {
+        "id": "kmu_dep_strom",
+        "title": "Energie- und Stromversorgung (typischerweise ohne Notstrom in KMU)",
+        "category": "energie",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "USV für 30-60 Minuten geordneter Shutdown der IT, danach Geschäftsbetrieb pausiert bis zur Strom-Wiederkehr. Notstrom-Aggregat in KMUs unter 100 Mitarbeitenden selten (Kosten-Argument).",
+        "contractReference": "Strom-Vertrag mit Stadtwerken / regionalem EVU",
+        "notes": "Im Gegensatz zu KRITIS-Branchen (Healthcare, Industry mit Notstrom) ist die KMU-Realität: Stromausfall = Geschäftsbetrieb-Pause. NRW 2024 als Schablone (mehrtägiger Stromausfall mit existenz-bedrohlichen Folgen für regionale Mittelständler). Cloud-Abhängigkeit verschärft das Problem — auch ohne lokalen Stromausfall ist Cloud nicht erreichbar bei Internet-Outage."
+      },
+      {
+        "id": "kmu_dep_lieferant",
+        "title": "Schlüssel-Lieferant (Single-Source kritischer Komponenten oder Dienstleistungen)",
+        "category": "lieferant",
+        "criticality": "hoch",
+        "singlePointOfFailure": false,
+        "fallback": "Backup-Lieferanten-Vereinbarung mit zweiter Quelle (oft Versicherung gegen Single-Source-Risiko). Sicherheitsbestand 2-4 Wochen für kritische Komponenten.",
+        "contractReference": "Lieferanten-Rahmenvertrag",
+        "notes": "Single-Source-Risiko in KMU oft strukturell — historisch gewachsene Beziehungen, niedrige Margen erlauben keine zweite Quelle. NIS2-Lieferketten-Pflicht: bei Großkunden-Auflagen muss Tenant Liefer-Risiko-Bewertung jährlich aktualisieren."
+      }
+    ],
+    "scenarioTemplates": [
+      {
+        "id": "kmu_scn_ransomware_msp",
+        "title": "Ransomware mit Geschäftsstillstand und MSP-Verstrickung",
+        "category": "Cyber-physische Bedrohung mit MSP-Lieferketten-Hebel",
+        "description": "Ransomware-Verschlüsselung über den MSP-Zugang — der MSP ist gleichzeitig Lieferant und Mitbetroffener. KMU steht ohne Recovery-Kapazität da, weil die eigene IT extern ausgelagert ist. Kaseya-VSA-Schablone Juli 2021.",
+        "likelihood": 4,
+        "impact": 5,
+        "ownerRole": "Geschäftsführung / Externer MSP",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_buchhaltung",
+          "kmu_proc_kunden_service",
+          "kmu_proc_it",
+          "kmu_proc_kerngeschaeft"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_msp_mssp",
+          "kmu_dep_cloud_provider",
+          "kmu_dep_internet"
+        ],
+        "playbook": "MSP-Vertrags-Eskalation, BSI-NIS2-Erstmeldung 24 h (falls Tenant in NIS2-Kreis durch Großkunden-Auflagen), Bank-Information mit Liquiditäts-Klärung, Kunden-Kommunikation mit B2B-Vertrags-Klauseln, Lösegeld-Verweigerung mit BKA-Anzeige, Cyber-Police-Aktivierung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Kaseya VSA Juli 2021 als zentrale Schablone (REvil, ~1.000 MSP-Kunden direkt verschlüsselt). BSI-Lagebericht 2025: 80 % der angezeigten Angriffe gegen KMU."
+      },
+      {
+        "id": "kmu_scn_schluesselperson_ausfall",
+        "title": "Schlüsselperson-Ausfall mit Generationenwechsel-Triade",
+        "category": "Operative Resilienz mit Mittelstands-Realität",
+        "description": "Drei klassische Schlüsselperson-Risiken im Mittelstand, die auch kombiniert auftreten können: (1) Senior, 76 Jahre — Geschäftsführer/Gesellschafter mit allen Bank-Vollmachten, Investitions-Entscheidungs-Kompetenz und 40-jährigem Kunden-Wissen; plötzlicher Ausfall durch Krankheit oder Tod ohne Nachfolge-Regelung. (2) Junior, 41 Jahre — IT-Verantwortlicher mit 25-jährigem System-Wissen, alle Passwörter im Kopf, kein Passwort-Manager; Ausfall durch Wechsel zur Konkurrenz mit aktiver Abwerbung oder durch Generationen-Streit mit Senior. (3) Buchhalterin, 22 Jahre — einzige Buchhaltungs-Kompetenz im Haus, frisch eingestellt, lange Eingewöhnung; Ausfall durch Long-Covid, Burnout, längere Krankheit oder Schwangerschaft mit Mutterschutz. Optional vierte Person: stille Wissens-Trägerin in Vertrieb oder Lager-Logistik mit jahrzehntealten Kunden-/Lieferanten-Beziehungen, deren Ausfall erst Wochen später bemerkt wird.",
+        "likelihood": 3,
+        "impact": 5,
+        "ownerRole": "Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_geschaeftsfuehrung",
+          "kmu_proc_buchhaltung",
+          "kmu_proc_lohnabrechnung",
+          "kmu_proc_it"
+        ],
+        "linkedDependencyTemplateIds": [],
+        "playbook": "Notfall-Vertretung mit externem Dienstleister (Anwalt, Steuerberater, externe Buchhaltungs-Firma — siehe kmu_dep_steuerberater), Passwort-Recovery-Strategie mit Notfall-Tresor und Backup-Admin-Zugängen, Kunden-/Lieferanten-Information, Versicherungs-Aktivierung (D&O), Bank-Vollmachts-Klärung mit Vier-Augen-Prinzip-Aktivierung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Mittelstands-Realität gemäß Bitkom Wirtschaftsschutz 2025: KMU bewerten ihre Vertretungs-Disziplin überwiegend als gut, Realität liegt deutlich darunter — 87 % der Unternehmen waren 2025 von Datenklau, Spionage oder Sabotage betroffen, Vertretungs-Pläne wurden in den seltensten Fällen durchgespielt. KfW-Generationen-Studie zeigt strukturelles Risiko bei Familienunternehmen ohne klare Nachfolge."
+      },
+      {
+        "id": "kmu_scn_business_email_compromise",
+        "title": "Business Email Compromise (CEO-Fraud) mit Liquiditäts-Hebel",
+        "category": "Cyber-physische Bedrohung mit Social-Engineering-Hebel",
+        "description": "Angreifer kompromittieren das E-Mail-Konto der Geschäftsführung oder fälschen es überzeugend. Buchhaltung erhält scheinbar legitime Zahlungs-Anweisung über 50-200 T€ an unbekannten Empfänger. Im Mittelstand sehr verbreitet — Kompetenz-Strukturen und Liquidität liegen beieinander, was den Tenant zum perfekten Ziel macht.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Buchhaltung / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_buchhaltung",
+          "kmu_proc_geschaeftsfuehrung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_bank",
+          "kmu_dep_cloud_provider"
+        ],
+        "playbook": "Vier-Augen-Prinzip bei Zahlungen > 10 T€, Rückrufbestätigung bei ungewöhnlichen Anweisungen über bekannte Telefonnummer (nicht aus E-Mail kopiert), MFA für E-Mail-Konten, Bank-Sperre bei Verdacht, Strafanzeige beim LKA Cyber, Cyber-Police-Aktivierung.",
+        "exerciseTypeHint": "alarm",
+        "notes": "Bitkom-Wirtschaftsschutz 2025: CEO-Fraud bleibt einer der wirtschaftlich größten Schaden-Vektoren im Mittelstand. 70 % der Schäden durch Cyber, davon 34 % durch Ransomware — der Rest über Social-Engineering wie BEC. Vier-Augen-Prinzip mit Rückrufbestätigung als wirksamste Maßnahme."
+      },
+      {
+        "id": "kmu_scn_cloud_outage",
+        "title": "Cloud-Provider-Outage (Microsoft 365 mehrtägig)",
+        "category": "IT-Lieferketten-Disruption mit Office-Stillstand",
+        "description": "Microsoft 365 / Google Workspace / Azure / AWS hat einen mehrtägigen Region-Outage. E-Mail, Office-Dokumente, Teams-Kollaboration sind nicht erreichbar. Bei Single-Region-Konfiguration (KMU-Standard) steht das Geschäft still.",
+        "likelihood": 2,
+        "impact": 4,
+        "ownerRole": "IT-Verantwortlicher / MSP / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_it",
+          "kmu_proc_kunden_service",
+          "kmu_proc_kerngeschaeft",
+          "kmu_proc_vertrieb"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_internet"
+        ],
+        "playbook": "Cloud-Provider-Status-Seite und Twitter-Account beobachten, Kommunikation mit Kunden über alternative Kanäle (Telefon, SMS, Webseite), Notbetrieb mit Offline-Kopien kritischer Daten, ggf. temporärer Wechsel auf Backup-Cloud (Multi-Cloud-Substitution), Geschäftsführungs-Entscheidung über Wartezeit vs. Migration.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Cloud-Region-Outages sind selten aber wirkungsvoll. Microsoft 365 hatte zuletzt Anfang 2024 einen mehrstündigen globalen Outage. Multi-Region-Konfiguration kostet 30-100 % Aufpreis und ist daher in KMU selten."
+      },
+      {
+        "id": "kmu_scn_dsgvo_datenpanne",
+        "title": "DSGVO-Verstoß mit Datenpanne (Kunden-/Mitarbeiter-Daten in falsche Hände)",
+        "category": "Datenschutz-Vorfall mit DSGVO-Härte",
+        "description": "Versehentlicher oder vorsätzlicher Datenpannen-Vorfall — Verlust eines USB-Sticks, falsche Empfänger einer E-Mail mit Personalakten, Kompromittierung der HR-Software durch Cyber-Angriff. DSGVO Art. 33 (72-h-Meldefrist) und Art. 34 (Bürger-Benachrichtigung bei hohem Risiko) lösen aus.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Datenschutzbeauftragte*r (intern oder extern) / Geschäftsführung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_buchhaltung",
+          "kmu_proc_personal",
+          "kmu_proc_kunden_service"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_branchensoftware"
+        ],
+        "playbook": "DSGVO-Bewertung Art. 33/34 binnen Stunden nach Entdeckung, Meldung an Aufsichtsbehörde (BfDI oder Landes-Datenschutzbehörde) binnen 72 h, individuelle Benachrichtigung der Betroffenen bei hohem Risiko, Schnittstelle zur Polizei (LKA Cyber). Externer Datenschutzbeauftragter als Eskalations-Pfad.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "KMU haben oft externen Datenschutzbeauftragten via Kanzlei-Vertrag (kmu_dep_steuerberater oder Datenschutz-Spezialist). Bußgeld-Risiko gemäß DSGVO Art. 83 bis 4 % des Jahresumsatzes oder 20 Mio. € — Mittelstands-Schaden in der Regel 50-200 T€."
+      },
+      {
+        "id": "kmu_scn_grosskunden_audit",
+        "title": "Großkunden-Cyber-Audit-Eskalation (NIS2-Kette für Mittelstand)",
+        "category": "Lieferketten-Risiko mit NIS2-Hebel",
+        "description": "Großkunde fordert NIS2-/ISO-27001-/TISAX-Konformität von Tenant — dieser ist formal unterhalb der NIS2-Schwelle, wird aber durch Großkunden-Auflage faktisch in den NIS2-Kreis gezogen. Drei Eskalations-Stufen typischerweise: (1) Self-Assessment-Fragebogen mit 100-200 Fragen, (2) Anforderungs-Update mit Investitions-Bedarf, (3) Audit-Termin mit Bestätigungs-Pflicht. Bei Nicht-Erfüllung droht Auftragsentzug.",
+        "likelihood": 3,
+        "impact": 4,
+        "ownerRole": "Geschäftsführung / Vertriebsleitung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_geschaeftsfuehrung",
+          "kmu_proc_vertrieb",
+          "kmu_proc_it",
+          "kmu_proc_liquiditaet"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_grosskunde"
+        ],
+        "playbook": "Sofortige Einschätzung des Anforderungs-Katalogs mit IT-Leitung und Anwalt. Investitions-Plan über 3-12 Monate aufstellen (typisch 50-200 T€ einmalig + 20-50 T€ jährliche Folgekosten). Großkunden-Information über realistischen Zeitplan. Externe Beratung durch ISO-27001-Auditor oder Cyber-Security-Berater. Liquiditäts-Steuerung mit Hausbank klären (Investitions-Kredit-Anpassung).",
+        "exerciseTypeHint": "tabletop",
+        "notes": "NIS2-Kette ist die ökonomische Realität für Mittelstand: auch unterhalb der NIS2-Schwelle wird Konformität durch Großkunden-Hebel erzwungen. Großkundenanteil > 30 % Umsatz ist Schwellwert für Existenz-Risiko bei Auftragsentzug. Drei Eskalations-Stufen entsprechen typischen Konzern-Sourcing-Prozessen (Self-Assessment, Site-Visit, Re-Audit)."
+      },
+      {
+        "id": "kmu_scn_phishing_welle",
+        "title": "Phishing-Welle mit Konto-Übernahme (Office-365-Hijack mehrerer Mitarbeitende)",
+        "category": "Cyber-Bedrohung mit Konto-Hijack-Hebel",
+        "description": "Phishing-Welle trifft mehrere Mitarbeitende gleichzeitig — gefälschte Microsoft-Login-Seite, MFA-Müdigkeits-Angriff oder Adversary-in-the-Middle. Office-365-Konten werden übernommen, Angreifer richten Mail-Forwarding-Regeln ein und beobachten Geschäftsprozess. Häufiger Einstiegs-Vektor für CEO-Fraud (kmu_scn_business_email_compromise).",
+        "likelihood": 4,
+        "impact": 3,
+        "ownerRole": "IT-Verantwortlicher / MSP / Datenschutzbeauftragte*r",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_it",
+          "kmu_proc_buchhaltung",
+          "kmu_proc_kunden_service"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_cloud_provider",
+          "kmu_dep_msp_mssp"
+        ],
+        "playbook": "Sofortige Sperrung der betroffenen Konten, MFA-Token-Reset, Mail-Forwarding-Regeln auf allen Konten prüfen und löschen, Passwort-Reset für alle Mitarbeitende, Awareness-Training mit aktueller Phishing-Schablone, Strafanzeige beim LKA Cyber, Cyber-Police-Aktivierung. Microsoft 365 Audit-Log nach lateral movement durchsuchen.",
+        "exerciseTypeHint": "alarm",
+        "notes": "Phishing ist KMU-Realität — fast jeder Tenant wird mindestens einmal pro Jahr getroffen. MFA mit Number-Matching (gegen MFA-Müdigkeit) als Mindeststandard. Häufiger Einstiegs-Vektor für CEO-Fraud (BEC), daher Verlinkung zur kmu_scn_business_email_compromise."
+      },
+      {
+        "id": "kmu_scn_liquiditaets_krise",
+        "title": "Liquiditäts-Krise nach Cyber-Vorfall (Bandbreiten-Schaden 100 T€ bis 5 Mio €)",
+        "category": "Ökonomischer Folge-Schaden mit Insolvenz-Risiko",
+        "description": "Nach einem Cyber-Vorfall mit längerem Notbetrieb laufen Vorfall-Kosten plus Umsatz-Ausfall hoch. Drei realistische Schadens-Skalen: (1) typisch 100-500 T€ (kurzer Notbetrieb, Beratungs- und Versicherungs-Kosten gemäß GDV-Statistik), (2) schwerer Vorfall 1-2 Mio. € (mehrwöchiger Notbetrieb, Recovery-Kosten, Kunden-Verlust — entspricht BSI-Lagebericht-2025-Schnitt von 1,67 Mio. €), (3) Worst-Case bis 5 Mio. € (Insolvenz-Risiko, Großkunden-Verlust, Reputations-Schaden mit langfristiger Umsatz-Erosion). Cashflow-Einbruch wenn Bank-Linie nicht angepasst wird.",
+        "likelihood": 2,
+        "impact": 5,
+        "ownerRole": "Geschäftsführung / kaufmännische Leitung",
+        "linkedProcessTemplateIds": [
+          "kmu_proc_liquiditaet",
+          "kmu_proc_geschaeftsfuehrung",
+          "kmu_proc_lohnabrechnung"
+        ],
+        "linkedDependencyTemplateIds": [
+          "kmu_dep_bank"
+        ],
+        "playbook": "Sofortige Liquiditäts-Bestandsaufnahme mit Buchhaltung, Hausbank-Notfall-Termin mit Bank-Berater zur Linien-Anpassung, Cyber-Police-Schaden-Anzeige, Verzögerung nicht-existenz-kritischer Zahlungen mit Lieferanten-Kommunikation, ggf. Stundungs-Vereinbarung mit Finanzamt und Sozialversicherungs-Trägern. Steuerberater einbinden für Bilanz-Bewertung.",
+        "exerciseTypeHint": "tabletop",
+        "notes": "Bandbreiten-Schadens-Schätzung gemäß GDV-Statistik (typisch 100-500 T€), BSI-Lagebericht 2025 (Durchschnittsschaden 1,67 Mio. € pro Mittelständler) und Bitkom Wirtschaftsschutz 2025 (Worst-Case-Insolvenz bei mehrwöchigem Stillstand). Cyber-Police mit Insolvenz-Schutz-Klausel als Mindeststandard."
+      }
+    ],
+    "exerciseTemplates": [
+      {
+        "id": "kmu_ex_ransomware_msp",
+        "title": "Ransomware-mit-MSP Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_ransomware_msp",
+        "ownerRole": "Krisenstab / Geschäftsführung",
+        "cadenceMonths": 12,
+        "notes": "Jährliche Übung mit Geschäftsführung, IT-Dienstleister-Verantwortliche*r, Buchhaltung, externem MSP-Account-Manager, Anwalt, Cyber-Versicherung-Schadenregulierer. Kaseya-VSA-Schablone als Drehbuch-Anhang. Demo-Pointe: bei MSP-Verstrickung sitzt der IT-Verantwortliche extern und ist gleichzeitig Mitbetroffener."
+      },
+      {
+        "id": "kmu_ex_schluesselperson_ausfall",
+        "title": "Schlüsselperson-Ausfall Tabletop (Generationenwechsel-Triade)",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_schluesselperson_ausfall",
+        "ownerRole": "Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop — bewusst Schlüsselperson „nicht erreichbar\" im Drill, Vertretung muss Passwort-Manager-Notfall-Zugang aktivieren. Triade-Drehbuch (Senior 76 / Junior 41 / Buchhalterin 22 — siehe kmu_scn_schluesselperson_ausfall) als Drehbuch-Variante. Cadence von 12 auf 24 Monate angepasst, weil Schlüsselperson-Risiko nicht jährlich neu bewertet werden muss; in dazwischen-liegenden Jahren reicht Tabletop-Update der Kontaktliste."
+      },
+      {
+        "id": "kmu_ex_ceo_fraud",
+        "title": "CEO-Fraud-Awareness-Funktionstest",
+        "exerciseType": "alarm",
+        "scenarioTemplateId": "kmu_scn_business_email_compromise",
+        "ownerRole": "Buchhaltung / Geschäftsführung",
+        "cadenceMonths": 12,
+        "notes": "Jährlicher Funktions-Test mit gesamter Buchhaltung und Geschäftsführung: simulierte CEO-E-Mail mit Zahlungs-Anweisung (im Drill, mit Zustimmung der Geschäftsführung). Stoppuhr durch Vier-Augen-Prinzip-Pfad und Rückrufbestätigung. Schnelligkeit der Erkennung als Kennzahl. Phishing-Awareness-Training als Grund-Stufe."
+      },
+      {
+        "id": "kmu_ex_dsgvo_walkthrough",
+        "title": "DSGVO-Meldung-Walkthrough",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_dsgvo_datenpanne",
+        "ownerRole": "Datenschutzbeauftragte*r / Geschäftsführung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Walkthrough mit Geschäftsführung und Datenschutzbeauftragtem (intern oder extern via Kanzlei-Vertrag). Stoppuhr durch Meldepfad zu Aufsichtsbehörde (DSGVO Art. 33, 72-h-Frist). Bürger-Benachrichtigungs-Logistik (Art. 34) mit Brief-Vorlagen und Hotline-Skripten testen. Externe Anwalts-/Datenschutz-Berater einbeziehen."
+      },
+      {
+        "id": "kmu_ex_grosskunden_audit",
+        "title": "Großkunden-Cyber-Audit-Tabletop",
+        "exerciseType": "tabletop",
+        "scenarioTemplateId": "kmu_scn_grosskunden_audit",
+        "ownerRole": "Geschäftsführung / Vertriebsleitung",
+        "cadenceMonths": 24,
+        "notes": "Zwei-Jahres-Tabletop mit Geschäftsführung, Vertrieb, IT-Verantwortlichem, Anwalt. Drei-Stufen-Eskalations-Drehbuch: Self-Assessment-Fragebogen, Anforderungs-Update mit Investitions-Plan (50-200 T€ einmalig + 20-50 T€ jährlich), Audit-Termin mit Bestätigungs-Pflicht. Liquiditäts-Folgen mit Hausbank klären."
+      }
+    ],
+    "riskCatalogTemplates": [
+      {
+        "id": "risk-kmu-ransomware-geschaeftsstillstand",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ransomware_full_outage",
+        "titel": "Ransomware mit Geschäftsstillstand",
+        "beschreibung": "Ransomware-Verschlüsselung der Geschäftsdaten — Buchhaltung, Kundendaten, E-Mail, ggf. Webshop nicht verfügbar. BSI-Lagebericht 2025: 950 dokumentierte Ransomware-Angriffe, 80 % gegen kleine und mittlere Unternehmen. KMU mit ausgelagerter IT sind besonders verwundbar, weil Recovery-Kapazität extern liegt. Vektoren: Phishing-E-Mail mit Office-Makro, kompromittierte VPN-Zugänge, ungepatchte Web-Anwendungen, kompromittierter MSP-Zugang. Tenant-Profil-Hinweis: Klein-MA (50-100) strukturell anfälliger (knappe Sicherheits-Ressourcen), Groß-MA (250-500) besser ausgestattet aber höherer Schadens-Hebel. Schadensbild: Tage bis Wochen Geschäftsstillstand, Lohnzahlungen gefährdet, Kunden-/Lieferanten-Vertrauensschaden, ggf. Existenz-Risiko (Bitkom-2025: 59 % der Unternehmen halten Cyber-Attacken für existenz-bedrohend). Mitigation: Backup nach 3-2-1-Regel mit halbjährlichem Restore-Test, EDR auf allen Workstations, MFA für VPN- und Cloud-Zugänge, MSP-Sicherheits-SLA, jährliche Phishing-Simulation.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / IT-Dienstleister-Verantwortliche*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-business-email-compromise",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "business_email_compromise",
+        "titel": "Business Email Compromise (CEO-Fraud) mit Liquiditäts-Hebel",
+        "beschreibung": "Angreifer kompromittieren das E-Mail-Konto der Geschäftsführung oder fälschen es überzeugend (Spoofing, Look-alike-Domain). Buchhaltung erhält scheinbar legitime Zahlungs-Anweisung über 50-200 T€ an unbekannten Empfänger („dringende Akquisitionszahlung\", „neuer Lieferant in Hongkong\"). Im Mittelstand sehr verbreitet — Bitkom-Wirtschaftsschutz 2025 nennt CEO-Fraud als einen der wirtschaftlich größten Schaden-Vektoren im Mittelstand. Tenant-Profil-Hinweis: Familienunternehmen mit Allein-Inhaber-Vollmacht primär betroffen; Tenants mit etabliertem Vier-Augen-Prinzip strukturell weniger anfällig. Schadensbild: direkter monetärer Verlust (oft nicht mehr rückholbar bei Auslandsüberweisung), Vertrauensbruch in der Buchhaltung, Reputations-Schaden bei Bekanntwerden. Mitigation: Vier-Augen-Prinzip bei Zahlungen > 10 T€, Rückruf-Bestätigung bei ungewöhnlichen Anweisungen, MFA für E-Mail-Konten, DMARC/DKIM/SPF-Konfiguration zum Spoofing-Schutz, Schulung der Buchhaltung halbjährlich.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Buchhaltung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-phishing-daten-exfiltration",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "phishing_data_exfiltration",
+        "titel": "Phishing-Kampagne mit Daten-Exfiltration",
+        "beschreibung": "Phishing-E-Mail-Kampagne kompromittiert Mitarbeiter-Konten, Angreifer exfiltrieren Kunden-Daten, Kalkulationen, Verträge oder Personal-Daten. Empirisch der häufigste Initial-Vektor im Mittelstand (BSI-Lagebericht 2025: Phishing-Kampagnen dominieren neben Ransomware und ungepatchten Schwachstellen). KMU-Realität: 91 % der KMU bewerten ihre IT-Sicherheit selbst als gut, erfüllen aber im Durchschnitt nur 56 % der Basisanforderungen — die Selbst-Überschätzung verschärft das Phishing-Risiko. Tenant-Profil-Hinweis: alle KMU-Profile gleichermaßen betroffen; Tenants mit geringer MFA-Coverage strukturell anfälliger. Schadensbild: DSGVO Art. 33 Meldepflicht 72 h, Art. 34 Bürger-/Kunden-Benachrichtigung bei hohem Risiko, BfDI/Landes-Datenschutz-Bußgeld-Risiko, Reputations-Schaden bei B2B-Kunden mit eigenen Compliance-Anforderungen. Mitigation: MFA-Vollabdeckung (FIDO2/WebAuthn bevorzugt), halbjährliche Phishing-Simulation mit Klicker-Statistik, EDR mit Anomalie-Erkennung, E-Mail-Filter mit Sandboxing.",
+        "eintrittswahrscheinlichkeit": 5,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Datenschutzbeauftragte*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-ddos-webshop",
+        "categoryId": "cyber_physical",
+        "subCategoryId": "ddos_webshop",
+        "titel": "DDoS-Angriff auf Webshop / Kunden-Portal",
+        "beschreibung": "Volumetrische DDoS-Angriffe gegen Webshop, Kunden-Portal oder öffentliche Webseite — besonders kritisch bei E-Commerce-Tenants mit hohem Online-Umsatzanteil. Erpresser-Komponente: „DDoS-Demo\" mit Lösegeldforderung in BTC, Bedrohung mit Folge-Angriffen. Tenant-Profil-Hinweis: E-Commerce-Tenants und Tenants mit zeitkritischen Online-Services (z. B. Reservierungs-Portale, Buchungs-Systeme) primär betroffen; reine Offline-Tenants (Handwerk, lokale Dienstleistung) deutlich weniger empfindlich. Schadensbild: Umsatzausfall pro Stunde Webshop-Stillstand, Kunden-Verlust durch Kaufabbruch, Suchmaschinen-Ranking-Verlust bei längerer Nicht-Erreichbarkeit. Mitigation: Cloud-CDN mit DDoS-Schutz (Cloudflare, AWS Shield, Akamai) als Standard-Konfiguration, Anycast-DNS, Rate-Limiting auf Anwendungs-Ebene, Notfall-Mitigation-Vertrag für höhere Volumina (Akamai Prolexic / Cloudflare Magic Transit).",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Geschäftsführung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-server-ausfall-ohne-backup-test",
+        "categoryId": "technical",
+        "subCategoryId": "server_failure_no_restore_test",
+        "titel": "Server-Ausfall mit fehlgeschlagenem Backup-Restore",
+        "beschreibung": "Klassischer Mittelstands-Vorfall: Hardware-Defekt eines Servers (Storage-Cluster, Festplatten-Mehrfachausfall, Netzteil-Brand) — Wiederherstellung scheitert, weil Backups zwar existieren, aber nie restored wurden. Korrupte Tapes, vergessene Passwörter für Backup-Tresor, unvollständige Backup-Sets, inkompatible Hardware für Restore. Tenant-Profil-Hinweis: alle KMU-Profile gleichermaßen betroffen; Tenants mit ausgelagerter IT haben besseren Schutz, aber nur falls der MSP den Restore-Test wirklich durchführt (Vertrags-Klausel oft schwach). Schadensbild: 24-72 h Geschäftsstillstand bei vollständig erfolgreichem Restore, Tage bis Wochen bei teilweisem oder fehlgeschlagenem Restore. Mitigation: Backup-Konzept nach 3-2-1-Regel mit halbjährlichem vollständigem Restore-Test, Stoppuhr-Messung der RTO, Dokumentation der Restore-Schritte, Backup-Tresor-Passwörter in Passwort-Manager mit Notfall-Zugang.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Externer MSP",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-veraltete-hardware-sicherheitsluecken",
+        "categoryId": "technical",
+        "subCategoryId": "legacy_hardware_vulnerabilities",
+        "titel": "Veraltete Hardware/Software mit ungepatchten Sicherheitslücken",
+        "beschreibung": "KMU-typische Beispiele aus der Mittelstands-Realität: Microsoft Windows Server 2012 R2 ohne Extended Security Updates (EOS Oktober 2023, viele Mittelständler haben den Wechsel auf Windows Server 2019/2022 noch nicht vollzogen), ältere ERP-Versionen wie Sage 2014 oder DATEV-Stand vor 2019 mit bekannten Schwachstellen, ungepatchte Netzwerk-Switches (Cisco/HPE) mit veröffentlichten CVEs, alte Firewalls (z. B. SonicWall, Fortinet, Sophos) mit ausgelaufenen Wartungsverträgen, Office-Versionen vor Microsoft 365 ohne aktuelle Sicherheits-Patches. BSI-Lagebericht 2025: täglich 119 neue Sicherheitslücken entdeckt (+24 % gegenüber Vorjahr) — die ungepatchten Schwachstellen bleiben offen, bis sie ausgenutzt werden. Die EW=4-Bewertung ist daher als „Realität in Mittelständlern ohne dedizierte IT\" plausibel — Patch-Disziplin scheitert oft an Budget oder Fachpersonal. Tenant-Profil-Hinweis: traditionelle Mittelstands-Branchen (Handwerk, Handel) mit knappem IT-Budget primär betroffen; modernisierte IT-Dienstleister-Tenants strukturell besser. Schadensbild: erhöhte Angriffsfläche für Ransomware und Daten-Exfiltration, Compliance-Verstoß bei NIS2 und ggf. ISO 27001, Versicherungs-Risiko (Cyber-Police kann Leistungen ablehnen bei nachgewiesener Patch-Fahrlässigkeit). Mitigation: Lifecycle-Management mit definierten Migrations-Fenstern, monatliches Patch-Reporting durch MSP, Compensating-Controls bei nicht-patchbaren Altsystemen (Netzsegmentierung, EDR), Mehrjahres-Investitions-Plan.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Externer MSP",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-cloud-service-outage",
+        "categoryId": "technical",
+        "subCategoryId": "cloud_service_outage",
+        "titel": "Cloud-Service-Outage (Microsoft 365, Google Workspace, AWS-/Azure-Region)",
+        "beschreibung": "Cloud-Service-Ausfall beim primären Provider — Microsoft-365-Outage trifft E-Mail, Teams, SharePoint, OneDrive gleichzeitig; AWS-/Azure-Region-Outage trifft alle dort gehosteten Anwendungen; Google Workspace-Outage trifft G-Mail/Drive/Meet. Vorfälle 2024-2025 zeigen: selbst Hyperscaler haben mehrstündige Region-Outages (AWS us-east-1 historisch, Azure mehrere Regionen 2024). Tenant-Profil-Hinweis: alle KMU-Profile mit Cloud-zentrierter IT betroffen; Multi-Cloud- oder Multi-Region-Konfigurationen strukturell weniger empfindlich, aber 30-100 % höhere Kosten. Schadensbild: Stunden bis Tage Beeinträchtigung der Kommunikation und Dokument-Verfügbarkeit, Lohn-/Buchhaltungs-Software bei Cloud-Hosting auch betroffen. Mitigation: Multi-Region-Konfiguration für kritische Anwendungen, Offline-Kopien wichtiger Dokumente (z. B. Notfall-Kontakte als PDF auf lokalem USB-Stick), Cloud-Provider-SLA-Review, Notfall-Kommunikations-Kanal außerhalb der Cloud (Telefon, separate Mailbox).",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Externer MSP",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-insider-datendiebstahl-kuendigung",
+        "categoryId": "human_intentional",
+        "subCategoryId": "insider_data_theft_resignation",
+        "titel": "Insider-Datendiebstahl bei Kündigung / Wettbewerber-Wechsel",
+        "beschreibung": "Bewusste Mitnahme von Geschäftsdaten zum neuen Arbeitgeber — Mitarbeiter*in mit Zugriff auf Kunden-Daten, Kalkulationen, Lieferanten-Konditionen oder Know-how kopiert diese vor der Kündigung oder beim Wettbewerber-Wechsel. Häufiges Phänomen, oft niedrigerer Einzelschaden (deshalb EW=3, AW=3). Klar abzugrenzen von destruktiver Sabotage durch entlassene Mitarbeiter (siehe risk-kmu-sabotage-entlassener-mitarbeiter): hier geht es um Mitnahme ohne Zerstörung, nicht um Datenschäden vor Ort. Vorfälle 2018-2024 mit BGB-Schadensersatz und § 17 UWG (Geheimnisverrat) im Mittelstand sehr verbreitet. Tenant-Profil-Hinweis: Tenants mit hochwertigem Know-how (Maschinenbau, Beratung, Software-Entwicklung) primär betroffen; Tenants mit standardisiertem Geschäft (z. B. Lebensmittel-Einzelhandel) weniger empfindlich. Schadensbild: Wettbewerbs-Nachteil (Konditionen, Kunden-Listen), DSGVO-Implikation falls personenbezogene Daten betroffen, gerichtliche Auseinandersetzung mit ehemaligem Mitarbeiter, Reputations-Schaden bei Kunden-Mitnahme. Mitigation: Account-Sperrung am Tag der Kündigung (zentral koordiniert), Logging aller Daten-Downloads, Daten-Loss-Prevention auf E-Mail und Cloud-Speicher, NDA und Wettbewerbs-Klauseln im Arbeitsvertrag, Exit-Interview mit Compliance-Reminder.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Personal / IT-Dienstleister-Verantwortliche*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-sabotage-entlassener-mitarbeiter",
+        "categoryId": "human_intentional",
+        "subCategoryId": "sabotage_disgruntled_employee",
+        "titel": "Sabotage durch entlassenen oder unzufriedenen Mitarbeiter",
+        "beschreibung": "Destruktive Aktion eines entlassenen oder stark unzufriedenen Mitarbeiters mit noch aktivem Account — Daten-Löschung, manipulierte Kunden-Daten, manipulative Bestellungen, kompromittierte Konfiguration. Selten, aber mit hohem Einzelschaden (deshalb EW=2, AW=4). Klar abzugrenzen von Insider-Datendiebstahl-bei-Kündigung (siehe risk-kmu-insider-datendiebstahl-kuendigung): dort Daten-Mitnahme ohne Zerstörung, hier zerstörerische Wirkung am System. Klassiker im Mittelstand: Account wird beim Abgang oft erst Tage später deaktiviert, Sabotage erfolgt im Zeitfenster zwischen letzter Anwesenheit und Account-Sperrung. Tenant-Profil-Hinweis: Tenants mit konfliktträchtigen Trennungs-Situationen (Streit, Insolvenz-Drohungen, Generationenwechsel-Konflikt) primär betroffen. Schadensbild: Daten-Verlust mit Restore-Aufwand, manipulierte Geschäfts-Vorgänge, Vertrauens-Bruch in der Belegschaft, ggf. Strafanzeige (§ 303a StGB Datenveränderung). Mitigation: Account-Sperrung am Tag der Trennung mit zentraler Koordinations-Liste, Off-boarding-Checkliste (Hardware-Rückgabe, Schlüssel, Pässe), Logging aller Admin-Aktionen mit Anomalie-Erkennung, EDR mit Verhaltens-Analyse, Trennungs-Begleitung durch externen Anwalt bei eskalierten Fällen.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Personal / IT-Dienstleister-Verantwortliche*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-bedienfehler-datenmigration",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "data_migration_error",
+        "titel": "Bedienfehler bei Daten-Migration oder Software-Wechsel",
+        "beschreibung": "Klassischer Mittelstands-Vorfall bei Wechsel auf neue Software (CRM-Wechsel, Buchhaltungs-Wechsel, ERP-Migration) oder bei größeren Daten-Importen — fehlerhafte Mapping-Konfiguration, vergessene Test-Phase, kein Rollback-Plan. Beispiel: Kunden-Stammdaten-Migration verliert 15 % der Datensätze, oder Lohn-System-Wechsel führt zu fehlerhaften SV-Beiträgen. Tenant-Profil-Hinweis: alle KMU-Profile bei Migrations-Projekten betroffen; Tenants mit eigenem IT-Personal haben tendenziell besseren Schutz, ausgelagerte Tenants hängen an MSP-Disziplin. Schadensbild: Daten-Verlust mit Rekonstruktions-Aufwand, fehlerhafte Geschäfts-Vorgänge (Mahnungen, Lohn-Auszahlungen), Kunden-Vertrauensschaden bei sichtbaren Fehlern. Mitigation: Test-Migration in separater Umgebung, dokumentierter Rollback-Plan, Vier-Augen-Prinzip bei Migrations-Schritten, externe Beratung bei großen Migrationen, Backup unmittelbar vor Migration.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 3,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "IT-Dienstleister-Verantwortliche*r / Externer MSP",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-schluesselperson-ausfall",
+        "categoryId": "human_unintentional",
+        "subCategoryId": "key_person_outage",
+        "titel": "Schlüsselperson-Ausfall (Krankheit, Kündigung, Streit)",
+        "beschreibung": "Die einzige Buchhalterin, der einzige IT-Verantwortliche, der Geschäftsführer mit Bank-Vollmacht oder die einzige Vertriebs-Schlüsselperson ist plötzlich ausgefallen — Krankheit, Unfall, plötzliche Kündigung, schwerer Streit, Insolvenz im Privatumfeld. Niemand kennt die Passwörter, Verträge, Bank-Zugänge, Kunden-Beziehungen. Generationenwechsel im Familienunternehmen verschärft das Risiko (Senior plötzlich nicht mehr verfügbar, Junior noch nicht voll eingearbeitet). Fachkräftemangel als zusätzlicher Verstärker — bei Kündigung kein Ersatz im Markt verfügbar. Tenant-Profil-Hinweis: Die EW=4-Bewertung gilt für Tenants mit Allein-Schlüsselpersonen-Funktionen (typisch in 50-100-MA-Tenants ohne Vertretungs-Strukturen, klassische Familienunternehmen mit Allein-Inhaber). Bei Tenants mit etablierter Vertretungs-Disziplin und dokumentiertem Notfall-Zugang (Passwort-Manager mit Emergency-Access für mind. zwei Personen, schriftliche Vertretungs-Regelung, jährlicher Drill) kann EW auf 2-3 abgesenkt werden — der Score landet dann bei 8-12, was die Wirksamkeit organisatorischer Mitigation operationalisiert. Schadensbild: Tage bis Wochen Funktions-Lähmung, Lohn-Auszahlungen oder Bank-Vorgänge gefährdet, Kunden-Beziehungen bei Vertriebs-Ausfall gefährdet, ggf. Existenz-Risiko bei langem Ausfall. Mitigation: Passwort-Manager mit Notfall-Zugang für mind. zwei Personen, Notfall-Schlüssel im Tresor mit Vier-Augen-Prinzip, dokumentierte Vertretungs-Regelung pro Schlüsselperson, jährlicher Vertretungs-Drill, externe Vertretung als Notfall (Steuer-Berater, Anwalt, externe Buchhaltung).",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 4,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Personal",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-msp-ransomware-kaseya",
+        "categoryId": "interdependency",
+        "subCategoryId": "msp_ransomware_supply_chain",
+        "titel": "MSP-Ransomware mit Supply-Chain-Effekt (Kaseya-VSA-Schablone)",
+        "beschreibung": "Ransomware kommt über den externen MSP-Zugang ins Tenant-Netz — der MSP ist gleichzeitig Lieferant und Mitbetroffener. Kaseya-VSA-Schablone Juli 2021: REvil exploitete eine Zero-Day in der Kaseya-VSA-Plattform, ~1.000 MSP-Kunden direkt verschlüsselt, $700M Lösegeld-Forderung. Coop Schweden 800 Filialen 1 Woche zu. Vorfälle in DACH 2022-2025 mit ähnlichem Pattern bei kleineren MSPs ohne mediale Aufmerksamkeit. Tenant-Profil-Hinweis: alle KMU-Profile mit ausgelagerter IT betroffen; Tenants mit Multi-MSP-Strategie strukturell weniger empfindlich, aber 50-100 % höhere Kosten. Schadensbild: Geschäftsstillstand mit doppelter Komplexität — Tenant ist betroffen UND der Recovery-Anbieter ist gleichermaßen betroffen, externe Notfall-MSPs müssen aktiviert werden. Mitigation: MSP-Vertrag mit harten Sicherheits-SLA (MFA-Pflicht, Patch-Disziplin, Audit-Recht, Incident-Notfall-Hotline), Notfall-Vertrag mit Zweit-MSP für 30-90 Tage Brückenlösung, eigene Backup-Kopien außerhalb des MSP-Zugriffs (Air-Gap), regelmäßiger MSP-Sicherheits-Review.",
+        "eintrittswahrscheinlichkeit": 3,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / IT-Dienstleister-Verantwortliche*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-mssp-sla-verletzung",
+        "categoryId": "interdependency",
+        "subCategoryId": "mssp_sla_breach",
+        "titel": "MSSP-SLA-Verletzung (Verfügbarkeit, Reaktionszeit, Patch-Disziplin)",
+        "beschreibung": "Externer MSSP (Managed Security Service Provider) erfüllt vertragliche SLA-Werte nicht — verspätete Patch-Installation, schwache MFA-Coverage, lange Reaktionszeiten bei Vorfällen, fehlende monatliche Sicherheits-Reports. Tenant-Profil-Hinweis: Tenants mit billigem MSSP-Vertrag (50-200 €/Monat) primär betroffen; Tenants mit Premium-MSSP (500-2000 €/Monat) typischerweise besser. Schadensbild: ohne sichtbare unmittelbare Folge bis zum nächsten Vorfall, dann massiv verschärfter Schadens-Verlauf wegen schwacher Vorbereitung. Mitigation: Quartals-Review der SLA-Werte mit MSSP, Patch-Status-Reporting durch MSSP monatlich, jährliches externes Audit der MSSP-Leistung (Pentest oder Red-Team-Übung), Vertrags-Substitutions-Plan bei wiederholter SLA-Verletzung, Dokumentation der MSSP-Pflichten im NIS2-Lieferketten-Register.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / IT-Dienstleister-Verantwortliche*r",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-konzern-kunde-cyber-anforderung",
+        "categoryId": "interdependency",
+        "subCategoryId": "enterprise_customer_cyber_requirements",
+        "titel": "Großkunde fordert plötzlich höhere Cyber-Sicherheits-Konformität",
+        "beschreibung": "Ein Großkunde mit > 20 % Umsatzanteil verschickt eine neue Lieferanten-Cyber-Anforderungs-Erklärung. Konkrete Realitäts-Anker aus dem Mittelstands-Alltag: Automotive-OEM verlangt TISAX-Zertifizierung mit 6-Monats-Frist (Audit-Ergebnis Voraussetzung für weitere Bestell-Vergabe), IT-Konzernkunde verlangt SOC-2-Audit-Nachweis (Type-2 mit 12-Monats-Beobachtungs-Zeitraum), Bank verlangt ISO 27001 oder gleichwertige Zertifizierung als Voraussetzung für Kreditlinien-Verlängerung, Großhandel verlangt Cyber-Versicherungs-Nachweis mit Mindest-Deckung. Im Mittelstand zunehmend häufig — Konzerne überwälzen NIS2-Lieferketten-Pflichten an ihre Zulieferer. Tenant-Profil-Hinweis: Maschinenbau-Zulieferer (TISAX), IT-Dienstleister mit Konzern-Kunden (ISO 27001 / SOC 2), Beratungs-Tenants mit DSGVO-Anforderungen, Finanz-Sektor-Zulieferer (Bank-Audit-Anforderungen) primär betroffen. Schadensbild: Investitions-Bedarf 50-200 T€ binnen 6-12 Monaten (ISMS-Aufbau, externes Audit, Dokumentation), bei Nicht-Erfüllung Verlust eines Großkunden mit potenziellem Existenz-Risiko. Mitigation: NIS2-Baseline als Vorbereitung auf Konzern-Anforderungen, ISO-27001-Lite-Selbst-Bewertung, externe Beratung bei TISAX-Vorbereitung, Mehr-Großkunden-Strategie zur Diversifikation, Dialog mit Großkunden zu Anforderungs-Roadmap.",
+        "eintrittswahrscheinlichkeit": 4,
+        "auswirkung": 3,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Vertrieb",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-bankenkonto-sperre",
+        "categoryId": "interdependency",
+        "subCategoryId": "bank_account_freeze",
+        "titel": "Bankkonto-Sperre (Geldwäsche-Verdacht, Pfändung, Cyber-Vorfall)",
+        "beschreibung": "Bankkonto wird unangekündigt gesperrt oder eingeschränkt — Geldwäsche-Verdacht nach GwG (Bank ist meldepflichtig bei verdächtigen Transaktionen), Pfändungs-Beschluss eines Gläubigers, oder Bank-eigener Cyber-Vorfall (Cross-Sector-Bezug zum Finanz-Pack). Tenant-Profil-Hinweis: Tenants mit ungewöhnlichen Zahlungs-Mustern (große runde Beträge, Auslands-Überweisungen in Risiko-Länder, Bargeld-Einzahlungen) primär betroffen; Tenants mit etablierter Bank-Beziehung weniger anfällig. Schadensbild: Lohn-Auszahlungen blockiert, Lieferanten-Zahlungen verzögert, Kunden-Lastschriften zurückgegeben, Reputations-Schaden bei Geschäftspartnern, ggf. mehrere Wochen bis zur Klärung mit Bank-Compliance. Mitigation: Zweit-Bank-Konto mit Notfall-Liquidität (Mittelstands-Standard), proaktiver Dialog mit Bank-Berater bei großen oder ungewöhnlichen Transaktionen, GwG-konforme Eigen-Compliance (KYC bei eigenen Kunden), strukturelle Vermeidung von Bargeld-Geschäften > 10 T€, Kreditlinien-Reserve.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 5,
+        "residualRisk": 3,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Buchhaltung",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      },
+      {
+        "id": "risk-kmu-hochwasser-strom-geschaeftsraeume",
+        "categoryId": "nature",
+        "subCategoryId": "flood_or_power_outage_premises",
+        "titel": "Hochwasser oder Stromausfall an den Geschäftsräumen",
+        "beschreibung": "Bündel-Risiko für seltene aber existenzielle Naturereignisse — Hochwasser an den Geschäftsräumen (Schablonen: Ahrtal 2021, Süddeutschland 2024 mit 100-150 mm Niederschlag im Allgäu), Sturm-Schäden mit Strom- und Internet-Ausfall, langer Stromausfall (> 24 h) durch Substations-Vorfall im Versorgungsgebiet. Tenant-Profil-Hinweis: Tenants in Hochwasser-Risiko-Gebieten (Donau, Rhein, Elbe, Mittelgebirge) primär betroffen; Tenants in Mehrparteien-Gewerbegebäuden mit Multi-Anbindung weniger anfällig. Schadensbild: physische Schäden an Hardware, Akten und Lager, Geschäftsstillstand 1-7 Tage je nach Schaden, Kunden- und Lieferanten-Vertrauensschaden, Versicherungs-Klärung mit ggf. langer Schadens-Regulierung. Mitigation: Hochwasser-Risiko-Karte für Standort-Lage prüfen, Server-Räume in höherer Etage (nicht Keller), USV für kritische IT für 1-4 h Überbrückung, Notstrom-Aggregat für längeren Ausfall optional, Cloud-Backup als Offsite-Schutz, Versicherungs-Police mit klaren Cyber- und Natur-Schaden-Klauseln.",
+        "eintrittswahrscheinlichkeit": 2,
+        "auswirkung": 4,
+        "residualRisk": 2,
+        "reviewDate": "",
+        "owner": "Geschäftsführung / Hauptamt",
+        "affectedAssetIds": [],
+        "affectedProcessIds": [],
+        "affectedInterdependencies": [],
+        "mitigationMeasureIds": []
+      }
+    ],
+    "tabletopScenarios": [
+      {
+        "id": "tabletop-kmu-ransomware-msp-verstrickung",
+        "version": "1.0.0",
+        "title": "Ransomware mit Geschäftsstillstand und MSP-Verstrickung",
+        "summary": "Ransomware-Verschlüsselung über den externen MSP-Zugang trifft einen mittelständischen Tenant (~ 180 MA, ~ 35 Mio. € Umsatz, NIS2-pflichtig nach 6.12.2025) — Buchhaltung, CRM, E-Mail, Webshop nicht erreichbar. Kaseya-VSA-Schablone Juli 2021: REvil-Zero-Day in der MSP-Plattform, ~1.000 MSP-Kunden direkt verschlüsselt. Im KMU-Kontext besonders schwer, weil der MSP gleichzeitig Lieferant und Mitbetroffener ist — Recovery-Kapazität liegt extern, ist aber selbst lahmgelegt. BSI-Lagebericht 2025: 80 % der 950 dokumentierten Ransomware-Angriffe trafen KMU. Der Krisenstab ist im Mittelstand schlanker als in Sektor-Tenants — Geschäftsführer in Personalunion mit Krisenstabs-Leitung und Pressesprecher, Buchhaltung mit Bank-Schnittstelle, IT-Verantwortliche*r intern (oft technisch versiert ohne formale IT-Ausbildung) plus externer MSP-Account-Manager als Ad-hoc-Mitglied. Das Szenario simuliert die ersten 3 Stunden mit Fokus auf MSP-Vertrags-Eskalation, BSIG-§-8d-NIS2-Erstmeldung (24-h-Frist), Bank-Information für Liquiditäts-Klärung, Kunden-Kommunikation mit B2B-Vertrags-Klauseln (Konventionalstrafen), Lösegeld-Frage mit Cyber-Versicherungs-Komplikation und ressourcen-pragmatischen Notbetrieb-Entscheidungen. Realitätsbezug: Kaseya VSA Juli 2021, BSI-Lagebericht 2025 KMU-Hauptziel, Bitkom-Wirtschaftsschutz 2025 (59 % halten Cyber-Attacken für existenz-bedrohend). Das Szenario komprimiert auf 180 Minuten.",
+        "sectors": [
+          "KMU-Basis (NIS2-Querschnitt)"
+        ],
+        "applicableRegimes": [
+          "BSIG",
+          "NIS2",
+          "DSGVO",
+          "BGB",
+          "GwG"
+        ],
+        "durationMinutes": 180,
+        "roles": [
+          {
+            "id": "role-geschaeftsfuehrung",
+            "title": "Krisenstabs-Leitung (Geschäftsführer*in / Inhaber*in)",
+            "briefing": "Politische und operative Letztverantwortung in Personalunion — typisch für KMU. Gesamtkoordination, MSP-Vertrags-Eskalation, Lösegeld-Entscheidung, Bank-Information, Kunden-Kommunikation, Pressemitteilung. Persönliche Haftung nach NIS2 § 38 BSIG bei Pflichtverletzung. KMU-Spezifik: Geschäftsführung ist oft auch Pressesprecher, Bank-Schnittstelle und Versicherungs-Aktivierer in einer Person — keine arbeitsteilige Krisenstabs-Struktur wie in Sektor-Tenants."
+          },
+          {
+            "id": "role-it-intern",
+            "title": "IT-Dienstleister-Verantwortliche*r (intern)",
+            "briefing": "Schnittstelle zum externen MSP. Hat keine eigene IT-Operations-Kapazität, koordiniert externen Dienstleister. KMU-typisch: Personalunion mit Hauptamt oder einem technisch versierten Mitarbeiter ohne formale IT-Ausbildung (z. B. „der Sohn vom Chef hat Informatik studiert\" oder „die Marketing-Mitarbeiterin macht IT mit\"). Trägt Verantwortung für MSP-Eskalation, Backup-Status-Klärung, Patch-Status-Tracking. Erste Eskalations-Stufe und entscheidender Fakten-Lieferer."
+          },
+          {
+            "id": "role-buchhaltung",
+            "title": "Buchhaltung / kaufmännische Leitung",
+            "briefing": "Liquiditäts-Verantwortung, Bank-Schnittstelle, Versicherungs-Aktivierung (D&O, Cyber-Police), Lohn-Auszahlungen, Lieferanten-/Kunden-Zahlungs-Status. KMU-Spezifik: oft Schlüsselperson mit Allein-Wissen über Bank-Zugänge, Lastschriften, Kontoinhaber-Vollmachten. Klärt im Krisenfall, ob Liquidität für 14 Tage Betriebsstillstand reicht (typische Mittelstands-Reserve), ggf. Kreditlinie ziehen, Lieferanten-Stundungen verhandeln."
+          },
+          {
+            "id": "role-msp-extern",
+            "title": "Externer MSP-Account-Manager",
+            "briefing": "Vertrags-Partner, der ad hoc in den Krisenstab geholt wird. Kennt die IT-Topologie des Tenants, hat Zugriff auf Backup-Systeme (sofern nicht selbst verschlüsselt), kann Eskalation an MSP-eigene Incident-Response-Team auslösen. Im Kaseya-Pattern: MSP ist gleichzeitig Mitbetroffener, hat eigene Notlage, Tenant-Eskalation konkurriert mit anderen MSP-Kunden um Recovery-Ressourcen. Vertrags-SLA werden in dieser Lage zur Existenz-Frage."
+          },
+          {
+            "id": "role-anwalt-extern",
+            "title": "Externer Anwalt (Wirtschaftsrecht / IT-Recht)",
+            "briefing": "Ad-hoc-Mitglied. Berät zu BSIG-§-8d-NIS2-Meldepflicht (24 h Erstmeldung, 72 h Folgemeldung, 1 Monat Abschlussbericht), DSGVO Art. 33/34, Lösegeld-Strafrecht (§ 89c StGB Terrorismusfinanzierung, OFAC-SDN-Compliance), B2B-Vertrags-Klauseln mit Großkunden (Konventionalstrafen, Force-Majeure-Klauseln, Cyber-Spezifika in modernen Verträgen), GwG-Aspekte falls Lösegeld-Zahlung erwogen wird. KMU-Spezifik: oft kein dedizierter Inhouse-Anwalt — externe Kanzlei wird im Krisenfall ad hoc eingebunden."
+          },
+          {
+            "id": "role-cyber-versicherung",
+            "title": "Cyber-Versicherungs-Schadenregulierer",
+            "briefing": "Vertrags-Partner, der bei Cyber-Police-Aktivierung in den Krisenstab geholt wird. Klärt Deckungs-Status, beauftragt vertraglich gebundene externe IR-Firma (oft HiSolutions, KPMG, PwC oder spezialisierte Mittelstands-IR-Firmen), entscheidet über Lösegeld-Übernahme (umstritten — viele Cyber-Policen schließen Lösegeld inzwischen aus). KMU-Spezifik: Cyber-Police ist im Mittelstand zunehmend Standard, aber Deckungs-Limits oft niedrig (250 K – 1 Mio. €), reicht nicht für alle Schadens-Komponenten."
+          },
+          {
+            "id": "role-bank-berater",
+            "title": "Bank-Berater (extern, Hausbank)",
+            "briefing": "Ad-hoc-Mitglied. Berät zu Liquiditäts-Notpfad, Kreditlinien-Erweiterung, Lastschrift-Rückrufen falls Konto-Manipulation befürchtet wird, GwG-Aspekte falls verdächtige Transaktionen vorliegen. KMU-Spezifik: enge Bank-Beziehung ist Mittelstands-Standard — Bank-Berater wird oft persönlich erreicht, nicht nur via Hotline."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-ransomware-erkennung",
+                "title": "Ransomware-Erkennung am Montagmorgen",
+                "description": "IT-Verantwortliche*r intern meldet: Beim Hochfahren der Workstations am Montagmorgen sehen Mitarbeiter*innen einen Lock-Screen — „Your network has been encrypted by REvil. Pay 200.000 EUR in BTC within 72h or your data will be published\". Buchhaltungs-Software DATEV nicht erreichbar, CRM-System nicht erreichbar, E-Mail-Server nicht erreichbar. Webshop läuft noch (separate Hosting-Umgebung). Vorab-Telefonat mit MSP-Account-Manager: „Wir haben das gleiche Problem bei mehreren Kunden — vermutlich kommt das über unsere Plattform\" (Kaseya-VSA-Pattern).",
+                "roleId": "role-it-intern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-eskalation-msp",
+                "question": "Wie wird die MSP-Eskalation gestaltet?",
+                "roleId": "role-it-intern",
+                "guidance": "Trade-off zwischen sofortiger Vertrags-SLA-Eskalation (24/7-Hotline aktivieren, formelle Eskalations-Stufe 3 ziehen) und kollegialem Telefonat mit Account-Manager (oft schneller, aber nicht vertraglich dokumentiert). Im Mittelstand sind Beziehungen oft persönlich, aber bei MSP-Mitbetroffenheit reicht die persönliche Schiene nicht — vertragliche Eskalation sichert Priorisierung gegen andere MSP-Kunden.",
+                "options": [
+                  {
+                    "id": "opt-vertraglich-eskalieren",
+                    "label": "Vertraglich Eskalations-Stufe 3 ziehen (24/7-Hotline-Aktivierung mit schriftlicher Bestätigung), parallel Account-Manager telefonisch, parallel Geschäftsführung und externer Anwalt informieren",
+                    "consequence": "Vertraglich saubere Eskalation, Priorisierung gegen andere MSP-Kunden gesichert. Anwalt kann SLA-Verstöße dokumentieren. Empfohlen.",
+                    "evaluationHints": [
+                      "Vertragliche Eskalation konsequent genutzt"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-kollegial-zuerst",
+                    "label": "Erst kollegiales Telefonat mit Account-Manager (15 min), bei keiner Lösung dann formelle Eskalation",
+                    "consequence": "Mittelstands-übliche Schiene, oft schneller im Akut-Fall. Vertraglich aber riskant — bei MSP-Insolvenz oder Strafrecht-Fall fehlt schriftlicher Eskalations-Nachweis. Pragmatisch akzeptabel.",
+                    "evaluationHints": [
+                      "Pragmatische Eskalation — gleichwertig zu opt-vertraglich-eskalieren wenn schriftlich nachgezogen"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-warten",
+                    "label": "MSP-Hotline anrufen ohne Eskalations-Stufen-Nennung, abwarten was passiert",
+                    "consequence": "Verlorene Stunden, in denen lateral movement weiterläuft. Im Kaseya-Pattern fatal — der MSP priorisiert nach Eskalations-Stufe.",
+                    "evaluationHints": [
+                      "Passive Reaktion — schwächste Option"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-supply-msp-eskalation",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-msp-bestaetigt-mit-betroffenheit",
+                "title": "MSP bestätigt Mit-Betroffenheit + Lösegeld-Forderungs-Details",
+                "description": "MSP-Account-Manager bestätigt nach Eskalation: „Wir sind selbst betroffen, ca. 80 unserer 350 Kunden haben den Ransomware-Lock. Unsere Plattform-Schwachstelle wurde am Wochenende ausgenutzt. Wir arbeiten mit unserer eigenen IR-Firma und dem BSI zusammen.\" Gleichzeitig hat die Buchhaltung eine zweite E-Mail aus dem Erpresser-Portal: Stichproben aus Kunden-Daten als „Beweis\", Klar-Namen, Rechnungs-Beträge. Bei Nicht-Zahlung Veröffentlichung im Dark-Net binnen 72 h. Erste Mitarbeiter-Anrufe — Kunden-Service kann keine Bestellungen abarbeiten.",
+                "roleId": "role-msp-extern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-kunden-information",
+                "question": "Wie wird die erste Kunden-Information gestaltet?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Trade-off zwischen sofortiger transparenter Information (B2B-Vertrags-Geschäftspartner haben oft Cyber-Spezifika in ihren Verträgen — Meldepflicht binnen 24-48 h kann vertraglich verankert sein) und vorsichtiger Verzögerungs-Sprache („wir untersuchen technische Probleme\"). KMU-Realität: Kunden-Beziehungen sind oft persönlich — Vertrauen darf nicht durch Verschweigen gefährdet werden.",
+                "options": [
+                  {
+                    "id": "opt-sofort-transparent",
+                    "label": "Sofort transparente Information an die Top-20-Kunden (E-Mail über Smartphone vom GF persönlich, Telefon-Folgekontakte), parallel allgemeine Webseite-Notice „technische Beeinträchtigung, Detail folgt\"",
+                    "consequence": "B2B-Vertrags-Klauseln gewahrt, Vertrauen gesichert, Anwalts-Position bei späteren Konventional-Strafen-Diskussionen gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofort-Transparenz mit Top-Kunden-Fokus — gleichwertig zu opt-anwaltlich-koordiniert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-anwaltlich-koordiniert",
+                    "label": "30-min-Anwalts-Konsultation zu B2B-Vertrags-Klauseln, dann strukturierte Kunden-Information mit rechtlich präziser Sprache",
+                    "consequence": "Rechtlich saubere Variante, Konventional-Strafen-Risiko minimiert. 30 min Verzögerung vertretbar bei mittlerem Schaden. Empfohlen. Gleichwertig zu opt-sofort-transparent.",
+                    "evaluationHints": [
+                      "Anwaltlich koordinierte Kommunikation"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-verzoegerungs-sprache",
+                    "label": "Allgemeine Webseite-Notice „technische Probleme, wir arbeiten daran\", keine direkte Kunden-Ansprache",
+                    "consequence": "B2B-Vertrags-Klauseln verletzt, Vertrauensschaden, ggf. Konventionalstrafen-Forderungen. Schwächste Option.",
+                    "evaluationHints": [
+                      "Verzögerungs-Sprache mit Vertragsbruch-Risiko"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-communication-kunden",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-krisenstab-konstituiert",
+                "title": "Krisenstab konstituiert + Cyber-Versicherung aktiviert",
+                "description": "Geschäftsführung hat den schlanken KMU-Krisenstab einberufen: GF, IT-Verantwortliche*r intern, Buchhaltung, externer Anwalt (telefonisch), Cyber-Versicherung-Schadenregulierer (telefonisch), Bank-Berater (telefonisch). MSP-Account-Manager bleibt extern. Cyber-Versicherung bestätigt Deckungs-Status — Police mit 500 K € Limit, externe IR-Firma „IT-Forensik-Mittelstand GmbH\" wird mobilisiert (Ankunft in 4 h). Buchhaltung berichtet: Liquidität reicht für 21 Tage Stillstand, Lohnzahlungen Ende des Monats sind gesichert, Lieferanten-Zahlungen können verzögert werden mit Stundungs-Telefonaten.",
+                "roleId": "role-geschaeftsfuehrung"
+              },
+              {
+                "id": "inj-bsi-meldung-frist",
+                "title": "BSIG-§-8d-NIS2-Erstmeldungs-Frist tickt",
+                "description": "Externer Anwalt meldet: Tenant ist NIS2-pflichtig (~ 180 MA, ~ 35 Mio. € Umsatz, BSI-Registrierung erfolgt im Februar 2026). § 8d BSIG-Erstmeldungs-Frist: 24 h ab Klassifikation als „Sicherheitsvorfall\". Frist tickt seit Minute 30. DSGVO Art. 33-Frist 72 h, Art. 34 unverzüglich falls Bürger-/Kunden-Daten-Veröffentlichung droht. BSI-Meldeportal-Zugang ist Geschäftsführung-persönlich.",
+                "roleId": "role-anwalt-extern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-bsig-meldung-strategie",
+                "question": "Wie wird die BSIG-§-8d-Erstmeldung gestaltet?",
+                "roleId": "role-anwalt-extern",
+                "guidance": "KMU-Realität: Geschäftsführung hat selten Erfahrung mit BSI-Meldeportal — typischerweise externer Anwalt führt durch das Portal, GF gibt formal die Bestätigung. Trade-off: vollständige strukturierte Meldung mit allen Details (zeit-aufwändig, aber BSI-konform und reduziert Nachfragen) versus Minimal-Meldung (Pflichtfelder, schnell, aber BSI-Nachfragen wahrscheinlich).",
+                "options": [
+                  {
+                    "id": "opt-meldung-vollstaendig",
+                    "label": "Vollständige strukturierte Erstmeldung mit allen NIS2-Pflichtfeldern (Vorfalls-Kategorie, Customer-Reichweite, MSP-Drittanbieter-Bezug, Mitigation-Status), Anwalt führt durch das Portal — innerhalb 4 h (deutlich vor 24-h-Frist)",
+                    "consequence": "BSI-konform, signalisiert Disziplin, reduziert Nachfragen. Anwalt-Kosten gerechtfertigt. Empfohlen.",
+                    "evaluationHints": [
+                      "Vollständige Erstmeldung deutlich vor Frist"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-meldung-minimal",
+                    "label": "Minimal-konforme Erstmeldung mit Pflichtfeldern (1-2 h), ergänzende Details in der 72-h-Folgemeldung",
+                    "consequence": "Frist-konform, BSI-Nachfragen wahrscheinlich aber im Mittelstand vertretbar. Akzeptabel bei Zeit-/Anwalts-Kosten-Druck. Pragmatisch — gleichwertig zu opt-meldung-vollstaendig in der Mittelstands-Realität.",
+                    "evaluationHints": [
+                      "Minimal-konforme Erstmeldung — pragmatisch akzeptabel"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-meldung-verspaetet-aber-aufgeholt",
+                    "label": "24-h-Erstmeldungs-Frist verpasst, aber innerhalb 72-h-Folgemeldungs-Korridor mit Erst- + Folgemeldung in einem Schritt aufgeholt",
+                    "consequence": "Mittelstands-Realität: 24-h-Frist wird oft verpasst (Anwalts-Verfügbarkeit am Wochenende, BSI-Portal-Lernkurve), dann innerhalb 72 h kombinierte Erst-+Folgemeldung nachgeliefert. Nicht ideal, aber kein klarer § 38 BSIG-Verstoß weil Meldepflicht im Folgemeldungs-Korridor erfüllt wird. Mögliche BSI-Beanstandung im Audit, aber selten Bußgeld. Schwächer als Frist-konform, aber legitim. Score 1.",
+                    "evaluationHints": [
+                      "Verspätete aber im 72-h-Korridor aufgeholte Erstmeldung — pragmatisch akzeptabel mit Audit-Risiko"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-meldung-verspaetet",
+                    "label": "Erstmeldung erst nach interner Stabilisierung — auch 72-h-Folgemeldungs-Korridor überschritten",
+                    "consequence": "BSIG-Verstoß mit nachweisbarer Frist-Verletzung in beiden Fenstern. Bußgeld-Risiko bis 10 Mio. € + persönliche GF-Haftung nach § 38 BSIG. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Frist-Verstoß in beiden Fenstern — strafrechtlich problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-reporting-bsig",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-loesegeld-und-versicherung",
+                "title": "Lösegeld-Frage + Cyber-Versicherungs-Position",
+                "description": "Cyber-Versicherung-Schadenregulierer meldet die Position klar: „Unsere Police schließt Lösegeld-Zahlungen seit der Aktualisierung 2024 explizit aus. Wir übernehmen Forensik, Recovery-Aufwand, Betriebsunterbrechung-Schaden bis zum Limit, aber kein Lösegeld.\" Externer Anwalt bekräftigt: REvil-Cluster ist OFAC-SDN-gelistet, Lösegeld-Zahlung wäre nach § 89c StGB strafbar (Terrorismusfinanzierung). Geschäftsführung muss formell entscheiden — Lösegeld ist auch ohne diese Argumente unrealistisch im Mittelstand (200 K € entsprechen 0,6 % Jahresumsatz, aber Liquiditäts-Druck der nächsten Wochen ist real).",
+                "roleId": "role-cyber-versicherung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-loesegeld",
+                "question": "Wie reagiert die Geschäftsführung auf die Lösegeld-Forderung?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "Rechtlich klare Lage: REvil-Cluster OFAC-SDN-gelistet, Lösegeld-Zahlung nach § 89c StGB strafbar, Cyber-Versicherung schließt Lösegeld aus. KMU-Spezifik: Geschäftsführung kann nicht „aus Verzweiflung\" zahlen, weil Versicherung dann keine Folge-Schäden mehr deckt und Strafrecht-Risiko sehr real ist. Trade-off-Frage ist daher rhetorisch — die einzige saubere Variante ist Verweigerung.",
+                "options": [
+                  {
+                    "id": "opt-nicht-zahlen",
+                    "label": "Lösegeld verweigern, BKA-Anzeige (§ 100 Abs. 1 StPO via Anwalt), Forensik mit IR-Firma intensivieren, Wiederaufbau aus Backup priorisieren, Versicherungs-Schadens-Maximum ausschöpfen",
+                    "consequence": "Rechtlich saubere und einzig empfohlene Variante. BSI-/Bundes-Linie. Versicherungs-Deckung gewahrt. Empfohlen.",
+                    "evaluationHints": [
+                      "Lösegeld-Verweigerung mit BKA-Anzeige"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zeit-spielen",
+                    "label": "Verhandeln-um-Zeit-zu-gewinnen (Verhandlung andeuten ohne zu zahlen) + parallel BKA-Einbindung sofort + Anwalts-Begleitung jeder Erpresser-Kommunikation",
+                    "consequence": "Mittelstands-Realität in Cyber-Krisen: pragmatisch häufig praktiziert, weil Recovery-Zeit für Backup-Wiederherstellung benötigt wird. Vom BKA in einigen Fällen toleriert für Forensik-Gewinn. Cyber-Versicherungs-Position bleibt deckungs-fähig, solange BKA-Einbindung ab Minute 1 dokumentiert ist und Anwalt jede Kommunikation begleitet. Nicht ideal, aber legitim — Score 2.",
+                    "evaluationHints": [
+                      "Verhandeln-um-Zeit + BKA + Anwalt — pragmatisch realistisch"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-zahlen-aus-verzweiflung",
+                    "label": "200 K € BTC zahlen, um Recovery zu beschleunigen",
+                    "consequence": "§ 89c StGB-Verstoß bei OFAC-SDN-gelistetem REvil, persönliche GF-Haftung, Cyber-Versicherung deckt nichts mehr, Bank-Konto kann wegen GwG-Verdacht gesperrt werden. Kontraindiziert auf allen Achsen.",
+                    "evaluationHints": [
+                      "Lösegeld-Zahlung — strafrechtlich + versicherungs-rechtlich problematisch"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-governance-krisenstab",
+                  "crit-kmu-reporting-bsig"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-bank-information",
+                "title": "Bank-Information für Liquiditäts-Klärung",
+                "description": "Buchhaltung hat den Bank-Berater telefonisch erreicht. Bank-Berater bestätigt: Konto-Aktivität wird genau beobachtet — bei verdächtigen Transaktionen (große BTC-Käufe, ungewöhnliche Auslandsüberweisungen) würde GwG-Meldung an FIU laufen. Bank kann auf Antrag Kreditlinie um 100 K € für 60 Tage erweitern (mündliche Vor-Zusage, schriftlicher Antrag morgen). Lastschriften für Kunden-Zahlungen sind weiterhin möglich (Konto nicht gesperrt). Bank empfiehlt zusätzlich: Lieferanten-Stundungs-Telefonate sofort beginnen, weil 21-Tage-Reserve bei längerem Stillstand knapp wird.",
+                "roleId": "role-bank-berater"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-papier-notbetrieb",
+                "question": "Wie wird der Papier-Notbetrieb für die kritischen Geschäftsfunktionen organisiert?",
+                "roleId": "role-buchhaltung",
+                "guidance": "KMU-Realität: Papier-Notbetrieb bedeutet manuelle Rechnungs-Erstellung (Word-Vorlage auf privatem Notebook, MwSt manuell rechnen), manuelle Bank-Überweisungen (Online-Banking läuft separat von der DATEV-Software), Kunden-Bestellungen am Telefon mit handschriftlichem Notizblock. Trade-off: priorisierter Notbetrieb (Lohn-Auszahlungen + Top-20-Kunden zuerst, Rest später) versus uniformer Notbetrieb (alle Kunden gleich, langsamer).",
+                "options": [
+                  {
+                    "id": "opt-papier-priorisiert",
+                    "label": "Priorisierter Papier-Notbetrieb: Tag 1 Lohn-Auszahlungen-Vorbereitung (manuell, GF zeichnet), Tag 2-3 Top-20-Kunden-Bestellungen (Telefon, handschriftliche Erfassung mit nachträglicher Übertragung), Tag 4+ Rest",
+                    "consequence": "Bürger-/Kunden-Bedürfnis-orientiert, Liquiditäts-relevante Vorgänge zuerst. Empfohlen. Gleichwertig zu opt-papier-pragmatisch.",
+                    "evaluationHints": [
+                      "Priorisierter Papier-Notbetrieb"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-papier-pragmatisch",
+                    "label": "Pragmatischer Papier-Notbetrieb: Buchhaltungs-Mitarbeiterin nimmt Top-Kunden-Anrufe entgegen, GF unterzeichnet Lohn-Vorbereitung, IT-Verantwortliche*r bleibt komplett auf MSP-Eskalation fokussiert (kein Multitasking)",
+                    "consequence": "KMU-realistische Ressourcen-Verteilung — pragmatisch, schlanker Krisenstab effizient genutzt. Empfohlen. Gleichwertig zu opt-papier-priorisiert.",
+                    "evaluationHints": [
+                      "Pragmatische Ressourcen-Verteilung im schlanken Krisenstab"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-papier-warten",
+                    "label": "Auf Recovery warten, in der Zwischenzeit kein Notbetrieb",
+                    "consequence": "Lohn-Auszahlungs-Risiko, Top-Kunden-Verlust, B2B-Vertrags-Bruch. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Kein Notbetrieb — gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-operations-geschaeftskontinuitaet",
+                  "crit-kmu-supply-bank"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "24h_reporting",
+            "injects": [
+              {
+                "id": "inj-ir-firma-vor-ort",
+                "title": "Externe IR-Firma vor Ort + erste Recovery-Einschätzung",
+                "description": "IT-Forensik-Mittelstand GmbH ist eingetroffen. Erste Lageeinschätzung: REvil-Variante mit bekannten Pattern, Backup-Server beim MSP zwar verschlüsselt, aber der Tenant hat eine ältere Backup-Kopie auf einem externen NAS-Gerät im Tresor (Anhalt-Bitterfeld-Lehre wurde im Jahresgespräch gehört, NAS-Backup wurde damals eingerichtet — Buchhaltung hat das Tresor-Passwort). Restore aus NAS-Backup ist möglich, aber Daten-Stand vom letzten Freitag (Verlust von 2 Werktagen Buchungen). Wiederaufbau-Zeit geschätzt 5-7 Tage. Cyber-Versicherung bestätigt: Forensik + Recovery + Betriebsunterbrechung-Schaden werden bis zum 500-K-€-Limit abgedeckt.",
+                "roleId": "role-cyber-versicherung"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-recovery-strategie",
+                "question": "Wie wird der Recovery-Pfad gestaltet?",
+                "roleId": "role-it-intern",
+                "guidance": "Trade-off zwischen NAS-Backup-Restore (eigenständig durch IR-Firma, 5-7 Tage, 2-Tage-Datenverlust) und Warten auf MSP-Backup-Wiederherstellung (durch MSP betreut, Daten-Stand aktueller, aber Zeit-Schätzung unklar — 1-3 Wochen abhängig von MSP-Recovery-Reihenfolge).",
+                "options": [
+                  {
+                    "id": "opt-nas-restore-sofort",
+                    "label": "NAS-Backup-Restore sofort starten (durch IR-Firma), 2-Tage-Datenverlust akzeptieren, MSP-Recovery nur als spätere Ergänzung",
+                    "consequence": "Schneller Wiederanlauf in 5-7 Tagen, eigenständig vom MSP-Schicksal. 2-Tage-Daten-Lücke wird über Kunden-Telefonate rekonstruiert. Empfohlen.",
+                    "evaluationHints": [
+                      "NAS-Backup-Restore mit eigenständigem Recovery"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-msp-recovery-warten",
+                    "label": "MSP-Recovery abwarten — Daten-Stand vollständig, aber Zeit-Risiko 1-3 Wochen",
+                    "consequence": "Aktuellerer Daten-Stand, aber MSP-Priorisierungs-Risiko (Tenant ist nur einer von 80 betroffenen MSP-Kunden). Bei längerem Stillstand Existenz-Risiko.",
+                    "evaluationHints": [
+                      "MSP-Recovery-Abhängigkeit"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-beide-parallel",
+                    "label": "NAS-Backup-Restore parallel zur MSP-Recovery — Datenabgleich nach beiden Wiederherstellungen",
+                    "consequence": "Komplexer, aber risiko-gemittelt. Im Mittelstand oft zu komplex (Doppel-Aufwand bei IR-Firma), aber bei sehr aktuellem MSP-Backup theoretisch optimal.",
+                    "evaluationHints": [
+                      "Parallele Recovery — komplex"
+                    ],
+                    "scoreContribution": 2
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-operations-geschaeftskontinuitaet",
+                  "crit-kmu-supply-msp-eskalation"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-kunden-konventional-strafe",
+                "title": "Kunden-Reaktion: Konventional-Strafen-Drohung",
+                "description": "Top-Kunde 2 (Automotive-OEM-Zulieferer mit ~ 4 Mio. €-Jahresumsatz für den Tenant) meldet sich mit formellem Schreiben: „Ihr Cyber-Vorfall stellt einen Vertragsbruch nach § 14.3 unseres Rahmenvertrags dar (Cyber-Spezifika seit 2024). Bei nicht-Lieferung über 5 Werktage wird eine Konventionalstrafe von 0,5 % der ausstehenden Bestellungen pro Werktag fällig (~ 18 K €/Tag).\" Anwalt empfiehlt Sofort-Gespräch mit OEM-Einkauf — Force-Majeure-Klausel bei Cyber-Vorfällen ist im Vertrag enthalten, aber unklar definiert. Verhandlungs-Position: Force-Majeure muss formal aktiviert werden, sonst Strafe.",
+                "roleId": "role-anwalt-extern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-konventional-strafe",
+                "question": "Wie reagiert die Geschäftsführung auf die Konventional-Strafen-Drohung?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "KMU-Spezifik: Top-Kunden sind oft Konzerne mit standardisierten Cyber-Vertrags-Klauseln. Verhandlungsmacht des Mittelstands ist begrenzt, aber Force-Majeure-Klauseln sind seit dem TISAX-/NIS2-Trend durchsetzbar. Trade-off: formales Force-Majeure-Schreiben mit Anwalt (rechtlich präzise, kann eskalieren) versus persönliches Geschäftsführer-Gespräch mit OEM-Einkauf (Beziehungs-Investition, oft pragmatischer im Mittelstand).",
+                "options": [
+                  {
+                    "id": "opt-force-majeure-anwaltlich",
+                    "label": "Anwaltliches Force-Majeure-Schreiben + persönliches GF-Telefonat mit OEM-Einkaufsleiter, BSI-Meldungs-Bestätigung als Beleg",
+                    "consequence": "Rechtlich saubere Position, BSI-Bestätigung stärkt Force-Majeure-Argument. Empfohlen. Gleichwertig zu opt-persoenliches-gespraech.",
+                    "evaluationHints": [
+                      "Anwaltlich gestützte Verhandlung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-persoenliches-gespraech",
+                    "label": "Persönliches GF-Telefonat mit OEM-Einkaufsleiter zuerst, anwaltliches Schreiben als Backup falls Gespräch scheitert",
+                    "consequence": "Mittelstands-pragmatisch, Beziehungs-Investition langfristig wertvoll. Empfohlen. Gleichwertig zu opt-force-majeure-anwaltlich.",
+                    "evaluationHints": [
+                      "Persönliche Verhandlung mit anwaltlichem Backup"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-strafe-akzeptieren",
+                    "label": "Konventional-Strafe ohne Verhandlung akzeptieren — „wir haben den Vorfall, wir zahlen\"",
+                    "consequence": "Bei 18 K €/Tag und 5-7 Tagen Recovery 90-126 K € Strafe — übersteigt Cyber-Police-Deckung deutlich. Existenz-Risiko bei mehreren betroffenen Top-Kunden gleichzeitig.",
+                    "evaluationHints": [
+                      "Strafe-Akzeptanz ohne Force-Majeure-Aktivierung"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-communication-kunden",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 160,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-recovery-fortschritt",
+                "title": "Recovery-Fortschritt + Mitarbeiter-Information",
+                "description": "IR-Firma meldet Recovery-Fortschritt: NAS-Backup-Restore läuft, Buchhaltungs-System DATEV ist seit 1 h wieder verfügbar (Stand Freitag), CRM-System Recovery in 4 h, E-Mail-Server in 8 h. Mitarbeiter-Information ist überfällig — bisher wurden nur informelle WhatsApp-Gerüchte ausgetauscht. GF muss Mitarbeiter-Versammlung einberufen oder schriftliches Statement herausgeben. Datenschutzbeauftragte*r meldet: ~ 50.000 Kunden-Datensätze waren in den exfiltrierten Stichproben — DSGVO Art. 34-Bürger-Benachrichtigung ist Pflicht falls Veröffentlichung im Dark-Net erfolgt (72-h-Frist tickt).",
+                "roleId": "role-it-intern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-mitarbeiter-information",
+                "question": "Wie wird die Mitarbeiter-Information gestaltet?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "KMU-Realität: Mitarbeiter-Beziehungen im Mittelstand sind oft persönlich — Geschäftsführer kennt die meisten Mitarbeiter*innen mit Vornamen. Trade-off zwischen Mitarbeiter-Versammlung (persönlich, transparent, aber aufwändig) und schriftlichem Statement (effizient, aber distanziert).",
+                "options": [
+                  {
+                    "id": "opt-mitarbeiter-versammlung",
+                    "label": "Mitarbeiter-Versammlung am nächsten Morgen (persönlich, GF erklärt Lage, Q&A) + schriftliches Statement als Nachverdichtung",
+                    "consequence": "Mittelstands-üblich, Vertrauen wird gestärkt, Gerüchte werden gestoppt. Empfohlen.",
+                    "evaluationHints": [
+                      "Persönliche Mitarbeiter-Versammlung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-schriftliches-statement",
+                    "label": "Schriftliches Statement an alle Mitarbeiter*innen (E-Mail oder bei E-Mail-Ausfall via Aushang oder WhatsApp-Gruppe)",
+                    "consequence": "Effizient, aber distanziert. Gerüchte können weiter zirkulieren. Akzeptabel bei sehr großen Tenants (250+ MA).",
+                    "evaluationHints": [
+                      "Schriftliches Statement"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-communication-mitarbeiter",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 175,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein. Erste Erkenntnisse: NAS-Backup-Tresor war Goldwert (Anhalt-Bitterfeld-Lehre angewandt), aber Daten-Stand vom letzten Freitag — Verlust von 2 Werktagen Buchungen. Backup-Frequenz täglich (statt nur freitags) wäre besser. MSP-Vertrag muss um harte Sicherheits-SLA-Klauseln erweitert werden (MFA-Pflicht für MSP-Mitarbeiter, Audit-Recht, Notfall-Hotline). Cyber-Versicherungs-Limit 500 K € hat gereicht, aber bei größerem Vorfall wäre es knapp gewesen — Limit-Erhöhung auf 1 Mio. € prüfen. BSIG-Erstmeldung in Frist verlief sauber, externer Anwalt war Schlüssel.",
+                "roleId": "role-it-intern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-msp-vertrag-zukunft",
+                "question": "Wie wird der MSP-Vertrag nach dem Vorfall überarbeitet?",
+                "roleId": "role-geschaeftsfuehrung",
+                "guidance": "KMU-Realität: MSP-Wechsel ist mehrjähriges Projekt mit hohem Risiko (Daten-Migration, Vertrags-Übergänge). Trade-off zwischen MSP-Vertrags-Härtung mit gleichem Anbieter (pragmatisch, aber Vertrauen-Frage) versus parallelem Aufbau einer Zweit-MSP-Beziehung (teurer, aber Resilienz-Investition).",
+                "options": [
+                  {
+                    "id": "opt-msp-vertrag-haerten",
+                    "label": "MSP-Vertrag um harte Sicherheits-SLA erweitern (MFA-Pflicht, Audit-Recht, Notfall-Hotline, vertragliche Konventional-Strafen bei wiederholten Vorfällen), bei Verweigerung Substitutions-Plan vorbereiten",
+                    "consequence": "Pragmatisch im Mittelstand, Beziehung bleibt nutzbar, vertraglich abgesichert. Empfohlen. Gleichwertig zu opt-zweit-msp-aufbauen.",
+                    "evaluationHints": [
+                      "MSP-Vertrags-Härtung mit Substitutions-Backup"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-zweit-msp-aufbauen",
+                    "label": "Parallelen Aufbau einer Zweit-MSP-Beziehung für 30-90-Tage-Brückenlösung im nächsten Vorfall (Notfall-Vertrag mit anderem Anbieter)",
+                    "consequence": "Resilienz-Investition langfristig wertvoll, aber 30-50 % Kostenaufschlag. Empfohlen für Tenants mit > 250 MA. Gleichwertig zu opt-msp-vertrag-haerten.",
+                    "evaluationHints": [
+                      "Zweit-MSP-Aufbau für Resilienz"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-msp-wechsel-sofort",
+                    "label": "MSP komplett wechseln — neuer Anbieter binnen 6 Monaten",
+                    "consequence": "Hohes Migrations-Risiko während ohnehin geschwächter Phase. Im Mittelstand selten realistisch innerhalb 6 Monaten.",
+                    "evaluationHints": [
+                      "MSP-Wechsel — riskant"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-supply-msp-eskalation",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 180,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 7 evaluationCriteria-Achsen. MSP-Eskalation vertraglich gesichert, BSIG-Erstmeldung in Frist via Anwalt, Lösegeld verweigert (rechtlich + versicherungs-rechtlich korrekt), NAS-Backup-Restore als eigenständiger Recovery-Pfad gewählt, Force-Majeure mit Top-Kunden anwaltlich verhandelt, Mitarbeiter-Versammlung persönlich, Cyber-Versicherung-Deckung ausgeschöpft. Lessons-Learned: tägliches Backup statt freitags, MSP-Vertrags-Härtung mit Sicherheits-SLA, Cyber-Versicherungs-Limit-Review, Anwalts-Eskalations-Pfad als Standard im NIS2-Notfall-Drehbuch verankern.",
+                "roleId": "role-geschaeftsfuehrung"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-kmu-reporting-bsig",
+            "description": "BSIG § 8d / NIS2 Erstmeldung (24 h) + Folgemeldung (72 h) + Abschlussbericht (1 Monat) eingehalten",
+            "weight": 3,
+            "category": "reporting"
+          },
+          {
+            "id": "crit-kmu-governance-krisenstab",
+            "description": "Krisenstabs-Konstituierung im schlanken KMU-Format, GF-Letztverantwortung nach NIS2 § 38 BSIG",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-kmu-supply-msp-eskalation",
+            "description": "MSP-Vertrags-Eskalation mit dokumentierter Eskalations-Stufe, vertragliche Disziplin",
+            "weight": 3,
+            "category": "supply"
+          },
+          {
+            "id": "crit-kmu-supply-bank",
+            "description": "Bank-Information für Liquiditäts-Klärung, Kreditlinie-Aktivierung, GwG-Vermeidung",
+            "weight": 2,
+            "category": "supply"
+          },
+          {
+            "id": "crit-kmu-operations-geschaeftskontinuitaet",
+            "description": "Geschäftskontinuität durch priorisierten Papier-Notbetrieb, Recovery-Pfad-Wahl",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-kmu-communication-kunden",
+            "description": "Kunden-Kommunikation mit B2B-Vertrags-Disziplin (Force-Majeure, Konventional-Strafen-Vermeidung)",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-kmu-communication-mitarbeiter",
+            "description": "Mitarbeiter-Information persönlich oder strukturiert schriftlich",
+            "weight": 2,
+            "category": "communication"
+          }
+        ]
+      },
+      {
+        "id": "tabletop-kmu-schluesselperson-ausfall",
+        "version": "1.0.0",
+        "title": "Schlüsselperson-Ausfall mit Geschäftskontinuitäts-Krise",
+        "summary": "Die einzige Buchhalterin eines mittelständischen Familienunternehmens (~ 90 MA, ~ 18 Mio. € Umsatz, klassisches NIS2-Schwellen-Profil) ist plötzlich seit drei Tagen nicht mehr erreichbar — Krankenhaus-Notaufnahme bestätigt, Genesung unklar, mindestens 4-6 Wochen Ausfall zu erwarten. Niemand kennt die DATEV-Passwörter, Bank-Online-Banking-Vollmachten, Lastschrift-Verwaltung, Mahnwesen-Status, Lohn-Vorbereitung für übermorgen. Generationenwechsel-Verschärfung: Senior-Inhaber (76) hat sich vor 6 Monaten aus dem Tagesgeschäft zurückgezogen, Junior-Inhaberin (Tochter, 41) ist seit 3 Monaten Geschäftsführerin und hat zur Buchhaltung kaum operative Beziehung — die Buchhalterin war 22 Jahre im Unternehmen, „einzig zuverlässig\", Senior hat alles auf sie delegiert. Jetzt ist die Junior-Geschäftsführerin allein mit der Krise. Operative Resilienz, kein Cyber-Vorfall — aber strukturell ähnlich existenz-bedrohlich. Das Szenario simuliert die ersten 2,5 Stunden mit Fokus auf Notfall-Vertretung mit externem Dienstleister (Steuer-Berater, externe Buchhaltungs-Firma), Passwort-Recovery-Strategie (Bank-Filiale, IT-Wiederherstellung), Kunden-/Lieferanten-Information, Versicherungs-Aktivierung (D&O-Police, Krankheits-Vertretung), Lohn-Auszahlungs-Notbetrieb für übermorgen. Das Szenario komprimiert auf 150 Minuten.",
+        "sectors": [
+          "KMU-Basis (NIS2-Querschnitt)"
+        ],
+        "applicableRegimes": [
+          "BGB",
+          "GmbHG",
+          "HGB",
+          "AO",
+          "EStG"
+        ],
+        "durationMinutes": 150,
+        "roles": [
+          {
+            "id": "role-junior-gf",
+            "title": "Junior-Geschäftsführerin (Krisenstabs-Leitung)",
+            "briefing": "Generationenwechsel-Verschärfung: Junior-GF (41, Tochter des Senior-Inhabers) ist seit 3 Monaten alleinige Geschäftsführerin. Hat keine operative Beziehung zur Buchhalterin (Senior hat alles auf sie delegiert). Jetzt politische und operative Letztverantwortung. KMU-Realität: schlanker Krisenstab — Junior-GF hat keine Pressesprecherin, keinen Anwalt im Haus, keinen Personalvorstand. Externe Dienstleister müssen ad hoc aktiviert werden."
+          },
+          {
+            "id": "role-senior-inhaber",
+            "title": "Senior-Inhaber (zurückgezogen, ad-hoc verfügbar)",
+            "briefing": "76 Jahre, hat sich vor 6 Monaten aus dem Tagesgeschäft zurückgezogen, ist aber im Notfall verfügbar. Hat 30+ Jahre Beziehung zur Buchhalterin und kennt informell viele Vorgänge — aber Passwörter und systemische Zugänge waren bei der Buchhalterin allein. Senior ist Generationenwechsel-Spezifikum: Beratung-Quelle und potenzielle Konflikt-Quelle gleichzeitig (kann Junior-GF übergehen, wenn er meint, „das hätte ich anders gemacht\")."
+          },
+          {
+            "id": "role-it-extern",
+            "title": "Externer IT-Dienstleister (MSP-Account-Manager)",
+            "briefing": "Vertrags-Partner. Hat technischen Zugang zu Servern, kann Passwort-Reset für DATEV-Software durchführen (administrativer Override), kennt die Backup-Strategie. KMU-Realität: oft die einzige verlässliche externe Schnittstelle in einer Schlüsselperson-Krise. Kann aber DATEV-Buchungs-Daten nicht inhaltlich interpretieren — das ist die Lücke."
+          },
+          {
+            "id": "role-steuer-berater",
+            "title": "Steuer-Berater (extern)",
+            "briefing": "Vertrags-Partner für Jahresabschluss und Lohn-Steuer-Anmeldung. Im Notfall: Notfall-Vertretung für laufende Buchhaltung möglich (gegen Honorar 80-150 €/Stunde, Mindest-Verfügbarkeit 6-8 Wochen). Kann DATEV-Stand interpretieren, Lohnabrechnung erstellen, Mahnwesen weiterführen. KMU-Realität: viele Mittelständler haben langjährige Steuer-Berater-Beziehung — im Schlüsselperson-Notfall die wichtigste externe Ressource."
+          },
+          {
+            "id": "role-bank-berater",
+            "title": "Bank-Berater (Hausbank, persönlicher Kontakt)",
+            "briefing": "Klärt Passwort-Recovery für Online-Banking (typisch: Filial-Termin mit Geschäftsführer-Ausweis, Vollmachts-Klärung), Lastschrift-Status, Kreditlinie-Verfügbarkeit. KMU-Spezifik: enge Bank-Beziehung — Bank-Berater wird persönlich erreicht, kennt Geschäftsführung mit Vornamen, kann pragmatisch helfen."
+          },
+          {
+            "id": "role-anwalt-arbeitsrecht",
+            "title": "Anwalt (Arbeitsrecht / D&O-Versicherung)",
+            "briefing": "Ad-hoc-Mitglied. Berät zu D&O-Versicherung (deckt Schlüsselperson-Krankheits-Vertretung in einigen Policen), Lohnfortzahlungs-Pflicht für die ausgefallene Buchhalterin (max. 6 Wochen), Schweigepflicht-Aspekte (Personal-Daten der Buchhalterin) und arbeitsrechtliche Position falls Buchhalterin später nicht zurückkehrt."
+          }
+        ],
+        "timeline": [
+          {
+            "t": 0,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-dritter-tag",
+                "title": "Dritter Tag ohne Buchhalterin",
+                "description": "Junior-GF ist heute Morgen ins Büro gekommen — Schreibtisch der Buchhalterin ist seit drei Tagen leer. Krankenhaus hat gestern bestätigt: Notaufnahme, Operation, mindestens 4-6 Wochen Ausfall. Buchhalterin ist nicht erreichbar (sediert). Auf dem Schreibtisch liegt der Stapel mit den Lohn-Vorbereitungs-Unterlagen für übermorgen — Lohnzahlungen für ~ 90 Mitarbeiter*innen am 28. des Monats. Mahnungs-Stapel, drei Lieferanten-Rechnungen mit Fälligkeit gestern. Niemand im Unternehmen kennt das DATEV-Passwort. Bank-Online-Banking-Login auch unbekannt.",
+                "roleId": "role-junior-gf"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-erste-eskalation",
+                "question": "Wie gestaltet die Junior-GF die Erst-Eskalation?",
+                "roleId": "role-junior-gf",
+                "guidance": "Trade-off zwischen Senior-Inhaber sofort einbinden (Generationenwechsel-Konflikt-Risiko, aber Erfahrungs-Quelle) und externe Dienstleister allein aktivieren (Junior-GF-Autonomie demonstriert, aber Senior fühlt sich übergangen). KMU-Familienunternehmen-Spezifik: politisches Generationenwechsel-Thema in der Krise.",
+                "options": [
+                  {
+                    "id": "opt-senior-und-externe",
+                    "label": "Senior-Inhaber sofort einbinden („ich brauche Deine Erfahrung, aber ich entscheide\") + parallel Steuer-Berater + Bank-Berater + IT-Dienstleister anrufen",
+                    "consequence": "Familien-Politik gewahrt, Erfahrungs-Quelle genutzt, externe Dienstleister parallel aktiviert. Empfohlen. Gleichwertig zu opt-externe-zuerst.",
+                    "evaluationHints": [
+                      "Senior als Erfahrungs-Quelle + externe Dienstleister parallel"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-externe-zuerst",
+                    "label": "Externe Dienstleister sofort aktivieren (Steuer-Berater, Bank-Berater, IT-Dienstleister), Senior-Inhaber erst nach 1-2 h informieren",
+                    "consequence": "Junior-GF demonstriert Autonomie und Krisen-Kompetenz, Senior wird informiert (nicht übergangen). Empfohlen. Gleichwertig zu opt-senior-und-externe.",
+                    "evaluationHints": [
+                      "Junior-GF-Autonomie mit Senior-Information"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-senior-uebernimmt",
+                    "label": "Senior-Inhaber bittet, die Krise zu übernehmen — er kennt die Buchhalterin am besten",
+                    "consequence": "Generationenwechsel rückgängig — schwächt Junior-GF-Position dauerhaft. Mittelstandstypischer Fehler. Schwächer.",
+                    "evaluationHints": [
+                      "Generationenwechsel-Rückzug — politisch schwach"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-governance-krisenstab",
+                  "crit-kmu-people-schluesselperson"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 15,
+            "phase": "discovery",
+            "injects": [
+              {
+                "id": "inj-passwort-recovery",
+                "title": "Passwort-Recovery-Status",
+                "description": "Externer IT-Dienstleister meldet: DATEV-Passwort kann administrativ zurückgesetzt werden (Master-Admin-Zugang vorhanden — wurde im Vertrag dokumentiert), Recovery in 30 min möglich. Bank-Berater meldet: Online-Banking-Passwort-Recovery erfordert persönliches Erscheinen der Junior-GF in der Filiale (mit Geschäftsführer-Ausweis, Vollmachts-Klärung) — Termin heute Nachmittag um 15:00 möglich. Bank-Filiale ist 25 km entfernt. Steuer-Berater meldet: kann ab morgen Notfall-Vertretung übernehmen (eigene Mitarbeiterin verfügbar, 6-8 Wochen, 110 €/Stunde Honorar). Senior-Inhaber meldet: hat alte handschriftliche Liste mit Buchhaltungs-Vorgangs-Verfahren in seinem Schreibtisch zu Hause, kann sie heute Nachmittag bringen.",
+                "roleId": "role-it-extern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-lohn-zahltag-strategie",
+                "question": "Wie wird die Lohnzahlung übermorgen sichergestellt?",
+                "roleId": "role-junior-gf",
+                "guidance": "Lohnzahlungen für ~ 90 Mitarbeiter*innen am 28. des Monats sind existenz-kritisch — bei Verspätung ist Mitarbeiter-Vertrauen schwer beschädigt. Trade-off zwischen Steuer-Berater-Notfall-Vertretung (extern, professional, aber Übergabe-Aufwand) und Senior-Inhaber + IT-Passwort-Reset (intern, schneller, aber Senior kennt das aktuelle Lohn-System nicht detailliert).",
+                "options": [
+                  {
+                    "id": "opt-steuer-berater-vertretung",
+                    "label": "Steuer-Berater-Notfall-Vertretung ab morgen früh aktivieren — Steuer-Berater übernimmt Lohn-Erstellung, GF unterzeichnet Banking-Übertragung",
+                    "consequence": "Professional, dokumentiert, juristisch sauber (Steuer-Berater hat eigene Haftung). Lohn-Auszahlung gesichert. Empfohlen. Gleichwertig zu opt-it-passwort-reset.",
+                    "evaluationHints": [
+                      "Steuer-Berater-Notfall-Vertretung aktiviert"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-it-passwort-reset",
+                    "label": "IT-Dienstleister setzt DATEV-Passwort sofort zurück, Senior-Inhaber + Junior-GF erstellen Lohn manuell anhand der handschriftlichen Liste, Banking-Übertragung über neue Vollmacht",
+                    "consequence": "Pragmatisch, kostenneutral, aber juristisch riskant (kein Steuer-Fachwissen, mögliche Lohn-Fehler). Akzeptabel als Brückenlösung wenn Steuer-Berater erst später kann. Empfohlen als Brückenlösung.",
+                    "evaluationHints": [
+                      "Brücken-Lösung mit IT-Reset und Senior-Beratung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-lohn-verschieben",
+                    "label": "Lohnzahlung um 3-5 Tage verschieben mit Mitarbeiter-Information",
+                    "consequence": "Mitarbeiter-Vertrauen massiv beschädigt, Mittelstandstypischer Fehler. Bei wiederholter Verspätung Kündigungs-Risiko bei Schlüssel-Mitarbeitern. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Lohn-Verschiebung — Mitarbeiter-Vertrauen beschädigend"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-people-schluesselperson",
+                  "crit-kmu-operations-geschaeftskontinuitaet"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 30,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-lieferanten-rechnungen",
+                "title": "Lieferanten-Rechnungen + Mahn-Drohung",
+                "description": "Drei Lieferanten-Rechnungen mit Fälligkeit gestern liegen unbearbeitet auf dem Schreibtisch der Buchhalterin: Lieferant A ~ 8 K € (Rohstoffe, Folge-Lieferung erwartet), Lieferant B ~ 15 K € (Maschinen-Wartung, Rechnung jetzt mit Mahn-Drohung), Lieferant C ~ 3 K € (Büromaterial, unkritisch). Lieferant B hat heute Morgen angerufen und mit Lieferungs-Sperre gedroht falls nicht binnen 48 h gezahlt wird. Maschinen-Wartung ist nächste Woche, Lieferungs-Sperre würde Produktion lahmlegen.",
+                "roleId": "role-junior-gf"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-lieferanten-priorisierung",
+                "question": "Wie werden die Lieferanten-Rechnungen priorisiert?",
+                "roleId": "role-junior-gf",
+                "guidance": "Trade-off zwischen sofortiger Priorisierung (Lieferant B mit Mahn-Drohung zuerst, dann A, dann C — pragmatisch) und kategorischer Vorgehensweise (alle drei am 28. mit Lohn-Auszahlung, dann gemeinsamer Mahn-Brief mit Erklärung). KMU-typisch: persönliche Telefonate mit Lieferanten sind oft wirksamer als formelle Schreiben.",
+                "options": [
+                  {
+                    "id": "opt-priorisiert-mit-anruf",
+                    "label": "Lieferant B sofort anrufen (Junior-GF persönlich), Krisenlage erklären, Zahlung am 28. zusichern. Lieferant A am 28. mit Lohn-Übertragung. Lieferant C am 30.",
+                    "consequence": "Persönlicher Mittelstands-Stil, Beziehung gewahrt, Lieferungs-Sperre vermieden. Empfohlen.",
+                    "evaluationHints": [
+                      "Persönliche Lieferanten-Priorisierung"
+                    ],
+                    "scoreContribution": 3
+                  },
+                  {
+                    "id": "opt-formeller-brief",
+                    "label": "Formeller Brief an alle drei Lieferanten mit Krisenlage-Erklärung und Zahlungs-Plan",
+                    "consequence": "Distanziert, weniger effektiv im Mittelstand, aber juristisch dokumentiert. Akzeptabel.",
+                    "evaluationHints": [
+                      "Formelle Kommunikation"
+                    ],
+                    "scoreContribution": 1
+                  },
+                  {
+                    "id": "opt-warten",
+                    "label": "Mahnungen abwarten und dann reagieren",
+                    "consequence": "Lieferungs-Sperre wahrscheinlich, Produktion lahmgelegt, Folge-Eskalation. Kontraindiziert.",
+                    "evaluationHints": [
+                      "Passive Reaktion — gefährlich"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-supply-lieferanten",
+                  "crit-kmu-operations-geschaeftskontinuitaet"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 60,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-do-versicherung",
+                "title": "D&O-Versicherungs-Aktivierung + Krankheits-Vertretungs-Klausel",
+                "description": "Anwalt für Arbeitsrecht meldet: D&O-Versicherung des Tenants (Limit 1 Mio. €, jährliche Prämie 4.500 €) deckt nicht direkt Schlüsselperson-Krankheits-Vertretung ab — das wäre eine separate „Schlüsselperson-Versicherung\", die der Tenant nicht hat. Aber: D&O-Versicherung deckt Junior-GF gegen Pflichtverletzungs-Vorwürfe wegen unzureichender Vorsorge (was die Junior-GF gerade macht), falls später Mitarbeiter-/Lieferanten-Klagen kommen. Lohnfortzahlung der Buchhalterin ist 6 Wochen Pflicht (~ 4.500 € Brutto-Monatsgehalt × 1,4 Lohnnebenkosten). Falls Buchhalterin nicht zurückkehrt, wird Krankheitsbedingte Kündigung nach 6 Monaten möglich — aber vorerst ist Vertretungs-Lösung Pflicht.",
+                "roleId": "role-anwalt-arbeitsrecht"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-versicherungs-strategie",
+                "question": "Wird eine Schlüsselperson-Versicherung jetzt nachgekauft?",
+                "roleId": "role-junior-gf",
+                "guidance": "Versicherungs-Markt: Schlüsselperson-Versicherung (Key-Person Insurance) ist im Mittelstand verfügbar, aber teuer (jährliche Prämie 2-5 K € pro Schlüsselperson für ~ 100 K € Vertretungs-Deckung). Kann jetzt nicht rückwirkend abgeschlossen werden, aber für die Zukunft Schutz. Trade-off zwischen sofort abschließen (Investition in Resilienz) und erst nach Krise entscheiden (Liquidität schonen).",
+                "options": [
+                  {
+                    "id": "opt-versicherung-nach-krise",
+                    "label": "Nach der Krise (in 6-8 Wochen) Schlüsselperson-Versicherungs-Beratung mit Versicherungs-Makler — strukturierte Entscheidung mit Liquiditäts-Sicht",
+                    "consequence": "Pragmatisch, kein Schnellschuss. Empfohlen. Gleichwertig zu opt-versicherung-sofort.",
+                    "evaluationHints": [
+                      "Strukturierte Versicherungs-Entscheidung nach Krise"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-versicherung-sofort",
+                    "label": "Schlüsselperson-Versicherung sofort beim Versicherungs-Makler anfragen — Lehre aus aktueller Krise sofort konvertieren",
+                    "consequence": "Resilienz-Investition direkt umgesetzt, Junior-GF demonstriert Lern-Disziplin gegenüber Senior und Mitarbeitern. Empfohlen. Gleichwertig zu opt-versicherung-nach-krise.",
+                    "evaluationHints": [
+                      "Sofortige Versicherungs-Entscheidung als Lern-Signal"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-keine-versicherung",
+                    "label": "Keine Schlüsselperson-Versicherung — Vertretungs-Strukturen reichen",
+                    "consequence": "Im Wiederholungs-Fall ist die nächste Krise genauso teuer. Resilienz-Lehre nicht gezogen. Schwach.",
+                    "evaluationHints": [
+                      "Versicherungs-Verzicht ohne Lern-Effekt"
+                    ],
+                    "scoreContribution": 0
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-people-schluesselperson",
+                  "crit-kmu-finance-versicherung"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 90,
+            "phase": "early_response",
+            "injects": [
+              {
+                "id": "inj-passwort-recovery-erfolg",
+                "title": "DATEV-Passwort-Recovery erfolgreich + Bank-Termin",
+                "description": "IT-Dienstleister hat das DATEV-Passwort administrativ zurückgesetzt — DATEV-System ist wieder zugänglich, Buchhaltungs-Stand bis vorletzten Freitag verfügbar. Steuer-Berater hat zugesagt, ab morgen 8:00 die Notfall-Vertretung zu übernehmen, eigene Mitarbeiterin kommt mit Notebook in den Tenant. Bank-Termin um 15:00 in der Filiale ist bestätigt — Junior-GF muss persönlich kommen mit Geschäftsführer-Ausweis. Senior-Inhaber hat seine handschriftliche Liste vorbeigebracht — überraschend hilfreich, deckt 80 % der wiederkehrenden Vorgänge ab.",
+                "roleId": "role-it-extern"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-mitarbeiter-information",
+                "question": "Wie wird die Mitarbeiter-Information gestaltet?",
+                "roleId": "role-junior-gf",
+                "guidance": "Mitarbeiter-Realität: ~ 90 Mitarbeiter*innen wissen seit gestern, dass die Buchhalterin im Krankenhaus ist. Gerüchte über Lohn-Auszahlungs-Verzögerung haben sich entwickelt. Trade-off zwischen Mitarbeiter-Versammlung (persönlich, Junior-GF beruhigt aktiv) und schriftlichem Statement (effizienter, aber distanziert). Familie-Schweigepflicht über medizinische Details der Buchhalterin ist Pflicht.",
+                "options": [
+                  {
+                    "id": "opt-mitarbeiter-versammlung-junior",
+                    "label": "Mitarbeiter-Versammlung morgen früh (Junior-GF leitet, Senior-Inhaber dabei aber Junior als Sprecherin) — „Buchhalterin ist krank, wir aktivieren Steuer-Berater-Notfall-Vertretung, Lohn am 28. ist gesichert, weitere Information folgt nächste Woche\"",
+                    "consequence": "Junior-GF demonstriert Krisen-Kompetenz, Senior als Backup ohne Übernahme. Mitarbeiter-Vertrauen gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Junior-GF-Mitarbeiter-Versammlung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-schriftliches-statement",
+                    "label": "Schriftliches Statement an alle Mitarbeiter*innen via E-Mail",
+                    "consequence": "Effizient, aber distanziert. Generationenwechsel-Politik leidet — Junior-GF wirkt wie ihr Senior-Vater (der distanziert war). Akzeptabel.",
+                    "evaluationHints": [
+                      "Schriftliches Statement"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-communication-mitarbeiter",
+                  "crit-kmu-people-schluesselperson"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 120,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-bank-recovery",
+                "title": "Bank-Recovery + Steuer-Berater morgen früh",
+                "description": "Junior-GF ist von der Bank-Filiale zurück. Online-Banking-Passwort wurde zurückgesetzt, neue Vollmachts-Karte erstellt, Lastschrift-Status ist normal (Buchhalterin hatte alle Lastschriften für die nächsten 30 Tage vorab eingerichtet — Mittelstands-Disziplin), Kreditlinie ist verfügbar (Stand-by 50 K €). Steuer-Berater-Mitarbeiterin kommt morgen früh 8:00 — Übergabe-Termin geplant 4-6 Stunden, Junior-GF und Senior werden dabei sein. DATEV-Stand wird mit Steuer-Berater abgeglichen, Lohn-Vorbereitung für 28. wird priorisiert.",
+                "roleId": "role-bank-berater"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-langfristige-vorsorge",
+                "question": "Welche langfristige Vorsorge wird sofort eingeleitet?",
+                "roleId": "role-junior-gf",
+                "guidance": "Lessons-Learned-Sofort-Umsetzung: Was wäre anders, wenn die Krise wiederkommt? KMU-typische Antwort: Passwort-Manager mit Notfall-Zugang für GF + zweite Person, Vertretungs-Regelung schriftlich für jede Schlüsselposition, Notfall-Liste mit externen Dienstleistern (Steuer-Berater, IT-Dienstleister, Bank-Berater, Anwalt) im Tresor.",
+                "options": [
+                  {
+                    "id": "opt-vorsorge-sofort",
+                    "label": "Passwort-Manager-Einführung (Bitwarden Teams oder 1Password Business) bis Ende Woche, Vertretungs-Regelung schriftlich für alle Schlüsselpositionen bis Ende Monat, Notfall-Liste im Tresor bis morgen",
+                    "consequence": "Lehre direkt umgesetzt, Junior-GF demonstriert Lern-Disziplin, Resilienz strukturell verbessert. Empfohlen.",
+                    "evaluationHints": [
+                      "Sofortige Vorsorge-Umsetzung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-vorsorge-spaeter",
+                    "label": "Vorsorge erst nach der akuten Krise einleiten (in 6-8 Wochen)",
+                    "consequence": "Pragmatisch, aber Lern-Moment vergeht — Senior-Inhaber-Erinnerung „wir haben damals auch nichts geändert\" wird wahrscheinlicher.",
+                    "evaluationHints": [
+                      "Verzögerte Vorsorge"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-people-schluesselperson",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 140,
+            "phase": "stabilization",
+            "injects": [
+              {
+                "id": "inj-mitarbeiter-versammlung",
+                "title": "Mitarbeiter-Versammlung morgen + Senior-Position",
+                "description": "Senior-Inhaber meldet sich an: Er möchte bei der Mitarbeiter-Versammlung morgen anwesend sein („damit die Belegschaft sieht, dass wir zusammenstehen\"), aber ausdrücklich Junior-GF als Sprecherin. Senior hat über die Krise gesprochen und ist beeindruckt von der Junior-GF-Reaktion: „Du machst das gut. Wenn die Buchhalterin nicht zurückkommt, müssen wir uns ohnehin neu aufstellen — aber mit Vertretungs-Strukturen, nicht wieder mit Allein-Funktionen.\" Generationenwechsel-Moment: Senior gibt Anerkennung, Junior nimmt sie an.",
+                "roleId": "role-senior-inhaber"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-generationenwechsel-position",
+                "question": "Wie positioniert sich die Junior-GF zur Senior-Anerkennung?",
+                "roleId": "role-junior-gf",
+                "guidance": "Generationenwechsel-Spezifikum: Anerkennung des Seniors ist im Familienunternehmen ein politischer Moment. Trade-off zwischen offener Annahme (Junior wird sicht- und spürbar bestärkt) und distanzierter Annahme (Junior-GF demonstriert Eigenständigkeit, hat aber Senior-Beziehung weniger nähend).",
+                "options": [
+                  {
+                    "id": "opt-anerkennung-annehmen",
+                    "label": "Anerkennung offen annehmen, Senior als Berater einbinden („ich brauche Deine Erfahrung, aber Du hast mich gut auf den Generationenwechsel vorbereitet\")",
+                    "consequence": "Familien-Politik gestärkt, Senior als langfristige Beratungs-Quelle erhalten. Empfohlen.",
+                    "evaluationHints": [
+                      "Familien-Politik durch Anerkennung"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-anerkennung-distanziert",
+                    "label": "Anerkennung sachlich annehmen, weiter eigenständig agieren („danke Vater, ich weiß was ich tue\")",
+                    "consequence": "Junior-GF-Eigenständigkeit demonstriert, aber Senior fühlt sich abgestoßen. Bei kommenden Konflikten weniger Beratungs-Bereitschaft. Akzeptabel, aber nicht optimal.",
+                    "evaluationHints": [
+                      "Distanzierte Eigenständigkeit"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-people-generationenwechsel",
+                  "crit-kmu-governance-krisenstab"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 149,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-lessons-learned",
+                "title": "Lessons-Learned-Setup",
+                "description": "Krisenstab leitet Lessons-Learned-Phase ein. Erste Erkenntnisse: Steuer-Berater-Notfall-Vertretung war Goldwert (alle Mittelständler sollten diese Option im Notfall-Drehbuch haben), Senior-Inhaber-Erfahrungs-Reserve war überraschend hilfreich (Generationenwechsel-Wissens-Übergang läuft langsamer als gedacht), Bank-Filial-Termin war reibungslos (Mittelstands-Bank-Beziehung trägt), Mitarbeiter-Versammlung mit Junior-GF als Sprecherin und Senior als Backup war politisch klug. Verbesserungs-Ziele: Passwort-Manager-Einführung, schriftliche Vertretungs-Regelung pro Schlüsselposition, Schlüsselperson-Versicherung-Beratung, Notfall-Liste im Tresor.",
+                "roleId": "role-junior-gf"
+              }
+            ],
+            "decisions": [
+              {
+                "id": "dec-langfristige-roadmap",
+                "question": "Welche langfristige Roadmap wird der Mitarbeiter-Versammlung kommuniziert?",
+                "roleId": "role-junior-gf",
+                "guidance": "Mitarbeiter-Information: Die Krise wird in einigen Wochen vorbei sein, aber strukturelle Veränderungen werden bleiben. Trade-off zwischen ehrlicher Vorsorge-Roadmap (Mitarbeiter sehen, dass strukturell investiert wird) und vorsichtiger Sprache (Mitarbeiter könnten nervös werden bei „wir bauen um\").",
+                "options": [
+                  {
+                    "id": "opt-roadmap-ehrlich",
+                    "label": "Ehrliche Roadmap: „Wir haben gelernt, dass wir keine Allein-Funktionen mehr haben dürfen. In den nächsten 6 Monaten führen wir Passwort-Manager, schriftliche Vertretungs-Regelungen und Schlüsselperson-Versicherung ein. Das ist eine Investition in unsere Resilienz, nicht ein Misstrauen gegen einzelne.\"",
+                    "consequence": "Ehrlich, lerneorientiert, Mitarbeiter-Vertrauen langfristig gestärkt. Empfohlen.",
+                    "evaluationHints": [
+                      "Ehrliche Lessons-Learned-Roadmap"
+                    ],
+                    "scoreContribution": 2
+                  },
+                  {
+                    "id": "opt-roadmap-vorsichtig",
+                    "label": "Vorsichtige Sprache: „Wir prüfen, wie wir die Vorsorge verbessern können\"",
+                    "consequence": "Pragmatisch, aber Lern-Moment vergeht. Mitarbeiter sehen keine konkrete Investition. Akzeptabel.",
+                    "evaluationHints": [
+                      "Vorsichtige Sprache"
+                    ],
+                    "scoreContribution": 1
+                  }
+                ],
+                "relatedCriteria": [
+                  "crit-kmu-communication-mitarbeiter",
+                  "crit-kmu-people-schluesselperson"
+                ]
+              }
+            ]
+          },
+          {
+            "t": 150,
+            "phase": "recovery",
+            "injects": [
+              {
+                "id": "inj-uebung-ende",
+                "title": "Übungs-Ende",
+                "description": "Tabletop-Ende. Bewertung über die 6 evaluationCriteria-Achsen. Junior-GF hat Krisenstab schlank konstituiert, Senior als Erfahrungs-Quelle eingebunden, Steuer-Berater-Notfall-Vertretung aktiviert, IT-Passwort-Recovery + Bank-Termin koordiniert, Lieferanten persönlich angerufen, Mitarbeiter-Versammlung mit politisch klug positionierter Generationenwechsel-Botschaft. Lessons-Learned: Passwort-Manager + schriftliche Vertretungs-Regelung + Schlüsselperson-Versicherung sofort, Senior-Erfahrungs-Reserve als formelle Beratungs-Funktion etablieren.",
+                "roleId": "role-junior-gf"
+              }
+            ],
+            "decisions": []
+          }
+        ],
+        "evaluationCriteria": [
+          {
+            "id": "crit-kmu-governance-krisenstab",
+            "description": "Junior-GF-Krisenstabs-Leitung mit politisch klug eingebundenem Senior-Inhaber",
+            "weight": 3,
+            "category": "governance"
+          },
+          {
+            "id": "crit-kmu-people-schluesselperson",
+            "description": "Schlüsselperson-Vertretung mit externem Dienstleister (Steuer-Berater) + Lessons-Learned-Vorsorge",
+            "weight": 3,
+            "category": "people"
+          },
+          {
+            "id": "crit-kmu-people-generationenwechsel",
+            "description": "Generationenwechsel-Politik: Junior-Eigenständigkeit + Senior-Beratungs-Reserve",
+            "weight": 2,
+            "category": "people"
+          },
+          {
+            "id": "crit-kmu-operations-geschaeftskontinuitaet",
+            "description": "Geschäftskontinuität durch Lohn-Notbetrieb, Lieferanten-Priorisierung, Recovery-Pfad",
+            "weight": 3,
+            "category": "operations"
+          },
+          {
+            "id": "crit-kmu-supply-lieferanten",
+            "description": "Lieferanten-Information mit persönlichen Anrufen, Mahn-Drohung-Vermeidung",
+            "weight": 2,
+            "category": "supply"
+          },
+          {
+            "id": "crit-kmu-communication-mitarbeiter",
+            "description": "Mitarbeiter-Information mit Junior-GF als Sprecherin, Lessons-Learned-Roadmap",
+            "weight": 3,
+            "category": "communication"
+          },
+          {
+            "id": "crit-kmu-finance-versicherung",
+            "description": "Versicherungs-Aktivierung (D&O) + Lessons-Learned-Schlüsselperson-Versicherung",
+            "weight": 2,
+            "category": "finance"
+          }
+        ]
+      }
+    ],
+    "resiliencePlanTemplate": {
+      "templateId": "resilience-template-kmu-basis-nis2-mindest-1.0",
+      "templateNote": "Demo-Entwurf als Starter für einen Resilienzplan im Querschnitts-Pack KMU-Basis (NIS2-Querschnitt) — adressiert mittelständische Unternehmen ohne klare KRITIS-Sektor-Zuordnung mit NIS2-Pflicht. Sektor-spezifische Performance-Dimension ist Geschäftskontinuität und NIS2-Mindest-Compliance — die zwei harten Mittelstands-Achsen, parallel zu Healthcare „Patientensicherheit\", Energy „Netzstabilität\", Industry „Produktionsfähigkeit\", Logistics „Dispositionsfähigkeit\", Water „Versorgungssicherheit + Trinkwasser-Qualität\", IT/Telekom „Verfügbarkeit + Datenintegrität\", Finanz „Customer-Trust + transaktionelle Verfügbarkeit\", Verwaltung „Bürger-Service + Akten-Integrität\". Pack-Charakter ist Einsteiger-Pack mit pragmatischen Mindest-Maßnahmen, nicht Vollausbau — Investitions-Volumen typischerweise 50-200 T€ binnen 12-18 Monaten (vgl. NIS2-Mittelstands-Studien 2025-2026). Regulatorische Stapelung: NIS2-Umsetzungsgesetz seit 6.12.2025 in Kraft (BSI-Registrierungsfrist 6.3.2026 abgelaufen, Bußgelder bis 10 Mio. €, persönliche GF-Haftung nach § 38 BSIG), DSGVO Art. 30/33/34, BGB-Schadensersatz für B2B-Vertragspartner, GwG bei Verdachtsmomenten, ggf. branchenspezifische Konzern-Anforderungen (TISAX, ISO 27001, SOC 2). Demo-Argument: KMU-Basis ist die Einsteiger-Branche der Sektor-Familie — wer nicht klar in einem KRITIS-Sektor liegt, aber NIS2-pflichtig ist, findet hier den passenden Pack. Strukturelle Mittelstands-Realität: 80 % der dokumentierten Ransomware-Angriffe 2025 trafen KMU (BSI-Lagebericht 2025), 59 % der Unternehmen halten Cyber-Attacken für existenz-bedrohend (Bitkom-Wirtschaftsschutz 2025), Allianz-3:1-Resilience-Gap zwischen Versicherungs- und Wirtschafts-Schaden-Anstieg. Die durchgängige Frage des Plans lautet: Bleibt die Geschäftskontinuität erhalten — auch bei Ransomware mit Geschäftsstillstand, Schlüsselperson-Ausfall in Familienunternehmen mit Generationenwechsel-Komplikation, MSP-Ransomware mit Supply-Chain-Effekt (Kaseya-Schablone), CEO-Fraud mit Liquiditäts-Hebel, oder Konzern-Kunde-Cyber-Anforderungs-Update — und ist die NIS2-Mindest-Compliance dokumentiert und auditfähig? Vor Go-Live anzupassen: Operator-Name, Sub-Profil-Zuordnung (Handel / Dienstleistung / Handwerk / IT-Dienstleister / Familienunternehmen-Mischgeschäft, plus Größenklasse Klein-MA 50-100 / Mittel 100-250 / Groß 250-500), Umsatz/Bilanz, MSP/MSSP-Vertrags-Partner, Hausbank, ggf. Großkunden-Cyber-Anforderungs-Profile, Kontaktdaten, Krisenstabs-Mitglieder, GF-Schulungs-Plan. Cross-Referenzen (topRisks[].riskId, measuresByGoal[*][].linkedActionItemId) bleiben im Pack leer — der Operator verknüpft nach Übernahme manuell. Review-Zyklus 2 Jahre voreingestellt — bei realen Vorfällen oder NIS2-Updates anlassbezogen früher. KMU-Realität: Geschäftsführung ist oft auch Krisenstabs-Leitung, externe Dienstleister (Anwalt, Steuer-Berater, MSP, Cyber-Versicherung) sind feste Komponenten der Resilienz, nicht Inhouse-Funktionen.",
+      "content": {
+        "scope": {
+          "operatorName": "Donau-Mittelstand GmbH",
+          "sector": "KMU-Basis (NIS2-Querschnitt)",
+          "criticalService": "Mittelständisches Unternehmen mit gemischtem Geschäftsmodell (Handel / Dienstleistung / Fertigung / IT-Dienstleistung — vor Go-Live spezifizieren), B2B-Schwerpunkt mit ca. 30-60 % Großkunden-Anteil. Kerngeschäft: Auftrags-Annahme, Bestellungs-Abwicklung, Buchhaltung, Lohn-Auszahlungen, Kunden-Service, Lieferanten-Management. Webshop optional je nach Geschäftsmodell. IT extern ausgelagert an MSP/MSSP, kein dedizierter Inhouse-CISO, IT-Verantwortliche*r intern in Personalunion mit Hauptamt oder Vertriebs-Funktion.",
+          "locations": "Hauptsitz Donauwörth (~ 90-180 MA, Verwaltung + Vertrieb + ggf. Lager/Produktion), eine bis drei Niederlassungen in der Region (Augsburg, Nördlingen, Ingolstadt typisch), kein eigenes Rechenzentrum (alles bei MSP gehostet oder in Microsoft 365 / Google Workspace / AWS / Azure).",
+          "employees": "Ca. 90-180 Vollzeitäquivalente (Mittelstands-Profil), davon eine IT-Verantwortliche*r intern (oft Personalunion), eine Buchhalterin / kaufmännische Leitung als Schlüsselperson, Vertriebs-Team 15-30 Personen, Service/Lieferung 30-80 Personen, Verwaltung 10-20 Personen.",
+          "personsServed": "Ca. 200-800 B2B-Kunden, ggf. zusätzlich 1.000-10.000 Privatkunden bei E-Commerce-Tenants, ca. 50-150 Lieferanten und externe Dienstleister.",
+          "scopeNote": "Mittelständisches Familienunternehmen oder klassisches Mittelstands-Profil mit NIS2-Erfassung (50 MA / 10 Mio. € Schwelle in einem der 18 NIS2-Sektoren). NIS2-Umsetzungsgesetz seit 6.12.2025 in Kraft, BSI-Registrierungsfrist 6.3.2026 abgelaufen — bei verspäteter Registrierung Bußgeld-Risiko bis 10 Mio. € und persönliche Geschäftsführungs-Haftung nach § 38 BSIG. KMU-Spezifik: keine dedizierten Inhouse-Cyber-/Krisenmanagement-Funktionen, externe Dienstleister (MSP/MSSP, Anwalt, Steuer-Berater, Cyber-Versicherung, Bank-Berater) sind feste Resilienz-Komponenten. Sub-Tenant-Profil-Hinweis: Diese Vorlage ist universell für mittelständische Tenants ohne klare KRITIS-Sektor-Zuordnung — Branchen-Spezifika (Handel / Dienstleistung / Handwerk / IT-Dienstleister / Familienunternehmen-Mischgeschäft) und Größenklasse (Klein 50-100, Mittel 100-250, Groß 250-500) bei der Adoption anpassen. Bei Erreichen einer KRITIS-Schwelle durch Wachstum oder Zukauf sollte auf einen Sektor-spezifischen Pack gewechselt werden. Operator-Name fiktiv, kein realer Bezug."
+        },
+        "riskBasis": {
+          "methodology": "BSI-Standard 200-2 Risikoanalyse als zusammengeführtes Verfahren mit pragmatischen Mittelstands-Anpassungen (NIS2-Mindest-Compliance, nicht Vollausbau). Bewertungs-Skala 1–5 für Eintrittswahrscheinlichkeit und Auswirkung; Score = EW × AW. Top-Risiken werden jährlich im Krisenstabs-Komitee überprüft (Geschäftsführung + IT-Verantwortliche*r intern + externer Anwalt + ggf. externer MSP-Account-Manager). Pragmatik-Kalibrierung: kein Score-25 (nur Sektor-Tenants), höchster Score 20 für Ransomware-Geschäftsstillstand. EW=5 nur empirisch belegbar (Phishing als #1-Initial-Vektor laut BSI-Lagebericht 2025).",
+          "riskAnalysisReference": "Internes Risiko-Register (Verweis vor Go-Live zu setzen). Cross-Referenzen zur Risiko-Katalog-Vorlage des Pack (riskCatalogTemplates) bleiben im Pack leer — der Operator verknüpft nach Adoption manuell.",
+          "topRisks": [
+            {
+              "title": "Ransomware mit Geschäftsstillstand",
+              "category": "Cyber-physische Bedrohung mit Existenz-Hebel",
+              "initialScore": 20,
+              "residualScore": 9,
+              "criticality": "sehr hoch"
+            },
+            {
+              "title": "Schlüsselperson-Ausfall (Krankheit, Kündigung, Streit)",
+              "category": "Operative Resilienz mit Mittelstands-Realität",
+              "initialScore": 16,
+              "residualScore": 8,
+              "criticality": "hoch"
+            },
+            {
+              "title": "MSP-Ransomware mit Supply-Chain-Effekt (Kaseya-Schablone)",
+              "category": "Interdependenz mit Lieferketten-Hebel",
+              "initialScore": 15,
+              "residualScore": 8,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Business Email Compromise (CEO-Fraud) mit Liquiditäts-Hebel",
+              "category": "Cyber-physische Bedrohung mit Social-Engineering-Hebel",
+              "initialScore": 16,
+              "residualScore": 6,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Phishing-Kampagne mit Daten-Exfiltration",
+              "category": "Cyber-physische Bedrohung mit DSGVO-Hebel",
+              "initialScore": 15,
+              "residualScore": 6,
+              "criticality": "hoch"
+            },
+            {
+              "title": "Konzern-Kunde-Cyber-Anforderungs-Update (TISAX/ISO 27001/SOC 2)",
+              "category": "Interdependenz mit Compliance-Hebel",
+              "initialScore": 12,
+              "residualScore": 8,
+              "criticality": "mittel"
+            }
+          ],
+          "riskBasisNote": "Top-6-Risiken decken die fünf KMU-spezifischen Hebel ab: (1) Ransomware-Geschäftsstillstand (Anhalt-Bitterfeld-/BSI-2025-Schablone), (2) Schlüsselperson-Ausfall (Mittelstands-Realität mit Generationenwechsel-Verschärfung), (3) MSP-Supply-Chain-Risiko (Kaseya-Schablone), (4) CEO-Fraud (Bitkom-2025-Hauptschaden-Vektor), (5) Konzern-Kunden-Compliance-Druck (NIS2-Lieferketten-Überwälzung). Phishing als zusätzlicher #1-Initial-Vektor wird durch Ransomware und CEO-Fraud abgedeckt. Pack-Pragmatik: Top-Risk-Auswahl bewusst auf operative Mittelstands-Realität fokussiert, nicht auf rare Worst-Case-Szenarien."
+        },
+        "measuresByGoal": {
+          "prevent": [
+            {
+              "id": "m-kmu-prevent-nis2-baseline",
+              "title": "NIS2-Baseline (Schwellen-Prüfung, BSI-Registrierung, GF-Schulung)",
+              "description": "Strukturelle Antwort auf NIS2-Compliance-Pflicht (Top-6 Konzern-Kunden-Anforderung als Folge-Hebel). Dokumentierte NIS2-Schwellen-Prüfung (MA-Zahl, Umsatz, Bilanz, Sektor-Zuordnung in einem der 18 NIS2-Sektoren), bei Treffer BSI-Registrierungs-Bestätigung archiviert (Frist war 6.3.2026), jährliche Geschäftsführungs-Schulung mit Nachweis-Dokumentation für BSI-Audits (1-2 h, externe Anbieter wie BSI-IT-Grundschutz-Sensibilisierungs-Kurs, IHK-Cyber-Sicherheits-Schulung, oder MSP-eigene Schulung). KMU-Realität: bei verspäteter Registrierung Bußgeld bis 10 Mio. €, persönliche GF-Haftung — Sofort-Maßnahme falls noch nicht erfolgt.",
+              "goal": "prevent",
+              "owner": "Geschäftsführung / Datenschutzbeauftragte*r",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-prevent-msp-vertrag-haerten",
+              "title": "MSP/MSSP-Vertrags-Härtung mit Sicherheits-SLA",
+              "description": "Strukturelle Antwort auf MSP-Ransomware-Risiko (Top-3, Kaseya-Schablone). MSP/MSSP-Vertrag um harte Sicherheits-Anforderungen erweitern: SLA-Werte (RTO/RPO/Verfügbarkeit), MFA-Pflicht für MSP-Mitarbeiter beim Tenant-Zugriff, monatliches Patch-Status-Reporting, Audit-Recht (jährliche Compliance-Bestätigung), 24/7-Eskalations-Hotline mit Stufen-Modell, DSGVO Art. 28 Auftragsverarbeitung mit klaren Verantwortlichkeiten. Bei Vertrags-Verweigerung: Substitutions-Plan mit Zweit-MSP für 30-90-Tage-Brückenlösung. KMU-Realität: MSP-Wechsel ist mehrjährig, vertragliche Härtung beim aktuellen MSP ist daher Standard-Pfad.",
+              "goal": "prevent",
+              "owner": "Geschäftsführung / IT-Verantwortliche*r intern",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-prevent-mfa-vollabdeckung",
+              "title": "MFA-Vollabdeckung (FIDO2/WebAuthn) für E-Mail, Cloud, VPN",
+              "description": "Strukturelle Antwort auf Phishing-Daten-Exfiltration (Top-5) und CEO-Fraud (Top-4). MFA-Pflicht für alle E-Mail-Konten (Microsoft 365 / Google Workspace), Cloud-Plattform-Logins (AWS, Azure, DATEV-Online), VPN-Zugänge zum Tenant-Netz, Bank-Online-Banking. FIDO2/WebAuthn als bevorzugter Faktor (Phishing-resistent), Authenticator-App als zweite Wahl, SMS nur für nicht-kritische Konten. Halbjährliche Phishing-Simulation mit Klicker-Statistik und Nachschulung der Klicker. KMU-Realität: MFA-Roll-out kostet 20-50 € pro Mitarbeiter pro Jahr (Microsoft 365 E3+ inkludiert), schnell umsetzbar.",
+              "goal": "prevent",
+              "owner": "IT-Verantwortliche*r intern / Externer MSP",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-prevent-vier-augen-prinzip-zahlungen",
+              "title": "Vier-Augen-Prinzip bei Zahlungen > 10 T€ (CEO-Fraud-Schutz)",
+              "description": "Strukturelle Antwort auf CEO-Fraud-Risiko (Top-4). Vier-Augen-Prinzip bei allen Zahlungen über 10 T€: zwei voneinander unabhängige Personen bestätigen die Zahlung mit Rückruf-Verifikation bei ungewöhnlichen Anweisungen (insbesondere Auslandsüberweisungen, neue Empfänger, ungewohnte Beträge). Dokumentierte Rückruf-Liste mit verifizierten Telefonnummern (nicht aus der ursprünglichen E-Mail entnommen). DMARC/DKIM/SPF-Konfiguration auf der eigenen E-Mail-Domain zum Spoofing-Schutz. Halbjährliche Schulung der Buchhaltung mit aktuellen CEO-Fraud-Beispielen.",
+              "goal": "prevent",
+              "owner": "Geschäftsführung / Buchhaltung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "protect": [
+            {
+              "id": "m-kmu-protect-backup-3-2-1-mit-restore-test",
+              "title": "Backup nach 3-2-1-Regel mit halbjährlichem Restore-Test",
+              "description": "Strukturelle Antwort auf Ransomware-Risiko (Top-1) und Server-Ausfall (Top-7). Backup-Konzept nach 3-2-1-Regel: 3 Kopien, 2 verschiedene Medien (z. B. NAS + Tape oder NAS + Cloud-Backup), mindestens 1 Kopie offline (Tape im Tresor oder Immutable-Cloud-Storage mit Air-Gap). Halbjährlicher vollständiger Restore-Test mit Stoppuhr-Messung der RTO, dokumentiertes Restore-Protokoll. RTO-Ziele pro Geschäftsfunktion (z. B. Buchhaltung 24 h, Webshop 4 h, Kunden-Daten 8 h). Backup-Tresor-Passwörter im zentralen Passwort-Manager mit Notfall-Zugang. KMU-Realität: 91 % der KMU bewerten ihre IT-Sicherheit selbst als gut, aber Restore-Test wird oft erst im Ernstfall erstmalig versucht — und scheitert.",
+              "goal": "protect",
+              "owner": "IT-Verantwortliche*r intern / Externer MSP",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-protect-passwort-manager-notfall-zugang",
+              "title": "Passwort-Manager mit Notfall-Zugang (Schlüsselperson-Vertretung)",
+              "description": "Strukturelle Antwort auf Schlüsselperson-Ausfall (Top-2). Zentraler Passwort-Manager (z. B. 1Password Business, Bitwarden Teams, Keeper, Dashlane Business) mit Notfall-Zugang („Emergency Access\") für mindestens zwei Personen pro Schlüsselposition (Geschäftsführung + Stellvertretung, IT + Stellvertretung, Buchhaltung + Stellvertretung). Notfall-Schlüssel im Tresor mit Vier-Augen-Prinzip (zweiter Schlüssel beim externen Anwalt oder Steuer-Berater). Jährlicher Vertretungs-Drill (bewusst „Schlüsselperson nicht erreichbar\" simulieren, Vertretung muss Passwort-Manager-Notfall-Zugang aktivieren). Dokumentierte Vertretungs-Regelung pro Schlüsselposition.",
+              "goal": "protect",
+              "owner": "Geschäftsführung / IT-Verantwortliche*r intern",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-protect-edr-endpoint",
+              "title": "EDR (Endpoint Detection and Response) auf allen Workstations und Servern",
+              "description": "Strukturelle Antwort auf Ransomware-/Phishing-/Lateral-Movement-Risiken (Top-1, Top-5). EDR-Tool (z. B. CrowdStrike Falcon, SentinelOne Singularity, Microsoft Defender for Endpoint, oder MSP-Pakete wie Datto/Sophos) auf allen Workstations und Servern, zentrales Monitoring durch externen MSSP oder MSP-eigenes SOC. Automatische Isolation bei Verdachts-Verhalten. Anomalie-Alerts an interne IT und externen MSP gleichzeitig. KMU-Realität: EDR ersetzt klassische Antivirus-Software, kostet 4-15 € pro Endpoint pro Monat über MSP, ROI bei mittlerem Ransomware-Vorfall (200 K € Schaden) sehr deutlich.",
+              "goal": "protect",
+              "owner": "IT-Verantwortliche*r intern / Externer MSP",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "respond": [
+            {
+              "id": "m-kmu-respond-bsig-meldepfad",
+              "title": "BSIG-§-8d-Meldepfad mit BSI-Portal-Zugang und Anwalts-Bereitschaft",
+              "description": "Strukturelle Antwort auf NIS2-Erstmeldungs-Pflicht (24 h Erstmeldung, 72 h Folgemeldung, 1 Monat Abschlussbericht). BSI-Meldeportal-Zugang ist Geschäftsführung-persönlich, vorab-konfiguriert mit Test-Login. Vor-strukturierte Meldevorlagen für Erstmeldung mit allen Pflichtfeldern (Vorfalls-Kategorie, Customer-Reichweite, MSP-Drittanbieter-Bezug, Mitigation-Status). Anwalts-Bereitschafts-Vereinbarung mit IT-Recht-Kanzlei (24/7-Erreichbarkeit für 4-h-Meldepfad-Begleitung). Parallel-Pfade für DSGVO Art. 33 (72 h LfD/LDI) und Art. 34 (unverzügliche Bürger-Benachrichtigung bei hohem Risiko). KMU-Realität: ohne Anwalts-Bereitschaft scheitert die Erstmeldung am Wochenende oder Feiertag häufig — Bereitschafts-Vertrag ist deshalb Pflicht.",
+              "goal": "respond",
+              "owner": "Geschäftsführung / Externer Anwalt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-respond-cyber-versicherung",
+              "title": "Cyber-Versicherungs-Police mit klarer Deckungs-Klärung",
+              "description": "Strukturelle Antwort auf Ransomware-/CEO-Fraud-Risiken mit Schaden-Hebel (Top-1, Top-4). Cyber-Versicherungs-Police mit ausreichendem Limit (KMU-Standard 250 K – 1 Mio. €, bei größeren Tenants 1-3 Mio. €), klarer Deckungs-Klärung (Forensik, Recovery, Betriebsunterbrechung, Datenschutz-Rechtskosten, Lösegeld-Position — Lösegeld inzwischen oft ausgeschlossen seit 2024). Vertraglich gebundene externe IR-Firma (4-h-SLA). Schadenregulierer-Hotline 24/7 vor-vereinbart. Jährlicher Versicherungs-Review mit Anpassung an Tenant-Wachstum und Risiko-Profil. KMU-Realität: Cyber-Police ist im Mittelstand zunehmend Standard, aber Deckungs-Limits oft niedrig — bei Wachstum nachpassen.",
+              "goal": "respond",
+              "owner": "Geschäftsführung / Buchhaltung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-respond-krisenstabs-drehbuch",
+              "title": "Krisenstabs-Drehbuch (schlankes KMU-Format) mit externen Dienstleister-Liste",
+              "description": "Strukturelle Antwort auf Krisenstabs-Reaktionsfähigkeit. Schriftliches Krisenstabs-Drehbuch im KMU-schlanken Format (6-7 Personen statt 8-12 in Sektor-Tenants) mit Geschäftsführung als Krisenstabs-Leitung in Personalunion mit Pressesprecher und Bank-Schnittstelle. Liste der externen Dienstleister mit 24/7-Kontaktdaten (MSP, Anwalt-IT-Recht, Anwalt-Arbeitsrecht, Steuer-Berater, Cyber-Versicherung-Schadenregulierer, Bank-Berater-persönlich, ggf. externer DSB). Pro Tabletop-Hauptszenario ein Drehbuch-Anhang (Ransomware+MSP, Schlüsselperson-Ausfall, CEO-Fraud, Konzern-Cyber-Anforderung). Jährliche Tabletop-Übung.",
+              "goal": "respond",
+              "owner": "Geschäftsführung",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-respond-bank-liquiditaets-notpfad",
+              "title": "Bank-Liquiditäts-Notpfad mit Zweit-Konto und Kreditlinien-Reserve",
+              "description": "Strukturelle Antwort auf Bankkonto-Sperre (Top-15) und Liquiditäts-Risiken bei Geschäftsstillstand. Zweit-Bank-Konto bei zweiter Hausbank mit Notfall-Liquidität (mindestens Lohn-Auszahlung für 1 Monat zur Verfügung). Kreditlinien-Reserve mit Hauptbank (50-200 K € Stand-by). Persönliche Bank-Berater-Beziehung mit direktem Telefonkontakt (KMU-Standard, nicht nur Hotline). GwG-Vorbeugung: Vermeidung verdächtiger Zahlungs-Pattern (große runde Beträge, Auslands-BTC-Käufe). KMU-Realität: enge Bank-Beziehung trägt im Krisenfall — Bank-Berater wird oft persönlich erreicht.",
+              "goal": "respond",
+              "owner": "Geschäftsführung / Buchhaltung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ],
+          "recover": [
+            {
+              "id": "m-kmu-recover-papier-notbetrieb-drehbuch",
+              "title": "Papier-Notbetrieb-Drehbuch pro Geschäftsfunktion",
+              "description": "Strukturelle Antwort auf Geschäftskontinuitäts-Bedarf bei IT-Stillstand (Top-1, Top-3, Top-7). Pro kritischer Geschäftsfunktion ein Papier-Notbetrieb-Drehbuch: Buchhaltung mit manueller Rechnungs-Erstellung (Word-Vorlage, MwSt manuell), Banking mit Online-Banking direkt am Bank-Portal (separat von DATEV), Kunden-Service mit Telefon-Auftragsannahme und handschriftlichem Notizblock, Lohnabrechnung mit Steuer-Berater-Notfall-Vertretung. Jährliche Übung mit Stoppuhr-Messung. KMU-Realität: Papier-Notbetrieb fühlt sich altmodisch an, ist aber im Mittelstand der einzige Pfad bei MSP-Mitbetroffenheit.",
+              "goal": "recover",
+              "owner": "Geschäftsführung / Buchhaltung / Vertrieb",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-recover-kunden-vertrauens-wiederaufbau",
+              "title": "Kunden-Vertrauens-Wiederaufbau-Programm mit B2B-Vertrags-Disziplin",
+              "description": "Strukturelle Antwort auf Vertrauens-Folgewirkung nach Vorfällen (Top-1, Top-5). Strukturiertes Programm: Geschäftsführungs-Statement an Top-20-Kunden (E-Mail + Telefon-Folgekontakt), Force-Majeure-Aktivierung mit anwaltlichem Schreiben bei B2B-Vertrags-Klauseln, Konventional-Strafen-Vermeidung durch frühzeitige Kommunikation, Lessons-Learned-Bericht für Großkunden mit Cyber-Anforderungen, ggf. externes Audit-Bericht (KPMG/PwC/HiSolutions) als Glaubwürdigkeits-Anker bei Konzern-Kunden. KMU-Realität: B2B-Cyber-Vertrags-Klauseln sind seit 2024 standardmäßig in OEM- und Konzern-Verträgen — Force-Majeure muss formal aktiviert werden.",
+              "goal": "recover",
+              "owner": "Geschäftsführung / Externer Anwalt",
+              "dueDate": "",
+              "status": "planned"
+            },
+            {
+              "id": "m-kmu-recover-lessons-learned-resilienz-investition",
+              "title": "Lessons-Learned mit Resilienz-Investitions-Plan und ggf. Schlüsselperson-Versicherung",
+              "description": "Strukturelle Antwort auf langfristige Resilienz-Verbesserung. Strukturierter Lessons-Learned-Bericht binnen 30 Tagen nach realem Vorfall oder Tabletop-Übung mit klaren Verbesserungs-Maßnahmen (Backup-Frequenz erhöhen, MSP-Vertrag härten, Versicherungs-Limit erhöhen, Schulung intensivieren). Schlüsselperson-Versicherung-Beratung mit Versicherungs-Makler nach Schlüsselperson-Vorfall (Key-Person Insurance, Prämie 2-5 K €/Jahr für ~ 100 K € Vertretungs-Deckung). Jährliche Resilienz-Investitions-Plan-Review mit Geschäftsführung — KMU-Realität: kommunale Finanz-Knappheit als strukturelle Limitierung, Investitions-Anträge müssen oft mit Senior-Inhaber/Aufsichtsrat verhandelt werden.",
+              "goal": "recover",
+              "owner": "Geschäftsführung / Buchhaltung",
+              "dueDate": "",
+              "status": "planned"
+            }
+          ]
+        },
+        "governance": {
+          "managementBoardContact": "Geschäftsführung / Inhaber*in der Donau-Mittelstand GmbH (vor Go-Live zu setzen: Name, Bestellungs-Datum, Stellvertreter*in). Bei Familienunternehmen mit Generationenwechsel zusätzlich Senior-Inhaber als Beratungs-Reserve dokumentieren. Persönliche Haftung der Geschäftsführung nach NIS2 § 38 BSIG bei Pflichtverletzung — nicht delegierbar. KMU-Realität: Geschäftsführung ist oft auch Krisenstabs-Leitung in Personalunion.",
+          "programOwner": "IT-Verantwortliche*r intern (oft Personalunion mit Hauptamt oder Vertriebs-Funktion) als operativer Programm-Owner; Geschäftsführung als strategischer Owner mit Letztverantwortung. Bei Tenants ohne Inhouse-IT-Funktion: externer MSP-Account-Manager als faktischer Programm-Owner mit vertraglich geregelter Verantwortung. KMU-Spezifik: kein dedizierter CISO — Doppel-Säule MSP/MSSP + interner IT-Verantwortliche*r ersetzt die CISO-Funktion strukturell.",
+          "escalationPath": "Stufe 1: Interner IT-Verantwortliche*r und externer MSP-Account-Manager (24/7-Bereitschaft via MSP-Vertrag, Reaktionszeit < 30 min). Stufe 2: Geschäftsführung (eigenständig erreichbar binnen 60 min), Krisenstabs-Konstituierung. Stufe 3: Externe Dienstleister werden ad hoc telefonisch eingebunden — Anwalt-IT-Recht (24/7-Bereitschaftsvertrag), Cyber-Versicherung-Schadenregulierer (24/7-Hotline), Bank-Berater (persönlich, Geschäftszeiten + Mobil-Notfall), Steuer-Berater (Geschäftszeiten + ggf. Wochenend-Vereinbarung). Stufe 4: Bei systemischer Eskalation (Mitarbeiter > 100 betroffen, B2B-Vertrags-Brüche, Strafrecht-Fragen): externe IR-Firma (4-h-SLA via Cyber-Versicherung), ggf. externe Krisenkommunikations-Beratung, Senior-Inhaber als Beratungs-Reserve bei Familienunternehmen.",
+          "boardReviewCadence": "Jährlicher Geschäftsführungs-Review der NIS2-Compliance (Schwellen-Prüfung, BSI-Registrierung, GF-Schulung). Halbjährlicher Krisenstabs-Komitee-Review (Geschäftsführung + IT-Verantwortliche*r intern + ggf. externer MSP) mit Top-Risiken, MSP-Vertrags-Status und Backup-Restore-Test-Ergebnissen. Anlassbezogene Reviews nach realen Vorfällen oder Tabletops binnen 30 Tagen.",
+          "governanceNote": "KMU-Spezifika: Familienunternehmen-Strukturen mit Generationenwechsel-Politik (Senior als Beratungs-Reserve, Junior mit Letztverantwortung), keine separate Aufsichtsratsstruktur in Privat-GmbH (Beirat optional). Bei größeren Tenants (> 250 MA) Beirat oder Aufsichtsrat mit eigenem Cyber-Sicherheits-Briefing. NIS2-Geschäftsführungs-Schulung jährlich Pflicht. Verbands-Schnittstelle bei Branchen-Mitgliedschaft (IHK, Verband Deutscher Maschinen- und Anlagenbau, etc.) für Sprachregelung und Vorlagen-Austausch."
+        },
+        "reporting": {
+          "incidentContact": "BSI-Meldeportal für NIS2-/BSIG-§-8d (24-h-Erstmeldung, 72-h-Folgemeldung, 1-Monats-Abschlussbericht). Parallel LfD/LDI-Meldeportal für DSGVO Art. 33 (72 h), bei Bayern: BayLfD; NRW: LDI NRW; Hessen: HBDI; etc. Bei Verdacht auf Strafrecht: BKA-/LKA-Cyber-Anzeige via externem Anwalt. Bei Cyber-Versicherungs-Aktivierung: Schadenregulierer-Hotline 24/7.",
+          "incidentBackupContact": "Externer Anwalt (IT-Recht / Wirtschaftsrecht) als 24/7-Bereitschafts-Kontakt für Meldepfad-Begleitung. Externer MSP-Account-Manager als technischer Eskalations-Kontakt. Externer Steuer-Berater bei Schlüsselperson-Ausfall in Buchhaltung. Hausbank-Berater bei Liquiditäts-Klärung. Cyber-Versicherung-Schadenregulierer bei Police-Aktivierung. KMU-Realität: keine Inhouse-Compliance-/Rechts-Abteilung, alle externe Kontakte mit pflegender Beziehung.",
+          "bsiPortalNote": "BSI nimmt NIS2-/BSIG-§-8d-Meldungen entgegen (24-h-Frist für „Sicherheitsvorfall\"). Bei KMU-Tenants als „wichtige Einrichtung\" nach NIS2 (50 MA / 10 Mio. €-Schwelle in einem der 18 NIS2-Sektoren) ist Tenant direkt meldepflichtig. Bei MSP-Vorfällen ist sowohl der MSP (als „kritische Einrichtung\" oder „wichtige Einrichtung\") meldepflichtig als auch der Tenant (als „betroffene wichtige Einrichtung\" falls Verfügbarkeit erheblich eingeschränkt). Doppel-Meldung bei Schnittmenge ist Pflicht. DSGVO-Meldungen gehen an LfD/LDI.",
+          "firstReportingTimeline": "NIS2-/BSIG-§-8d: Erstmeldung 24 h ab Klassifikation als „Sicherheitsvorfall\", Folgemeldung 72 h, Abschlussbericht 1 Monat. Pragmatische Mittelstands-Realität: 24-h-Frist wird oft verpasst (Anwalts-Verfügbarkeit, BSI-Portal-Lernkurve), dann innerhalb 72-h-Folgemeldungs-Korridor mit kombinierter Erst-+Folgemeldung aufgeholt — nicht ideal aber legitim, mögliche BSI-Audit-Beanstandung aber selten Bußgeld. Frist-konformer Pfad bleibt empfohlen. DSGVO Art. 33: 72 h gegenüber LfD. DSGVO Art. 34: unverzüglich bei hohem Risiko.",
+          "reportingNote": "Vor-strukturierte Reporting-Templates für NIS2/BSIG, DSGVO sind im Krisenstabs-Drehbuch abgelegt. Halbjährlicher Test der Meldewege durch externen Anwalt mit 1-h-Beratung. BSI- und LfD/LDI-Meldeportal-Logins liegen bei Geschäftsführung-persönlich mit Backup beim externen Anwalt (Vier-Augen-Prinzip)."
+        },
+        "evidence": {
+          "evidenceReferences": [
+            "NIS2-Schwellen-Prüfungs-Dokument mit Sektor-Zuordnung",
+            "BSI-Registrierungs-Bestätigung (bei Treffer)",
+            "Geschäftsführungs-Schulungs-Nachweis (jährlich)",
+            "MSP/MSSP-Vertrag mit Sicherheits-Anhang und SLA-Werten",
+            "Backup-Konzept und halbjährliche Restore-Test-Protokolle",
+            "Passwort-Manager-Konzept mit Notfall-Zugang-Dokumentation",
+            "Krisenstabs-Drehbuch mit externer Dienstleister-Liste",
+            "Tabletop-Übungs-Protokolle (Ransomware+MSP, Schlüsselperson-Ausfall)",
+            "Cyber-Versicherungs-Police mit Limit- und Deckungs-Klärung",
+            "Bank-Liquiditäts-Notpfad-Dokumentation (Zweit-Konto, Kreditlinie)",
+            "DSGVO Art. 30 Verfahrensverzeichnis (NIS2-Mindest-Coverage)"
+          ],
+          "reviewCycleYears": 2,
+          "equivalentProofsNote": "Review-Zyklus 2 Jahre voreingestellt — bei realen Vorfällen oder NIS2-Updates anlassbezogen früher. Bei KMU-Tenants oft Verbands-Schulungs-Materialien (IHK, Berufsverband) als Ergänzung möglich. MSP-Vertrags-Review jährlich. Backup-Restore-Test halbjährlich. Cyber-Versicherungs-Review jährlich mit Wachstum-Anpassung. Pragmatische Mittelstands-Realität: NIS2-Mindest-Compliance, nicht Vollausbau — Investitions-Volumen typischerweise 50-200 T€ binnen 12-18 Monaten, Verteilung über 2-3 Haushalts-Jahre.",
+          "evidenceNote": "Ergänzend zu den hier gelisteten Evidenz-Referenzen sind alle relevanten BSI-/LfD-/MSP-/Versicherungs-/Bank-Korrespondenzen, externe Forensik-Berichte und Vertrags-Updates im Geschäftsführungs-Aktenraum dokumentiert. KMU-Realität: oft pragmatisch in Cloud-Speicher (Microsoft 365 SharePoint, Google Drive) abgelegt, nicht in dediziertem GRC-Tool. Bei Cyber-Versicherungs-Aktivierung wird eine strukturierte Akten-Übergabe an Schadenregulierer notwendig — Aktenraum-Strukturierung ist Pflicht."
+        }
+      }
+    }
+  }
+}
